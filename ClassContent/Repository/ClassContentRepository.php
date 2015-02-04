@@ -23,16 +23,16 @@
 
 namespace BackBee\ClassContent\Repository;
 
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
-
 use BackBee\BBApplication;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Util\Doctrine\SettablePaginator;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\ResultSetMapping;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * AClassContent repository
@@ -99,9 +99,16 @@ class ClassContentRepository extends EntityRepository
         if ($results) {
             foreach ($results as $parentContentSet) {
                 /* create draft for the main container */
-                if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($parentContentSet, $userToken, true)) {
+                $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft(
+                    $parentContentSet,
+                    $userToken,
+                    true
+                );
+
+                if (null !== $draft) {
                     $parentContentSet->setDraft($draft);
                 }
+
                 /* Replace the old ContentSet by the new one */
                 $parentContentSet->replaceChildBy($oldContentSet, $newContentSet);
                 $em->persist($parentContentSet);
@@ -784,28 +791,30 @@ class ClassContentRepository extends EntityRepository
 
     /**
      * Load content if need, the user's revision is also set
-     * @param  \BackBee\ClassContent\AClassContent $content
-     * @param  \BackBee\Security\Token\BBUserToken $token
-     * @param  boolean                             $checkoutOnMissing If true, checks out a new revision if none was found
-     * @return \BackBee\ClassContent\AClassContent
+     * @param  AClassContent $content
+     * @param  BBUserToken   $token
+     * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
+     * @return AClassContent
      */
-    public function load(AClassContent $content, \BackBee\Security\Token\BBUserToken $token = null, $checkoutOnMissing = false)
+    public function load(AClassContent $content, BBUserToken $token = null, $checkoutOnMissing = false)
     {
         $revision = null;
         if (null !== $token) {
-            $revision = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, $checkoutOnMissing);
+            $revision = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft(
+                $content,
+                $token,
+                $checkoutOnMissing
+            );
         }
 
         if (false === $content->isLoaded()) {
-            $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($content);
+            $classname = ClassUtils::getRealClass($content);
             if (null !== $refresh = $this->_em->find($classname, $content->getUid())) {
                 $content = $refresh;
             }
         }
 
-        if (null !== $content) {
-            $content->setDraft($revision);
-        }
+        $content->setDraft($revision);
 
         return $content;
     }
@@ -939,5 +948,26 @@ class ClassContentRepository extends EntityRepository
             ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
+    }
+
+    /**
+     * Returns classcontent if couple (type;uid) is valid
+     *
+     * @param string $type short namespace of a classcontent
+     *                     (full: BackBee\ClassContent\Block\paragraph => short: Block/paragraph)
+     * @param string $uid
+     *
+     * @return AClassContent
+     */
+    public function findOneByTypeAndUid($type, $uid)
+    {
+        $content = null;
+        $classname = AClassContent::getClassnameByContentType($type);
+
+        if (null === $content = $this->findOneBy(['_uid' => $uid])) {
+            throw new \InvalidArgumentException("No `$classname` exists with uid `$uid`.");
+        }
+
+        return $content;
     }
 }

@@ -88,8 +88,6 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     /**
      * test setProperty
-     *
-     * @coverage \BackBee\ClassContent\AContent::_isAccepted
      */
     public function testAcceptedType()
     {
@@ -100,68 +98,95 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->content->isAccepted('false'));
     }
 
-    /**
-     * test defineProperty
-     *
-     * @coverage \BackBee\ClassContent\AClassContent::_defineProperty
-     */
     public function testDefineProperty()
     {
         $name = $this->content->getProperty('name');
 
-        $this->content->defineProperty('name', $name.' foobar');
+        $this->content->mockedDefineProperty('name', $name.' foobar');
         $this->assertEquals($name, $this->content->getProperty('name'));
 
-        $this->content->defineProperty('newproperty', 'foobar');
+        $this->content->mockedDefineProperty('newproperty', 'foobar');
         $this->assertEquals('foobar', $this->content->getProperty('newproperty'));
     }
 
-    /**
-     * test defineParam
-     *
-     * @coverage \BackBee\ClassContent\AClassContent::_defineParam
-     */
     public function testDefineParam()
     {
-        $this->assertFalse(
-            $this->content->getDefaultParameters()['excludefromautobloc']['array']['default'],
-            'Before load excludefromautobloc have to be false'
-        );
-        $param = array(
-            'default' => array(
-                'rendertype' => 'checkbox',
-                'label' => 'Exclude from autoblocs',
-                'default' => true,
-            ),
-        );
-        $this->content->defineParam('excludefromautobloc', 'array', $param);
-        $this->assertTrue(
-            $this->content->getDefaultParameters()['excludefromautobloc']['array']['default']
-        );
-        $this->assertNotEquals(
-            $this->content->getParam('excludefromautobloc:array:default'),
-            $this->content->getDefaultParameters()['excludefromautobloc']['array']['default']
-        );
-        $this->content->defineParam('foo', 'scalar', 'toBeNull');
-        $this->assertNull($this->content->getParam('foo:scalar'));
-        $this->assertNull($this->content->getDefaultParameters()['foo']['scalar']);
+        $defaultParams = $this->content->getDefaultParams();
+
+        $this->assertFalse(isset($defaultParams['test_foobar']));
+        $this->content->mockedDefineParam('test_foobar', [
+            'default' => 'hello world',
+            'value'   => null,
+        ]);
+
+        $defaultParams = $this->content->getDefaultParams();
+        $this->assertTrue(isset($defaultParams['test_foobar']));
+        $this->assertTrue(array_key_exists('value', $defaultParams['test_foobar']));
+        $this->assertNull($defaultParams['test_foobar']['value']);
+        $this->assertEquals('hello world', $defaultParams['test_foobar']['default']);
+    }
+
+    public function testSetAndGetParam()
+    {
+        $content = new image();
+        $defaultParams = $content->getDefaultParams();
+
+        foreach ($defaultParams as $param) {
+            $this->assertTrue(array_key_exists('value', $param));
+        }
+
+        foreach ($content->getAllParams() as $param) {
+            $this->assertTrue(array_key_exists('value', $param));
+        }
+
+        $this->assertSame($defaultParams, $content->getAllParams());
+        $this->assertNull($content->getParam('foobar'));
+        $this->assertEquals($defaultParams['width'], $content->getParam('width'));
+        $this->assertSame(50, $content->getParamValue('width'));
+
+        $content->setParam('width', '1234');
+        $this->assertNotSame(1234, $content->getParamValue('width'));
+        $this->assertSame('1234', $content->getParamValue('width'));
+        $this->assertNotEquals($defaultParams, $content->getAllParams());
     }
 
     /**
-     * test defineData
-     *
-     * @coverage \BackBee\ClassContent\AClassContent::_defineData
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Cannot set foo as parameter cause this key does not exist.
      */
+    public function testSetInvalidParam()
+    {
+        $this->content->setParam('foo', 'bar');
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Cannot replace width's value, integer expected and boolean given.
+     */
+    public function testSetIncompatibleParam()
+    {
+        (new image())->setParam('width', false);
+    }
+
+    /**
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage Parameter's value cannot be type of object.
+     */
+    public function testSetInvalidParamType()
+    {
+        (new image())->setParam('width', new \stdClass());
+    }
+
     public function testDefineData()
     {
-        $this->content->defineData(
+        $this->content->mockedDefineData(
             'title',
             '\BackBee\ClassContent\Element\date',
             array(
                 'default' => array('value' => 'Foo Bar Baz'),
             )
         );
-        $this->content->defineData(
+        $this->content->mockedDefineData(
             'title',
             '\BackBee\ClassContent\Element\image',
             array(
@@ -169,7 +194,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
             ),
             false
         );
-        $this->content->defineData(
+        $this->content->mockedDefineData(
             'date',
             '\BackBee\ClassContent\Element\date',
             array(
@@ -183,46 +208,14 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($this->content->isAccepted($this->content->date, 'title'));
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
-        $this->assertFalse($this->content->isAccepted(new image(), 'title'));
+        try {
 
-        $this->assertEquals('A date', $this->content->date->value);
+        $this->assertFalse($this->content->isAccepted(new image(), 'title'));
+    } catch (\Exception $e) {
+        var_dump($e->getMessage(), get_class($e));
     }
 
-    /**
-     * test prepareCommitDraft
-     *
-     * @coverage \BackBee\ClassContent\AClassContent::prepareCommitDraft
-     */
-    public function prepareCommitDraft()
-    {
-        try {
-            $this->content->prepareCommitDraft();
-            $this->fail('RevisionMissingException not raise');
-        } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionMissingException', $expected);
-        }
-
-        $revision = new Revision();
-        $revision->setContent($this->content);
-        $this->content->setDraft($revision);
-        $revision->setState(Revision::STATE_CONFLICTED);
-
-        $this->assertInstanceOf('BackBee\ClassContent\Element\text', $this->content->getDraft()->getData('title'));
-
-        try {
-            $this->content->prepareCommitDraft();
-            $this->fail('RevisionConflictedException not raise');
-        } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionConflictedException', $expected);
-        }
-
-        $revision->setState('bad case');
-        try {
-            $this->content->prepareCommitDraft();
-            $this->fail('RevisionUptodateException not raise');
-        } catch (BBException $expected) {
-            $this->assertInstanceOf('\BackBee\ClassContent\Exception\RevisionUptodateException', $expected);
-        }
+        $this->assertEquals('A date', $this->content->date->value);
     }
 
     public function testJsonSerialize()

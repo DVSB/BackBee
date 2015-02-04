@@ -330,6 +330,16 @@ bb.rest.classcontent.get_collection:
         type: .+
         _method: GET
 
+bb.rest.classcontent.put_collection:
+    pattern: /rest/{version}/classcontent
+    defaults:
+        _action: putCollectionAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: PUT
+
 bb.rest.classcontent.post:
     pattern: /rest/{version}/classcontent/{type}
     defaults:
@@ -340,6 +350,16 @@ bb.rest.classcontent.post:
         type: .+
         _method: POST
 
+bb.rest.classcontent.put:
+    pattern: /rest/{version}/classcontent/{type}/{uid}
+    defaults:
+        _action: putAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: PUT
+
 bb.rest.classcontent.delete:
     pattern: /rest/{version}/classcontent/{type}/{uid}
     defaults:
@@ -349,6 +369,42 @@ bb.rest.classcontent.delete:
         uid: \w{32}
         type: .+
         _method: DELETE
+
+bb.rest.classcontent.get_draft:
+    pattern: /rest/{version}/classcontent-draft/{type}/{uid}
+    defaults:
+        _action: getDraftAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: GET
+
+bb.rest.classcontent.get_draft_collection:
+    pattern: /rest/{version}/classcontent-draft
+    defaults:
+        _action: getDraftCollectionAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        _method: GET
+
+bb.rest.classcontent.put_draft:
+    pattern: /rest/{version}/classcontent-draft/{type}/{uid}
+    defaults:
+        _action: putDraftAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        uid: \w{32}
+        type: "[a-zA-Z_\/]+"
+        _method: PUT
+
+bb.rest.classcontent.put_draft_collection:
+    pattern: /rest/{version}/classcontent-draft
+    defaults:
+        _action: putDraftCollectionAction
+        _controller: BackBee\Rest\Controller\ClassContentController
+    requirements:
+        _method: PUT
 
 bb.rest.bundle.get_collection:
     pattern: /rest/{version}/bundle

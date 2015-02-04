@@ -44,7 +44,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * Internal position in iterator
      * @var int
      */
-    protected $_index = 0;
+    protected $index = 0;
 
     /**
      * Pages owning this contentset
@@ -61,7 +61,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     {
         parent::__construct($uid, $options);
 
-        $this->_initData();
+        $this->initData();
     }
 
     /**
@@ -140,9 +140,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         }
 
         $this->_subcontent->clear();
-        $this->_subcontentmap = array();
+        $this->subcontentmap = array();
         $this->_data = array();
-        $this->_index = 0;
+        $this->index = 0;
     }
 
     /**
@@ -160,7 +160,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function current()
     {
-        return (null === $this->getDraft()) ? $this->getData($this->_index) : $this->getDraft()->current();
+        return (null === $this->getDraft()) ? $this->getData($this->index) : $this->getDraft()->current();
     }
 
     /**
@@ -288,7 +288,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function key()
     {
-        return (null === $this->getDraft()) ? $this->_index : $this->getDraft()->key();
+        return (null === $this->getDraft()) ? $this->index : $this->getDraft()->key();
     }
 
     /**
@@ -307,7 +307,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function next()
     {
-        return (null === $this->getDraft()) ? $this->getData($this->_index++) : $this->getDraft()->next();
+        return (null === $this->getDraft()) ? $this->getData($this->index++) : $this->getDraft()->next();
     }
 
     /**
@@ -328,10 +328,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         array_pop($this->_data);
         $content = null;
-        if (isset($this->_subcontentmap[$last->getUid()])) {
-            $content = $this->_subcontent->get($this->_subcontentmap[$last->getUid()]);
+        if (isset($this->subcontentmap[$last->getUid()])) {
+            $content = $this->_subcontent->get($this->subcontentmap[$last->getUid()]);
             $this->_subcontent->removeElement($content);
-            unset($this->_subcontentmap[$last->getUid()]);
+            unset($this->subcontentmap[$last->getUid()]);
         }
 
         $this->rewind();
@@ -350,7 +350,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             return $this->getDraft()->push($var);
         }
 
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             if (
                     (!$this->_maxentry && !$this->_minentry) ||
                     (is_array($this->_maxentry) && is_array($this->_minentry) && 0 == count($this->_maxentry)) ||
@@ -358,7 +358,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             ) {
                 $this->_data[] = array($this->_getType($var) => $var->getUid());
                 if ($this->_subcontent->add($var)) {
-                    $this->_subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
+                    $this->subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
                 }
             }
         }
@@ -372,7 +372,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     public function rewind()
     {
         if (null === $this->getDraft()) {
-            $this->_index = 0;
+            $this->index = 0;
         } else {
             $this->getDraft()->rewind();
         }
@@ -395,10 +395,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         array_shift($this->_data);
         $content = null;
-        if (isset($this->_subcontentmap[$first->getUid()])) {
-            $content = $this->_subcontent->get($this->_subcontentmap[$first->getUid()]);
+        if (isset($this->subcontentmap[$first->getUid()])) {
+            $content = $this->_subcontent->get($this->subcontentmap[$first->getUid()]);
             $this->_subcontent->removeElement($content);
-            unset($this->_subcontentmap[$first->getUid()]);
+            unset($this->subcontentmap[$first->getUid()]);
         }
 
         $this->rewind();
@@ -417,11 +417,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             return $this->getDraft()->unshift($var);
         }
 
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             if (!$this->_maxentry || $this->_maxentry > $this->count()) {
                 array_unshift($this->_data, array($this->_getType($var) => $var->getUid()));
                 if ($this->_subcontent->add($var)) {
-                    $this->_subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
+                    $this->subcontentmap[$var->getUid()] = $this->_subcontent->indexOf($var);
                 }
             }
         }
@@ -435,7 +435,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function valid()
     {
-        return (null === $this->getDraft()) ? isset($this->_data[$this->_index]) : $this->getDraft()->valid();
+        return (null === $this->getDraft()) ? isset($this->_data[$this->index]) : $this->getDraft()->valid();
     }
 
     /*     * **************************************************************** */
@@ -458,64 +458,6 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
         } catch (UnknownPropertyException $e) {
             return;
         }
-    }
-
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                   Implementation of Serializable                       */
-    /*                                                                        */
-    /*     * **************************************************************** */
-
-    /**
-     * Initialized the instance from a serialized string
-     * @param  string                                                   $serialized
-     * @param  Boolean                                                  $strict     If TRUE, all missing or additionnal element will generate an error
-     * @return \BackBee\ClassContent\AClassContent                      The current instance
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs, in strict mode, when a
-     *                                                                             property does not match an element
-     */
-    public function unserialize($serialized, $strict = false)
-    {
-        if (false === is_object($serialized)) {
-            $serialized = json_decode($serialized);
-        }
-
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_'.$property;
-
-            if (true === in_array($property, array('_created', '_modified')) || null === $value) {
-                continue;
-            } elseif ('_param' === $property) {
-                foreach ($value as $param => $paramvalue) {
-                    $this->setParam($param, $paramvalue);
-                }
-            } elseif ('_data' === $property) {
-                $this->clear();
-                foreach ($value as $val) {
-                    $this->push($val);
-                }
-            } elseif (false === property_exists($this, $property) && true === $strict) {
-                throw new Exception\UnknownPropertyException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this->_getContentInstance())));
-            }
-        }
-
-        return $this;
-    }
-
-    public function toJson($return_array = false)
-    {
-        $datas = array('elements' => array());
-
-        foreach ($this->getData() as $content) {
-            $datas['elements'][] = array(
-                'uid'  => $content->getUid(),
-                'type' => str_replace('BackBee\ClassContent\\', '', get_class($content)),
-            );
-        }
-
-        $datas = array_merge(parent::toJson(true), $datas);
-
-        return false === $return_array ? json_encode($datas) : $datas;
     }
 
     /**
@@ -543,13 +485,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * {@inheritdoc}
      */
-    protected function _initData()
+    protected function initData()
     {
         if (null === $this->getProperty('auto_hydrate')) {
             $this->setProperty('auto_hydrate', false);
         }
 
-        parent::_initData();
+        parent::initData();
     }
 
     /**
@@ -562,7 +504,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      *                                                   - default     array default value for datas
      * @return \BackBee\ClassContent\ContentSet
      */
-    protected function _setOptions($options = null)
+    protected function setOptions($options = null)
     {
         if (null !== $options) {
             $options = (array) $options;
@@ -602,7 +544,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @return \BackBee\ClassContent\AClassContent The current instance
      * @deprecated since version 1.0
      */
-    protected function _defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
+    protected function defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
     {
         if (true === $updateAccept) {
             $this->_addAcceptedType($type, $var);
@@ -624,14 +566,15 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * {@inheritdoc}
      */
-    protected function _defineParam($var, $type = 'scalar', $options = null)
+    protected function defineParam($var, $options = null)
     {
+        parent::defineParam($var, $options);
+
         if ('accept' === $var) {
-            if (true === is_array($options) && true === array_key_exists('default', $options)) {
-                return $this->_addAcceptedType($options['default']);
+            if (null !== $options) {
+                $this->_addAcceptedType($this->getParamValue('accept'));
+                $this->setParam('accept', null);
             }
-        } else {
-            parent::_defineParam($var, $type, $options);
         }
 
         return $this;

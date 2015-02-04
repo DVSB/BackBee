@@ -25,6 +25,8 @@ namespace BackBee\ClassContent;
 
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\IRenderable;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
@@ -143,6 +145,31 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     ];
 
     /**
+     * Returns complete namespace of classcontent with provided $type
+     *
+     * @param string $type
+     * @return string classname associated to provided
+     * @throws
+     */
+    public static function getClassnameByContentType($type)
+    {
+        $classname = self::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
+        $exists = true;
+
+        try {
+            $exists = class_exists($classname);
+        } catch (\Exception $e) {
+            $exists = false;
+        }
+
+        if (!$exists) {
+            throw new \InvalidArgumentException("`$type` is not a classcontent valid type.");
+        }
+
+        return $classname;
+    }
+
+    /**
      * Class constructor
      * @param string $uid     The unique identifier
      * @param array  $options Initial options for the content:
@@ -157,19 +184,23 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $this->_modified = new \DateTime();
         $this->_revision = 0;
 
-        $this->_setOptions($options);
+        $this->setOptions($options);
     }
 
     /**
      * Magical function to get value for given element
-     * @param  string                                                   $var The name of the element
-     * @return mixed                                                    The value
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @param  string $var The name of the element
+     * @return mixed The value
+     * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __get($var)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
-            throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this->_getContentInstance())));
+        if ($this->getContentInstance() instanceof ContentSet) {
+            throw new UnknownPropertyException(sprintf(
+                'Unknown property %s in %s.',
+                $var,
+                ClassUtils::getRealClass($this->getContentInstance())
+            ));
         }
 
         return $this->getData($var);
@@ -177,31 +208,46 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Magical function to set value to given element
-     * @param  string                                                   $var   The name of the element
-     * @param  mixed                                                    $value The value to set
-     * @return \BackBee\ClassContent\AClassContent                      The current instance content
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @param  string $var   The name of the element
+     * @param  mixed  $value The value to set
+     * @return AClassContent The current instance content
+     * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __set($var, $value)
     {
-        if ($this->_getContentInstance() instanceof ContentSet || false === isset($this->_data[$var])) {
-            throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this->_getContentInstance())));
+        if ($this->getContentInstance() instanceof ContentSet || !isset($this->_data[$var])) {
+            throw new UnknownPropertyException(sprintf(
+                'Unknown property %s in %s.',
+                $var,
+                ClassUtils::getRealClass($this->getContentInstance())
+            ));
         }
 
-        $values = (true === is_array($value)) ? $value : array($value);
+        $values = is_array($value) ? $value : array($value);
 
         $this->__unset($var);
         $val = array();
 
         foreach ($values as $value) {
-            if ((isset($this->_maxentry[$var]) && 0 < $this->_maxentry[$var] && $this->_maxentry[$var] == count($val)) || (isset($this->_minentry[$var]) && count($val) < $this->_minentry[$var] && $this->_maxentry[$var] == count($val))) {
+            if (
+                (
+                    isset($this->_maxentry[$var])
+                    && 0 < $this->_maxentry[$var]
+                    && $this->_maxentry[$var] == count($val)
+                )
+                || (
+                    isset($this->_minentry[$var])
+                    && count($val) < $this->_minentry[$var]
+                    && $this->_maxentry[$var] == count($val)
+                )
+            ) {
                 break;
             }
 
-            if (true === $this->_isAccepted($value, $var)) {
+            if ($this->isAccepted($value, $var)) {
                 $type = $this->_getType($value);
 
-                if (true === is_object($value) && $value instanceof AClassContent) {
+                if (is_object($value) && $value instanceof AClassContent) {
                     $value = $this->_addSubcontent($value);
                 }
 
@@ -212,33 +258,41 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $this->_data[$var] = $val;
         $this->_modified = new \DateTime();
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
      * Magical function to check the setting of an element
-     * @param  string                                                   $var The name of the element
-     * @return Boolean                                                  TRUE if an element is set for $var, FALSE otherwise
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @param  string  $var The name of the element
+     * @return boolean TRUE if an element is set for $var, FALSE otherwise
+     * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __isset($var)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
-            throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this->_getContentInstance())));
+        if ($this->getContentInstance() instanceof ContentSet) {
+            throw new UnknownPropertyException(sprintf(
+                'Unknown property %s in %s.',
+                $var,
+                ClassUtils::getRealClass($this->getContentInstance())
+            ));
         }
 
-        return true === array_key_exists($var, $this->_data) && 0 < count($this->_data[$var]);
+        return array_key_exists($var, $this->_data) && 0 < count($this->_data[$var]);
     }
 
     /**
      * Magical function to unset an element
-     * @param  string                                                   $var The name of the element to unset
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
+     * @param  string $var The name of the element to unset
+     * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __unset($var)
     {
-        if ($this->_getContentInstance() instanceof ContentSet) {
-            throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this->_getContentInstance())));
+        if ($this->getContentInstance() instanceof ContentSet) {
+            throw new UnknownPropertyException(sprintf(
+                'Unknown property %s in %s.',
+                $var,
+                ClassUtils::getRealClass($this->getContentInstance())
+            ));
         }
 
         if ($this->__isset($var)) {
@@ -254,7 +308,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     public function __toString()
     {
         if (false === $this->isElementContent()) {
-            return sprintf('%s(%s)', ClassUtils::getRealClass($this->_getContentInstance()), $this->getUid());
+            return sprintf('%s(%s)', ClassUtils::getRealClass($this->getContentInstance()), $this->getUid());
         }
 
         $string = '';
@@ -375,7 +429,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_label = $label;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -388,73 +442,40 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_accept = $accept;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
-     * Sets one or all parameters
-     * @param  string                         $var    the parameter name to set, if NULL all the parameters array wil be set
-     * @param  mixed                          $values the parameter value or all the parameters if $var is NULL
-     * @param  string                         $type   the optionnal casting type of the value
-     * @return \BackBee\ClassContent\AContent The current instance
-     */
-    public function setParam($var = null, $values = null, $type = null)
-    {
-        if (null === $var) {
-            $this->_parameters = $values;
-        } else {
-            $paths = explode(':', $var);
-            if (1 < count($paths)) {
-                $this->setParameterRecursively($paths, $values, $type);
-            } else {
-                if (null !== $values) {
-                    if (null !== $type) {
-                        $values = array($type => $values);
-                    } elseif (false === is_array($values)) {
-                        $values = array($values);
-                    }
-
-                    // A surveiller cette partie pour les revisions
-                    if (true === is_array($this->_parameters) && true === array_key_exists($var, $this->_parameters) && true === is_array($this->_parameters[$var])) {
-                        $values = array_replace_recursive($this->_parameters[$var], $values);
-                    }
-                }
-
-                $this->_parameters[$var] = $values;
-            }
-        }
-
-        return $this->_getContentInstance();
-    }
-
-    /**
-     * Setters of parameters with the ':' syntax
+     * Sets one parameter.
      *
-     * @param array  $paths
-     * @param mixed  $values new value to set
-     * @param string $type   type of the parameter, can be null
+     * @param  string $key   the parameter name to set
+     * @param  mixed  $value the parameter value, if null is passed it will unset provided key parameter
+     * @return AContent The current instance
      */
-    private function setParameterRecursively(array $paths, $value, $type)
+    public function setParam($key, $value = null)
     {
-        if (null !== $type) {
-            $path = array_shift($paths);
-            array_unshift($paths, $type);
-            array_unshift($paths, $path);
-            unset($path);
+        if (null === $value) {
+            unset($this->_parameters[$key]);
+        } else {
+            $this->_parameters[$key] = ['value' => $value];
         }
 
-        $target = &$this->_parameters;
-        foreach ($paths as $path) {
-            if (false === array_key_exists($path, $target)) {
-                throw new InvalidArgumentException(
-                    'Invalid path provided for setting parameter value: '.implode(':', $paths)
-                );
-            }
+        return $this->getContentInstance();
+    }
 
-            $target = &$target[$path];
+    /**
+     * Sets all parameters.
+     *
+     * @param array $params
+     * @return self
+     */
+    public function setAllParams(array $params)
+    {
+        foreach ($params as $key => $value) {
+            $this->setParam($key, $value);
         }
 
-        $target = $value;
+        return $this;
     }
 
     /**
@@ -467,7 +488,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_maxentry = $maxentry;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -480,7 +501,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_minentry = $minentry;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -491,9 +512,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function setCreated(\DateTime $created = null)
     {
-        $this->_created = (null === $created) ? new \DateTime() : $created;
+        $this->_created = null === $created ? new \DateTime() : $created;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -504,9 +525,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function setModified(\DateTime $modified = null)
     {
-        $this->_modified = (null === $modified) ? new \DateTime() : $modified;
+        $this->_modified = null === $modified ? new \DateTime() : $modified;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -519,7 +540,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_revision = $revision;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -532,7 +553,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     {
         $this->_state = $state;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -542,7 +563,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function isElementContent()
     {
-        return false !== strpos(ClassUtils::getRealClass($this->_getContentInstance()), 'BackBee\ClassContent\Element\\');
+        return false !== strpos(
+            ClassUtils::getRealClass($this->getContentInstance()),
+            self::CLASSCONTENT_BASE_NAMESPACE.'Element\\'
+        );
     }
 
     /**
@@ -552,7 +576,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function acceptSubcontent($var)
     {
-        if (false === array_key_exists($var, $this->_accept)) {
+        if (!array_key_exists($var, $this->_accept)) {
             return false;
         }
 
@@ -570,9 +594,39 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function postLoad()
     {
-        if (null !== $this->_getContentInstance()) {
-            $this->_parameters = Parameter::paramsReplaceRecursive($this->_getContentInstance()->getDefaultParameters(), $this->getParam());
+    }
+
+    /**
+     * Checks for an accepted type
+     * @param  mixed   $value the value from which the type will be checked
+     * @param  string  $var   the element to be checks
+     * @return Boolean
+     */
+    public function isAccepted($value, $var = null)
+    {
+        if ($this->getContentInstance() instanceof ContentSet) {
+            if (!($value instanceof AClassContent)) {
+                return false;
+            }
+
+            $accept_array = $this->_accept;
+        } else {
+            if (null === $var) {
+                return false;
+            }
+
+            if (!array_key_exists($var, $this->_accept)) {
+                return true;
+            }
+
+            $accept_array = $this->_accept[$var];
         }
+
+        if (0 === count($accept_array)) {
+            return true;
+        }
+
+        return in_array($this->_getType($value), $accept_array);
     }
 
     /**
@@ -581,7 +635,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * @param  string                                    $value The value of the subcontent (uid)
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
-    protected function _getContentByDataValue($type, $value)
+    protected function getContentByDataValue($type, $value)
     {
         return new $type($value);
     }
@@ -591,23 +645,23 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * @return \BackBee\ClassContent\AClassContent
      * @codeCoverageIgnore
      */
-    protected function _getContentInstance()
+    protected function getContentInstance()
     {
         return $this;
     }
 
     /**
      * Sets options at the construction of a new instance
-     * @param  mixed                          $options Initial options for the content:
-     *                                                 - label       the label of the content
-     * @return \BackBee\ClassContent\AContent
+     * @param  mixed $options Initial options for the content:
+     *                            - label: the label of the content
+     * @return self
      */
-    protected function _setOptions($options = null)
+    protected function setOptions($options = null)
     {
         if (null !== $options) {
             $options = (array) $options;
 
-            if (true === array_key_exists('label', $options)) {
+            if (isset($options['label'])) {
                 $this->setLabel($options['label']);
             }
         }
@@ -622,48 +676,15 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     protected function _getType($value)
     {
-        if (true === is_object($value)) {
+        if (is_object($value)) {
             return ClassUtils::getRealClass($value);
         }
 
-        if (true === is_array($value)) {
+        if (is_array($value)) {
             return 'array';
         }
 
         return 'scalar';
-    }
-
-    /**
-     * Checks for an accepted type
-     * @param  mixed   $value the value from which the type will be checked
-     * @param  string  $var   the element to be checks
-     * @return Boolean
-     */
-    protected function _isAccepted($value, $var = null)
-    {
-        if ($this->_getContentInstance() instanceof ContentSet) {
-            if (false === ($value instanceof AClassContent)) {
-                return false;
-            }
-
-            $accept_array = $this->_accept;
-        } else {
-            if (null === $var) {
-                return false;
-            }
-
-            if (false === array_key_exists($var, $this->_accept)) {
-                return true;
-            }
-
-            $accept_array = $this->_accept[$var];
-        }
-
-        if (0 === count($accept_array)) {
-            return true;
-        }
-
-        return in_array($this->_getType($value), $accept_array);
     }
 
     /**
@@ -684,25 +705,6 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     protected function _removeSubcontent($var)
     {
-        // To be overload by \BackBee\ClassContent\AClassContent
-    }
-
-    /**
-     * Return the serialized string of an array
-     * @param  array  $var
-     * @return string
-     */
-    protected function _arrayToStdClass($var)
-    {
-        $result = new \stdClass();
-
-        if (true === is_array($var)) {
-            foreach ($var as $key => $value) {
-                $result->$key = $value;
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -751,12 +753,24 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
+     * Returns a string that represents shorten namespace of current classname.
+     *
+     * Example: BackBee\ClassContent\Element\text => Element/text
+     *
+     * @return string
+     */
+    public function getContentType()
+    {
+        return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], $this->getType());
+    }
+
+    /**
      * Returns the set of data
-     * @param  string                                                   $var        The element to be return, if NULL, all datas are returned
-     * @param  Boolean                                                  $forceArray Force the return as array
-     * @return mixed                                                    Could be either one or array of scalar, array, AClassContent instance
-     * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
-     * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
+     * @param  string  $var        The element to be return, if NULL, all datas are returned
+     * @param  boolean $forceArray Force the return as array
+     * @return mixed Could be either one or array of scalar, array, AClassContent instance
+     * @throws UnknownPropertyException Occurs when $var does not match an element
+     * @throws ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
     {
@@ -769,17 +783,21 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             return $datas;
         }
 
-        if (false === array_key_exists($var, $this->_data)) {
-            if ($this->_getContentInstance() instanceof ContentSet) {
+        if (!array_key_exists($var, $this->_data)) {
+            if ($this->getContentInstance() instanceof ContentSet) {
                 return;
             } else {
-                throw new Exception\UnknownPropertyException(sprintf('Unknown property %s in %s.', $var, ClassUtils::getRealClass($this)));
+                throw new UnknownPropertyException(sprintf(
+                    'Unknown property %s in %s.',
+                    $var,
+                    ClassUtils::getRealClass($this)
+                ));
             }
         }
 
         $data = array();
         foreach ($this->_data[$var] as $type => $value) {
-            if (true === is_array($value)) {
+            if (is_array($value)) {
                 $keys = array_keys($value);
                 $values = array_values($value);
 
@@ -787,12 +805,12 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
                 $value = end($values);
             }
 
-            if (0 === strpos($type, 'BackBee\ClassContent')) {
-                if (false === class_exists($type)) {
-                    throw new \BackBee\AutoLoader\Exception\ClassNotFoundException(sprintf('Unknown class content %s.', $type));
+            if (0 === strpos($type, self::CLASSCONTENT_BASE_NAMESPACE)) {
+                if (!class_exists($type)) {
+                    throw new ClassNotFoundException(sprintf('Unknown class content %s.', $type));
                 }
 
-                if (false !== $subcontent = $this->_getContentByDataValue($type, $value)) {
+                if (false !== $subcontent = $this->getContentByDataValue($type, $value)) {
                     $data[] = $subcontent;
                 }
             } else {
@@ -831,74 +849,49 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public function getFirstElementOfType($classnames)
     {
-        if (false === is_array($classnames)) {
+        if (!is_array($classnames)) {
             $classnames = array($classnames);
         }
 
         foreach (array_keys($this->_data) as $key) {
             $element = $this->getData($key);
 
-            if (false === is_object($element)) {
+            if (!is_object($element)) {
                 continue;
             }
 
             foreach ($classnames as $classname) {
-                if (true === is_a($element, $classname)) {
+                if (is_a($element, $classname)) {
                     return $element;
                 }
             }
         }
-
-        return;
     }
 
     /**
-     * Returns defined parameters
-     * Upgrade of getParam method - parameter $var can follow this pattern:
-     *     rendermode:array:selected
-     * this will return $this->_parameters['rendermode']['array']['selected'] is it exists
-     * @param  string $var  The parameter to be return, if NULL, all parameters are returned
-     * @param  string $type The casting type of the parameter
+     * Returns parameters if requested key exist.
+     *
+     * @param  string $key  The parameter to be return, if NULL, all parameters are returned
      * @return mixed  the parameter value or NULL if unfound
      */
-    public function getParam($var = null, $type = null)
+    public function getParam($key)
     {
-        if (null === $var) {
-            return $this->_parameters;
+        $value = null;
+        if (isset($this->_parameters[$key])) {
+            $value = $this->_parameters[$key];
         }
 
-        $pieces = explode(':', $var);
-        $var = array_shift($pieces);
-        if (false === array_key_exists($var, $this->_parameters)) {
-            return;
-        }
-
-        if (null !== $type && true === is_string($type)) {
-            array_unshift($pieces, $type);
-        }
-
-        return $this->getRecursivelyParam($this->_parameters[$var], $pieces);
+        return $value;
     }
 
     /**
-     * Goes all over the $param and keep looping until $pieces is empty to return
-     * the values user is looking for
-     * @param  mixed $param
-     * @param  array $pieces
-     * @return mixed
+     * Returns all parameters
+     *
+     * @return array
      */
-    private function getRecursivelyParam($param, array $pieces)
+    public function getAllParams()
     {
-        if (0 === count($pieces)) {
-            return $param;
-        }
-
-        $key = array_shift($pieces);
-        if (false === isset($param[$key])) {
-            return;
-        }
-
-        return $this->getRecursivelyParam($param[$key], $pieces);
+        return $this->_parameters;
     }
 
     /**
@@ -937,12 +930,12 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         $data = [
             'uid'        => $this->_uid,
             'label'      => $this->_label,
-            'type'       => $this->getShortenClassname($this),
+            'type'       => $this->getContentType(),
             'state'      => $this->_state,
             'created'    => $this->_created->getTimestamp(),
             'modified'   => $this->_modified->getTimestamp(),
             'revision'   => $this->_revision,
-            'parameters' => $this->getParam(),
+            'parameters' => $this->getAllParams(),
             'accept'     => array_map(
                 function ($classname) {
                     return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], $classname);
@@ -954,18 +947,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             'elements'   => $this->computeElementsToJson($this->getData()),
         ];
 
-        return $this->formatJsonData($data, $format);
-    }
+        if (0 === count($data['parameters'])) {
+            $data['parameters'] = new \ArrayObject();
+        }
 
-    /**
-     * Computes and returns shorten classname of provided content
-     *
-     * @param  AContent $content
-     * @return string
-     */
-    private function getShortenClassname(AContent $content)
-    {
-        return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], get_class($content));
+        return $this->formatJsonData($data, $format);
     }
 
     /**
@@ -981,7 +967,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             if ($element instanceof AContent) {
                 $result[$key] = [
                     'uid'  => $element->getUid(),
-                    'type' => $this->getShortenClassname($element),
+                    'type' => $element->getContentType(),
                 ];
             } elseif (is_scalar($element)) {
                 $result[$key] = $element;
@@ -1008,7 +994,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         }
 
         if (self::JSON_INFO_FORMAT === $format || self::JSON_CONCISE_FORMAT === $format) {
-            unset($data['accept'], $data['minentry'], $data['maxentry']);
+            unset($data['accept'], $data['label'], $data['minentry'], $data['maxentry']);
         }
 
         if (self::JSON_DEFINITION_FORMAT === $format || self::JSON_INFO_FORMAT === $format) {
@@ -1018,7 +1004,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
         if (self::JSON_DEFINITION_FORMAT === $format) {
             unset($data['uid']);
         } elseif (self::JSON_INFO_FORMAT === $format) {
-            unset($data['label'], $data['parameters']);
+            unset($data['parameters']);
         }
 
         return $data;

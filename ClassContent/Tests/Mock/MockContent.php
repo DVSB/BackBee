@@ -43,12 +43,12 @@ class MockContent extends AClassContent implements IMock
     public function __construct($uid = null, $options = null)
     {
         parent::__construct($uid, $options);
-        $this->_initData();
+        $this->initData();
     }
 
-    protected function _initData()
+    protected function initData()
     {
-        $this->_defineData(
+        $this->defineData(
             'title',
             '\BackBee\ClassContent\Element\text',
             array(
@@ -58,50 +58,39 @@ class MockContent extends AClassContent implements IMock
                 'label' => 'Title',
                 'maxentry' => 1,
                 'parameters' => array(
-                    'aloha' =>  array(
-                        'type' => 'scalar',
-                        'options' => array(
-                            'default' => 'lite',
-                        ),
-                    ),
-                    'editable' => array(
-                        'type' => 'boolean',
-                        'options' => array(
-                            'default' => 'true',
-                        ),
-                    ),
+                    'aloha' =>  'lite',
+                    'editable' => true,
                 ),
             )
-        )->_defineData(
+        )->defineData(
             'body',
             '\BackBee\ClassContent\ContentSet',
             array()
-        )->_defineData(
+        )->defineData(
             'permid',
             'scalar'
-        )->_defineParam(
-            'excludefromautobloc',
-            'array',
-            array(
-                'default' => array(
-                    'rendertype' => 'checkbox',
-                    'label' => 'Exclude from autoblocs',
-                    'default' => false,
-                ),
-            )
         );
-        $this->_defineProperty(
+        $this->defineParam(
+            'excludefromautobloc',
+            [
+                'rendertype' => 'checkbox',
+                'label'      => 'Exclude from autoblocs',
+                'default'    => false,
+                'value'      => null,
+            ]
+        );
+        $this->defineProperty(
             'name',
             'Mock Content'
-        )->_defineProperty(
+        )->defineProperty(
             'description',
             'Basic content yml'
-        )->_defineProperty(
+        )->defineProperty(
             'category',
             array(
                 0 => 'Mocks',
             )
-        )->_defineProperty(
+        )->defineProperty(
             'indexation',
             array(
                 0 => array(
@@ -109,7 +98,8 @@ class MockContent extends AClassContent implements IMock
                 ),
             )
         );
-        parent::_initData();
+
+        parent::initData();
     }
 
     public function load()
@@ -119,24 +109,19 @@ class MockContent extends AClassContent implements IMock
         $this->body = new ContentSet();
     }
 
-    public function defineData($var, $type = 'scalar', $options = null, $updateAccept = true)
+    public function mockedDefineData($var, $type = 'scalar', $options = null, $updateAccept = true)
     {
-        return parent::_defineData($var, $type, $options, $updateAccept);
+        return parent::defineData($var, $type, $options, $updateAccept);
     }
 
-    public function defineProperty($var, $value)
+    public function mockedDefineProperty($var, $value)
     {
-        return parent::_defineProperty($var, $value);
+        return parent::defineProperty($var, $value);
     }
 
-    public function defineParam($var, $type = 'scalar', $options = null)
+    public function mockedDefineParam($var, $options = null)
     {
-        return parent::_defineParam($var, $type, $options);
-    }
-
-    public function isAccepted($value, $var = null)
-    {
-        return parent::_isAccepted($value, $var);
+        return parent::defineParam($var, $options);
     }
 
     public function getImageName()

@@ -28,12 +28,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Routing\RouteCollection;
+use BackBee\Rest\Patcher\EntityPatcher;
+use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBee\Rest\Patcher\OperationSyntaxValidator;
+use BackBee\Rest\Patcher\RightManager;
 use BackBee\Utils\File\File;
 
 /**
@@ -47,16 +53,14 @@ use BackBee\Utils\File\File;
 class ClassContentController extends ARestController
 {
     /**
-     * Contains every potential classcontent thumbnail base folder
-     * @var array
+     * @var BackBee\ClassContent\ClassContentManager
      */
-    private $thumbnailBaseDir = null;
+    private $manager;
 
     /**
      * Returns category's datas if $id is valid
      *
      * @param string $id category's id
-     *
      * @return Response
      */
     public function getCategoryAction($id)
@@ -97,15 +101,20 @@ class ClassContentController extends ARestController
         $format = $this->getFormatParam();
         $response = $this->createJsonResponse();
         $categoryName = $request->query->get('category', null);
-        if (null !== $categoryName && AClassContent::JSON_DEFINITION_FORMAT !== $format) {
-            $contents = $this->getClassContentByCategory($categoryName, $start, $count);
-            $response->setData($this->formatClassContentCollection($contents));
-        } elseif (AClassContent::JSON_DEFINITION_FORMAT === $format) {
+
+        if (AClassContent::JSON_DEFINITION_FORMAT === $format) {
             $response->setData($contents = $this->getClassContentDefinitionsByCategory($categoryName));
             $start = 0;
         } else {
-            $contents = $this->findContentsByCriterias($this->getAllClassContentClassnames(), $start, $count);
-            $response->setData($this->formatClassContentCollection($contents));
+            if (null !== $categoryName) {
+                $contents = $this->getClassContentByCategory($categoryName, $start, $count);
+            } else {
+                $classnames = $this->getClassContentManager()->getAllClassContentClassnames();
+                $contents = $this->findContentsByCriterias($classnames, $start, $count);
+            }
+
+            $data = $this->getClassContentManager()->jsonEncodeCollection($contents, $this->getFormatParam());
+            $response->setData($data);
         }
 
         return $this->addContentRangeHeadersToResponse($response, $contents, $start);
@@ -115,16 +124,18 @@ class ClassContentController extends ARestController
      * Returns collection of classcontent associated to $type and according to provided criterias
      *
      * @param string $type
-     *
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\Pagination(default_count=25, max_count=100)
      */
     public function getCollectionByTypeAction($type, $start, $count)
     {
-        $classname = $this->getClassnameByType($type);
+        $classname = AClassContent::getClassnameByContentType($type);
         $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
-        $response = $this->createJsonResponse($this->formatClassContentCollection($contents));
+        $response = $this->createJsonResponse($this->getClassContentManager()->jsonEncodeCollection(
+            $contents,
+            $this->getFormatParam()
+        ));
 
         return $this->addContentRangeHeadersToResponse($response, $contents, $start);
     }
@@ -134,7 +145,6 @@ class ClassContentController extends ARestController
      *
      * @param string $type type of the class content (ex: Element/text)
      * @param string $uid  identifier of the class content
-     *
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\QueryParam(name="mode", description="The render mode to use")
@@ -146,11 +156,7 @@ class ClassContentController extends ARestController
      */
     public function getAction($type, $uid, Request $request)
     {
-        $this->granted('VIEW', $content = $this->getClassContentByTypeAndUid($type, $uid));
-
-        if (null !== $draft = $this->getClassContentRevision($content)) {
-            $content->setDraft($draft);
-        }
+        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true));
 
         $response = null;
         if (in_array('text/html', $request->getAcceptableContentTypes())) {
@@ -164,7 +170,7 @@ class ClassContentController extends ARestController
             );
         } else {
             $response = $this->createJsonResponse();
-            $response->setData($this->encodeClassContent($content, $this->getFormatParam()));
+            $response->setData($this->getClassContentManager()->jsonEncode($content, $this->getFormatParam()));
         }
 
         return $response;
@@ -175,28 +181,20 @@ class ClassContentController extends ARestController
      *
      * @param string  $type
      * @param Request $request
-     *
      * @return Symfony\Component\HttpFoundation\Response
      */
     public function postAction($type, Request $request)
     {
-        $classname = $this->getClassnameByType($type);
+        $classname = AClassContent::getClassnameByContentType($type);
         $content = new $classname();
 
-        $em = $this->getEntityManager();
-        $em->persist($content);
-
-        $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft(
-            $content,
-            $this->getApplication()->getBBUserToken(),
-            true
-        );
-
-        $content->setDraft($draft);
-        $em->flush();
+        $this->getEntityManager()->persist($content);
+        $content->setDraft($this->getClassContentManager()->getDraft($content, true));
+        $this->getEntityManager()->flush();
 
         return $this->createJsonResponse(null, 201, [
-            'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
+            'BB-RESOURCE-UID' => $content->getUid(),
+            'Location'        => $this->getApplication()->getRouting()->getUrlByRouteName(
                 'bb.rest.classcontent.get',
                 [
                     'version' => $request->attributes->get('version'),
@@ -206,8 +204,66 @@ class ClassContentController extends ARestController
                 '',
                 false
             ),
-            'BB-RESOURCE-UID' => $content->getUid(),
         ]);
+    }
+
+    /**
+     * Updates classcontent's elements and parameters
+     *
+     * @param  string $type type of the class content (ex: Element/text)
+     * @param  string $uid  identifier of the class content
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putAction($type, $uid, Request $request)
+    {
+        $this->updateClassContent($type, $uid, $request->request->all());
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * Updates collection of classcontent elements and parameters
+     *
+     * @param  Request $request
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putCollectionAction(Request $request)
+    {
+        $result = [];
+        foreach ($request->request->all() as $data) {
+            if (!isset($data['type']) || !isset($data['uid'])) {
+                throw new BadRequestHttpException("type and/or uid is missing.");
+            }
+
+            try {
+                $content = $this->updateClassContent($data['type'], $data['uid'], $data);
+                $result[] = [
+                    'uid'        => $content->getUid(),
+                    'type'       => $content->getContentType(),
+                    'statusCode' => 200,
+                    'message'    => 'OK',
+                ];
+            } catch (AccessDeniedException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 401,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (\Exception $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 500,
+                    'message'    => $e->getMessage(),
+                ];
+            }
+        }
+
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse($result);
     }
 
     /**
@@ -215,12 +271,11 @@ class ClassContentController extends ARestController
      *
      * @param string $type type of the class content (ex: Element/text)
      * @param string $uid  identifier of the class content
-     *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function deleteAction($type, $uid)
     {
-        $content = $this->getClassContentByTypeAndUid($type, $uid);
+        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
 
         try {
             $this->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')->deleteContent($content);
@@ -229,6 +284,96 @@ class ClassContentController extends ARestController
         }
 
         return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * ClassContent's draft getter
+     *
+     * @param  string $type type of the class content (ex: Element/text)
+     * @param  string $uid  identifier of the class content
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getDraftAction($type, $uid)
+    {
+        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid));
+
+        return $this->createJsonResponse($this->getClassContentManager()->getDraft($content));
+    }
+
+    /**
+     * Returns all drafts of current user
+     *
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function getDraftCollectionAction()
+    {
+        $contents = $this->getEntityManager()
+            ->getRepository('BackBee\ClassContent\Revision')
+            ->getAllDrafts($this->getApplication()->getBBUserToken())
+        ;
+
+        $contents = $this->sortDraftCollection($contents);
+
+        return $this->addContentRangeHeadersToResponse($this->createJsonResponse($contents), $contents, 0);
+    }
+
+    /**
+     * Updates a classcontent's draft.
+     *
+     * @param  string $type type of the class content (ex: Element/text)
+     * @param  string $uid  identifier of the class content
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putDraftAction($type, $uid, Request $request)
+    {
+        $this->updateClassContentDraft($type, $uid, $request->request->all());
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * Updates collection of classcontents' drafts.
+     *
+     * @param  Request $request
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function putDraftCollectionAction(Request $request)
+    {
+        $result = [];
+        foreach ($request->request->all() as $data) {
+            if (!isset($data['type']) || !isset($data['uid'])) {
+                throw new BadRequestHttpException("type and/or uid is missing.");
+            }
+
+            try {
+                $content = $this->updateClassContentDraft($data['type'], $data['uid'], $data);
+                $result[] = [
+                    'uid'        => $content->getUid(),
+                    'type'       => $content->getContentType(),
+                    'statusCode' => 200,
+                    'message'    => 'OK',
+                ];
+            } catch (AccessDeniedException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 401,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (\Exception $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'type'       => $data['type'],
+                    'statusCode' => 500,
+                    'message'    => $e->getMessage(),
+                ];
+            }
+        }
+
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse($result);
     }
 
     /**
@@ -242,40 +387,120 @@ class ClassContentController extends ARestController
     }
 
     /**
-     * Returns complete namespace of classcontent with provided $type
+     * Returns ClassContentManager
      *
-     * @param string $type
-     *
-     * @return string classname associated to provided
-     *
-     * @throws
+     * @return BackBee\ClassContent\ClassContentManager
      */
-    private function getClassnameByType($type)
+    private function getClassContentManager()
     {
-        $classname = AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
-
-        try {
-            class_exists($classname);
-        } catch (\Exception $e) {
-            throw new NotFoundHttpException("`$type` is not a valid type.");
+        if (null === $this->manager) {
+            $this->manager = $this->getApplication()->getContainer()->get('classcontent.manager')
+                ->setBBUserToken($this->getApplication()->getBBUserToken())
+            ;
         }
 
-        return $classname;
+        return $this->manager;
+    }
+
+    /**
+     * Sorts the provided array that contains current logged user's drafts.
+     *
+     * @param  array  $drafts
+     * @return array
+     */
+    private function sortDraftCollection(array $drafts)
+    {
+        $sortedDrafts = [];
+        foreach ($drafts as $draft) {
+            $sortedDrafts[$draft->getContent()->getUid()] = [$draft->getContent()->getUid() => $draft];
+        }
+
+        foreach ($drafts as $draft) {
+            foreach ($draft->getContent()->getData() as $key => $element) {
+                if (
+                    is_object($element)
+                    && $element instanceof AClassContent
+                    && in_array($element->getUid(), array_keys($sortedDrafts))
+                ) {
+                    $elementUid = $element->getUid();
+                    $sortedDrafts[$draft->getContent()->getUid()][$key] = $sortedDrafts[$elementUid][$elementUid];
+                }
+            }
+        }
+
+        $drafts = [];
+        foreach ($sortedDrafts as $key => $data) {
+            if (!array_key_exists($key, $drafts)) {
+                $drafts[$key] = $data;
+            }
+
+            foreach ($data as $elementName => $draft) {
+                if ($key === $elementName) {
+                    continue;
+                }
+
+                if (false === $drafts[$key]) {
+                    $drafts[$draft->getContent()->getUid()] = false;
+                } elseif (isset($sortedDrafts[$draft->getContent()->getUid()])) {
+                    $drafts[$key][$elementName] = $sortedDrafts[$draft->getContent()->getUid()];
+                    $drafts[$draft->getContent()->getUid()] = false;
+                }
+            }
+        }
+
+        return array_filter($drafts);
+    }
+
+    /**
+     * Updates and returns content and its draft according to provided data.
+     *
+     * @param  string $type
+     * @param  string $uid
+     * @param  array $data
+     * @return AClassContent
+     */
+    private function updateClassContent($type, $uid, $data)
+    {
+        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true, true);
+        $this->granted('EDIT', $content);
+        $this->getClassContentManager()->update($content, $data);
+
+        return $content;
+    }
+
+    /**
+     * Commits or reverts content's draft according to provided data.
+     *
+     * @param  string $type
+     * @param  string $uid
+     * @param  array  $data
+     * @return AClassContent
+     */
+    private function updateClassContentDraft($type, $uid, $data)
+    {
+        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid));
+
+        $operation = $data['operation'];
+        if (!in_array($operation, ['commit', 'revert'])) {
+            throw new BadRequestHttpException(sprintf('%s is not a valid operation for update draft.', $operation));
+        }
+
+        $this->getClassContentManager()->$operation($content, $data);
+
+        return $content;
     }
 
     /**
      * Returns classcontent datas if couple (type;uid) is valid
      *
-     * @param string $type short namespace of a classcontent
-     *                     (full: BackBee\ClassContent\Block\paragraph => short: Block\paragraph)
+     * @param string $type
      * @param string $uid
-     *
      * @return AClassContent
      */
     private function getClassContentByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = $this->getClassnameByType($type);
+        $classname = AClassContent::getClassnameByContentType($type);
 
         try {
             $content = $this->getEntityManager()->find($classname, $uid);
@@ -331,46 +556,6 @@ class ClassContentController extends ARestController
     }
 
     /**
-     * Returns all classcontents classnames
-     *
-     * @return array An array that contains all classcontents classnames
-     */
-    private function getAllClassContentClassnames()
-    {
-        $classnames = [];
-        foreach ($this->getCategoryManager()->getCategories() as $category) {
-            foreach ($category->getBlocks() as $block) {
-                $classnames[] = $this->getClassnameByType($block->type);
-            }
-        }
-
-        return array_merge($this->getAllElementClassContentClassnames(), $classnames);
-    }
-
-    /**
-     * Returns all BackBee elements classcontents classnames
-     *
-     * @return array An array that contains all elements classcontents classnames
-     */
-    private function getAllElementClassContentClassnames()
-    {
-        $directory = $this->getApplication()->getBBDir().DIRECTORY_SEPARATOR.'ClassContent';
-        $classnames = array_map(
-            function ($path) use ($directory) {
-                return str_replace(
-                    [DIRECTORY_SEPARATOR, '\\\\'],
-                    [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
-                    AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
-                );
-            },
-            File::getFilesRecursivelyByExtension($directory, 'yml')
-        );
-        $classnames[] = AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet';
-
-        return $classnames;
-    }
-
-    /**
      * Returns all classcontents classnames that belong to provided category
      *
      * @param  string $name The category name
@@ -378,17 +563,11 @@ class ClassContentController extends ARestController
      */
     private function getClassContentClassnamesByCategory($name)
     {
-        $category = $this->getCategoryManager()->getCategory($name);
-        if (null === $category) {
-            throw new NotFoundHttpException("`$name` is not a valid classcontent category.");
+        try {
+            return $this->getCategoryManager()->getClassContentClassnamesByCategory($name);
+        } catch (\InvalidArgumentException $e) {
+            throw new NotFoundHttpException($e->getMessage());
         }
-
-        $classnames = [];
-        foreach ($category->getBlocks() as $block) {
-            $classnames[] = $this->getClassnameByType($block->type);
-        }
-
-        return $classnames;
     }
 
     /**
@@ -403,33 +582,20 @@ class ClassContentController extends ARestController
     {
         $classnames = [];
         if (null === $name) {
-            $classnames = $this->getAllClassContentClassnames();
+            $classnames = $this->getClassContentManager()->getAllClassContentClassnames();
         } else {
             $classnames = $this->getClassContentClassnamesByCategory($name);
         }
 
         $definitions = [];
         foreach ($classnames as $classname) {
-            $definitions[] = $this->updateClassContentImageUrl(
-                (new $classname)->jsonSerialize(AClassContent::JSON_DEFINITION_FORMAT)
+            $definitions[] = $this->getClassContentManager()->jsonEncode(
+                (new $classname),
+                AClassContent::JSON_DEFINITION_FORMAT
             );
         }
 
         return $definitions;
-    }
-
-    /**
-     * Returns current revision for the given $content
-     *
-     * @param AClassContent $content content we want to get the latest revision
-     *
-     * @return null|BackBee\ClassContent\Revision
-     */
-    private function getClassContentRevision(AClassContent $content)
-    {
-        return $this->getEntityManager()->getRepository('BackBee\ClassContent\Revision')
-            ->getDraft($content, $this->getApplication()->getBBUserToken())
-        ;
     }
 
     /**
@@ -486,105 +652,6 @@ class ClassContentController extends ARestController
     }
 
     /**
-     * Encodes classcontent according to provided format in request
-     *
-     * @param  AClassContent $content
-     * @param  integer       $format
-     * @return array
-     */
-    private function encodeClassContent(AClassContent $content, $format)
-    {
-        if (AClassContent::JSON_DEFINITION_FORMAT === $format) {
-            $classname = get_class($content);
-            $content = new $classname;
-        }
-
-        return $this->updateClassContentImageUrl($content->jsonSerialize($format));
-    }
-
-    /**
-     * Converts Doctrine's paginator to php array
-     *
-     * @param Paginator $paginator the paginator to convert
-     *
-     * @return array
-     */
-    private function formatClassContentCollection(Paginator $paginator)
-    {
-        $contents = [];
-        if (AClassContent::JSON_DEFINITION_FORMAT === $format = $this->getFormatParam()) {
-            $contents[] = $this->encodeClassContent($paginator->getIterator()->current(), $format);
-        } else {
-            foreach ($paginator as $content) {
-                $contents[] = $this->encodeClassContent($content, $format);
-            }
-        }
-
-        return $contents;
-    }
-
-    /**
-     * Update a single classcontent image url
-     *
-     * @param array $classcontent the classcontent we want to update its image url
-     *
-     * @return array
-     */
-    private function updateClassContentImageUrl(array $data)
-    {
-        if (!isset($data['image'])) {
-            return $data;
-        }
-
-        $imageUri = '';
-        $urlType = RouteCollection::RESOURCE_URL;
-        if ('/' === $data['image'][0]) {
-            $imageUri = $data['image'];
-            $urlType = RouteCollection::IMAGE_URL;
-        } else {
-            $image_filepath = $this->getThumbnailBaseFolderPath().DIRECTORY_SEPARATOR.$data['image'];
-            $baseFolder = $this->getContainer()->getParameter('classcontent_thumbnail.base_folder');
-            if (file_exists($image_filepath) && is_readable($image_filepath)) {
-                $imageUri = $baseFolder.DIRECTORY_SEPARATOR.$data['image'];
-            } else {
-                $imageUri = $baseFolder.DIRECTORY_SEPARATOR.'default_thumbnail.png';
-            }
-        }
-
-        $data['image'] = $this->getApplication()->getRouting()->getUri($imageUri, null, null, $urlType);
-
-        return $data;
-    }
-
-    /**
-     * Getter of class content thumbnail folder path
-     *
-     * @return string
-     */
-    private function getThumbnailBaseFolderPath()
-    {
-        if (null === $this->thumbnailBaseDir) {
-            $baseFolder = $this->getContainer()->getParameter('classcontent_thumbnail.base_folder');
-            $this->thumbnailBaseDir = array_map(function ($directory) use ($baseFolder) {
-                return str_replace(
-                    DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,
-                    DIRECTORY_SEPARATOR,
-                    $directory.DIRECTORY_SEPARATOR.$baseFolder
-                );
-            }, $this->getApplication()->getResourceDir());
-
-            foreach ($this->thumbnailBaseDir as $directory) {
-                if (is_dir($directory)) {
-                    $this->thumbnailBaseDir = $directory;
-                    break;
-                }
-            }
-        }
-
-        return $this->thumbnailBaseDir;
-    }
-
-    /**
      * Add 'Content-Range' parameters to $response headers
      *
      * @param Response $response   the response object
@@ -598,8 +665,9 @@ class ClassContentController extends ARestController
             $count = count($collection->getIterator());
         }
 
-        $last_result = $start + $count - 1;
-        $response->headers->set('Content-Range', "$start-$last_result/".count($collection));
+        $lastResult = $start + $count - 1;
+        $lastResult = $lastResult < 0 ? 0 : $lastResult;
+        $response->headers->set('Content-Range', "$start-$lastResult/".count($collection));
 
         return $response;
     }

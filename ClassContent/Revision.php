@@ -23,12 +23,14 @@
 
 namespace BackBee\ClassContent;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\ClassContent\Exception\ClassContentException;
+use BackBee\Security\Token\BBUserToken;
 
 /**
  * Revision of a content in BackBee.
@@ -59,7 +61,6 @@ class Revision extends AContent implements \Iterator, \Countable
      * Committed revision of a content
      * @var int;
      */
-
     const STATE_COMMITTED = 1000;
 
     /**
@@ -130,59 +131,12 @@ class Revision extends AContent implements \Iterator, \Countable
     /**
      * @param \Doctrine\ORM\EntityManager $em
      */
-    private $_em;
+    private $em;
 
     /**
      * @var \BackBee\Security\Token\BBUserToken
      */
-    private $_token;
-
-    /**
-     * Sets the current entity manager to dynamicaly load subrevisions
-     * @param  \Doctrine\ORM\EntityManager    $em
-     * @return \BackBee\ClassContent\Revision
-     */
-    public function setEntityManager(\Doctrine\ORM\EntityManager $em = null)
-    {
-        $this->_em = $em;
-
-        return $this;
-    }
-
-    /**
-     * Sets the current BB user's token to dynamically load subrevisions
-     * @param  \BackBee\Security\Token\BBUserToken $token
-     * @return \BackBee\ClassContent\Revision
-     */
-    public function setToken(\BackBee\Security\Token\BBUserToken $token = null)
-    {
-        $this->_token = $token;
-
-        return $this;
-    }
-
-    /**
-     * Return a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                    $type  The classname of the subcontent
-     * @param  string                                    $value The value of the subcontent (uid)
-     * @return \BackBee\ClassContent\AClassContent|FALSE
-     */
-    protected function _getContentByDataValue($type, $value)
-    {
-        $element = new $type($value);
-
-        if (null !== $this->_em) {
-            $element = $this->_em->getRepository($type)->load($element, $this->_token);
-        }
-
-        return $element;
-    }
-
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                        Common functions                                */
-    /*                                                                        */
-    /*     * **************************************************************** */
+    private $token;
 
     /**
      * Class constructor.
@@ -194,6 +148,38 @@ class Revision extends AContent implements \Iterator, \Countable
         parent::__construct($uid, $token);
 
         $this->_state = self::STATE_ADDED;
+    }
+
+    /**
+     * Called after Php has cloned current instance and change the uid.
+     */
+    public function __clone()
+    {
+        $this->_uid = md5(uniqid('', true));
+    }
+
+    /**
+     * Sets the current entity manager to dynamicaly load subrevisions
+     * @param  \Doctrine\ORM\EntityManager    $em
+     * @return \BackBee\ClassContent\Revision
+     */
+    public function setEntityManager(EntityManager $em = null)
+    {
+        $this->em = $em;
+
+        return $this;
+    }
+
+    /**
+     * Sets the current BB user's token to dynamically load subrevisions
+     * @param  \BackBee\Security\Token\BBUserToken $token
+     * @return \BackBee\ClassContent\Revision
+     */
+    public function setToken(BBUserToken $token = null)
+    {
+        $this->token = $token;
+
+        return $this;
     }
 
     /**
@@ -246,7 +232,7 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $this->_data = $data;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -262,7 +248,7 @@ class Revision extends AContent implements \Iterator, \Countable
             $this->setClassname(ClassUtils::getRealClass($this->_content));
         }
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -275,7 +261,7 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $this->_classname = $classname;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -288,7 +274,7 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $this->_owner = UserSecurityIdentity::fromAccount($user);
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
 
     /**
@@ -301,38 +287,8 @@ class Revision extends AContent implements \Iterator, \Countable
     {
         $this->_comment = $comment;
 
-        return $this->_getContentInstance();
+        return $this->getContentInstance();
     }
-
-    /**
-     * Returns the revision content
-     * @return \BackBee\ClassContent\AClassContent
-     * @codeCoverageIgnore
-     */
-    protected function _getContentInstance()
-    {
-        return $this->getContent();
-    }
-
-    /**
-     * Sets options at the construction of a new revision
-     * @param  mixed                          $options
-     * @return \BackBee\ClassContent\AContent
-     */
-    protected function _setOptions($options = null)
-    {
-        if ($options instanceof TokenInterface) {
-            $this->_owner = UserSecurityIdentity::fromToken($options);
-        }
-
-        return $this;
-    }
-
-    /*     * ************************************************************************ */
-    /*                                                                         */
-    /*                       ContentSet functions                              */
-    /*                                                                         */
-    /*     * ************************************************************************ */
 
     /**
      * Empty the current set of contents
@@ -467,7 +423,7 @@ class Revision extends AContent implements \Iterator, \Countable
             throw new ClassContentException(sprintf('Can not push in a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
         }
 
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             $this->_data[] = array(get_class($var) => $var->getUid());
         }
 
@@ -512,7 +468,7 @@ class Revision extends AContent implements \Iterator, \Countable
      */
     public function unshift(AClassContent $var)
     {
-        if ($this->_isAccepted($var)) {
+        if ($this->isAccepted($var)) {
             if (!$this->_maxentry || $this->_maxentry > $this->count()) {
                 array_unshift($this->_data, array($this->_getType($var) => $var->getUid()));
             }
@@ -534,21 +490,129 @@ class Revision extends AContent implements \Iterator, \Countable
         return isset($this->_data[$this->_index]);
     }
 
-    /*     * **************************************************************** */
-    /*                                                                        */
-    /*                   Implementation of Serializable                       */
-    /*                                                                        */
-    /*     * **************************************************************** */
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        $sourceData = $this->getContent()->jsonSerialize(self::JSON_CONCISE_FORMAT);
+        $draftData = parent::jsonSerialize(self::JSON_CONCISE_FORMAT);
+        $draftData['uid'] = $sourceData['uid'];
+        $draftData['type'] = $sourceData['type'];
+        $draftData['elements'] = $this->computeElements($sourceData['elements'], $draftData['elements']);
+
+        $parameters = [];
+        foreach ($draftData['parameters'] as $key => $parameter) {
+            if ($parameter['value'] !== $sourceData['parameters'][$key]['value']) {
+                $parameters[$key] = [
+                    'current' => $sourceData['parameters'][$key]['value'],
+                    'draft'   => $parameter['value'],
+                ];
+            }
+        }
+
+        $draftData['parameters'] = $parameters;
+
+        if ($this->getRevision() !== $this->getContent()->getRevision()) {
+            $draftData['state'] = self::STATE_CONFLICTED;
+        }
+
+        return array_merge(parent::jsonSerialize(self::JSON_INFO_FORMAT), $draftData);
+    }
 
     /**
-     * Return the serialized string of the revision
-     * @return string
+     * Updates current revision state and revision to be ready for commit.
+     *
+     * @return self
      */
-    public function serialize()
+    public function commit()
     {
-        $serialized = json_decode(parent::serialize());
-        $serialized->content = (null === $this->getContent()) ? null : json_decode($this->getContent()->serialize());
+        if (self::STATE_ADDED === $this->getState() || self::STATE_MODIFIED === $this->getState()) {
+            $this->setRevision($this->getRevision() + 1);
+            $this->setState(self::STATE_COMMITTED);
+        } elseif (self::STATE_CONFLICTED === $this->getState()) {
+            throw new Exception\ClassContentException(
+                'Content is in conflict, resolve or revert it',
+                Exception\ClassContentException::REVISION_CONFLICTED
+            );
+        } else {
+            throw new ClassContentException(
+                sprintf('Content can not be commited (state : %s)', $revision->getState()),
+                ClassContentException::REVISION_UPTODATE
+            );
+        }
 
-        return json_encode($serialized);
+        return $this;
+    }
+
+    /**
+     * Returns the revision content
+     * @return \BackBee\ClassContent\AClassContent
+     * @codeCoverageIgnore
+     */
+    protected function getContentInstance()
+    {
+        return $this->getContent();
+    }
+
+    /**
+     * Sets options at the construction of a new revision
+     * @param  mixed                          $options
+     * @return \BackBee\ClassContent\AContent
+     */
+    protected function setOptions($options = null)
+    {
+        if ($options instanceof TokenInterface) {
+            $this->_owner = UserSecurityIdentity::fromToken($options);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return a subcontent instance by its type and value, FALSE if not found
+     *
+     * @param  string $type  The classname of the subcontent
+     * @param  string $value The value of the subcontent (uid)
+     * @return AClassContent
+     */
+    protected function getContentByDataValue($type, $value)
+    {
+        $element = new $type($value);
+
+        if (null !== $this->em) {
+            $element = $this->em->getRepository($type)->load($element, $this->token);
+        }
+
+        return $element;
+    }
+
+    /**
+     * Computes and returns elements data.
+     *
+     * @param  array $sourceElements
+     * @param  array $draftElements
+     * @return array
+     */
+    private function computeElements(array $sourceElements, array $draftElements)
+    {
+        $elements = [];
+        if ($this->getContent() instanceof ContentSet) {
+            $elements = [
+                'current' => $sourceElements,
+                'draft'   => $draftElements,
+            ];
+        } else {
+            foreach ($sourceElements as $key => $element) {
+                if ($element !== $draftElements[$key]) {
+                    $elements[$key] = [
+                        'current' => $element,
+                        'draft'   => $draftElements[$key],
+                    ];
+                }
+            }
+        }
+
+        return $elements;
     }
 }

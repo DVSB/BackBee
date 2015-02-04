@@ -57,14 +57,14 @@ class CategoryManager
      */
     public function __construct(ApplicationInterface $application)
     {
-        $this->categories = array();
-        $this->options = array(
+        $this->categories = [];
+        $this->options = [
             'thumbnail_url_pattern' => $application->getRouting()->getUrlByRouteName(
-                'bb.classcontent_thumbnail', array(
+                'bb.classcontent_thumbnail', [
                     'filename' => '%s.'.$application->getContainer()->getParameter('classcontent_thumbnail.extension'),
-                )
+                ]
             ),
-        );
+        ];
 
         $this->loadCategoriesFromClassContentDirectories($application->getClassContentDir());
     }
@@ -93,6 +93,21 @@ class CategoryManager
         return $this->categories;
     }
 
+    public function getClassContentClassnamesByCategory($name)
+    {
+        $category = $this->getCategory($name);
+        if (null === $category) {
+            throw new \InvalidArgumentException("`$name` is not a valid classcontent category.");
+        }
+
+        $classnames = [];
+        foreach ($category->getBlocks() as $block) {
+            $classnames[] = AClassContent::getClassnameByContentType($block->type);
+        }
+
+        return $classnames;
+    }
+
     /**
      * Parse classcontent directories and hydrate categories attribute
      *
@@ -100,21 +115,21 @@ class CategoryManager
      */
     private function loadCategoriesFromClassContentDirectories($directories)
     {
-        $classcontents = array();
+        $classcontents = [];
         foreach ($directories as $directory) {
             $classcontents = array_merge($classcontents, array_map(
                 function ($path) use ($directory) {
                     return str_replace(
-                        array(DIRECTORY_SEPARATOR, '\\\\'),
-                        array(NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR),
-                        AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace(array($directory, '.yml'), array('', ''), $path)
+                        [DIRECTORY_SEPARATOR, '\\\\'],
+                        [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
+                        AContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
                     );
                 },
                 File::getFilesRecursivelyByExtension($directory, 'yml')
             ));
         }
 
-        $categories = array();
+        $categories = [];
         foreach ($classcontents as $class) {
             try {
                 if (class_exists($class)) {

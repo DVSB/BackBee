@@ -467,7 +467,7 @@ class PageController extends ARestController
     private function doGetCollectionByContent($content_type, $content_uid)
     {
         $content = null;
-        $classname = AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $content_type);
+        $classname = AClassContent::getClassnameByContentType($content_type);
         $em = $this->getApplication()->getEntityManager();
 
         try {

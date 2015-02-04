@@ -273,7 +273,7 @@ class ClassContent extends AbstractServiceLocal
 
         $this->isGranted('VIEW', $contentNode);
 
-        $default = $contentNode->getDefaultParameters();
+        $default = $contentNode->getDefaultParams();
 
         // Find a draft if exists
         if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($contentNode, $this->getApplication()->getBBUserToken())) {

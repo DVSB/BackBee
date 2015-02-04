@@ -45,7 +45,7 @@ interface IRenderable
      * @param  string            $var
      * @return string|array|null
      */
-    public function getParam($var = null);
+    public function getParam($var);
 
     /**
      * Returns TRUE if the object can be rendered.

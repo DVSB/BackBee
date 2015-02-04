@@ -5,6 +5,6 @@ image:
     name: Image
     description: An inline image
   parameters:
-    width: !!scalar 50
-    height: !!scalar
-    crop: !!array
+    width: 50
+    height: ~
+    crop: ~

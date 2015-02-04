@@ -33,6 +33,7 @@ use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 use BackBee\BBApplication;
 use BackBee\Event\PageFilterEvent;
@@ -606,8 +607,24 @@ class FrontController implements HttpKernelInterface
         // a listener might have replaced the exception
         $e = $event->getException();
 
-        if (!$event->hasResponse()) {
-            throw $e;
+        try {
+            if (!$event->hasResponse()) {
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            $response = new Response();
+
+            if ($e instanceof AccessDeniedException) {
+                $response->setStatusCode(403);
+                $response->setContent($e->getMessage());
+            } elseif ($e instanceof \InvalidArgumentException) {
+                $response->setStatusCode(500);
+                $response->setContent($e->getMessage());
+            } else {
+                throw $e;
+            }
+
+            return $response;
         }
 
         $response = $event->getResponse();
@@ -623,6 +640,7 @@ class FrontController implements HttpKernelInterface
                 $response->setStatusCode($e->getStatusCode());
             } else {
                 $response->setStatusCode(500);
+                $response->setContent($e->getMessage());
             }
         }
 
