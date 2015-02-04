@@ -23,7 +23,7 @@
 
 namespace BackBee\ClassContent;
 
-use BackBee\ClassContent\Element\file as ElementFile;
+use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ApplicationInterface;
 use BackBee\Routing\RouteCollection;
 use BackBee\Security\Token\BBUserToken;
@@ -475,7 +475,7 @@ class ClassContentManager
             }
 
             if ($content instanceof ElementFile) {
-                $this->em->getRepository('BackBee\ClassContent\Element\file')
+                $this->em->getRepository('BackBee\ClassContent\Element\File')
                     ->setDirectories($this->application)
                     ->commitFile($content)
                 ;

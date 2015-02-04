@@ -23,6 +23,7 @@
 
 namespace BackBee\NestedNode\Repository;
 
+use BackBee\ClassContent\Element\Keyword;
 use BackBee\NestedNode\Page;
 
 /**
@@ -139,7 +140,7 @@ class KeyWordRepository extends NestedNodeRepository
         $uids = array();
         $assoc = array();
         foreach ($elements as &$element) {
-            if ($element instanceof \BackBee\ClassContent\Element\keyword) {
+            if ($element instanceof Keyword) {
                 $uids[] = $element->value;
                 $assoc[$element->value] = &$element;
             } elseif (true === is_string($element)) {

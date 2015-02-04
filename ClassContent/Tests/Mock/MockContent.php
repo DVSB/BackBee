@@ -25,7 +25,7 @@ namespace BackBee\ClassContent\Tests\Mock;
 
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
-use BackBee\ClassContent\Element\text;
+use BackBee\ClassContent\Element\Text;
 use BackBee\Tests\Mock\IMock;
 
 /**
@@ -50,7 +50,7 @@ class MockContent extends AClassContent implements IMock
     {
         $this->defineData(
             'title',
-            '\BackBee\ClassContent\Element\text',
+            '\BackBee\ClassContent\Element\Text',
             array(
                 'default' => array(
                     'value' => 'Title here',
@@ -104,7 +104,7 @@ class MockContent extends AClassContent implements IMock
 
     public function load()
     {
-        $this->title = new text();
+        $this->title = new Text();
         $this->title->value = 'This is the title';
         $this->body = new ContentSet();
     }

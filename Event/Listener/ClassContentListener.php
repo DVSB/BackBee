@@ -27,7 +27,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
-use BackBee\ClassContent\Element\file as elementFile;
+use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
@@ -188,7 +188,7 @@ class ClassContentListener
 
         try {
             $content = $event->getEventArgs()->getEntity();
-            if (!($content instanceof \BackBee\ClassContent\Element\file)) {
+            if (!($content instanceof ElementFile)) {
                 return;
             }
 

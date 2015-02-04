@@ -1,5 +1,5 @@
-file:
-  repository: \BackBee\ClassContent\Repository\Element\fileRepository
+File:
+  repository: \BackBee\ClassContent\Repository\Element\FileRepository
   properties:
     name: File
     description: An attached file
@@ -9,5 +9,5 @@ file:
   parameters:
     stat: ~
   fixture:
-    path: picute
+    path: picture
     originalname: word

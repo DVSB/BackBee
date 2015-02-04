@@ -23,7 +23,7 @@
 
 namespace BackBee\Util;
 
-use BackBee\ClassContent\Element\file as elementFile;
+use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Utils\File\File;
 
@@ -39,12 +39,12 @@ class Media
 {
     /**
      * Returns the computed storage filename of an element file
-     * @param  \BackBee\ClassContent\Element\file          $content
+     * @param  \BackBee\ClassContent\Element\File          $content
      * @param  int                                         $folder_size Optional, size in characters of the storing folder
      * @return string
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided element file is empty
      */
-    public static function getPathFromContent(elementFile $content, $folder_size = 3)
+    public static function getPathFromContent(ElementFile $content, $folder_size = 3)
     {
         if (null === $content->getUid()
                 || null === $content->originalname) {
