@@ -533,7 +533,7 @@ abstract class AClassContent extends AContent
             $this->_addAcceptedType($type, $var);
         }
 
-        if (null !== $options) {
+        if (!empty($options)) {
             $this->defaultOptions[$var] = $options;
         }
 
@@ -1090,9 +1090,17 @@ abstract class AClassContent extends AContent
             ;
         }
 
+        $properties = $this->getProperty();
+        unset(
+            $properties['indexation'],
+            $properties['labelized-by'],
+            $properties['clonemode'],
+            $properties['cache-lifetime']
+        );
+
         $data = array_merge([
             'defaultOptions' => 0 === count($this->defaultOptions) ? new \ArrayObject() : $this->defaultOptions,
-            'properties'     => $this->getProperty(),
+            'properties'     => $properties,
             'image'          => self::JSON_DEFINITION_FORMAT === $format
                 ? $this->getDefaultImageName()
                 : $this->getImageName()
