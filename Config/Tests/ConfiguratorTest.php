@@ -66,11 +66,11 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
     private $application;
 
     /**
-     * the Configurator we want to test
+     * mocked BundleLoader
      *
-     * @var BackBee\Config\Configurator
+     * @var BundleLoader
      */
-    private $config_builder;
+    private $bundleLoader;
 
     /**
      * setup the test environment with every needed variables
@@ -78,6 +78,10 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->application = new ManualBBApplication();
+        $this->bundleLoader = $this->getMockBuilder('BackBee\Bundle\BundleLoader')
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
     }
 
     /**
@@ -106,7 +110,7 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
             $config->getAllSections()
         );
 
-        $config_builder = new Configurator($this->application);
+        $config_builder = new Configurator($this->application, $this->bundleLoader);
         $config_builder->extend(Configurator::APPLICATION_CONFIG, $config);
         $this->assertEquals(
             array(
@@ -123,7 +127,7 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
         // Test with context and without environment
         $this->application->setContext('api');
         $config = new Config($this->application->getBBDir());
-        $config_builder = new Configurator($this->application);
+        $config_builder = new Configurator($this->application, $this->bundleLoader);
         $config_builder->extend(Configurator::APPLICATION_CONFIG, $config);
         $this->assertEquals(
             array(
@@ -143,7 +147,7 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
         $this->application->setEnvironment('preprod');
         $this->application->setOverrided_Config(true);
         $config = new Config($this->application->getBBDir());
-        $config_builder = new Configurator($this->application);
+        $config_builder = new Configurator($this->application, $this->bundleLoader);
         $config_builder->extend(Configurator::APPLICATION_CONFIG, $config);
         $this->assertEquals(
             array(

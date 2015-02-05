@@ -151,7 +151,7 @@ services:
 
     config.configurator:
         class:      %bbapp.config.configurator.class%
-        arguments:  [@bbapp]
+        arguments:  [@bbapp, @bundle.loader]
         public:     false
 
     config.persistor:

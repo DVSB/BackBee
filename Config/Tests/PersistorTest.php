@@ -96,7 +96,11 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
         $application->setConfig_Dir($application->getBBDir().'/Config');
         $application->setBase_Dir(vfsStream::url('virtual_structure'));
 
-        $this->configurator = new Configurator($application);
+        $bundleLoader = $this->getMockBuilder('BackBee\Bundle\BundleLoader')
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+        $this->configurator = new Configurator($application, $bundleLoader);
 
         $this->persistor = new Persistor($application, $this->configurator);
         $this->application = $application;
