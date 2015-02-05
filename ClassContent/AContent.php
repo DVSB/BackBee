@@ -755,7 +755,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     /**
      * Returns a string that represents shorten namespace of current classname.
      *
-     * Example: BackBee\ClassContent\Element\text => Element/text
+     * Example: BackBee\ClassContent\Element\Text => Element/Text
      *
      * @return string
      */

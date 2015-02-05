@@ -24,7 +24,7 @@
 namespace BackBee\ClassContent\Tests;
 
 use BackBee\ClassContent\AClassContent;
-use BackBee\ClassContent\Element\image;
+use BackBee\ClassContent\Element\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Tests\Mock\MockContent;
 use BackBee\Exception\BBException;
@@ -128,7 +128,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     public function testSetAndGetParam()
     {
-        $content = new image();
+        $content = new Image();
         $defaultParams = $content->getDefaultParams();
 
         foreach ($defaultParams as $param) {
@@ -165,7 +165,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetIncompatibleParam()
     {
-        (new image())->setParam('width', false);
+        (new Image())->setParam('width', false);
     }
 
     /**
@@ -174,21 +174,21 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetInvalidParamType()
     {
-        (new image())->setParam('width', new \stdClass());
+        (new Image())->setParam('width', new \stdClass());
     }
 
     public function testDefineData()
     {
         $this->content->mockedDefineData(
             'title',
-            '\BackBee\ClassContent\Element\date',
+            '\BackBee\ClassContent\Element\Date',
             array(
                 'default' => array('value' => 'Foo Bar Baz'),
             )
         );
         $this->content->mockedDefineData(
             'title',
-            '\BackBee\ClassContent\Element\image',
+            '\BackBee\ClassContent\Element\Image',
             array(
                 'default' => array('value' => 'Foo Bar Baz'),
             ),
@@ -196,7 +196,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         );
         $this->content->mockedDefineData(
             'date',
-            '\BackBee\ClassContent\Element\date',
+            '\BackBee\ClassContent\Element\Date',
             array(
                 'default' => array('value' => 'A date'),
             ),
@@ -204,13 +204,13 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertNotEquals('Foo Bar Baz', $this->content->title->value);
-        $this->assertInstanceOf('BackBee\ClassContent\Element\date', $this->content->date);
+        $this->assertInstanceOf('BackBee\ClassContent\Element\Date', $this->content->date);
 
         $this->assertTrue($this->content->isAccepted($this->content->date, 'title'));
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
         try {
 
-        $this->assertFalse($this->content->isAccepted(new image(), 'title'));
+        $this->assertFalse($this->content->isAccepted(new Image(), 'title'));
     } catch (\Exception $e) {
         var_dump($e->getMessage(), get_class($e));
     }

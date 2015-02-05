@@ -24,6 +24,7 @@
 namespace BackBee\Renderer\Helper;
 
 use BackBee\Renderer\Exception\RendererException;
+use BackBee\ClassContent\Element\Date;
 
 /**
  * @category    BackBee
@@ -91,15 +92,18 @@ class dateHelper extends AHelper
 
     private function getType($date)
     {
-        if (is_a($date, "DateTime")) {
+        if ($date instanceof \DateTime) {
             return self::$DATE_OBJECT;
         }
+
         if (preg_match('/^[\d]{4}-[\d]{2}-[\d]{2}$/', $date)) {
             return self::$DATE_STRING;
         }
-        if ($date instanceof \BackBee\ClassContent\Element\date) {
+
+        if ($date instanceof Date) {
             return self::$DATE_ELEMENT;
         }
+
         if (preg_match('/^[\d]+$/', $date)) {
             return self::$DATE_TIMESTAMP;
         }
@@ -114,17 +118,20 @@ class dateHelper extends AHelper
         switch ($type) {
             case self::$DATE_ERROR:
                 $this->date = null;
-//                throw new RendererException("Type date wrong for 'DateTime' object");
+
                 break;
             case self::$DATE_OBJECT:
                 $this->date = $date;
+
                 break;
             case self::$DATE_STRING:
                 $this->date = new \DateTime($date);
+
                 break;
             case self::$DATE_TIMESTAMP:
                 $this->date = new \DateTime();
                 $this->date->setTimestamp($date);
+
                 break;
             case self::$DATE_ELEMENT:
                 if ('' == $date->value) {
@@ -133,8 +140,10 @@ class dateHelper extends AHelper
                     $this->date = new \DateTime();
                     $this->date->setTimestamp($date->value ? $date->value : 0);
                 }
+
                 break;
-            default: $this->date = null;
+            default:
+            $this->date = null;
                 break;
         }
     }
@@ -177,8 +186,6 @@ class dateHelper extends AHelper
             $this->date->setTimezone($timezone);
         }
 
-        //if (NULL !== $culture && self::$CULTURE_FR == $culture)
-        //return strftime((NULL !== $format) ? $format: $this->format, $this->date->getTimestamp());
         $format = (null !== $format) ? $format : $this->format;
         if (strpos($format, "%") === false) {
             return $this->date->format($format);

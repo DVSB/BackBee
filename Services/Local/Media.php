@@ -24,9 +24,9 @@
 namespace BackBee\Services\Local;
 
 use BackBee\ClassContent\AClassContent;
-use BackBee\ClassContent\Element\file as elementFile;
-use BackBee\ClassContent\Element\image as elementImage;
-use BackBee\ClassContent\Element\text as elementText;
+use BackBee\ClassContent\Element\File as ElementFile;
+use BackBee\ClassContent\Element\Image;
+use BackBee\ClassContent\Element\Text;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\Services\Exception\ServicesException;
 use BackBee\Utils\File\File;
@@ -167,11 +167,11 @@ class Media extends AbstractServiceLocal
                 if (NULL !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $this->bbapp->getBBUserToken(), true)) {
                     $subcontent->setDraft($draft);
                 }
-                if ($subcontent instanceof elementText) {
+                if ($subcontent instanceof Text) {
                     $subcontent->value = $value;
                     $media_content->$element = $subcontent;
                     $this->bbapp->getEventDispatcher()->triggerEvent('commit', $subcontent);
-                } elseif ($subcontent instanceof elementFile) {
+                } elseif ($subcontent instanceof ElementFile) {
                     $content_image_obj = json_decode($value);
                     if (isset($content_image_obj->filename)) {
                         $subcontent->originalname = String::toPath($content_image_obj->originalname);
@@ -200,7 +200,7 @@ class Media extends AbstractServiceLocal
                         $stat = stat($moveto);
                         $subcontent->setParam('stat', $stat, 'array');
 
-                        if ($subcontent instanceof elementImage) {
+                        if ($subcontent instanceof Image) {
                             $size = getimagesize($moveto);
                             list($width, $height, $type, $attr) = $size;
                             $subcontent->setParam('width', $width, 'scalar');
@@ -381,7 +381,7 @@ class Media extends AbstractServiceLocal
             $this->em->persist($content);
         }
 
-        if (false === ($content instanceof elementFile)) {
+        if (false === ($content instanceof ElementFile)) {
             if (false === in_array(get_class($content), $this->_getAvailableMedias())) {
                 throw new ServicesException('Provided content is neither an element file nor an media');
             }
@@ -399,7 +399,7 @@ class Media extends AbstractServiceLocal
 
             $elementContent = null;
             foreach ($content->getData() as $key => $value) {
-                if ($value instanceof elementFile) {
+                if ($value instanceof ElementFile) {
                     $elementContent = $value;
                     break;
                 }
@@ -413,7 +413,7 @@ class Media extends AbstractServiceLocal
 
             $repository = $this->em->getRepository(get_class($content));
             if ('BackBee\ClassContent\Repository\ClassContentRepository' === get_class($repository)) {
-                $repository = $this->em->getRepository('BackBee\ClassContent\Element\file');
+                $repository = $this->em->getRepository('BackBee\ClassContent\Element\File');
             }
 
             if (false === $newfilename = $repository->setDirectories($this->bbapp)

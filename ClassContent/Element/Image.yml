@@ -1,0 +1,10 @@
+Image:
+  extends: \BackBee\ClassContent\Element\File
+  repository: \BackBee\ClassContent\Repository\Element\ImageRepository
+  properties:
+    name: Image
+    description: An inline image
+  parameters:
+    width: 50
+    height: ~
+    crop: ~

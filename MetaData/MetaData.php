@@ -25,6 +25,9 @@ namespace BackBee\MetaData;
 
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Element\File;
+use BackBee\ClassContent\Element\Keyword;
+use BackBee\ClassContent\Element\Text;
 use BackBee\NestedNode\Page;
 
 /**
@@ -246,7 +249,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                         try {
                                             $newcontent = $content->$property;
                                         } catch (\Exception $e) {
-                                            $newcontent = new \BackBee\ClassContent\Element\text();
+                                            $newcontent = new Text();
                                         }
                                     }
                                 }
@@ -263,7 +266,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                     $content->releaseDraft();
                                 }
 
-                                if ($content instanceof \BackBee\ClassContent\Element\File) {
+                                if ($content instanceof File) {
                                     $new_value = $content->path;
                                 } else {
                                     $new_value = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$content)));
@@ -277,7 +280,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                             } elseif (true === is_array($content)) {
                                 $v = array();
                                 foreach ($content as $c) {
-                                    if ($c instanceof \BackBee\ClassContent\Element\keyword) {
+                                    if ($c instanceof Keyword) {
                                     }
                                     $v[] = trim(str_replace(array("\n", "\r"), '', strip_tags(''.$c)));
                                 }

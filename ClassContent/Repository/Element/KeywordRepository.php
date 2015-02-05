@@ -24,7 +24,7 @@
 namespace BackBee\ClassContent\Repository\Element;
 
 use BackBee\ClassContent\AClassContent;
-use BackBee\ClassContent\Element\keyword as elementKeyword;
+use BackBee\ClassContent\Element\Keyword;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
 
@@ -36,19 +36,19 @@ use BackBee\ClassContent\Repository\ClassContentRepository;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class keywordRepository extends ClassContentRepository
+class KeywordRepository extends ClassContentRepository
 {
     /**
      * Do stuf on update by post of the content editing form
      * @param  \BackBee\ClassContent\AClassContent $content
      * @param  stdClass                            $value
      * @param  \BackBee\ClassContent\AClassContent $parent
-     * @return \BackBee\ClassContent\Element\file
+     * @return \BackBee\ClassContent\Element\File
      * @throws ClassContentException               Occures on invalid content type provided
      */
     public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
     {
-        if (false === ($content instanceof elementKeyword)) {
+        if (false === ($content instanceof Keyword)) {
             throw new ClassContentException('Invalid content type');
         }
 
@@ -79,7 +79,7 @@ class keywordRepository extends ClassContentRepository
      */
     public function removeFromPost(AClassContent $content, $value = null, AClassContent $parent = null)
     {
-        if (false === ($content instanceof elementKeyword)) {
+        if (false === ($content instanceof Keyword)) {
             throw new ClassContentException('Invalid content type');
         }
 

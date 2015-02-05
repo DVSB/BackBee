@@ -25,6 +25,7 @@ namespace BackBee\Renderer\Helper;
 
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Element\File;
 
 /**
  * Helper providing HTML attributes to online-edited content
@@ -296,9 +297,9 @@ class bb5content extends AHelper
      */
     private function _addElementFileMarkup($params = array())
     {
-        if ($this->_content instanceof \BackBee\ClassContent\Element\file) {
+        if ($this->_content instanceof File) {
             $em = $this->_renderer->getApplication()->getEntityManager();
-            $this->_addValueToAttribute('data-library', $em->getRepository('BackBee\ClassContent\Element\file')->isInMediaLibrary($this->_content));
+            $this->_addValueToAttribute('data-library', $em->getRepository('BackBee\ClassContent\Element\File')->isInMediaLibrary($this->_content));
         }
 
         return $this;
