@@ -63,14 +63,19 @@ class BundleLoader
     private $container;
 
     /**
-     * @var array[string]
+     * @var array
      */
-    private $bundlesBaseDir;
+    private $bundlesBaseDir = [];
 
     /**
-     * @var array[\ReflectionClass]
+     * @var array
      */
-    private $reflectionClasses;
+    private $reflectionClasses = [];
+
+    /**
+     * @var array
+     */
+    private $bundleInfos = [];
 
     /**
      * @param ApplicationInterface $application
@@ -79,8 +84,6 @@ class BundleLoader
     {
         $this->application = $application;
         $this->container = $application->getContainer();
-        $this->bundlesBaseDir = [];
-        $this->reflectionClasses = [];
     }
 
     /**
@@ -100,12 +103,36 @@ class BundleLoader
                     $serviceId,
                     $this->buildBundleDefinition($classname, $id, $baseDir)
                 );
+
+                $this->bundleInfos[$id] = [
+                    'main_class' => $classname,
+                    'base_dir'   => $baseDir,
+                ];
             }
         }
 
         if (0 < count($this->bundlesBaseDir)) {
             $this->loadFullBundles();
         }
+    }
+
+    /**
+     * Returns bundle id if provided path is matched with any bundle base directory.
+     *
+     * @param  string $path
+     * @return string
+     */
+    public function getBundleIdByBaseDir($path)
+    {
+        $bundleId = null;
+        foreach ($this->bundleInfos as $id => $data) {
+            if (0 === strpos($path, $data['base_dir'])) {
+                $bundleId = $id;
+                break;
+            }
+        }
+
+        return $bundleId;
     }
 
     /**
@@ -442,7 +469,7 @@ class BundleLoader
             $route = $config->getRouteConfig();
             if (true === is_array($route) && 0 < count($route)) {
                 $this->application->getController()->registerRoutes(
-                    $this->generateBundleServiceId(basename(dirname($config->getBaseDir()))),
+                    $this->generateBundleServiceId($this->getBundleIdByBaseDir($config->getBaseDir())),
                     $route
                 );
             }
