@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 /**
  * The main BackBuilder5 application
@@ -808,7 +809,20 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
             if ('test' === $this->getEnvironment()) {
                 $session = new Session(new MockArraySessionStorage());
             } else {
-                $session = new Session();
+                if (null === $sessionConfig = $this->getConfig()->getSessionConfig()) {
+                    $sessionConfig = array();
+                }
+
+                $siteConfig = $this->getContainer()->getConfig()->getSection('sites');
+                $currentSite = $this->getSite();
+                if (
+                        null !== $currentSite 
+                        && isset($siteConfig[$currentSite->getLabel()]['session'])
+                ) {
+                    $sessionConfig = array_merge($sessionConfig, $siteConfig[$currentSite->getLabel()]['session']);
+                }
+
+                $session = new Session(new NativeSessionStorage($sessionConfig));
             }
 
             $session->start();
