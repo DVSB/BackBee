@@ -813,7 +813,7 @@ class BBApplication implements IApplication, DumpableServiceInterface, DumpableS
                     $sessionConfig = array();
                 }
 
-                $siteConfig = $this->getContainer()->getConfig()->getSection('sites');
+                $siteConfig = $this->getConfig()->getSection('sites');
                 $currentSite = $this->getSite();
                 if (
                         null !== $currentSite 
