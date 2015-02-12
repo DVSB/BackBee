@@ -233,6 +233,7 @@ class ClassContent extends AbstractServiceLocal
                     $classname = '\BackBuilder\ClassContent\\'.$content->type;
                     if (null === $nwContent = $em->find($classname, $content->uid)) {
                         $nwContent = new $classname();
+                        $nwContent->populateEmptyElement();
                     }
                     /* handle param modification */
                     if (isset($content->serializedContent)) {

@@ -395,14 +395,19 @@ class Media extends AbstractServiceLocal
             }
 
             $elementContent = null;
+            $elementKey = null;
             foreach ($content->getData() as $key => $value) {
                 if ($value instanceof elementFile) {
                     $elementContent = $value;
+                    $elementKey = $key;
                     break;
                 }
             }
 
-            $this->postBBMediaUpload($elementContent->getUid(), str_replace('BackBuilder\\ClassContent\\', '', get_class($elementContent)), $content_values);
+            $stdElement = $this->postBBMediaUpload($elementContent->getUid(), str_replace('BackBuilder\\ClassContent\\', '', get_class($elementContent)), $content_values);
+            if (null !== $element = $this->em->find($stdElement->classname, $stdElement->uid)) {
+                $content->$elementKey = $element;
+            }
         } else {
             if (NULL !== $draft = $this->em->getRepository('BackBuilder\ClassContent\Revision')->getDraft($content, $this->bbapp->getBBUserToken(), true)) {
                 $content->setDraft($draft);
@@ -417,9 +422,9 @@ class Media extends AbstractServiceLocal
                     ->updateFile($content, $content_obj->filename, $content_obj->originalname, $content_obj->src)) {
                 throw new ServicesException('Unable to change the file');
             }
-
-            $this->em->flush();
         }
+
+        $this->em->flush();
 
         $return = new \stdClass();
         $return->uid = $content->getUid();

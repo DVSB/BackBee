@@ -7,7 +7,7 @@ $linkTitle = $this->getObject()->getParam("title", "scalar");
         <label for="<?php echo $this->getObject()->getUid(); ?>"><?php echo $this->getObject()->getLabel(); ?></label>
         <input class="bb5-form-editcontent-inputtext" id="<?php echo $this->getObject()->getUid(); ?>" name="<?php echo $this->getObject()->getUid(); ?>" value="<?php echo $this->getObject()->value; ?>" />
         <a href="#" class="bb5-button bb5-ico-tree bb5-button-link bb5-button-thick bb5-button-outline bb5-ShowBBSelector" data-uid="<?php echo $this->getObject()->getUid(); ?>">Parcourir</a>
-        <span class="bb5-form-editcontent-delete"><input type="checkbox" id="<?php echo $this->getObject()->getUid(); ?>_delete" <?php if (!$this->getObject()->isLoaded()) : ?>checked="checked"<?php endif; ?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete">Supprimer</label></span>
+        <span class="bb5-form-editcontent-delete"><input type="checkbox" id="<?php echo $this->getObject()->getUid(); ?>_delete"><label for="<?php echo $this->getObject()->getUid(); ?>_delete">Supprimer</label></span>
     </p>
 
     <p class="bb5-form-group parameter" data-param="title">

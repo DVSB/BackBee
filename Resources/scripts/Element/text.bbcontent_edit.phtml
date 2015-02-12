@@ -2,7 +2,7 @@
 <label for="<?php echo $this->getObject()->getUid(); ?>" style="font-weight: bold;"><?php echo $this->getObject()->getLabel(); ?></label>
 <div style="text-align: right;">
 <?php if (false === $this->getParam('disabled')): ?>
-    <input id="<?php echo $this->getObject()->getUid(); ?>_delete" type="checkbox" <?php if (!$this->getObject()->isLoaded()) :?>checked="checked"<?php endif;?>><label for="<?php echo $this->getObject()->getUid(); ?>_delete" style="min-width: 0px;">&nbsp;Supprimer</label>
+    <input id="<?php echo $this->getObject()->getUid(); ?>_delete" type="checkbox"><label for="<?php echo $this->getObject()->getUid(); ?>_delete" style="min-width: 0px;">&nbsp;Supprimer</label>
 <?php endif; ?>
 </div>
 <div id="<?php echo $this->getObject()->getUid(); ?>_container">
