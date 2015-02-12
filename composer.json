@@ -27,7 +27,8 @@
         "respect/validation": "0.7.3",
         "willdurand/jsonp-callback-validator": "1.1.0",
         "symfony/expression-language": "2.6.3",
-        "backbee/utils": "1.0.*@dev"
+        "backbee/utils": "1.0.*@dev",
+        "symfony/var-dumper": "~2.6"
     },
     "autoload": {
         "psr-4": {

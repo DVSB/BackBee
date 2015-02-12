@@ -115,12 +115,6 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     private $_dispatcher;
 
     /**
-     * Application logger
-     * @var \BackBee\Logging\Logger
-     */
-    private $_logger;
-
-    /**
      * define if autolader is already restored by container or not
      * @var boolean
      */
@@ -130,7 +124,6 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * Class constructor
      * @param \BackBee\BBApplication    $application Optionnal BackBee Application
      * @param \BackBee\Event\Dispatcher $dispatcher  Optionnal events dispatcher
-     * @param \BackBee\Logging\Logger   $logger      Optionnal logging engine
      */
     public function __construct(BBApplication $application = null, Dispatcher $dispatcher = null)
     {
