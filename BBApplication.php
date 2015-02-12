@@ -1074,7 +1074,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     {
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
-            'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/symfony/src/',
+            'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/validator/',
             'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
         ));
 
