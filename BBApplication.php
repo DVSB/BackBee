@@ -27,6 +27,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Debug\Debug;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -132,6 +133,9 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
         $this->_initAnnotationReader();
         $this->_initContainer();
+        if ($this->isDebugMode()) {
+            Debug::enable();
+        }
         $this->_initEnvVariables();
         $this->_initAutoloader();
         $this->_initContentWrapper();
@@ -1180,7 +1184,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         $definition = new Definition('Doctrine\Common\EventManager');
         $definition->addMethodCall('addEventListener', array($r->getConstants(), new Reference('doctrine.listener')));
         $this->_container->setDefinition('doctrine.event_manager', $definition);
-        $evm = $this->_container->get('doctrine.event_manager');
 
         try {
             $logger_id = 'logging';

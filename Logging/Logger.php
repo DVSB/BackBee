@@ -53,10 +53,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     private $_level;
     private $_priorities;
     private $_priorities_name;
-    private $_errorHandling = false;
-    private $_errorHandlers;
-    private $_exceptionHandling = false;
-    private $_exceptionHandlers;
     private $_buffer;
     private $_start;
     private $_mailto;
@@ -115,10 +111,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 }
             }
         }
-
-        $this->_setErrorHandler()
-             ->_setExceptionHandler()
-        ;
     }
 
     public function __destruct()
@@ -128,30 +120,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
                 $appender->close();
             }
         }
-    }
-
-    private function _setErrorHandler()
-    {
-        if (true === $this->_errorHandling) {
-            return;
-        }
-
-        $this->_errorHandlers = set_error_handler(array($this, 'errorHandler'));
-        $this->_errorHandling = true;
-
-        return $this;
-    }
-
-    private function _setExceptionHandler()
-    {
-        if ($this->_exceptionHandling) {
-            return;
-        }
-
-        $this->_exceptionHandlers = set_exception_handler(array($this, 'exceptionHandler'));
-        $this->_exceptionHandling = true;
-
-        return $this;
     }
 
     /**
@@ -164,162 +132,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         $this->_appenders[] = $appender;
 
         return $this;
-    }
-
-    public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
-    {
-        if (error_reporting() && $errno) {
-            switch ($errno) {
-                case E_ERROR:
-                case E_USER_ERROR:
-                case E_CORE_ERROR:
-                    $priority = self::ERROR;
-                    break;
-                case E_WARNING:
-                case E_USER_WARNING:
-                case E_CORE_WARNING:
-                    $priority = self::WARNING;
-                    break;
-                case E_NOTICE:
-                case E_USER_NOTICE:
-                    $priority = self::NOTICE;
-                    break;
-                default:
-                    $priority = self::INFO;
-                    break;
-            }
-
-            $this->log($priority, sprintf('%s:%d: %s', $errfile, $errline, $errstr));
-        }
-
-        if (null !== $this->_errorHandlers) {
-            return call_user_func($this->_errorHandlers, $errno, $errstr, $errfile, $errline, $errcontext);
-        }
-
-        return false;
-    }
-
-    public function exceptionHandler(\Exception $exception)
-    {
-        if ($exception instanceof FrontControllerException) {
-            $httpCode = $exception->getCode() - FrontControllerException::UNKNOWN_ERROR;
-
-            // Not logging when not found
-            if ($httpCode !== 404) {
-                $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
-            }
-
-            $r = new \ReflectionClass($exception);
-            $errors = array_flip($r->getConstants());
-
-            $title = str_replace('_', ' ', $errors[$exception->getCode()]);
-            $message = $exception->getMessage();
-            $error_trace = '';
-
-            if (null !== $this->_application) {
-                $error_trace .= ' in '.$exception->getFile().' on line '.$exception->getLine().'</th></tr>';
-                foreach ($exception->getTrace() as $trace) {
-                    $this->getTemplateError($trace);
-                }
-
-                $previous = $exception->getPrevious();
-                while (null !== $previous) {
-                    // Not logging when not found
-                    if ($httpCode !== 404) {
-                        $this->error(sprintf('Cause By : Error occurred in file `%s` at line %d with message: %s', $previous->getFile(), $previous->getLine(), $previous->getMessage()));
-                    }
-
-                    $error_trace .= '<tr><th colspan="5">Caused by: '.$previous->getMessage().
-                            ' in '.$previous->getFile().' on line '.$previous->getLine().'</td></tr>';
-                    foreach ($previous->getTrace() as $trace) {
-                        $this->getTemplateError($trace);
-                    }
-                    $previous = $previous->getPrevious();
-                }
-            }
-
-            if (false === $content = $this->_application->getRenderer()->reset()->error($httpCode, $title, $message, $error_trace)) {
-                if ($this->_application->isDebugMode()) {
-                    $content = '<link type="text/css" rel="stylesheet" href="ressources/css/debug.css"/>';
-                }
-                $content .= '<h1>'.$httpCode.': '.$title.'<h1>';
-                $content .= '<table>';
-                $content .= '<tr><th colspan="5">'.$message;
-                if ($this->_application->isDebugMode()) {
-                    $content .= $error_trace;
-                } else {
-                    $content .= '</th></tr>';
-                }
-                $content .= '</table>';
-            }
-
-            $this->_sendErrorMail(
-                $title,
-                "<h1>$httpCode: $title</h1><h2>$message</h2><p>Referer: "
-                .$this->_application->getContainer()->get('request')->server->get('HTTP_REFERER')."</p>$error_trace"
-            );
-
-            $response = new Response($content, $httpCode);
-            $response->send();
-            die();
-        } else {
-            $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', $exception->getFile(), $exception->getLine(), $exception->getMessage()));
-
-            if (false === $this->_application->isClientSAPI()) {
-                if (!headers_sent()) {
-                    header("HTTP/1.0 500 Internal Server Error");
-                } else {
-                    $this->error(sprintf('Error occurred in file `%s` at line %d with message: %s', __FILE__, __LINE__, 'This error should not happend, headers already sents'));
-                }
-
-                if (false === $this->_application->isDebugMode() && 1 != ini_get('display_errors')) {
-                    exit(-1);
-                }
-            }
-
-            if (null !== $this->_application && $this->_application->isDebugMode()) {
-                echo 'An error occured: '.$exception->getMessage().' (errNo: '.$exception->getCode().')'.PHP_EOL;
-                foreach ($exception->getTrace() as $trace) {
-                    echo 'Trace: line '.
-                    (array_key_exists('line', $trace) ? $trace['line'] : '-').': '.
-                    (array_key_exists('file', $trace) ? $trace['file'] : 'unset file').', '.
-                    (array_key_exists('class', $trace) ? $trace['class'] : '').
-                    (array_key_exists('type', $trace) ? $trace['type'] : '').
-                    (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function').'()'.PHP_EOL;
-                }
-
-                $previous = $exception->getPrevious();
-                while (null !== $previous) {
-                    echo PHP_EOL.'Caused by: '.$previous->getMessage().' (errNo: '.$previous->getCode().')'.PHP_EOL;
-                    foreach ($previous->getTrace() as $trace) {
-                        echo 'Trace: line '.
-                        (array_key_exists('line', $trace) ? $trace['line'] : '-').': '.
-                        (array_key_exists('file', $trace) ? $trace['file'] : 'unset file').', '.
-                        (array_key_exists('class', $trace) ? $trace['class'] : '').
-                        (array_key_exists('type', $trace) ? $trace['type'] : '').
-                        (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function').'()'.PHP_EOL;
-                    }
-                    $previous = $previous->getPrevious();
-                }
-            }
-        }
-
-//        if (null !== $this->_exceptionHandlers) {
-//            return call_user_func($this->_exceptionHandlers, $exception);
-//        }
-
-        exit(-1);
-    }
-
-    private function getTemplateError($trace)
-    {
-        return '<tr>'.
-                '<td>'.(array_key_exists('file', $trace) ? $trace['file'] : 'unset file').': '.
-                (array_key_exists('line', $trace) ? $trace['line'] : '-').'</td>'.
-                '<td>'.(array_key_exists('class', $trace) ? $trace['class'] : '').
-                (array_key_exists('type', $trace) ? $trace['type'] : '').
-                (array_key_exists('function', $trace) ? $trace['function'] : 'unknown_function').'()</td>'.
-                '</tr>';
     }
 
     public function log($level, $message, array $context = array())
@@ -382,7 +194,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     {
         if (self::DEBUG === $this->_level) {
             $this->_start = microtime(true);
-            //$this->_buffer = '[Doctrine] ' . $sql . ' with ' . var_export($params, true); //old throw error  "Nesting level too deep - recursive dependency?"
             $this->_buffer = '[Doctrine] '.$sql;
         }
     }
