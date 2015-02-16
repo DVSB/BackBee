@@ -59,14 +59,13 @@ class UserController extends ARestController
      */
     public function getCollectionAction(Request $request)
     {
-        // TODO
-
-
         if (!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBee\Security\User'))) {
             throw new AccessDeniedException(sprintf('You are not authorized to view users'));
         }
 
-        return array();
+        $users = $this->getEntityManager()->getRepository('BackBee\Security\User')->findAll();
+
+        return new Response($this->formatCollection($users), 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -120,6 +119,52 @@ class UserController extends ARestController
         return new Response("", 204);
     }
 
+    public function checkIdentity($username, $password)
+    {
+        $created = date('Y-m-d H:i:s');
+        $token = new BBUserToken();
+        $token->setUser($request->request->get('username'));
+        $token->setCreated($created);
+        $token->setNonce(md5(uniqid('', true)));
+        $token->setDigest(md5($token->getNonce() . $created . md5($password)));
+
+        $tokenAuthenticated = $this->getApplication()->getSecurityContext()->getAuthenticationManager()
+            ->authenticate($token)
+        ;
+
+        $this->getApplication()->getSecurityContext()->setToken($tokenAuthenticated);
+    }
+
+
+    /**
+     * PATCH User
+     *
+     * @param int $id User ID
+     */
+    public function patchAction($id, Request $request)
+    {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedException('You must be authenticated to view users');
+        }
+
+        $user = $this->getApplication()->getBBUserToken()->getUser();
+
+        if ($user->getId() !== $id) {
+            throw new AccessDeniedException('Password can only be changed by its owner.');
+        }
+
+        if ($user->getState() === User::PASSWORD_NOT_PICKED) {
+            $this->updateUserPassword($user, $request);
+        } else {
+            $oldPassword = $request->get('old_password', '');
+
+            $this->checkIdentity($user->getLogin(), $oldPassword);
+            $this->updateUserPassword($user, $request);
+        }
+
+        return new Response("", 204);
+    }
+
     /**
      * UPDATE User
      *
@@ -127,11 +172,9 @@ class UserController extends ARestController
      *  @Assert\NotBlank(message="Login is required"),
      *  @Assert\Length(min=6, minMessage="Minimum length of the login is 6 characters")
      * })
-     * @Rest\RequestParam(name = "firstname", requirements = {
-     *  @Assert\NotBlank(message="First Name is required")
-     * })
-     * @Rest\RequestParam(name = "lastname", requirements = {
-     *  @Assert\NotBlank(message="Last Name is required")
+     * @Rest\RequestParam(name = "email", requirements = {
+     *  @Assert\NotBlank(message="Email not provided"),
+     *  @Assert\Email(checkMX=true, message="Email invalid")
      * })
      *
      * @param int $id User ID
@@ -152,10 +195,21 @@ class UserController extends ARestController
             throw new AccessDeniedException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
-        $this->deserializeEntity($request->request->all(), $user);
+        $user = $this->deserializeEntity($request->request->all(), $user);
+
+        if ($request->request->has('password')) {
+            $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
+            $password = $request->request->get('password', '');
+
+            if ($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
+                $password = $encoder->encodePassword($password, '');
+            }
+
+            $user->setPassword($password);
+        }
 
         $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush();
+        $this->getEntityManager()->flush($user);
 
         return new Response("", 204);
     }
@@ -163,26 +217,17 @@ class UserController extends ARestController
     /**
      * Create User
      *
-     *
-     * @Rest\RequestParam(name = "password", requirements = {
-     *  @Assert\NotBlank(message="Password not provided"),
-     *  @Assert\Length(min=6, minMessage="Password minimum length is 6 characters")
-     * })
      * @Rest\RequestParam(name = "login", requirements = {
      *  @Assert\NotBlank(message="Login is required"),
-     *  @Assert\Length(min=6, minMessage="Minimum length of the login is 6 characters")
      * })
-     * @Rest\RequestParam(name = "firstname", requirements = {
-     *  @Assert\NotBlank(message="First Name is required")
+     * @Rest\RequestParam(name = "email", requirements = {
+     *  @Assert\NotBlank(message="Email not provided"),
+     *  @Assert\Email(checkMX=true, message="Email invalid")
      * })
-     * @Rest\RequestParam(name = "lastname", requirements = {
-     *  @Assert\NotBlank(message="Last Name is required")
-     * })
-     *
-     *
      */
     public function postAction(Request $request)
     {
+
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedException('You must be authenticated to view users');
         }
@@ -200,22 +245,66 @@ class UserController extends ARestController
         }
 
         $user = $this->deserializeEntity($request->request->all(), $user);
-
         // handle the password
         if ($request->request->has('password')) {
-            $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
             $password = $request->request->get('password');
-
-            if ($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
-                $password = $encoder->encodePassword($password, "");
-            }
-
-            $user->setPassword($password);
+        } elseif ($request->request->has('generate_password') && true === $request->request->get('generate_password')) {
+            $password = substr(hash('sha512', rand()), 0, 6);
+        } else {
+            return new JsonResponse([
+                'errors' => [
+                    'password' => ['Password not provided.']
+                ]
+            ], 400);
         }
 
-        $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush();
+        $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
 
-        return new Response($this->formatItem($user), 200, array('Content-Type' => 'application/json'));
+        if ($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
+            $password = $encoder->encodePassword($password, '');
+        }
+
+        $user->setPassword($password);
+
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush($user);
+
+        return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
+    }
+
+    /**
+     * @todo  set minimal password size in security config
+     * [updateUserPassword description]
+     * @param  User    $user    [description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    private function updateUserPassword(User $user, Request $request)
+    {
+        if ($request->request->get('password') !== $request->request->get('confirm_password')) {
+            return new JsonResponse([
+                'errors' => [
+                    'password' => ['Password and confirm password are differents.']
+                ]
+            ], 400);
+        }
+        $password = trim($request->request->get('password'));
+        if (strlen($password) < 5) {
+            return new JsonResponse([
+                'errors' => [
+                    'password' => ['Password to short.']
+                ]
+            ], 400);
+        }
+
+        $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
+
+        if ($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
+            $password = $encoder->encodePassword($password, '');
+        }
+
+        $user->setPassword($password);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush($user);
     }
 }

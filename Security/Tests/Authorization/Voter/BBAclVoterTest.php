@@ -100,6 +100,7 @@ class BBAclVoterTest extends TestCase
         $this->user = new User();
         $this->user->addGroup($this->group);
         $this->user->setLogin('user123');
+        $this->user->setEmail('user123@provider.com');
         $this->user->setPassword('password123');
         $this->user->setActivated(true);
         $this->getBBApp()->getEntityManager()->persist($this->user);

@@ -46,7 +46,8 @@ bb.images:
 
 # BackBee REST API
 
-bb.rest.user_get:
+# User Rest API
+bb.rest.user.get:
     pattern: /rest/{version}/user/{id}
     defaults:
         _action: getAction
@@ -56,8 +57,8 @@ bb.rest.user_get:
         id: \d
         _method: GET
 
-bb.rest.user_post:
-    pattern: /rest/{version}/user/
+bb.rest.user.post:
+    pattern: /rest/{version}/user
     defaults:
         _action: postAction
         _controller: BackBee\Rest\Controller\UserController
@@ -65,6 +66,75 @@ bb.rest.user_post:
         version: \d
         _method: POST
 
+bb.rest.user.put:
+    pattern: /rest/{version}/user/{id}
+    defaults:
+        _action: putAction
+        _controller: BackBee\Rest\Controller\UserController
+    requirements:
+        version: \d
+        id: \d
+        _method: PUT
+
+bb.rest.user.delete:
+    pattern: /rest/{version}/user/{id}
+    defaults:
+        _action: deleteAction
+        _controller: BackBee\Rest\Controller\UserController
+    requirements:
+        version: \d
+        id: \d
+        _method: DELETE
+
+bb.rest.user.get_collection:
+    pattern: /rest/{version}/user
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBee\Rest\Controller\UserController
+    requirements:
+        version: \d
+        _method: GET
+
+# Group Rest Api
+bb.rest.group.get:
+    pattern: /rest/{version}/group/{uid}
+    defaults:
+        _action:     getAction
+        _controller: BackBee\Rest\Controller\GroupController
+    requirements:
+        version: \d
+        uid: \w{32}
+        _method: GET
+
+bb.rest.group.post:
+    pattern: /rest/{version}/group
+    defaults:
+        _action:     postAction
+        _controller: BackBee\Rest\Controller\GroupController
+    requirements:
+        version: \d
+        _method: POST
+
+bb.rest.group.put:
+    pattern: /rest/{version}/group/{id}
+    defaults:
+        _action:     putAction
+        _controller: BackBee\Rest\Controller\GroupController
+    requirements:
+        uid: \w{32}
+        version: \d
+        _method: PUT
+
+bb.rest.group.get_collection:
+    pattern: /rest/{version}/group
+    defaults:
+        _action:     getCollectionAction
+        _controller: BackBee\Rest\Controller\GroupController
+    requirements:
+        version: \d
+        _method: GET
+
+# Security Rest Api
 bb.rest.security_firewall_autenticate:
     pattern: /rest/{version}/security/auth/{firewall}
     defaults:
@@ -440,32 +510,6 @@ bb.rest.bundle.exposed_actions:
         controller_name: "[a-z]+"
         action_name: "[a-z]+"
         parameters: "^\/.+|"
-
-bb.rest.group.get:
-    pattern: /rest/{version}/group/{id}
-    defaults:
-        _action:     getAction
-        _controller: BackBee\Rest\Controller\GroupController
-    requirements:
-        uid: \w{32}
-        _method: GET
-
-bb.rest.group.post:
-    pattern: /rest/{version}/group
-    defaults:
-        _action:     postAction
-        _controller: BackBee\Rest\Controller\GroupController
-    requirements:
-        _method: POST
-
-bb.rest.group.put:
-    pattern: /rest/{version}/group/{id}
-    defaults:
-        _action:     putAction
-        _controller: BackBee\Rest\Controller\GroupController
-    requirements:
-        uid: \w{32}
-        _method: PUT
 
 # BackBee rss
 bb.rss:

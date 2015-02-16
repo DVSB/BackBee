@@ -66,6 +66,7 @@ class UserControllerTest extends RestTestCase
         $this->user = new User();
         $this->user->addGroup($group);
         $this->user->setLogin('user123');
+        $this->user->setEmail('user123@provider.com');
         $this->user->setPassword('password123');
         $this->user->setActivated(true);
         $bbapp->getEntityManager()->persist($this->user);
@@ -74,6 +75,7 @@ class UserControllerTest extends RestTestCase
         $user = new User();
         $user->addGroup($group);
         $user->setLogin('user123inactive');
+        $user->setEmail('user123inactive@provider.com');
         $user->setPassword('password123');
         $user->setActivated(false);
         $bbapp->getEntityManager()->persist($user);
@@ -136,6 +138,7 @@ class UserControllerTest extends RestTestCase
         // create user
         $user = new User();
         $user->setLogin('usernameToDelete')
+                ->setEmail('usernameToDelete@provider.com')
                 ->setPassword('password123')
                 ->setActivated(true);
 
@@ -179,6 +182,7 @@ class UserControllerTest extends RestTestCase
         // create user
         $user = new User();
         $user->setLogin('usernameToUpdate')
+                ->setEmail('usernameToUpdate@provider.com')
                 ->setPassword('password123')
                 ->setApiKeyEnabled(false)
                 ->setApiKeyPrivate('PRIVATE_KEY')
@@ -201,6 +205,7 @@ class UserControllerTest extends RestTestCase
             'firstname' => 'updated_first_name',
             'lastname' => 'updated_last_name',
             'activated' => false,
+            'password' => 'trucmuch'
         );
 
         $response = $controller->putAction($user->getId(), new Request(array(), $data));
@@ -213,7 +218,6 @@ class UserControllerTest extends RestTestCase
         $this->assertEquals($data['login'], $userUpdated->getLogin());
         $this->assertEquals($data['api_key_enabled'], $userUpdated->getApiKeyEnabled());
         $this->assertEquals($data['api_key_public'], $userUpdated->getApiKeyPublic());
-        $this->assertEquals($data['api_key_private'], $userUpdated->getApiKeyPrivate());
         $this->assertEquals($data['firstname'], $userUpdated->getFirstname());
         $this->assertEquals($data['lastname'], $userUpdated->getLastname());
 
@@ -240,6 +244,7 @@ class UserControllerTest extends RestTestCase
         // create user
         $user = new User();
         $user->setLogin('usernameToUpdate')
+                ->setEmail('usernameToUpdate@provider.com')
                 ->setPassword('password123')
                 ->setApiKeyEnabled(false)
                 ->setApiKeyPrivate('PRIVATE_KEY')
@@ -255,8 +260,7 @@ class UserControllerTest extends RestTestCase
         $controller = $this->getController();
 
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'firstname' => '',
-            'lastname' => '',
+            'email' => '',
             'login' => '',
         ), array(
             'id' => $userId,
@@ -268,8 +272,7 @@ class UserControllerTest extends RestTestCase
 
         $res = json_decode($response->getContent(), true);
 
-        $this->assertContains('First Name is required', $res['errors']['firstname']);
-        $this->assertContains('Last Name is required', $res['errors']['lastname']);
+        $this->assertContains('Email not provided', $res['errors']['email']);
         $this->assertContains('Login is required', $res['errors']['login']);
     }
 
@@ -286,6 +289,7 @@ class UserControllerTest extends RestTestCase
 
         $data = array(
             'login' => 'username',
+            'email' => 'username@provider.com',
             'api_key_enabled' => true,
             'api_key_public' => 'api_key_public',
             'api_key_private' => 'api_key_private',
@@ -305,9 +309,9 @@ class UserControllerTest extends RestTestCase
         $this->assertInternalType('array', $res);
 
         $this->assertEquals($data['login'], $res['login']);
+        $this->assertEquals($data['email'], $res['email']);
         $this->assertEquals($data['api_key_enabled'], $res['api_key_enabled']);
         $this->assertEquals($data['api_key_public'], $res['api_key_public']);
-        $this->assertEquals($data['api_key_private'], $res['api_key_private']);
         $this->assertEquals($data['firstname'], $res['firstname']);
         $this->assertEquals($data['lastname'], $res['lastname']);
 
@@ -331,9 +335,7 @@ class UserControllerTest extends RestTestCase
 
         $res = json_decode($response->getContent(), true);
 
-        $this->assertContains('Password not provided', $res['errors']['password']);
-        $this->assertContains('First Name is required', $res['errors']['firstname']);
-        $this->assertContains('Last Name is required', $res['errors']['lastname']);
+        $this->assertContains('Email not provided', $res['errors']['email']);
         $this->assertContains('Login is required', $res['errors']['login']);
     }
 
@@ -352,6 +354,7 @@ class UserControllerTest extends RestTestCase
         // create user
         $user = new User();
         $user->setLogin('usernameDuplicate')
+            ->setEmail('usernameDuplicate@provider.com')
             ->setPassword('password123')
             ->setApiKeyEnabled(false)
             ->setApiKeyPrivate('PRIVATE_KEY')
@@ -364,6 +367,7 @@ class UserControllerTest extends RestTestCase
 
         $response = $controller->postAction(new Request([], [
             'login' => 'usernameDuplicate',
+            'email' => 'usernameDuplicate@provider.com',
             'api_key_enabled' => true,
             'api_key_public' => 'api_key_public',
             'api_key_private' => 'api_key_private',

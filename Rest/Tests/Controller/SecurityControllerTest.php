@@ -57,6 +57,7 @@ class SecurityControllerTest extends TestCase
         // valid user
         $user = new User();
         $user->setLogin('user123');
+        $user->setEmail('user123@provider.com');
         $user->setPassword(md5('password123'));
         $user->setActivated(true);
 

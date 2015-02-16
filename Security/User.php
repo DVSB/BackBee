@@ -40,13 +40,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class User implements UserInterface
 {
+    const PASSWORD_NOT_PICKED = 0;
+    const PASSWORD_PICKED = 0;
     /**
      * Unique identifier of the user
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
      *
-     * @Serializer\Type('integer'))
+     * @Serializer\Type("integer")
      */
     protected $_id;
 
@@ -56,9 +58,27 @@ class User implements UserInterface
      * @Column(type="string", name="login")
      * @fixture(type="word")
      *
-     * @Serializer\Type('string'))
+     * @Serializer\Type("string")
      */
     protected $_login;
+
+    /**
+     * The login of this user
+     * @var string
+     * @Column(type="string", name="email")
+     * @fixture(type="email")
+     *
+     * @Serializer\Type("string")
+     */
+    protected $_email;
+
+    /**
+     * The raw password of this user
+     * @var string
+     *
+     * @Serializer\Exclude()
+     */
+    protected $_raw_password;
 
     /**
      * The password of this user
@@ -71,11 +91,19 @@ class User implements UserInterface
     protected $_password;
 
     /**
+     * The User state
+     * @var Integer
+     * @Column(type="integer", name="state", length=2, options={"default": \BackBee\Security\User::PASSWORD_NOT_PICKED})
+     * @Serializer\Type("integer")
+     */
+    protected $_state = self::PASSWORD_NOT_PICKED;
+
+    /**
      * The access state
      * @var Boolean
      * @Column(type="boolean", name="activated")
      * @fixture(type="boolean")
-     * @Serializer\Type('boolean'))
+     * @Serializer\Type("boolean")
      */
     protected $_activated = false;
 
@@ -84,7 +112,7 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="firstname", nullable=true)
      * @fixture(type="firstName")
-     * @Serializer\Type('string'))
+     * @Serializer\Type("string")
      */
     protected $_firstname;
 
@@ -93,7 +121,7 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="lastname", nullable=true)
      * @fixture(type="lastName")
-     * @Serializer\Type('string'))
+     * @Serializer\Type("string")
      */
     protected $_lastname;
 
@@ -117,7 +145,7 @@ class User implements UserInterface
      * @var String
      * @Column(type="string", name="api_key_public", nullable=true)
      * @fixture(type="string")
-     * @Serializer\Type('string'))
+     * @Serializer\Type("string")
      */
     protected $_api_key_public;
 
@@ -127,7 +155,7 @@ class User implements UserInterface
      * @Column(type="string", name="api_key_private", nullable=true)
      * @fixture(type="string")
      * @Serializer\Exclude()
-     * @Serializer\Type('string'))
+     * @Serializer\Type("string")
      */
     protected $_api_key_private;
 
@@ -136,7 +164,7 @@ class User implements UserInterface
      * @var Boolean
      * @Column(type="boolean", name="api_key_enabled", options={"default": false})
      * @fixture(type="boolean")
-     * @Serializer\Type('boolean'))
+     * @Serializer\Type("boolean")
      */
     protected $_api_key_enabled = false;
 
@@ -144,7 +172,7 @@ class User implements UserInterface
      * The creation datetime
      * @var \DateTime
      * @Column(type="datetime", name="created")
-     * @Serializer\Type('DateTime'))
+     * @Serializer\Type("DateTime")
      */
     protected $_created;
 
@@ -152,7 +180,7 @@ class User implements UserInterface
      * The last modification datetime
      * @var \DateTime
      * @Column(type="datetime", name="modified")
-     * @Serializer\Type('DateTime'))
+     * @Serializer\Type("DateTime")
      */
     protected $_modified;
 
@@ -232,6 +260,32 @@ class User implements UserInterface
 
     /**
      *
+     * @param  string                 $email
+     * @return \BackBee\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setEmail($email)
+    {
+        $this->_email = $email;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param  string                 $password
+     * @return \BackBee\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setRawPassword($password)
+    {
+        $this->_raw_password = $password;
+
+        return $this;
+    }
+
+    /**
+     *
      * @param  string                 $password
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
@@ -287,6 +341,26 @@ class User implements UserInterface
     public function getLogin()
     {
         return $this->_login;
+    }
+
+    /**
+     *
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getEmail()
+    {
+        return $this->_email;
+    }
+
+    /**
+     *
+     * @return string
+     * @codeCoverageIgnore
+     */
+    public function getRawPassword()
+    {
+        return $this->_raw_password;
     }
 
     /**
