@@ -21,8 +21,9 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace Respect\Validation\Rules;
+namespace BackBee\Validator\Rules;
 
+use Respect\Validation\Rules\AbstractRule;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Image extends AbstractRule
