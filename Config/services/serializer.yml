@@ -33,7 +33,8 @@ services:
     serializer.handler_registry:
         class: JMS\Serializer\Handler\LazyHandlerRegistry
         arguments: [@service_container]
-
+        calls:
+            - [registerSubscribingHandler, [@serializer.handler.arraycollection]]
     serializer.object_constructor:
         class: BackBee\Serializer\Construction\DoctrineObjectConstructor
         arguments:
@@ -57,7 +58,8 @@ services:
     serializer.event_dispatcher:
         class: JMS\Serializer\EventDispatcher\LazyEventDispatcher
         arguments: [@service_container]
-
+        calls:
+            - [addListener, ['serializer.post_serialize', [@serializer.event.pagelistener, 'onPostSerialize'], 'BackBee\NestedNode\Page']]
     serializer.metadata.lazy_loading_driver:
         class: Metadata\Driver\LazyLoadingDriver
         arguments: [@service_container, serializer.metadata_driver]
@@ -90,3 +92,12 @@ services:
     serializer.doctrine_property_naming_strategy:
         class: BackBee\Serializer\Naming\DoctrinePropertyNamingStrategy
         arguments:  [@doctrine]
+
+    # Serializer handlers
+    serializer.handler.arraycollection:
+        class: JMS\Serializer\Handler\ArrayCollectionHandler
+
+    # Serializer events
+    serializer.event.pagelistener:
+        class: BackBee\NestedNode\Listener\Serializer\PageListener
+        arguments: [@service_container]
