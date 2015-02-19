@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -253,7 +253,7 @@ class FrontController implements HttpKernelInterface
             ) || (0 < count($matches) && true === isset($matches[2]) && $site->getDefaultExtension() !== $matches[2])
         ) {
             throw new FrontControllerException(sprintf(
-                'The URL `%s` can not be found.', $this->request->getHost().'/'.$uri), FrontControllerException::NOT_FOUND
+                'The URL `%s` can not be found.', $this->getRouteCollection()->getUri($uri)), FrontControllerException::NOT_FOUND
             );
         }
 

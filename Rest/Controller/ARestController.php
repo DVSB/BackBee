@@ -204,17 +204,7 @@ abstract class ARestController extends Controller implements RestControllerInter
      */
     protected function getSerializer()
     {
-        if (null === $this->serializer) {
-            $builder = SerializerBuilder::create()
-                ->setObjectConstructor($this->getContainer()->get('serializer.object_constructor'))
-                ->setPropertyNamingStrategy($this->getContainer()->get('serializer.naming_strategy'))
-                ->setAnnotationReader($this->getContainer()->get('annotation_reader'))
-                ->setMetadataDriver($this->getContainer()->get('serializer.metadata_driver'))
-            ;
-
-            $this->serializer = $builder->build();
-        }
-
+        $this->serializer = $this->getContainer()->get('serializer');
         return $this->serializer;
     }
 
