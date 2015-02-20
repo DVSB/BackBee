@@ -50,10 +50,7 @@ class AclLoadCommandTest extends TestCase
         $this->initAcl();
 
         $superAdminGroup = new Group();
-        $superAdminGroup
-            ->setIdentifier('super_admin')
-            ->setName('Super Admin')
-        ;
+        $superAdminGroup->setName('Super Admin');
         $this->bbapp->getEntityManager()->persist($superAdminGroup);
 
         $this->getBBApp()->getEntityManager()->flush();
@@ -73,7 +70,7 @@ class AclLoadCommandTest extends TestCase
 
         vfsStream::umask(0000);
         $this->_mock_basedir = vfsStream::setup('test_dir', 0777, array(
-            'file.xml' => '
+            'file.yml' => '
 groups:
   super_admin:
     sites:
@@ -85,11 +82,11 @@ groups:
         $commandTester->execute(
             array(
                 'command' => $command->getName(),
-                'file' => 'vfs://test_dir/file.xml',
+                'file' => 'vfs://test_dir/file.yml',
             )
         );
 
-        $this->assertContains('Processing file: vfs://test_dir/file.xml', $commandTester->getDisplay());
+        $this->assertContains('Processing file: vfs://test_dir/file.yml', $commandTester->getDisplay());
     }
 
     /**

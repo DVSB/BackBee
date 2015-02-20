@@ -51,16 +51,12 @@ class YmlLoaderTest extends TestCase
         $this->initAcl();
 
         $superAdminGroup = new Group();
-        $superAdminGroup
-            ->setIdentifier('super_admin')
-            ->setName('Super Admin')
+        $superAdminGroup->setName('Super Admin')
         ;
         $this->bbapp->getEntityManager()->persist($superAdminGroup);
 
         $adminGroup = new Group();
-        $adminGroup
-            ->setIdentifier('admin_front')
-            ->setName('Super Admin')
+        $adminGroup->setName('Super Admin')
         ;
         $this->bbapp->getEntityManager()->persist($adminGroup);
 

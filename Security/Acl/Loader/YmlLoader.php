@@ -64,12 +64,11 @@ class YmlLoader extends ContainerAware
             throw new \Exception('Invalid yml: '.$ymlFile);
         }
 
-        foreach ($grid['groups'] as $group_identifier => $rights) {
-            if (null === $group = $this->em->getRepository('BackBee\Security\Group')->findOneBy(array('_identifier' => $group_identifier))) {
+        foreach ($grid['groups'] as $group_name => $rights) {
+            if (null === $group = $this->em->getRepository('BackBee\Security\Group')->findOneBy(array('_name' => $group_name))) {
                 // ensure group exists
                 $group = new \BackBee\Security\Group();
-                $group->setIdentifier($group_identifier)
-                        ->setName($group_identifier);
+                $group->setName($group_name);
                 $this->em->persist($group);
                 $this->em->flush($group);
             }
