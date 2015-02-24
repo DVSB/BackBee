@@ -56,35 +56,40 @@ use BackBee\Config\Config;
 class Registry implements PersistorInterface
 {
     /**
-     * [$application description]
-     *
-     * @var [type]
+     * @var ApplicationInterface
      */
-    private $application;
+    private $app;
 
     /**
      * @see BackBee\Config\Persistor\PersistorInterface::__construct
      */
-    public function __construct(ApplicationInterface $application)
+    public function __construct(ApplicationInterface $app)
     {
-        $this->application = $application;
+        $this->app = $app;
     }
 
     /**
      * @see BackBee\Config\Persistor\PersistorInterface::persist
      */
-    public function persist(Config $config, array $config_to_persist)
+    public function persist(Config $config, array $configToPersist)
     {
-        if (true === array_key_exists('override_site', $config_to_persist)) {
-            $config_to_persist = array(
-                'override_site' => $config_to_persist['override_site'],
+        if (true === array_key_exists('override_site', $configToPersist)) {
+            $configToPersist = array(
+                'override_site' => $configToPersist['override_site'],
             );
         }
 
-        $key = basename(dirname($config->getBaseDir()));
-        $scope = 'BUNDLE_CONFIG.'.$this->application->getContext().'.'.$this->application->getEnvironment();
+        $baseScope = 'BUNDLE_CONFIG.';
+        $key = $this->app->getContainer()->get('bundle.loader')->getBundleIdByBaseDir($config->getBaseDir());
+        if (null === $key) {
+            $key = $application;
+            $baseScope = 'APPLICATION_CONFIG.';
+        }
 
-        $registry = $this->application->getEntityManager()
+
+        $scope = $baseScope.$this->app->getContext().'.'.$this->app->getEnvironment();
+
+        $registry = $this->app->getEntityManager()
             ->getRepository('BackBee\Bundle\Registry')->findOneBy(array(
                 'key'   => $key,
                 'scope' => $scope,
@@ -95,13 +100,13 @@ class Registry implements PersistorInterface
             $registry = new RegistryEntity();
             $registry->setKey($key);
             $registry->setScope($scope);
-            $this->application->getEntityManager()->persist($registry);
+            $this->app->getEntityManager()->persist($registry);
         }
 
-        $registry->setValue(serialize($config_to_persist));
+        $registry->setValue(serialize($configToPersist));
         $success = true;
         try {
-            $this->application->getEntityManager()->flush($registry);
+            $this->app->getEntityManager()->flush($registry);
         } catch (\Exception $e) {
             $success = false;
         }

@@ -192,7 +192,7 @@ class Configurator
         if (true === $this->application->isStarted()) {
             $config = $event->getTarget();
             if (null !== $override_site = $config->getRawSection('override_site')) {
-                if (true === array_key_exists($this->application->getSite()->getUid(), $override_site)) {
+                if (array_key_exists($this->application->getSite()->getUid(), $override_site)) {
                     foreach ($override_site[$this->application->getSite()->getUid()] as $section => $data) {
                         $config->setSection($section, $data, true);
                     }
@@ -226,7 +226,7 @@ class Configurator
         );
 
         foreach ($config_directories as $directory) {
-            if (true === is_dir($directory)) {
+            if (is_dir($directory)) {
                 $config->extend($directory, $this->overrideConfig);
             }
         }
@@ -239,11 +239,11 @@ class Configurator
     private function doBundleConfigExtend(Config $config, array $options)
     {
         $this->overrideConfigByFile($config, $options['bundle_id']);
-        $config_config = $this->application->getConfig()->getConfigConfig();
+        $configConfig = $this->application->getConfig()->getConfigConfig();
         if (
-            null === $config_config
-            || false === array_key_exists('save_in_registry', $config_config)
-            || true === $config_config['save_in_registry']
+            null === $configConfig
+            || array_key_exists('save_in_registry', $configConfig)
+            || true === $configConfig['save_in_registry']
         ) {
             $this->overrideConfigByRegistry($config, $options['bundle_id']);
         }
@@ -275,8 +275,7 @@ class Configurator
     {
         $registry = $this->getRegistryConfig($bundleId);
         if (null !== $registry) {
-            $registryConfig = @unserialize($serialized);
-
+            $registryConfig = @unserialize($registry->getValue());
             if (is_array($registryConfig)) {
                 foreach ($registryConfig as $section => $value) {
                     $config->setSection($section, $value, true);
@@ -304,18 +303,18 @@ class Configurator
                 ));
             }
         } catch (DBALException $e) {
-            $expected_error = false;
+            $expectedError = false;
             if (null !== $e->getPrevious() && $e->getPrevious() instanceof \PDOException) {
                 // expected error is if we try to get overrided config in registry on application installation process
                 // PDOException has two methods for retrieving information about an error
                 // @see http://php.net/manual/en/class.pdoexception.php
-                $expected_error = (
+                $expectedError = (
                     '42S02' === $e->getPrevious()->getCode()
                     || false !== strpos($e->getPrevious()->getMessage(), 'SQLSTATE[42S02]')
                 );
             }
 
-            if (false === $expected_error) {
+            if (false === $expectedError) {
                 throw $e;
             }
         }

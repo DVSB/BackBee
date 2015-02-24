@@ -57,29 +57,27 @@ use BackBee\Config\Config;
 class File implements PersistorInterface
 {
     /**
-     * [$application description]
-     *
-     * @var [type]
+     * @var ApplicationInterface
      */
-    private $application;
+    private $app;
 
     /**
      * @see BackBee\Config\Persistor\PersistorInterface::__construct
      */
-    public function __construct(ApplicationInterface $application)
+    public function __construct(ApplicationInterface $app)
     {
-        $this->application = $application;
+        $this->app = $app;
     }
 
     /**
      * @see BackBee\Config\Persistor\PersistorInterface::persist
      */
-    public function persist(Config $config, array $config_to_persist)
+    public function persist(Config $config, array $configToPersist)
     {
         try {
             $success = @file_put_contents(
                 $this->getConfigDumpRightDirectory($config->getBaseDir()).DIRECTORY_SEPARATOR.'config.yml',
-                Yaml::dump($config_to_persist)
+                Yaml::dump($configToPersist)
             );
         } catch (\Exception $e) {
             $success = false;
@@ -91,30 +89,31 @@ class File implements PersistorInterface
     /**
      * Returns path to the right directory to dump and save config.yml file
      *
-     * @param string $base_directory config base directory
+     * @param string $baseDir config base directory
      *
      * @return string
      */
-    private function getConfigDumpRightDirectory($base_directory)
+    private function getConfigDumpRightDirectory($baseDir)
     {
-        $config_dump_directory = $this->application->getRepository();
-        if (ApplicationInterface::DEFAULT_CONTEXT !== $this->application->getContext()) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR.$this->application->getContext();
+        $configDumpDir = $this->app->getRepository();
+        if (ApplicationInterface::DEFAULT_CONTEXT !== $this->app->getContext()) {
+            $configDumpDir .= DIRECTORY_SEPARATOR.$this->app->getContext();
         }
 
-        $config_dump_directory .= DIRECTORY_SEPARATOR.'Config';
-        if (ApplicationInterface::DEFAULT_ENVIRONMENT !== $this->application->getEnvironment()) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR.$this->application->getEnvironment();
+        $configDumpDir .= DIRECTORY_SEPARATOR.'Config';
+        if (ApplicationInterface::DEFAULT_ENVIRONMENT !== $this->app->getEnvironment()) {
+            $configDumpDir .= DIRECTORY_SEPARATOR.$this->app->getEnvironment();
         }
 
-        if (1 === preg_match('#(bundle/[a-zA-Z]+Bundle)#', $base_directory, $matches)) {
-            $config_dump_directory .= DIRECTORY_SEPARATOR.$matches[1];
+        $key = $this->app->getContainer()->get('bundle.loader')->getBundleIdByBaseDir($baseDir);
+        if (null !== $key) {
+            $configDumpDir .= DIRECTORY_SEPARATOR.'bundle'.DIRECTORY_SEPARATOR.$key;
         }
 
-        if (false === is_dir($config_dump_directory) && false === @mkdir($config_dump_directory, 0755, true)) {
+        if (!is_dir($configDumpDir) && false === @mkdir($configDumpDir, 0755, true)) {
             throw new \Exception('Unable to create config dump directory');
         }
 
-        return $config_dump_directory;
+        return $configDumpDir;
     }
 }
