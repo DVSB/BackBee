@@ -118,6 +118,23 @@ class UserControllerTest extends RestTestCase
     }
 
     /**
+     * @covers ::getCollectionAction
+     */
+    public function testGetCollectionAction()
+    {
+        $controller = $this->getController();
+
+        // no filters
+        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
+        ), array(
+            '_action' => 'getCollectionAction',
+            '_controller' => 'BackBee\Rest\Controller\UserController',), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
+
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+    }
+
+    /**
      * @covers ::getAction
      */
     public function testGetAction_invalidUser()
