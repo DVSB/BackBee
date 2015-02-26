@@ -53,9 +53,12 @@ class ExceptionListener
 
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
-
         $exception = $event->getException();
         $statusCode = $exception->getStatusCode();
+
+        if($this->application->isDebugMode()){
+            return $this->createDebugResponse($event, $exception);
+        }
 
         switch($statusCode) {
             case 404:
@@ -70,11 +73,28 @@ class ExceptionListener
         $view = $this->getErrorTemplate($parameter);
 
         $this->response
+            ->setStatusCode($statusCode)
             ->setContent($this->renderer->partial($view, ['error' => $exception]));
 
         $event->setResponse($this->response);
         $filterEvent = new FilterResponseEvent($event->getKernel(), $event->getRequest(), $event->getRequestType(), $event->getResponse());
         $event->getDispatcher()->dispatch(KernelEvents::RESPONSE, $filterEvent);
+    }
+
+    /**
+     * Create a response from Symfony Debug component
+     */
+    private function createDebugResponse(GetResponseForExceptionEvent $event, \Exception $exception)
+    {
+        try {
+            if (!$event->hasResponse()) {
+                throw $exception;
+            }
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+        return;
     }
 
     /**
