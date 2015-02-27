@@ -137,6 +137,7 @@ class User implements UserInterface
      * @ManyToMany(targetEntity="BackBee\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
      *
      * @Serializer\MaxDepth(1)
+     * @Serializer\SerializedName("groups")
      */
     protected $_groups;
 
