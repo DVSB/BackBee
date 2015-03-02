@@ -40,7 +40,7 @@ use Doctrine\DBAL\Types\Type;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class upgradeFrom0_10To0_11Command extends ACommand
+class UpgradeToPageSectionCommand extends ACommand
 {
 
     /**
