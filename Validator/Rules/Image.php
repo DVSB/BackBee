@@ -19,8 +19,9 @@
  * along with BackBuilder5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Respect\Validation\Rules;
+namespace BackBuilder\Validator\Rules;
 
+use Respect\Validation\Rules\AbstractRule;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Image extends AbstractRule
