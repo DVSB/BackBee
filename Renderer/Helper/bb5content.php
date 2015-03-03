@@ -133,8 +133,12 @@ class bb5content extends AHelper
      * @param AClassContent $parent
      * @param AClassContent $element
      */
-    private function _setElementName(AClassContent $parent, AClassContent $element)
+    private function _setElementName($parent, AClassContent $element)
     {
+        if(false === ($parent instanceof AClassContent)) {
+            return;
+        }
+        
         $this->already_checked[] = array($parent->getUid());
 
         foreach ($parent->getData() as $key => $values) {
