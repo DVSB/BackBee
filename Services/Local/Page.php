@@ -105,8 +105,6 @@ class Page extends AbstractServiceLocal
             throw new InvalidArgumentException(sprintf('None layout exists with uid `%s`.', $layout_uid));
         }
 
-        $this->isGranted('VIEW', $layout);
-
         $layout_states = $this->getEntityManager()
                 ->getRepository('BackBuilder\Workflow\State')
                 ->getWorkflowStatesForLayout($layout);
@@ -175,6 +173,7 @@ class Page extends AbstractServiceLocal
         }
 
         // User must have edit permission on page
+        $this->isGranted('VIEW', $page->getLayout());
         $this->isGranted('EDIT', $page);
 
         // If the page is online, user must have publish permission on it
@@ -519,10 +518,10 @@ class Page extends AbstractServiceLocal
             } else {
                 $page = new NestedPage();
 
-                // User must have create permission on page
-                $this->isGranted('CREATE', $page);
-
                 if (null !== $parent) {
+                    // User must have create permission on page
+                    $this->isGranted('CREATE', $parent);
+
                     $page->setTitle($title);
                     $page->setLayout($layout);
                     $this->_repo->insertNodeAsFirstChildOf($page, $parent, $page->getLayout()->getParam('section'));
