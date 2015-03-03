@@ -52,6 +52,7 @@
         editing: {
             pages: 'Gestion des pages',
             new_page: 'Nouvelle page',
+            edit_page: 'Éditer',
             clone_page: 'Dupliquer',
             delete_page: 'Supprimer',
             content_edition: 'Édition des contenus',
