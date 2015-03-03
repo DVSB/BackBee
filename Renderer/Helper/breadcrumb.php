@@ -37,7 +37,7 @@ class breadcrumb extends AHelper
         if (NULL !== $application) {
             $em = $application->getEntityManager();
             if (NULL !== $current = $this->_renderer->getCurrentPage()) {
-                $ancestors = $em->getRepository('BackBuilder\NestedNode\Page')->getAncestors($current);
+                $ancestors = $em->getRepository('BackBuilder\NestedNode\Page')->getAncestors($current, null, true);
             } else {
                 $ancestors = array($this->_renderer->getCurrentRoot());
             }
