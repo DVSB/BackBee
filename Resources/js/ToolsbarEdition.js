@@ -1111,36 +1111,41 @@
         initAutoComplete: function (content) {
             var myself = this;
             var cpt = 0;
-            bb.jquery('input.typeahead').bind('keyup', function () {
-                var inputVal = bb.jquery(this).val();
 
-                if (inputVal.length >= 2) {
+            var data= bb.jquery('input.typeahead').autocomplete({
+                minLength: 2,
+                delay: 1000,
+                source: function( request, response) {
+                    var json= myself.getDataKeyWordsFormated(bb.jquery('input.typeahead').val());
+                    response( json );
+                },
+                select: function (ev, ui) {
+                    var uidInput = bb.jquery(this).val('');
+                    cpt++;
 
-                    //bb.jquery('input.typeahead').autocomplete("destroy");
-                    bb.jquery('input.typeahead').autocomplete({
-                        source: myself.getDataKeyWordsFormated(inputVal),
-                        select: function (ev, ui) {
-                        var uidInput = bb.jquery(this).val('');
-                        cpt++;
-                        bb.jquery(this).parents('div#' + ui.item.value + '_container').append('<div class="removeKeyword" data-uid="' + ui.item.value + '">' + ui.item.label + '</div>');
-                        var form = "";
-                        form += '<div class="alert alert-success">' + ui.item.label + '<input type="hidden" data-uid-keyword="" name="keywords" value="' + ui.item.value + '"/><button type="button" class="close newKeywordAutoComplete">×</button><div>';
-                        bb.jquery('.contentNewKeywords').append(form);
-                        myself.updateContent(content, form);
-                        myself.removeNewKeyword();
-                        return false;
-                        },
-                        focus:function(ev,ui){
-                        return false;
-                        }
-                        }).data( "autocomplete" )._renderItem = function( ul, item ) {
-                        return bb.jquery( "<li class=\"keywordSelected\"></li>" )
-                        .data( "item.autocomplete", item )
-                        .append( "<a>" + item.label + "</a>" )
-                        .appendTo( ul );
-                    };
+                    bb.jquery(this).parents('div#' + ui.item.value + '_container').append('<div class="removeKeyword" data-uid="' + ui.item.value + '">' + ui.item.label + '</div>');
+                    var form = "";
+                    form += '<div class="alert alert-success">' + ui.item.label + '<input type="hidden" data-uid-keyword="" name="keywords" value="' + ui.item.value + '"/><button type="button" class="close newKeywordAutoComplete">×</button><div>';
+                    bb.jquery('.contentNewKeywords').append(form);
+                    myself.updateContent(content, form);
+                    myself.removeNewKeyword();
+                    return false;
+                },
+
+                focus:function(ev,ui){
+                    return false;
                 }
-            });
+            }).data( "autocomplete" );
+
+            if(data) {
+                data._renderItem = function( ul, item ) {
+                return bb.jquery( "<li class=\"keywordSelected\"></li>" )
+                    .data( "item.autocomplete", item )
+                    .append( "<a>" + item.label + "</a>" )
+                    .appendTo( ul );
+                };
+            }
+
             bb.jquery('.removeKeyword').live('click', function () {
                 var data_uid = bb.jquery(this).attr('data-uid');
                 bb.jquery('input[name="'+ data_uid + '_type"]').remove();
