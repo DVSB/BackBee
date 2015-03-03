@@ -362,7 +362,7 @@ class PageRepository extends EntityRepository
                 ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
 
         if (true === $paginate) {
-            return new Paginator($query);
+            return new Paginator($query, false);
         }
 
         return $query->getQuery()->getResult();
@@ -386,7 +386,7 @@ class PageRepository extends EntityRepository
                 ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
 
         if (true === $paginate) {
-            return new Paginator($query);
+            return new Paginator($query, false);
         }
 
         return $query->getQuery()->getResult();
@@ -423,7 +423,7 @@ class PageRepository extends EntityRepository
                 ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
 
         if (true === $paginate) {
-            return new Paginator($query);
+            return new Paginator($query, false);
         }
 
         return $query->getQuery()->getResult();
@@ -688,7 +688,7 @@ class PageRepository extends EntityRepository
                 ->andSearchCriteria($restrictedStates, $options);
 
         if (true === $paginate) {
-            return new Paginator($query);
+            return new Paginator($query, false);
         }
 
         return $query->getQuery()->getResult();
