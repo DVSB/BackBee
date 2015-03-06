@@ -82,6 +82,7 @@ kernel.request:
 kernel.exception:
     listeners:
         - [@rest.listener.exception, onKernelException]
+        - [@exception.listener, onKernelException]
 
 kernel.controller:
     listeners:
