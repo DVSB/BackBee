@@ -54,7 +54,7 @@ class ExceptionListener
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
-        $statusCode = $exception->getStatusCode();
+        $statusCode = method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : $exception->getCode();
 
         if($this->application->isDebugMode()){
             return $this->createDebugResponse($event, $exception);
