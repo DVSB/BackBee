@@ -281,13 +281,14 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $group = $this->getBBApp()->getEntityManager()
             ->getRepository('BackBee\Security\Group')
-            ->findOneBy(array('_identifier' => $groupId))
+            ->findOneBy(array('_name' => $groupId))
         ;
 
         if (!$group) {
             $group = new Group();
-            $group->setIdentifier($groupId);
             $group->setName($groupId);
+            $this->getBBApp()->getEntityManager()->persist($group);
+            $this->getBBApp()->getEntityManager()->flush($group);
         }
 
         $user->addGroup($group);

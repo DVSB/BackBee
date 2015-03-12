@@ -50,6 +50,17 @@ Consider your PR finished if:
 * You (may) have introduced a little documentation
 * Your PR respect project formatting rules (see above)
 
+Sync a fork
+-----------
+
+Github dev team has already described the [right way to do](https://help.github.com/articles/syncing-a-fork/).
+
+```bash
+$ git fetch upstream
+$ git checkout master
+$ git merge upstream/master
+```
+
 Formatting
 ----------
 

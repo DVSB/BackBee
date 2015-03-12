@@ -59,7 +59,6 @@ class UserControllerTest extends RestTestCase
         // save user
         $group = new Group();
         $group->setName('groupName');
-        $group->setIdentifier('GROUP_ID');
         $bbapp->getEntityManager()->persist($group);
 
         // valid user
@@ -116,6 +115,23 @@ class UserControllerTest extends RestTestCase
         $this->assertInternalType('array', $content);
 
         $this->assertEquals($this->user->getId(), $content['id']);
+    }
+
+    /**
+     * @covers ::getCollectionAction
+     */
+    public function testGetCollectionAction()
+    {
+        $controller = $this->getController();
+
+        // no filters
+        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
+        ), array(
+            '_action' => 'getCollectionAction',
+            '_controller' => 'BackBee\Rest\Controller\UserController',), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
+
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
     }
 
     /**

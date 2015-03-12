@@ -33,7 +33,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  * @Entity()
- * @Table(name="groups", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"identifier"})})
+ * @Table(name="`group`", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"id"})})
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -58,15 +58,6 @@ class Group implements DomainObjectInterface
      * @Serializer\Expose
      */
     protected $_name;
-
-    /**
-     * Group name identifier
-     * @var string
-     * @Column(type="string", name="identifier")
-     *
-     * @Serializer\Expose
-     */
-    protected $_identifier;
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
@@ -135,27 +126,6 @@ class Group implements DomainObjectInterface
     public function setName($name)
     {
         $this->_name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->_identifier;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @param  string                  $identifier
-     * @return \BackBee\Security\Group
-     */
-    public function setIdentifier($identifier)
-    {
-        $this->_identifier = $identifier;
 
         return $this;
     }
@@ -236,6 +206,6 @@ class Group implements DomainObjectInterface
      */
     public function getObjectIdentifier()
     {
-        return $this->getIdentifier();
+        return $this->getId();
     }
 }

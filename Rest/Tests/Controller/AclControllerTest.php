@@ -63,7 +63,6 @@ class AclControllerTest extends TestCase
         $this->groupEditor = new Group();
         $this->groupEditor->setName('groupName');
         $this->groupEditor->setSite($this->site);
-        $this->groupEditor->setIdentifier('GROUP_ID');
 
         $bbapp->getEntityManager()->persist($this->site);
         $bbapp->getEntityManager()->persist($this->groupEditor);

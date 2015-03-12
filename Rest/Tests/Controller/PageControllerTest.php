@@ -47,6 +47,7 @@ use BackBee\Site\Site;
 class PageControllerTest extends RestTestCase
 {
     protected $site;
+    protected $group_id;
 
     protected function setUp()
     {
@@ -65,6 +66,7 @@ class PageControllerTest extends RestTestCase
         // permissions
         $this->getContainer()->set('site', $this->site);
         self::$restUser = $this->createAuthUser('page_admin');
+        $this->group_id = self::$restUser->getUser()->getGroups()[0]->getId();
     }
 
     private function getController()
@@ -94,11 +96,11 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateClassAce(
             new ObjectIdentity('class', 'BackBee\NestedNode\Page'),
-            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             MaskBuilder::MASK_CREATE
         )->insertOrUpdateClassAce(
             $layout,
-            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
@@ -140,11 +142,11 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
-            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             ['PUBLISH', 'EDIT']
         )->insertOrUpdateObjectAce(
             $layout,
-            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             ['VIEW']
         );
 
@@ -177,7 +179,7 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $page,
-            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             ['PUBLISH', 'EDIT']
         );
 
@@ -251,7 +253,7 @@ class PageControllerTest extends RestTestCase
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
-            new UserSecurityIdentity('page_admin', 'BackBee\Security\Group'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 

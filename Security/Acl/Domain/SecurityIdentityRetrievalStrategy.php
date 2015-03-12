@@ -50,7 +50,7 @@ class SecurityIdentityRetrievalStrategy extends sfStrategy
 
         if ($token->getUser() instanceof \BackBee\Security\User) {
             foreach ($token->getUser()->getGroups() as $group) {
-                $securityIdentity = new UserSecurityIdentity($group->getIdentifier(), ClassUtils::getRealClass($group));
+                $securityIdentity = new UserSecurityIdentity($group->getObjectIdentifier(), ClassUtils::getRealClass($group));
                 array_unshift($sids, $securityIdentity);
             }
         }

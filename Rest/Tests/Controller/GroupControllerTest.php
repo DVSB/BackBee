@@ -60,7 +60,8 @@ class GroupControllerTest extends TestCase
         $this->groupEditor = new Group();
         $this->groupEditor->setName('groupName');
         $this->groupEditor->setSite($this->site);
-        $this->groupEditor->setIdentifier('GROUP_ID');
+
+        $this->getBBApp()->getContainer()->set('site', $this->site);
 
         $bbapp->getEntityManager()->persist($this->site);
         $bbapp->getEntityManager()->persist($this->groupEditor);
@@ -121,13 +122,18 @@ class GroupControllerTest extends TestCase
         $this->getBBApp()->getEntityManager()->persist($siteWithNoGroups);
         $this->getBBApp()->getEntityManager()->flush();
 
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'site_uid' => $siteWithNoGroups->getUid(),
-        ), array(
-            'id' => $this->groupEditor->getId(),
-            '_action' => 'getCollectionAction',
-            '_controller' => 'BackBee\Rest\Controller\GroupController',
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
+        $response = $this->getBBApp()->getController()
+        ->handle(new Request(
+            [],
+            ['site_uid' => $siteWithNoGroups->getUid()],
+            [
+                'id' => $this->groupEditor->getId(),
+                '_action' => 'getCollectionAction',
+                '_controller' => 'BackBee\Rest\Controller\GroupController',
+            ],
+            [],
+            [],
+            ['REQUEST_URI' => '/rest/1/test/']));
 
         $this->assertEquals(200, $response->getStatusCode());
         $res = json_decode($response->getContent(), true);
@@ -143,17 +149,19 @@ class GroupControllerTest extends TestCase
     {
         $controller = $this->getController();
 
-        $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
-            'site_uid' => 'wkl42gnsjpuw359respjtgesi',
-        ), array(
-            'id' => $this->groupEditor->getId(),
-            '_action' => 'getCollectionAction',
-            '_controller' => 'BackBee\Rest\Controller\GroupController',
-        ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
-
+        $response = $this->getBBApp()->getController()->handle(new Request(
+            [],
+            ['site_uid' => 'thisIsAFakeUid'],
+            [
+                'id' => $this->groupEditor->getId(),
+                '_action' => 'getCollectionAction',
+                '_controller' => 'BackBee\Rest\Controller\GroupController',
+            ],
+            [],
+            [],
+            ['REQUEST_URI' => '/rest/1/test/']
+        ));
         $this->assertEquals(400, $response->getStatusCode());
-        $res = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $res);
     }
 
     /**
@@ -208,7 +216,6 @@ class GroupControllerTest extends TestCase
         $controller = $this->getController();
 
         $data = array(
-            'identifier' => 'NEW_GROUP_ID_CHANGED',
             'name' => 'newGroupName_CHANGED',
             'site_uid' => $this->site->getUid(),
         );
@@ -218,7 +225,6 @@ class GroupControllerTest extends TestCase
         $this->assertEquals(204, $response->getStatusCode());
 
         $groupUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\Group')->find($groupId);
-        $this->assertEquals($data['identifier'], $groupUpdated->getIdentifier());
         $this->assertEquals($data['name'], $groupUpdated->getName());
         $this->assertEquals($data['site_uid'], $groupUpdated->getSite()->getUid());
     }
@@ -240,7 +246,6 @@ class GroupControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
 
         $this->assertContains('Name is required', $res['errors']['name']);
-        $this->assertContains('Identifier is required', $res['errors']['identifier']);
     }
 
     /**
@@ -251,7 +256,6 @@ class GroupControllerTest extends TestCase
         $controller = $this->getController();
 
         $data = array(
-            'identifier' => 'NEW_GROUP_ID',
             'name' => 'newGroupName',
             'site_uid' => $this->site->getUid(),
         );
@@ -264,7 +268,6 @@ class GroupControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
 
         $this->assertInternalType('array', $res);
-        $this->assertEquals($data['identifier'], $res['identifier']);
         $this->assertEquals($data['name'], $res['name']);
         $this->assertEquals($data['site_uid'], $res['site_uid']);
 
@@ -275,7 +278,6 @@ class GroupControllerTest extends TestCase
 
         // duplicate identifier
         $data = array(
-            'identifier' => 'NEW_GROUP_ID',
             'name' => 'newGroupName',
             'site_uid' => $this->site->getUid(),
         );
@@ -292,7 +294,6 @@ class GroupControllerTest extends TestCase
     {
         // invalide site
         $data = array(
-            'identifier' => 'NEW_GROUP_ID',
             'name' => 'newGroupName',
             'site_uid' => 'SiteUidThatDoesntExist',
         );
@@ -315,7 +316,6 @@ class GroupControllerTest extends TestCase
         $res = json_decode($response->getContent(), true);
 
         $this->assertContains('Name is required', $res['errors']['name']);
-        $this->assertContains('Identifier is required', $res['errors']['identifier']);
     }
 
     protected function tearDown()

@@ -53,8 +53,8 @@ bb.rest.user.get:
         _action: getAction
         _controller: BackBee\Rest\Controller\UserController
     requirements:
-        version: \d
-        id: \d
+        version: \d+
+        id: \d+
         _method: GET
 
 bb.rest.user.post:
@@ -63,7 +63,7 @@ bb.rest.user.post:
         _action: postAction
         _controller: BackBee\Rest\Controller\UserController
     requirements:
-        version: \d
+        version: \d+
         _method: POST
 
 bb.rest.user.put:
@@ -72,8 +72,8 @@ bb.rest.user.put:
         _action: putAction
         _controller: BackBee\Rest\Controller\UserController
     requirements:
-        version: \d
-        id: \d
+        version: \d+
+        id: \d+
         _method: PUT
 
 bb.rest.user.delete:
@@ -82,8 +82,8 @@ bb.rest.user.delete:
         _action: deleteAction
         _controller: BackBee\Rest\Controller\UserController
     requirements:
-        version: \d
-        id: \d
+        version: \d+
+        id: \d+
         _method: DELETE
 
 bb.rest.user.get_collection:
@@ -92,19 +92,29 @@ bb.rest.user.get_collection:
         _action: getCollectionAction
         _controller: BackBee\Rest\Controller\UserController
     requirements:
-        version: \d
+        version: \d+
         _method: GET
 
 # Group Rest Api
 bb.rest.group.get:
-    pattern: /rest/{version}/group/{uid}
+    pattern: /rest/{version}/group/{id}
     defaults:
         _action:     getAction
         _controller: BackBee\Rest\Controller\GroupController
     requirements:
-        version: \d
-        uid: \w{32}
+        version: \d+
+        id: \d+
         _method: GET
+
+bb.rest.group.delete:
+    pattern: /rest/{version}/group/{id}
+    defaults:
+        _action:     deleteAction
+        _controller: BackBee\Rest\Controller\GroupController
+    requirements:
+        version: \d+
+        id: \d+
+        _method: DELETE
 
 bb.rest.group.post:
     pattern: /rest/{version}/group
@@ -112,7 +122,7 @@ bb.rest.group.post:
         _action:     postAction
         _controller: BackBee\Rest\Controller\GroupController
     requirements:
-        version: \d
+        version: \d+
         _method: POST
 
 bb.rest.group.put:
@@ -121,8 +131,8 @@ bb.rest.group.put:
         _action:     putAction
         _controller: BackBee\Rest\Controller\GroupController
     requirements:
-        uid: \w{32}
-        version: \d
+        id: \d+
+        version: \d+
         _method: PUT
 
 bb.rest.group.get_collection:
@@ -131,7 +141,7 @@ bb.rest.group.get_collection:
         _action:     getCollectionAction
         _controller: BackBee\Rest\Controller\GroupController
     requirements:
-        version: \d
+        version: \d+
         _method: GET
 
 # Security Rest Api
