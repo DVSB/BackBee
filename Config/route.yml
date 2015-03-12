@@ -511,6 +511,65 @@ bb.rest.bundle.exposed_actions:
         action_name: "[a-z]+"
         parameters: "^\/.+|"
 
+bb.rest.media_folder.get_collection:
+    pattern: /rest/{version}/media-folder
+    defaults:
+      _action: getCollectionAction
+      _controller: BackBee\Rest\Controller\MediaFolderController
+    requirements:
+      _method: GET
+
+bb.rest.media_folder.get:
+  pattern: /rest/{version}/media-folder/{uid}
+  defaults:
+    _action: getAction
+    _controller: BackBee\Rest\Controller\MediaFolderController
+  requirements:
+    _method: GET
+
+bb.rest.media_folder.patch:
+  pattern: /rest/{version}/media-folder/{uid}
+  defaults:
+    _action: patchAction
+    _controller: BackBee\Rest\Controller\MediaFolderController
+  requirements:
+    _method: PATCH
+
+bb.rest.media_folder.post:
+  pattern: /rest/{version}/media-folder
+  defaults:
+    _action: postAction
+    _controller: BackBee\Rest\Controller\MediaFolderController
+  requirements:
+    _method: POST
+
+bb.rest.media_folder.put:
+  pattern: /rest/{version}/media-folder/{uid}
+  defaults:
+    _action: putAction
+    _controller: BackBee\Rest\Controller\MediaFolderController
+  requirements:
+    _method: PUT
+
+bb.rest.media_folder.delete:
+  pattern: /rest/{version}/media-folder/{uid}
+  defaults:
+    _action: deleteAction
+    _controller: BackBee\Rest\Controller\MediaFolderController
+  requirements:
+    _method: DELETE
+
+
+# Media
+bb.media.get_collection:
+  pattern: /rest/{version}/media
+  defaults:
+    _action: getCollectionAction
+    _controller: BackBee\Rest\Controller\MediaController
+  requirements:
+    _method: GET
+
+
 # BackBee rss
 bb.rss:
     pattern: /rss/{uri}

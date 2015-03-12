@@ -37,7 +37,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @Entity(repositoryClass="BackBee\NestedNode\Repository\MediaFolderRepository")
  * @Table(name="media_folder",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})})
  */
-class MediaFolder extends ANestedNode
+class MediaFolder extends ANestedNode implements \JsonSerializable
 {
     /**
      * Unique identifier of the content
@@ -154,6 +154,17 @@ class MediaFolder extends ANestedNode
         return $result;
     }
 
+    /**
+     *
+     * @return
+     */
+    public function jsonSerialize()
+    {
+        $result = parent::toArray();
+        $result['title'] = $this->getTitle();
+        $result['url'] = $this->getUrl();
+        return $result;
+    }
     /**
      * Sets the title.
      * @param  string                          $title
