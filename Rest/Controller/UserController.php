@@ -23,14 +23,22 @@
 
 namespace BackBee\Rest\Controller;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Exception\ValidationException;
+use BackBee\Rest\Patcher\EntityPatcher;
+use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBee\Rest\Patcher\OperationSyntaxValidator;
+use BackBee\Rest\Patcher\RightManager;
 use BackBee\Security\User;
 
 /**
@@ -59,13 +67,38 @@ class UserController extends ARestController
      */
     public function getCollectionAction(Request $request)
     {
-        if (!$this->isGranted('VIEW', new ObjectIdentity('class', 'BackBee\Security\User'))) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedException('You must be authenticated to access');
+        }
+
+        if (!$this->isGranted('VIEW', new ObjectIdentity('class', get_class($this->getUser())))) {
             throw new AccessDeniedException(sprintf('You are not authorized to view users'));
         }
 
-        $users = $this->getEntityManager()->getRepository('BackBee\Security\User')->findAll();
+        $group = $request->query->get('groups', null);
+
+        if ($group !== null) {
+            $group = $this->getEntityManager()->find('BackBee\Security\Group', $group);
+            $users = $group->getUsers();
+        } else {
+            $users = $this->getEntityManager()->getRepository(get_class($this->getUser()))->findAll();
+        }
 
         return new Response($this->formatCollection($users), 200, ['Content-Type' => 'application/json']);
+    }
+
+    /**
+     * GET current User
+     */
+    public function getCurrentAction()
+    {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedException('You must be authenticated to access');
+        }
+
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $this->getUser()->getId());
+
+        return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -79,7 +112,7 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to delete users');
         }
 
-        $user = $this->getEntityManager()->getRepository('BackBee\Security\User')->find($id);
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
 
         if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
@@ -103,7 +136,11 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to delete users');
         }
 
-        $user = $this->getEntityManager()->getRepository('BackBee\Security\User')->find($id);
+        if (intval($id) === $this->getUser()->getId()) {
+            throw new AccessDeniedException('You can remove the user of your current session.');
+        }
+
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
 
         if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
@@ -135,36 +172,6 @@ class UserController extends ARestController
         $this->getApplication()->getSecurityContext()->setToken($tokenAuthenticated);
     }
 
-
-    /**
-     * PATCH User
-     *
-     * @param int $id User ID
-     */
-    public function patchAction($id, Request $request)
-    {
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to view users');
-        }
-
-        $user = $this->getApplication()->getBBUserToken()->getUser();
-
-        if ($user->getId() !== $id) {
-            throw new AccessDeniedException('Password can only be changed by its owner.');
-        }
-
-        if ($user->getState() === User::PASSWORD_NOT_PICKED) {
-            $this->updateUserPassword($user, $request);
-        } else {
-            $oldPassword = $request->get('old_password', '');
-
-            $this->checkIdentity($user->getLogin(), $oldPassword);
-            $this->updateUserPassword($user, $request);
-        }
-
-        return new Response("", 204);
-    }
-
     /**
      * UPDATE User
      *
@@ -185,7 +192,7 @@ class UserController extends ARestController
             throw new AccessDeniedException('You must be authenticated to view users');
         }
 
-        $user = $this->getEntityManager()->getRepository('BackBee\Security\User')->find($id);
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
 
         if (!$user) {
             return $this->create404Response(sprintf('User not found with id %d', $id));
@@ -227,12 +234,14 @@ class UserController extends ARestController
      */
     public function postAction(Request $request)
     {
-
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedException('You must be authenticated to view users');
         }
 
-        $userExists = $this->getApplication()->getEntityManager()->getRepository('BackBee\Security\User')->findBy(array('_login' => $request->request->get('login')));
+        $userExists = $this->getApplication()
+                           ->getEntityManager()
+                           ->getRepository(get_class($this->getUser()))
+                           ->findBy(array('_login' => $request->request->get('login')));
 
         if ($userExists) {
             throw new ConflictHttpException(sprintf('User with that login already exists: %s', $request->request->get('login')));
@@ -273,22 +282,151 @@ class UserController extends ARestController
     }
 
     /**
+     * PATCH User
+     *
+     * @param int $id User ID
+     */
+    public function patchAction($id, Request $request)
+    {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw new AccessDeniedException('You must be authenticated to view users');
+        }
+        $actionFound = false;
+
+        $operations = $request->request->all();
+
+        try {
+            (new OperationSyntaxValidator())->validate($operations);
+        } catch (InvalidOperationSyntaxException $e) {
+            throw new BadRequestHttpException('operation invalid syntax: '.$e->getMessage());
+        }
+
+        $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+
+        foreach ($operations as $key => $operation) {
+            if ('/email' === $operation['path']) {
+                $actionFound = $this->patchUserIdentity($id, $operations);
+            } elseif ('/groups' === $operation['path']) {
+                $actionFound = $this->patchUserGroups($id, $operations);
+            } elseif ('/password' === $operation['path']) {
+                $actionFound = $this->patchUserPassword($id, $operations);
+            } elseif ('/activated' === $operation['path']) {
+                $actionFound = $this->patchUserStatus($id, $operations);
+            }
+        }
+
+        if ($actionFound) {
+            return new Response("", 204);
+        } else {
+            return $this->create404Response('Action not found');
+        }
+    }
+
+    private function flattenPatchRequest($operations)
+    {
+        $op = [];
+        foreach ($operations as $key => $operation) {
+            $op[substr($operation['path'], 1)] = $operation['value'];
+        }
+        return $op;
+    }
+
+    private function patchUserStatus($id, $operations)
+    {
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
+
+        if (!$this->isGranted('EDIT', $user)) {
+            throw new AccessDeniedException(sprintf('You are not authorized to edit user with id %s', $id));
+        }
+
+        $operation = reset($operations);
+
+        $user->setActivated(boolval($operation['value']));
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush($user);
+
+        return true;
+    }
+
+    private function patchUserGroups($id, $operations)
+    {
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
+
+        if (!$this->isGranted('EDIT', $user)) {
+            throw new AccessDeniedException(sprintf('You are not authorized to edit user with id %s', $id));
+        }
+
+        $operations = $this->flattenPatchRequest($operations);
+
+        foreach ($operations['groups'] as $key => $value) {
+            if ($value == 'added') {
+                $group = $this->getEntityManager()->find('BackBee\Security\Group', $key);
+                $group->addUser($user);
+                $this->getEntityManager()->persist($group);
+                $this->getEntityManager()->flush($group);
+            }
+        }
+
+        return true;
+    }
+
+
+    private function patchUserIdentity($id, $operations)
+    {
+        if ($this->getUser()->getId() != $id) {
+            throw new AccessDeniedException('Identity can only be changed by its owner.');
+        }
+
+        $operations = $this->flattenPatchRequest($operations);
+
+        $validator = Validation::createValidator();
+        $constraint = new Assert\Email(['message' => 'Invalid e-mail', 'checkMX' => true]);
+        $violations = $validator->validateValue($operations['email'], $constraint);
+        if (count($violations) > 0) {
+            throw new ValidationException($violations);
+        }
+
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
+
+        $user->setFirstname($operations['firstname']);
+        $user->setLastname($operations['lastname']);
+        $user->setEmail($operations['email']);
+
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush($user);
+
+        return true;
+    }
+
+    /**
      * @todo  set minimal password size in security config
      * [updateUserPassword description]
      * @param  User    $user    [description]
      * @param  Request $request [description]
      * @return [type]           [description]
      */
-    private function updateUserPassword(User $user, Request $request)
+    private function patchUserPassword($id, $operations)
     {
-        if ($request->request->get('password') !== $request->request->get('confirm_password')) {
+        if ($this->getUser()->getId() != $id) {
+            throw new AccessDeniedException('Password can only be changed by its owner.');
+        }
+
+        $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
+
+        $operations = $this->flattenPatchRequest($operationserations);
+
+        if ($user->getState() !== User::PASSWORD_NOT_PICKED) {
+            $this->checkIdentity($user->getLogin(), $operations['old_password']);
+        }
+
+        if ($operations['password'] !== $operations['confirm_password']) {
             return new JsonResponse([
                 'errors' => [
                     'password' => ['Password and confirm password are differents.']
                 ]
             ], 400);
         }
-        $password = trim($request->request->get('password'));
+        $password = trim($operations['password']);
         if (strlen($password) < 5) {
             return new JsonResponse([
                 'errors' => [
@@ -303,8 +441,11 @@ class UserController extends ARestController
             $password = $encoder->encodePassword($password, '');
         }
 
+
         $user->setPassword($password);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
+
+        return true;
     }
 }

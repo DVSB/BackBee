@@ -24,7 +24,9 @@
 namespace BackBee\Security;
 
 use Doctrine\Common\Collections\ArrayCollection;
+
 use JMS\Serializer\Annotation as Serializer;
+
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -68,6 +70,10 @@ class Group implements DomainObjectInterface
      *      inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")}
      * )
      *
+     * @Serializer\Expose
+     * @Serializer\MaxDepth(2)
+     * @Serializer\SerializedName("users")
+     * @Serializer\ReadOnly
      */
     protected $_users;
 
@@ -156,7 +162,7 @@ class Group implements DomainObjectInterface
      * @param  \BackBee\Security\User  $user
      * @return \BackBee\Security\Group
      */
-    public function setUser(User $user)
+    public function addUser(User $user)
     {
         $this->_users->add($user);
 

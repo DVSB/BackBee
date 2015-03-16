@@ -58,6 +58,15 @@ bb.rest.resource.upload:
         _method: POST
 
 # User Rest API
+bb.rest.user.current:
+    pattern: /rest/{version}/user/current
+    defaults:
+        _action: getCurrentAction
+        _controller: BackBee\Rest\Controller\UserController
+    requirements:
+        version: \d+
+        _method: GET
+
 bb.rest.user.get:
     pattern: /rest/{version}/user/{id}
     defaults:
@@ -86,6 +95,16 @@ bb.rest.user.put:
         version: \d+
         id: \d+
         _method: PUT
+
+bb.rest.user.patch:
+    pattern: /rest/{version}/user/{id}
+    defaults:
+        _action: patchAction
+        _controller: BackBee\Rest\Controller\UserController
+    requirements:
+        version: \d+
+        id: \d+
+        _method: PATCH
 
 bb.rest.user.delete:
     pattern: /rest/{version}/user/{id}

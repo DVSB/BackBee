@@ -79,7 +79,11 @@ abstract class ARestController extends Controller implements RestControllerInter
             $items[] = $item;
         }
 
-        return $this->getSerializer()->serialize($items, 'json');
+        $context = new SerializationContext();
+        $context->setSerializeNull(true);
+        $context->enableMaxDepthChecks(true);
+
+        return $this->getSerializer()->serialize($items, 'json', $context);
     }
 
     /**
@@ -98,6 +102,7 @@ abstract class ARestController extends Controller implements RestControllerInter
                 // serialize properties with null values
                 $context = new SerializationContext();
                 $context->setSerializeNull(true);
+                $context->enableMaxDepthChecks(true);
                 $formatted = $this->getSerializer()->serialize($item, 'json', $context);
                 break;
             case 'jsonp':
@@ -111,7 +116,7 @@ abstract class ARestController extends Controller implements RestControllerInter
 
                 $context = new SerializationContext();
                 $context->setSerializeNull(true);
-                $json = $this->getSerializer()->serialize($item, 'json', $context);
+                $json = $this->getSerializer()->serialize($item, 'json');
 
                 $formatted = sprintf('/**/%s(%s)', $callback, $json);
                 break;
@@ -135,6 +140,7 @@ abstract class ARestController extends Controller implements RestControllerInter
         if (is_object($entityOrClass)) {
             $context = DeserializationContext::create();
             $context->attributes->set('target', $entityOrClass);
+            $context->enableMaxDepthChecks(true);
             $entityOrClass = get_class($entityOrClass);
         }
 
