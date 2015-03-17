@@ -46,6 +46,17 @@ bb.images:
 
 # BackBee REST API
 
+# Resource Rest API
+
+bb.rest.resource.upload:
+    pattern: /rest/{version}/resource/upload
+    defaults:
+        _action: uploadAction
+        _controller: BackBee\Rest\Controller\ResourceController
+    requirements:
+        version: \d+
+        _method: POST
+
 # User Rest API
 bb.rest.user.get:
     pattern: /rest/{version}/user/{id}

@@ -25,8 +25,13 @@ namespace BackBee\Event\Listener;
 
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Element\File as ElementFile;
+use BackBee\ClassContent\Element\Image as ElementImage;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
+use BackBee\Utils;
+use BackBee\Util\Media;
+
 
 /**
  * Listener to ClassContent events :
@@ -106,6 +111,45 @@ class RevisionListener
                 $uow->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $revision);
             }
         }
+    }
+    
+    public static function onFlushElementFile(Event $event) 
+    {
+        $application = $event->getApplication();
+        $em = $application->getEntityManager();
+        $uow = $em->getUnitOfWork();
+        
+        $revision = $event->getTarget();
+        $content = $revision->getContent();
+        
+        if ($content instanceof ElementFile) {
+            $moveFrom = $content->path;
+            
+            $content->originalname = Utils\String::toPath($content->originalname);
+            $content->path = Media::getPathFromContent($content);
+            
+            $moveTo = $content->path;
+            
+            Utils\File\File::resolveFilepath($moveTo, null, array('base_dir' => $application->getMediaDir()));
+            
+            if (!is_dir(dirname($moveTo))) {
+                mkdir(dirname($moveTo), 0755, true);
+            }
+
+            $content->setParam('stat', json_encode(stat($moveFrom)));
+            
+            if ($content instanceof ElementImage) {
+                
+                list($width, $height) = getimagesize($moveFrom);
+                
+                $content->setParam('width', $width);
+                $content->setParam('height', $height);
+            }
+            
+            Utils\File\File::move($moveFrom, $moveTo);
+            
+            $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
+        } 
     }
 
     public static function onPostLoad(Event $event)
