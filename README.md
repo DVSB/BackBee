@@ -2,7 +2,7 @@ BackBee core
 ============
 
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/backbee/BackBee?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
+[![Stories in Ready](https://badge.waffle.io/backbee/BackBee.png?label=in%20progress&title=Features%20in%20progress)](https://waffle.io/backbee/BackBee)
 
 **BackBee core** is the core part of an open source PHP CMS built on top of Symfony & Doctrine 2 components.
 The main concept behind BackBee is that "your backend is your frontend", this CMS is
