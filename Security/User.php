@@ -37,6 +37,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
  * @Table(name="user", uniqueConstraints={@UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
  * @fixtures(qty=20)
+ *
+ * @Serializer\ExclusionPolicy("all")
  */
 class User implements UserInterface
 {
@@ -48,7 +50,9 @@ class User implements UserInterface
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
      *
+     * @Serializer\Expose
      * @Serializer\Type("integer")
+     * @Serializer\ReadOnly
      */
     protected $_id;
 
@@ -58,6 +62,7 @@ class User implements UserInterface
      * @Column(type="string", name="login")
      * @fixture(type="word")
      *
+     * @Serializer\Expose
      * @Serializer\Type("string")
      */
     protected $_login;
@@ -68,6 +73,7 @@ class User implements UserInterface
      * @Column(type="string", name="email")
      * @fixture(type="email")
      *
+     * @Serializer\Expose
      * @Serializer\Type("string")
      */
     protected $_email;
@@ -75,8 +81,6 @@ class User implements UserInterface
     /**
      * The raw password of this user
      * @var string
-     *
-     * @Serializer\Exclude()
      */
     protected $_raw_password;
 
@@ -85,8 +89,6 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="password")
      * @fixture(type="word")
-     *
-     * @Serializer\Exclude()
      */
     protected $_password;
 
@@ -94,6 +96,8 @@ class User implements UserInterface
      * The User state
      * @var Integer
      * @Column(type="integer", name="state", length=2, options={"default": \BackBee\Security\User::PASSWORD_NOT_PICKED})
+     *
+     * @Serializer\Expose
      * @Serializer\Type("integer")
      */
     protected $_state = self::PASSWORD_NOT_PICKED;
@@ -103,6 +107,8 @@ class User implements UserInterface
      * @var Boolean
      * @Column(type="boolean", name="activated")
      * @fixture(type="boolean")
+     *
+     * @Serializer\Expose
      * @Serializer\Type("boolean")
      */
     protected $_activated = false;
@@ -112,6 +118,8 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="firstname", nullable=true)
      * @fixture(type="firstName")
+     *
+     * @Serializer\Expose
      * @Serializer\Type("string")
      */
     protected $_firstname;
@@ -121,6 +129,8 @@ class User implements UserInterface
      * @var string
      * @Column(type="string", name="lastname", nullable=true)
      * @fixture(type="lastName")
+     *
+     * @Serializer\Expose
      * @Serializer\Type("string")
      */
     protected $_lastname;
@@ -128,16 +138,16 @@ class User implements UserInterface
     /**
      * @var BackBee\NestedNode\PageRevision
      * @OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
-     *
-     * @Serializer\Exclude()
      */
     protected $_revisions;
 
     /**
      * @ManyToMany(targetEntity="BackBee\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
      *
-     * @Serializer\MaxDepth(1)
+     * @Serializer\Expose
+     * @Serializer\MaxDepth(2)
      * @Serializer\SerializedName("groups")
+     * @Serializer\ReadOnly
      */
     protected $_groups;
 
@@ -146,6 +156,8 @@ class User implements UserInterface
      * @var String
      * @Column(type="string", name="api_key_public", nullable=true)
      * @fixture(type="string")
+     *
+     * @Serializer\Expose
      * @Serializer\Type("string")
      */
     protected $_api_key_public;
@@ -155,8 +167,6 @@ class User implements UserInterface
      * @var String
      * @Column(type="string", name="api_key_private", nullable=true)
      * @fixture(type="string")
-     * @Serializer\Exclude()
-     * @Serializer\Type("string")
      */
     protected $_api_key_private;
 
@@ -164,6 +174,8 @@ class User implements UserInterface
      * Whether the api key is enabled (default false)
      * @var Boolean
      * @Column(type="boolean", name="api_key_enabled", options={"default": false})
+     *
+     * @Serializer\Expose
      * @fixture(type="boolean")
      * @Serializer\Type("boolean")
      */
@@ -173,6 +185,8 @@ class User implements UserInterface
      * The creation datetime
      * @var \DateTime
      * @Column(type="datetime", name="created")
+     *
+     * @Serializer\Expose
      * @Serializer\Type("DateTime")
      */
     protected $_created;
@@ -181,6 +195,8 @@ class User implements UserInterface
      * The last modification datetime
      * @var \DateTime
      * @Column(type="datetime", name="modified")
+     *
+     * @Serializer\Expose
      * @Serializer\Type("DateTime")
      */
     protected $_modified;
@@ -543,6 +559,29 @@ class User implements UserInterface
     public function setApiKeyEnabled($api_key_enabled)
     {
         $this->_api_key_enabled = (bool) $api_key_enabled;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return bool
+     * @codeCoverageIgnore
+     */
+    public function getState()
+    {
+        return $this->_state;
+    }
+
+    /**
+     *
+     * @param  bool                   $api_key_enabled
+     * @return \BackBee\Security\User
+     * @codeCoverageIgnore
+     */
+    public function setState($state)
+    {
+        $this->_state = (int) $state;
 
         return $this;
     }
