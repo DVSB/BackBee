@@ -24,6 +24,7 @@
 namespace BackBee\Security\Repository;
 
 use Doctrine\ORM\EntityRepository;
+
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -70,5 +71,44 @@ class UserRepository extends EntityRepository implements UserProviderInterface, 
     public function supportsClass($class)
     {
         return ($class == 'BackBee\Security\User');
+    }
+
+    public function getCollection($params)
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        $likeParams = ['firstname', 'lastname', 'email', 'login'];
+
+        if (array_key_exists('name', $params)) {
+            $nameFilters = explode(' ', $params['name']);
+
+            foreach ($nameFilters as $key => $value) {
+                $qb->andWhere($qb->expr()->orX(
+                    $qb->expr()->like('u._firstname', ':p' . $key),
+                    $qb->expr()->like('u._lastname', ':p' . $key)
+                ));
+                $qb->setParameter(':p' . $key, '%' . $value . '%');
+            }
+
+            unset($params['name']);
+        }
+        foreach ($params as $key => $value) {
+            if (property_exists('BackBee\Security\User', '_' . $key)) {
+                if (in_array($key, $likeParams)) {
+                    $qb->andWhere(
+                        $qb->expr()->like('u._' . $key, ':' . $key)
+                    );
+                    $qb->setParameter(':' . $key, '%' . $value . '%');
+                } else {
+                    $qb->andWhere(
+                        $qb->expr()->eq('u._' . $key, ':' . $key)
+                    );
+                    $qb->setParameter(':' . $key, $value);
+                }
+            }
+        }
+
+
+        return $qb->getQuery()->getResult();
     }
 }
