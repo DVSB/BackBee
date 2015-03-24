@@ -99,7 +99,7 @@ class AclControllerTest extends TestCase
      */
     public function test_getClassCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/class/'));
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/class'));
 
         $this->assertEquals(200, $response->getStatusCode());
         $res = json_decode($response->getContent(), true);
@@ -111,7 +111,7 @@ class AclControllerTest extends TestCase
      */
     public function test_getMaskCollectionAction()
     {
-        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/permissions/'));
+        $response = $this->getBBApp()->getController()->handle(Request::create('/rest/1/acl/permissions'));
 
         $this->assertEquals(200, $response->getStatusCode());
 
@@ -263,7 +263,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST']));
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -295,7 +295,7 @@ class AclControllerTest extends TestCase
         ];
 
         $response = $this->getBBApp()->getController()->handle(Request::create(
-            sprintf('/rest/1/acl/ace/object/%s/', $this->groupEditor->getId()),
+            sprintf('/rest/1/acl/ace/object/%s', $this->groupEditor->getId()),
             'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
         ));
 
@@ -334,7 +334,7 @@ class AclControllerTest extends TestCase
             'object_class' => get_class($this->site),
         ];
         $response = $this->getBBApp()->getController()->handle(Request::create(
-            sprintf('/rest/1/acl/ace/class/%s/', $this->groupEditor->getId()),
+            sprintf('/rest/1/acl/ace/class/%s', $this->groupEditor->getId()),
             'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
         ));
         $this->assertEquals(204, $response->getStatusCode());
@@ -344,7 +344,7 @@ class AclControllerTest extends TestCase
             'object_class' => 'Class\That\Doenst\Exist',
         ];
         $response = $this->getBBApp()->getController()->handle(Request::create(
-            sprintf('/rest/1/acl/ace/class/%s/', $this->groupEditor->getId()),
+            sprintf('/rest/1/acl/ace/class/%s', $this->groupEditor->getId()),
             'DELETE', [], [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($data)
         ));
 
@@ -370,7 +370,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postObjectAceAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -393,7 +393,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], [], [
             '_action' => 'postObjectAceAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -421,7 +421,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postClassAceAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -443,7 +443,7 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], [], [
             '_action' => 'postClassAceAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
+        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 

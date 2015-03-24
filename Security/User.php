@@ -585,4 +585,36 @@ class User implements UserInterface
 
         return $this;
     }
+
+    /**
+     * Generate an REST api public key based on the private key
+     * @return String Rest api public key
+     */
+    private function generateApiPublicKey()
+    {
+        return sha1($this->_created->format(\DateTime::ATOM) . $this->_api_key_private);
+    }
+
+    /**
+     * Generate a random Api pulbic and private key
+     * @return void
+     */
+    public function generateRandomApiKey()
+    {
+        $this->_api_key_private = md5($this->_id . uniqid());
+
+        $this->_api_key_public = $this->generateApiPublicKey();
+
+        return $this;
+    }
+
+    /**
+     * Check if the public api key is correct
+     * @param  String $public_key public key to check
+     * @return Bool               The result of the check
+     */
+    public function checkPublicApiKey($public_key)
+    {
+        return ($public_key === $this->generateApiPublicKey());
+    }
 }

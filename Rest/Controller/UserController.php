@@ -80,6 +80,10 @@ class UserController extends ARestController
         if ($group !== null) {
             $group = $this->getEntityManager()->find('BackBee\Security\Group', $group);
             $users = $group->getUsers();
+        } elseif (count($request->query->all()) !== 0) {
+            $users = $this->getEntityManager()
+                        ->getRepository(get_class($this->getUser()))
+                        ->getCollection($request->query->all());
         } else {
             $users = $this->getEntityManager()->getRepository(get_class($this->getUser()))->findAll();
         }
@@ -275,6 +279,10 @@ class UserController extends ARestController
 
         $user->setPassword($password);
 
+        if (!$request->request->has('api_key_private')) {
+            $user->generateRandomApiKey();
+        }
+
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
 
@@ -341,7 +349,7 @@ class UserController extends ARestController
 
         $operation = reset($operations);
 
-        $user->setActivated(boolval($operation['value']));
+        $user->setActivated((boolean) $operation['value']);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
 
@@ -413,7 +421,7 @@ class UserController extends ARestController
 
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
 
-        $operations = $this->flattenPatchRequest($operationserations);
+        $operations = $this->flattenPatchRequest($operations);
 
         if ($user->getState() !== User::PASSWORD_NOT_PICKED) {
             $this->checkIdentity($user->getLogin(), $operations['old_password']);

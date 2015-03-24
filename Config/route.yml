@@ -181,7 +181,7 @@ bb.rest.security_firewall_autenticate:
         _action: firewallAuthenticateAction
         _controller: BackBee\Rest\Controller\SecurityController
     requirements:
-        version: \d
+        version: \d+
         firewall: "[a-z_-]+"
         _method: POST
 
@@ -191,7 +191,7 @@ bb.rest.security.authenticate:
         _action: authenticateAction
         _controller: BackBee\Rest\Controller\SecurityController
     requirements:
-        version: \d
+        version: \d+
         _method: POST
 
 bb.rest.security_firewall_status:
@@ -200,62 +200,63 @@ bb.rest.security_firewall_status:
         _action: firewallStatusAction
         _controller: BackBee\Rest\Controller\SecurityController
     requirements:
-        version: \d
+        version: \d+
         firewall: "[a-z_-]+"
         _method: GET
 
 bb.rest.security_session_delete:
-    pattern: /rest/{version}/security/session/
+    pattern: /rest/{version}/security/session
     defaults:
         _action: deleteSessionAction
         _controller: BackBee\Rest\Controller\SecurityController
     requirements:
-        version: \d
+        version: \d+
         _method: DELETE
 
 bb.rest.acl.permissions:
-    pattern: /rest/{version}/acl/permissions/
+    pattern: /rest/{version}/acl/permissions
     defaults:
         _action: getMaskCollectionAction
         _controller: BackBee\Rest\Controller\AclController
     requirements:
-        version: \d
+        version: \d+
         _method: GET
 
 bb.rest.acl.permissions_map:
-    pattern: /rest/{version}/acl/
+    pattern: /rest/{version}/acl
     defaults:
         _action: postPermissionMapAction
         _controller: BackBee\Rest\Controller\AclController
     requirements:
-        version: \d
+        version: \d+
         _method: POST
 
 bb.rest.acl.ace_class_delete:
-    pattern: /rest/{version}/acl/ace/class/{sid}/
+    pattern: /rest/{version}/acl/ace/class/{sid}
     defaults:
         _action: deleteClassAceAction
         _controller: BackBee\Rest\Controller\AclController
     requirements:
-        version: \d
+        version: \d+
         _method: DELETE
 
 bb.rest.acl.ace_object_delete:
-    pattern: /rest/{version}/acl/ace/object/{sid}/
+    pattern: /rest/{version}/acl/ace/object/{sid}
     defaults:
         _action: deleteObjectAceAction
         _controller: BackBee\Rest\Controller\AclController
     requirements:
-        version: \d
+        version: \d+
+        sid: .+
         _method: DELETE
 
 bb.rest.acl.get_classes:
-    pattern: /rest/{version}/acl/class/
+    pattern: /rest/{version}/acl/class
     defaults:
         _action: getClassCollectionAction
         _controller: BackBee\Rest\Controller\AclController
     requirements:
-        version: \d
+        version: \d+
         _method: GET
 
 bb.rest.page.get_available_status:
@@ -281,6 +282,7 @@ bb.rest.page.put_metadata:
         _action:     putMetadataAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: PUT
 
@@ -290,6 +292,7 @@ bb.rest.page.get_collection:
         _action:     getCollectionAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.page.get:
@@ -298,6 +301,7 @@ bb.rest.page.get:
         _action:     getAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: GET
 
@@ -307,6 +311,7 @@ bb.rest.page.post:
         _action:     postAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         _method: POST
 
 bb.rest.page.clone:
@@ -315,6 +320,7 @@ bb.rest.page.clone:
         _action:     cloneAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         _method: POST
 
 bb.rest.page.put:
@@ -323,6 +329,7 @@ bb.rest.page.put:
         _action:     putAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: PUT
 
@@ -332,6 +339,7 @@ bb.rest.page.patch:
         _action:     patchAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: PATCH
 
@@ -341,6 +349,7 @@ bb.rest.page.delete:
         _action: deleteAction
         _controller: BackBee\Rest\Controller\PageController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: DELETE
 
@@ -350,6 +359,7 @@ bb.rest.layout.get_workflow_state:
         _action: getWorkflowStateAction
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.layout.get_collection:
@@ -358,6 +368,7 @@ bb.rest.layout.get_collection:
         _action: getCollectionAction
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.layout.get:
@@ -366,6 +377,7 @@ bb.rest.layout.get:
         _action: getAction
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: GET
 
@@ -384,6 +396,7 @@ bb.rest.layout.put:
         _action: putAction
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: PUT
 
@@ -393,6 +406,7 @@ bb.rest.layout.delete:
         _action: deleteAction
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
+        version: \d+
         uid: \w{32}
         _method: DELETE
 
@@ -402,6 +416,7 @@ bb.rest.classcontent.category.get:
         _action: getCategoryAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.classcontent.category.get_collection:
@@ -410,6 +425,7 @@ bb.rest.classcontent.category.get_collection:
         _action: getCategoryCollectionAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.classcontent.get:
@@ -418,6 +434,7 @@ bb.rest.classcontent.get:
         _action: getAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         uid: "[a-f0-9]{32}"
         type: .+
         _method: GET
@@ -428,6 +445,7 @@ bb.rest.classcontent.get_collection_by_type:
         _action: getCollectionByTypeAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         type: "[a-zA-Z_\/]+"
         _method: GET
 
@@ -437,7 +455,7 @@ bb.rest.classcontent.get_collection:
         _action: getCollectionAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
-        type: .+
+        version: \d+
         _method: GET
 
 bb.rest.classcontent.put_collection:
@@ -446,8 +464,8 @@ bb.rest.classcontent.put_collection:
         _action: putCollectionAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         uid: \w{32}
-        type: "[a-zA-Z_\/]+"
         _method: PUT
 
 bb.rest.classcontent.post:
@@ -466,6 +484,7 @@ bb.rest.classcontent.put:
         _action: putAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         uid: \w{32}
         type: "[a-zA-Z_\/]+"
         _method: PUT
@@ -476,6 +495,7 @@ bb.rest.classcontent.delete:
         _action: deleteAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         uid: \w{32}
         type: .+
         _method: DELETE
@@ -486,6 +506,7 @@ bb.rest.classcontent.get_draft:
         _action: getDraftAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         uid: \w{32}
         type: "[a-zA-Z_\/]+"
         _method: GET
@@ -496,6 +517,7 @@ bb.rest.classcontent.get_draft_collection:
         _action: getDraftCollectionAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.classcontent.put_draft:
@@ -504,6 +526,7 @@ bb.rest.classcontent.put_draft:
         _action: putDraftAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         uid: \w{32}
         type: "[a-zA-Z_\/]+"
         _method: PUT
@@ -514,6 +537,7 @@ bb.rest.classcontent.put_draft_collection:
         _action: putDraftCollectionAction
         _controller: BackBee\Rest\Controller\ClassContentController
     requirements:
+        version: \d+
         _method: PUT
 
 bb.rest.bundle.get_collection:
@@ -522,6 +546,7 @@ bb.rest.bundle.get_collection:
         _action: getCollectionAction
         _controller: BackBee\Rest\Controller\BundleController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.bundle.get:
@@ -530,6 +555,7 @@ bb.rest.bundle.get:
         _action: getAction
         _controller: BackBee\Rest\Controller\BundleController
     requirements:
+        version: \d+
         _method: GET
 
 bb.rest.bundle.patch:
@@ -538,6 +564,7 @@ bb.rest.bundle.patch:
         _action: patchAction
         _controller: BackBee\Rest\Controller\BundleController
     requirements:
+        version: \d+
         _method: PATCH
 
 bb.rest.bundle.exposed_actions:
@@ -546,6 +573,7 @@ bb.rest.bundle.exposed_actions:
         _action: accessBundleExposedRoutesAction
         _controller: BackBee\Rest\Controller\BundleController
     requirements:
+        version: \d+
         bundle_name: "[a-z]+"
         controller_name: "[a-z]+"
         action_name: "[a-z]+"
@@ -554,60 +582,67 @@ bb.rest.bundle.exposed_actions:
 bb.rest.media_folder.get_collection:
     pattern: /rest/{version}/media-folder
     defaults:
-      _action: getCollectionAction
-      _controller: BackBee\Rest\Controller\MediaFolderController
+        _action: getCollectionAction
+        _controller: BackBee\Rest\Controller\MediaFolderController
     requirements:
-      _method: GET
+        version: \d+
+        _method: GET
 
 bb.rest.media_folder.get:
-  pattern: /rest/{version}/media-folder/{uid}
-  defaults:
-    _action: getAction
-    _controller: BackBee\Rest\Controller\MediaFolderController
-  requirements:
-    _method: GET
+    pattern: /rest/{version}/media-folder/{uid}
+    defaults:
+        _action: getAction
+        _controller: BackBee\Rest\Controller\MediaFolderController
+    requirements:
+        version: \d+
+        _method: GET
 
 bb.rest.media_folder.patch:
-  pattern: /rest/{version}/media-folder/{uid}
-  defaults:
-    _action: patchAction
-    _controller: BackBee\Rest\Controller\MediaFolderController
-  requirements:
-    _method: PATCH
+    pattern: /rest/{version}/media-folder/{uid}
+    defaults:
+        _action: patchAction
+        _controller: BackBee\Rest\Controller\MediaFolderController
+    requirements:
+        version: \d+
+        _method: PATCH
 
 bb.rest.media_folder.post:
-  pattern: /rest/{version}/media-folder
-  defaults:
-    _action: postAction
-    _controller: BackBee\Rest\Controller\MediaFolderController
-  requirements:
-    _method: POST
+    pattern: /rest/{version}/media-folder
+    defaults:
+        _action: postAction
+        _controller: BackBee\Rest\Controller\MediaFolderController
+    requirements:
+        version: \d+
+        _method: POST
 
 bb.rest.media_folder.put:
-  pattern: /rest/{version}/media-folder/{uid}
-  defaults:
-    _action: putAction
-    _controller: BackBee\Rest\Controller\MediaFolderController
-  requirements:
-    _method: PUT
+    pattern: /rest/{version}/media-folder/{uid}
+    defaults:
+        _action: putAction
+        _controller: BackBee\Rest\Controller\MediaFolderController
+    requirements:
+        version: \d+
+        _method: PUT
 
 bb.rest.media_folder.delete:
-  pattern: /rest/{version}/media-folder/{uid}
-  defaults:
-    _action: deleteAction
-    _controller: BackBee\Rest\Controller\MediaFolderController
-  requirements:
-    _method: DELETE
+    pattern: /rest/{version}/media-folder/{uid}
+    defaults:
+        _action: deleteAction
+        _controller: BackBee\Rest\Controller\MediaFolderController
+    requirements:
+        version: \d+
+        _method: DELETE
 
 
 # Media
 bb.media.get_collection:
-  pattern: /rest/{version}/media
-  defaults:
-    _action: getCollectionAction
-    _controller: BackBee\Rest\Controller\MediaController
-  requirements:
-    _method: GET
+    pattern: /rest/{version}/media
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBee\Rest\Controller\MediaController
+    requirements:
+        version: \d+
+        _method: GET
 
 
 # BackBee rss
