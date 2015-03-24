@@ -40,6 +40,7 @@ class MediaFolderController extends ARestController
     {
         $qb = $this->getMediaFolderRepository()->createQueryBuilder("mf");
         $qb->andParentIs($parent);
+        $qb->orderBy("mf._leftnode", "asc");
         $paginator = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
         $results = [];
         foreach ($paginator as $mediaFolder) {
@@ -86,8 +87,15 @@ class MediaFolderController extends ARestController
      */
     public function putAction(MediaFolder $mediaFolder, Request $request)
     {
+        $parent_id = $request->get("parent_uid", null);
+        if (null === $parent_id) {
+            $parent = $this->getMediaFolderRepository()->getRoot();
+        }else{
+            $parent = $this->getMediaFolderRepository()->find($parent_id);
+        }
+
         $title = trim($request->request->get('title'));
-        if ($this->mediaFolderAlreadyExists($title)) {
+        if ($this->mediaFolderAlreadyExists($title, $parent)) {
             throw new BadRequestHttpException("A MediaFolder named '" . $title . "' already exists.");
         }
         $mediaFolder->setTitle($request->request->get('title'));
@@ -105,8 +113,19 @@ class MediaFolderController extends ARestController
         if (true === $mediaFolder->isRoot()) {
             throw new BadRequestHttpException('Cannot remove the root node of the MediaFodler');
         }
-        $this->getMediaFolderRepository()->delete($mediaFolder);
-        return new Response("", 204);
+        $isEmpty = $this->getMediaRepository()->countMedias($mediaFolder);
+        if (!$isEmpty) {
+            $response = new Response("", 204);
+            $this->getMediaFolderRepository()->delete($mediaFolder);
+        } else {
+            $response = new Response("MediaFolder [".$mediaFolder->getTitle()."] is not empty", 500);
+        }
+        return $response;
+    }
+
+    private function getMediaRepository()
+    {
+        return $this->getEntityManager()->getRepository('BackBee\NestedNode\Media');
     }
 
     /**
@@ -133,14 +152,17 @@ class MediaFolderController extends ARestController
                 $mediaFolder = new MediaFolder();
                 $mediaFolder->setUrl($request->request->get('url', Utils\String::urlize($title)));
                 $mediaFolder->setTitle($title);
-                if (null !== $parent) {
-                    $mediaFolder->setParent($parent);
-                    $this->getMediaFolderRepository()->insertNodeAsLastChildOf($mediaFolder, $parent);
-                } else {
-                    $root = $this->getMediaFolderRepository()->getRoot();
-                    $this->getMediaFolderRepository()->insertNodeAsLastChildOf($mediaFolder, $root);
+                if (null === $parent) {
+                    $parent = $this->getMediaFolderRepository()->getRoot();
                 }
+                if ($this->mediaFolderAlreadyExists($title, $parent)) {
+                    throw new BadRequestHttpException("A MediaFolder named '" . $title . "' already exists. in [" . $parent->getTitle() . "]");
+                }
+
+                $mediaFolder->setParent($parent);
+                $this->getMediaFolderRepository()->insertNodeAsLastChildOf($mediaFolder, $parent);
             }
+
             $this->getEntityManager()->persist($mediaFolder);
             $this->getEntityManager()->flush();
             return $this->createJsonResponse(null, 201, [
@@ -171,6 +193,7 @@ class MediaFolderController extends ARestController
         } catch (InvalidOperationSyntaxException $e) {
             throw new BadRequestHttpException('operation invalid syntax: ' . $e->getMessage());
         }
+
         $this->patchSiblingAndParentOperation($mediaFolder, $operations);
         $this->getEntityManager()->flush();
         return $this->createJsonResponse(null, 204);
@@ -183,7 +206,6 @@ class MediaFolderController extends ARestController
 
     private function patchSiblingAndParentOperation(MediaFolder $mediaFolder, &$operations)
     {
-
         $sibling_operation = null;
         $parent_operation = null;
 
@@ -195,6 +217,7 @@ class MediaFolderController extends ARestController
                 $parent_operation = $op;
             }
         }
+
         if (null !== $sibling_operation || null !== $parent_operation) {
             if ($mediaFolder->isRoot()) {
                 throw new BadRequestHttpException('Cannot move root node of a site.');
@@ -228,7 +251,7 @@ class MediaFolderController extends ARestController
     private function mediaFolderAlreadyExists($title, MediaFolder $parent)
     {
         $folderExists = false;
-        $medialFolder = $this->getMediaFolderRepository()->findOneBy(array("_title" => $title));
+        $medialFolder = $this->getMediaFolderRepository()->findOneBy(array("_title" => trim($title), "_parent" => $parent));
         if ($medialFolder) {
             $folderExists = true;
         }
