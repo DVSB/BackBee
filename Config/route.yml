@@ -644,6 +644,37 @@ bb.media.get_collection:
         version: \d+
         _method: GET
 
+bb.media.post:
+  pattern: /rest/{version}/media
+  defaults:
+    _action: postAction
+    _controller: BackBee\Rest\Controller\MediaController
+  requirements:
+    _method: POST
+
+bb.media.put:
+  pattern: /rest/{version}/media/{id}
+  defaults:
+    _action: putAction
+    _controller: BackBee\Rest\Controller\MediaController
+  requirements:
+    _method: PUT
+
+bb.media.delete:
+  pattern: /rest/{version}/media/{id}
+  defaults:
+    _action: deleteAction
+    _controller: BackBee\Rest\Controller\MediaController
+  requirements:
+    _method: DELETE
+
+bb.media.list:
+  pattern: /rest/{version}/medialist
+  defaults:
+    _action: medialistAction
+    _controller: BackBee\Rest\Controller\MediaController
+  requirements:
+    _method: GET
 
 # BackBee rss
 bb.rss:
