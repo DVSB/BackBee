@@ -62,6 +62,11 @@ class MediaRepository extends EntityRepository
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
 
+        $title = (isset($cond["mediaTitle"])) ? $cond["mediaTitle"] : null;
+        if (null != $title) {
+            $q->andWhere($q->expr()->like('m._title', $q->expr()->literal('%'.$title.'%')));
+        }
+
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
         if (null != $afterPubdateField) {
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));

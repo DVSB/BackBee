@@ -29,7 +29,7 @@ class MediaFolderController extends ARestController
      * Get collection of media folder
      * @return Symfony\Component\HttpFoundation\Response
      *
-     * @Rest\Pagination(default_count=25, max_count=100)
+     * @Rest\Pagination(default_count=100, max_count=200)
      *
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBee\NestedNode\MediaFolder", required=false
@@ -38,14 +38,10 @@ class MediaFolderController extends ARestController
      */
     public function getCollectionAction(Request $request, $start, $count, MediaFolder $parent = null)
     {
-        $qb = $this->getMediaFolderRepository()->createQueryBuilder("mf");
-        $qb->andParentIs($parent);
-        $qb->orderBy("mf._leftnode", "asc");
-        $paginator = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
-        $results = [];
-        foreach ($paginator as $mediaFolder) {
+        $results = $this->getMediaFolderRepository()->getMediaFolders($parent,array("field"=>"_leftnode", "dir"=>"asc"));
+        /*foreach ($paginator as $mediaFolder) {
             $results[] = $mediaFolder;
-        }
+        }*/
         $response = $this->createJsonResponse($results);
         return $this->addRangeToContent($response, $results, $start);
     }

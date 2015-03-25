@@ -30,41 +30,24 @@ class MediaController extends ARestController
      */
     public function getCollectionAction(Request $request, $start, $count)
     {
-        /* collection */
         $this->preloadMediaClasses();
-        $qb = $this->getMediaRepository()->createQueryBuilder("media");
-        $mediaFolder = $request->get("mediaFolder_uid", null);
-        $qb = $this->doSeach($qb, $request);
-        $qb->andWhere("media._media_folder = :mediaFolder");
-        $qb->orderBy("media._modified", "desc");
-        $qb->setParameter('mediaFolder', $mediaFolder);
-        $paginator = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
+        $queryParams = $request->query->all();
+        $mediaFolderUid = $request->get("mediaFolder_uid", null);
+        if (null === $mediaFolderUid) {
+            throw new BadRequestHttpException('A mediaFolder uid should be provided!');
+        }
+        $mediaFolder = $this->getMediaFolderRepository()->find($mediaFolderUid);
+        if (null === $mediaFolder) {
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("The mediaFolder can't be found!");
+        }
+        $paging = array("start" => $start, "limit" => $count);
+        $paginator = $this->getMediaRepository()->getMedias($mediaFolder, $queryParams, "_modified", "desc", $paging);
         $results = [];
         foreach ($paginator as $media) {
             $results[] = $media;
         }
         $response = $this->createJsonResponse($this->mediaToJson($results));
         return $this->addRangeToContent($response, $paginator, $start, $count);
-    }
-
-    private function doSeach($qb, Request $request) {
-        $title = $request->get('title', null);
-        $pubBefore = $request->get('beforeDate', null);
-        $pubAfter = $request->get('afterDate', null);
-        if(null !== $title)
-        $qb->andWhere("media._title Like :title ");
-        if(null !== $title) {
-            $qb->setParameter("title", '%'.$title.'%');
-        }
-        if(null !== $pubBefore) {
-            $qb->andWhere("media._created >= :beforeDate");
-            $qb->setParameter("beforeDate", $pubBefore * 1000);
-        }
-        if(null !== $pubAfter) {
-            $qb->andWhere("media._created >= :afterDate");
-            $qb->setParameter("afterDate", $pubBefore * 1000);
-        }
-        return $qb;
     }
 
     private function mediaToJson($collection)
@@ -86,7 +69,7 @@ class MediaController extends ARestController
         return $result;
     }
 
-    private function addRangeToContent(Response $response, $collection, $start, $count)
+    private function addRangeToContent(Response $response, Paginator $collection, $start, $count)
     {
         $count = count($collection);
         if ($collection instanceof Paginator) {
@@ -104,12 +87,15 @@ class MediaController extends ARestController
      * @return type
      * @throws BadRequestHttpException
      */
-    public function deleteAction($id)
+    public function deleteAction($id = null)
     {
         $this->preloadMediaClasses();
+        if (null === $id) {
+            throw new BadRequestHttpException("A media id should be provided!");
+        }
         $media = $this->getMediaRepository()->find($id);
         if (!$media) {
-            throw new BadRequestHttpException('media can\'t be found');
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('media can\'t be found');
         }
         try {
             $this->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')->deleteContent($media->getContent());
@@ -123,10 +109,10 @@ class MediaController extends ARestController
 
     private function preloadMediaClasses()
     {
-       $media = $this->getApplication()->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
-       foreach($media as $mediaClass) {
+        $media = $this->getApplication()->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
+        foreach ($media as $mediaClass) {
             class_exists($mediaClass);
-       }
+        }
     }
 
     /**
@@ -134,8 +120,11 @@ class MediaController extends ARestController
      */
     public function putAction($id, Request $request)
     {
+        $this->preloadMediaClasses();
         $media = $this->getMediaRepository()->find($id);
         $media_title = $request->get("title", "Untitled media");
+        $mediaContentUid = $request->get("content_uid");
+        $mediaType = $request->get("type", null);
         if (!$media) {
             throw new BadRequestHttpException('media can\'t be found');
         }
@@ -166,7 +155,7 @@ class MediaController extends ARestController
         } else {
             $media = $this->getMediaRepository()->find($media_id);
             if (!$media) {
-                throw new BadRequestHttpException('media can\'t be found' . $e->getMessage());
+                throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Media can't be found!");
             }
         }
         $media->setContent($content);
