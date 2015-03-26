@@ -57,5 +57,10 @@
         "mikey179/vfsStream": "1.4.0",
         "fzaninotto/faker": "1.4.0"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
 }
