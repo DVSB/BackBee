@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,10 +27,10 @@ use BackBee\Renderer\Helper\HelperManager;
 use BackBee\Site\Layout;
 
 /**
- * abstract class for renderer adapter
+ * abstract class for renderer adapter.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -42,7 +42,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     protected $renderer;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param ARenderer $renderer
      */
@@ -53,10 +53,11 @@ abstract class ARendererAdapter implements IRendererAdapter
 
     /**
      * Magic call method; allow current object to forward unknow method to
-     * its associated renderer
+     * its associated renderer.
      *
-     * @param  string $method
-     * @param  array  $argv
+     * @param string $method
+     * @param array  $argv
+     *
      * @return mixed
      */
     public function __call($method, $argv)

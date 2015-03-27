@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,7 +31,6 @@ use Symfony\Component\Security\Core\SecurityContext as sfSecurityContext;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Http\Firewall;
 use Symfony\Component\Security\Http\FirewallMap;
-
 use BackBee\BBApplication;
 use BackBee\Routing\Matcher\RequestMatcher;
 use BackBee\Security\Authentication\AuthenticationManager;
@@ -41,7 +40,7 @@ use BackBee\Security\Listeners\LogoutListener;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -62,7 +61,8 @@ class SecurityContext extends sfSecurityContext
     private $contexts = array();
 
     /**
-     * An encoder factory
+     * An encoder factory.
+     *
      * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
      */
     private $_encoderfactory;
@@ -127,7 +127,8 @@ class SecurityContext extends sfSecurityContext
     }
 
     /**
-     * Returns the encoder factory or null if not defined
+     * Returns the encoder factory or null if not defined.
+     *
      * @return \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface|null
      */
     public function getEncoderFactory()
@@ -220,6 +221,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
+     *
      * @return \Symfony\Component\Security\Acl\Dbal\MutableAclProvider
      */
     public function getACLProvider()
@@ -278,11 +280,13 @@ class SecurityContext extends sfSecurityContext
     }
 
     /**
-     * Get auth provider
+     * Get auth provider.
      *
-     * @param  string                          $key
+     * @param string $key
+     *
      * @return AuthenticationProviderInterface
-     * @throws InvalidArgumentException        if provider not found
+     *
+     * @throws InvalidArgumentException if provider not found
      */
     public function getAuthProvider($key)
     {
@@ -295,6 +299,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
+     *
      * @param string                                                      $name
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $provider
      */
@@ -305,6 +310,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type $requestMatcher
      * @param type $listeners
      */
@@ -315,6 +321,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
+     *
      * @return BBApplication
      */
     public function getApplication()
@@ -324,6 +331,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getUserProviders()
@@ -333,6 +341,7 @@ class SecurityContext extends sfSecurityContext
 
     /**
      * @codeCoverageIgnore
+     *
      * @return AuthenticationManager
      */
     public function getAuthenticationManager()
@@ -403,8 +412,10 @@ class SecurityContext extends sfSecurityContext
     }
 
     /**
-     * Create an encoders factory if need
-     * @param  array                             $config
+     * Create an encoders factory if need.
+     *
+     * @param array $config
+     *
      * @return \BackBee\Security\SecurityContext
      */
     private function createEncoderFactory(array $config)

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Validator;
 use Doctrine\ORM\EntityManager;
 
 /**
- * Entity's validator
+ * Entity's validator.
  *
  * @category    BackBee
- * @package     BackBee\Validator
+ *
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -43,7 +43,8 @@ class EntityValidator extends AValidator
     protected $em;
 
     /**
-     * Form validator constructor
+     * Form validator constructor.
+     *
      * @param \Doctrine\ORM\EntityManager $em
      */
     public function __construct(EntityManager $em)
@@ -52,13 +53,14 @@ class EntityValidator extends AValidator
     }
 
     /**
-     * Validate all datas with config
+     * Validate all datas with config.
      *
-     * @param  object $entity
-     * @param  array  $datas
-     * @param  array  $errors
-     * @param  array  $config
-     * @param  string $prefix
+     * @param object $entity
+     * @param array  $datas
+     * @param array  $errors
+     * @param array  $config
+     * @param string $prefix
+     *
      * @return object
      */
     public function validate($entity, array $datas = array(), array &$errors = array(), array $config = array(), $prefix = '')
@@ -119,7 +121,7 @@ class EntityValidator extends AValidator
     }
 
     /**
-     * Valid if this field is unique
+     * Valid if this field is unique.
      *
      * @param array  $errors
      * @param string $key
@@ -149,7 +151,7 @@ class EntityValidator extends AValidator
     }
 
     /**
-     * Valid a password with confirmation
+     * Valid a password with confirmation.
      *
      * @param array  $errors
      * @param string $key
@@ -165,10 +167,11 @@ class EntityValidator extends AValidator
     }
 
     /**
-     * Verify if datas is valid
+     * Verify if datas is valid.
      *
-     * @param  object  $entity
-     * @param  array   $config
+     * @param object $entity
+     * @param array  $config
+     *
      * @return boolean
      */
     public function isValid($entity, $config)
@@ -185,8 +188,8 @@ class EntityValidator extends AValidator
     }
 
     /**
+     * @param object $entity
      *
-     * @param  object           $entity
      * @return \ReflectionClass
      */
     public function getReflectionClass($entity)
@@ -199,9 +202,10 @@ class EntityValidator extends AValidator
     }
 
     /**
-     * Get id of object
+     * Get id of object.
      *
-     * @param  object $entity
+     * @param object $entity
+     *
      * @return array
      */
     public function getIdProperties($entity)

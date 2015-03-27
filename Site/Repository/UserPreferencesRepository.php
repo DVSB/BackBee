@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,17 +25,15 @@ namespace BackBee\Site\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-
 use BackBee\Site\UserPreferences;
 
 /**
- * UserPreferences object in BackBee 5
+ * UserPreferences object in BackBee 5.
  *
  * User preferences persistence
  *
  * @category    BackBee
- * @package     BackBee\Site
- * @subpackage  Repository
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -45,8 +43,10 @@ class UserPreferencesRepository extends EntityRepository
      * Retrieve the user prefernces by security token.
      *
      * @codeCoverageIgnore
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return UserPreferences                                                      object
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @return UserPreferences object
      */
     public function loadPreferences(TokenInterface $token)
     {
@@ -57,7 +57,9 @@ class UserPreferencesRepository extends EntityRepository
      * Calculate the unique user preferences key.
      *
      * @codeCoverageIgnore
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
      * @return String
      */
     public function retrieveUserPreferencesUid(TokenInterface $token)
@@ -69,6 +71,7 @@ class UserPreferencesRepository extends EntityRepository
      * Set the user preferences.
      *
      * @codeCoverageIgnore
+     *
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param string                                                               $preferences
      */
@@ -82,8 +85,9 @@ class UserPreferencesRepository extends EntityRepository
     /**
      * Find the UserPreferences object by uid.
      *
-     * @param  string                        $uid
-     * @param  BackBee\Security\User         $user
+     * @param string                $uid
+     * @param BackBee\Security\User $user
+     *
      * @return \BackBee\Site\UserPreferences
      */
     private function retrieveByUid($uid, $user)

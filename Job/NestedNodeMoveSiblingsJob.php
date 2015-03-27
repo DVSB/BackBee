@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,24 +26,27 @@ namespace BackBee\Job;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
- * Calculates the left/right values for a nest node move around one of its siblings
+ * Calculates the left/right values for a nest node move around one of its siblings.
  *
  * @category    BackBee
- * @package     BackBee\Job
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class NestedNodeMoveSiblingsJob extends AJob
 {
     /**
-     * The entity manager to be used
+     * The entity manager to be used.
+     *
      * @var \Doctrine\ORM\EntityManager
      */
     private $em;
 
     /**
-     * Sets the entity manager to use
-     * @param  \Doctrine\ORM\EntityManager               $em
+     * Sets the entity manager to use.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     *
      * @return \BackBee\Job\NestedNodeDetachCalculateJob
      */
     public function setEntityManager($em)
@@ -54,8 +57,10 @@ class NestedNodeMoveSiblingsJob extends AJob
     }
 
     /**
-     * Run the job
-     * @param  mixed                     $args
+     * Run the job.
+     *
+     * @param mixed $args
+     *
      * @throws \InvalidArgumentException
      */
     public function run($args)

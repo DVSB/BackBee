@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,31 +24,30 @@
 namespace BackBee\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
-
 use BackBee\BBApplication;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\Util\MimeType;
 use BackBee\Utils\File\File;
 
 /**
- * MediaController provide actions to BackBee medias routes (get and upload)
+ * MediaController provide actions to BackBee medias routes (get and upload).
  *
  * @category    BackBee
- * @package     BackBee\Controller
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class MediaController
 {
     /**
-     * Application this controller belongs to
+     * Application this controller belongs to.
      *
      * @var BackBee\BBApplication
      */
     private $application;
 
     /**
-     * MediaController's constructor
+     * MediaController's constructor.
      *
      * @param BBApplication $application
      */
@@ -58,9 +57,10 @@ class MediaController
     }
 
     /**
-     * Handles a media file request
+     * Handles a media file request.
      *
-     * @param  string                   $filename The media file to provide
+     * @param string $filename The media file to provide
+     *
      * @throws FrontControllerException
      *
      * @return Response
@@ -101,7 +101,7 @@ class MediaController
     }
 
     /**
-     * Handles an upload by RPC request
+     * Handles an upload by RPC request.
      *
      * @throws FrontControllerException
      *
@@ -123,7 +123,7 @@ class MediaController
     }
 
     /**
-     * Create Response object for media
+     * Create Response object for media.
      *
      * @param string $filename valid filepath (file exists and readable)
      *

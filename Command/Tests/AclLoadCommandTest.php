@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,17 +25,16 @@ namespace BackBee\Command\Tests;
 
 use org\bovigo\vfs\vfsStream;
 use Symfony\Component\Console\Tester\CommandTester;
-
 use BackBee\Command\AclLoadCommand;
 use BackBee\Console\Console;
 use BackBee\Security\Group;
 use BackBee\Tests\TestCase;
 
 /**
- * AclDbInitCommand Test
+ * AclDbInitCommand Test.
  *
  * @category    BackBee
- * @package     BackBee\Command
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,27 +25,25 @@ namespace BackBee\Theme;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\Theme\Exception\ThemeException;
 use BackBee\Utils\File\Dir;
 
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class AThemesManager implements IThemesManager
 {
     /**
-     * Default theme config file name
+     * Default theme config file name.
      */
-
     const CONFIG_FILE = 'config.yml';
     const DIRECTORY_MODE = 0777;
 
     /**
-     * theme path
+     * theme path.
      *
      * @var string
      */
@@ -62,7 +60,7 @@ abstract class AThemesManager implements IThemesManager
     }
 
     /**
-     * Update the config.yml
+     * Update the config.yml.
      *
      * @param \BackBee\Theme\ThemeEntity $theme
      */
@@ -74,9 +72,10 @@ abstract class AThemesManager implements IThemesManager
     }
 
     /**
-     * Delete the theme specified
+     * Delete the theme specified.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return boolean
      */
     public function delete($name)
@@ -87,9 +86,11 @@ abstract class AThemesManager implements IThemesManager
     /**
      * rename the theme.
      *
-     * @param  string         $name     current name
-     * @param  string         $new_name new name
+     * @param string $name     current name
+     * @param string $new_name new name
+     *
      * @return boolean
+     *
      * @throws ThemeException
      */
     public function rename($name, $new_name)
@@ -104,9 +105,11 @@ abstract class AThemesManager implements IThemesManager
     /**
      * Create a copy of the theme.
      *
-     * @param  string         $name    name of the source
-     * @param  string         $cp_name destination name
+     * @param string $name    name of the source
+     * @param string $cp_name destination name
+     *
      * @return boolean
+     *
      * @throws ThemeException
      */
     public function copy($name, $cp_name)
@@ -135,10 +138,12 @@ abstract class AThemesManager implements IThemesManager
     }
 
     /**
-     * Return the configuration of the specified theme
+     * Return the configuration of the specified theme.
      *
-     * @param  string              $name
+     * @param string $name
+     *
      * @return BackBee\Theme\Theme
+     *
      * @throws ThemeException
      */
     public function getTheme($name)
@@ -153,7 +158,7 @@ abstract class AThemesManager implements IThemesManager
     }
 
     /**
-     * Return all the themes inside the path set in the constructor
+     * Return all the themes inside the path set in the constructor.
      *
      * @return array
      */
@@ -174,8 +179,10 @@ abstract class AThemesManager implements IThemesManager
     /**
      * Read the template config file.
      *
-     * @param  string         $config the config path
+     * @param string $config the config path
+     *
      * @return array
+     *
      * @throws ParseException
      * @codeCoverageIgnore
      */

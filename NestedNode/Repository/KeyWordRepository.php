@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,11 +27,10 @@ use BackBee\ClassContent\Element\Keyword;
 use BackBee\NestedNode\Page;
 
 /**
- * Keyword repository
+ * Keyword repository.
  *
  * @category    BackBee
- * @package     BackBee/NestedNode
- * @subpackage  Repository
+ *
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
@@ -127,8 +126,10 @@ class KeyWordRepository extends NestedNodeRepository
 
     /**
      * Returns the nested keywords object according to the element keyword objects provided
-     * Also set the parameter 'objectKeyword' from the element to the nested keyword
-     * @param  array $elements
+     * Also set the parameter 'objectKeyword' from the element to the nested keyword.
+     *
+     * @param array $elements
+     *
      * @return array
      */
     public function getKeywordsFromElements(&$elements = array())
@@ -166,9 +167,10 @@ class KeyWordRepository extends NestedNodeRepository
 
     /**
      * Check if given keyword already exists in database; it's case sensitive and make difference
-     * between "e" and "é"
+     * between "e" and "é".
      *
-     * @param  string      $keyword string
+     * @param string $keyword string
+     *
      * @return object|null return object if it already exists, else null
      */
     public function exists($keyword)

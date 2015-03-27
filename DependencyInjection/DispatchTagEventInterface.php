@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,17 +25,17 @@ namespace BackBee\DependencyInjection;
 
 /**
  * This interface allow BackBee\DependencyInjection\Container to know if it needs to dispatch
- * tags events or not
+ * tags events or not.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 interface DispatchTagEventInterface
 {
     /**
-     * Define if current service need to dispatch tag event or not
+     * Define if current service need to dispatch tag event or not.
      *
      * @return boolean true if needed to dispatch tag event, else false
      */

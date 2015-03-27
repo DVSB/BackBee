@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Event\Listener;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Abstract listener implementing IPathEnabledListener
+ * Abstract listener implementing IPathEnabledListener.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -46,7 +46,6 @@ abstract class APathEnabledListener implements IPathEnabledListener
     }
 
     /**
-     *
      * @param Request $request
      */
     public function setRequest(Request $request)
@@ -55,7 +54,8 @@ abstract class APathEnabledListener implements IPathEnabledListener
     }
 
     /**
-     * @param  Request $request
+     * @param Request $request
+     *
      * @return boolean - true if the listener should be enabled for the $request
      */
     public function isEnabled(Request $request = null)

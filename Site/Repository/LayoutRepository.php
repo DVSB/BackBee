@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,24 +24,23 @@
 namespace BackBee\Site\Repository;
 
 use Doctrine\ORM\EntityRepository;
-
 use BackBee\BBApplication;
 use BackBee\Site\Layout;
 use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
- * @package     BackBee\Site
- * @subpackage  Repository
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class LayoutRepository extends EntityRepository
 {
     /**
-     * Draw a filled rect on image
+     * Draw a filled rect on image.
      *
      * @access private
+     *
      * @param ressource $image      The image ressource
      * @param array     $clip       The clip rect to draw
      * @param int       $background The background color
@@ -54,16 +53,18 @@ class LayoutRepository extends EntityRepository
     }
 
     /**
-     * Draw a final layout zone on its thumbnail
+     * Draw a final layout zone on its thumbnail.
      *
      * @access private
-     * @param  ressource $thumbnail  The thumbnail ressource
-     * @param  DOMNode   $node       The current node zone
-     * @param  array     $clip       The clip rect to draw
-     * @param  int       $background The background color
-     * @param  int       $gridcolumn The number of columns in the grid
-     * @param  boolean   $lastChild  True if the current node is the last child of its parent node
-     * @return int       The new X axis position;
+     *
+     * @param ressource $thumbnail  The thumbnail ressource
+     * @param DOMNode   $node       The current node zone
+     * @param array     $clip       The clip rect to draw
+     * @param int       $background The background color
+     * @param int       $gridcolumn The number of columns in the grid
+     * @param boolean   $lastChild  True if the current node is the last child of its parent node
+     *
+     * @return int The new X axis position;
      */
     private function _drawThumbnailZone(&$thumbnail, $node, $clip, $background, $gridcolumn, $lastChild = false)
     {
@@ -104,12 +105,14 @@ class LayoutRepository extends EntityRepository
     }
 
     /**
-     * Generate a layout thumbnail according to the configuration
+     * Generate a layout thumbnail according to the configuration.
      *
      * @access public
-     * @param  Layout        $layout The layout to treate
-     * @param  BBApplication $app    The current instance of BBApplication
-     * @return mixed         FALSE if something wrong, the ressource path of the thumbnail elsewhere
+     *
+     * @param Layout        $layout The layout to treate
+     * @param BBApplication $app    The current instance of BBApplication
+     *
+     * @return mixed FALSE if something wrong, the ressource path of the thumbnail elsewhere
      */
     public function generateThumbnail(Layout $layout, BBApplication $app)
     {
@@ -218,9 +221,10 @@ class LayoutRepository extends EntityRepository
     }
 
     /**
-     * Returns layout models
+     * Returns layout models.
      *
      * @access public
+     *
      * @return array Array of Layout
      */
     public function getModels()

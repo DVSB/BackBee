@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,10 +28,10 @@ use BackBee\NestedNode\Page;
 
 /**
  * A set of content objects in BackBee
- * Implements Iterator, Countable
+ * Implements Iterator, Countable.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
@@ -41,13 +41,15 @@ use BackBee\NestedNode\Page;
 class ContentSet extends AClassContent implements \Iterator, \Countable
 {
     /**
-     * Internal position in iterator
+     * Internal position in iterator.
+     *
      * @var int
      */
     protected $index = 0;
 
     /**
-     * Pages owning this contentset
+     * Pages owning this contentset.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
      *
      * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
@@ -65,7 +67,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Returns the owning pages
+     * Returns the owning pages.
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getPages()
@@ -74,7 +77,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Initialized datas on postLoad doctrine event
+     * Initialized datas on postLoad doctrine event.
      */
     public function postLoad()
     {
@@ -97,8 +100,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Alternative recursive clone method, created because of problems related to doctrine clone method
-     * @param  \BackBee\NestedNode\Page         $origin_page
+     * Alternative recursive clone method, created because of problems related to doctrine clone method.
+     *
+     * @param \BackBee\NestedNode\Page $origin_page
+     *
      * @return \BackBee\ClassContent\ContentSet
      */
     public function createClone(Page $origin_page = null)
@@ -131,7 +136,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Empty the current set of contents
+     * Empty the current set of contents.
      */
     public function clear()
     {
@@ -164,7 +169,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Return the first subcontent of the set
+     * Return the first subcontent of the set.
+     *
      * @return AClassContent the first element
      * @codeCoverageIgnore
      */
@@ -179,7 +185,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * only the value but also the type must match.
      * For objects this means reference equality.
      *
-     * @param  mixed $element The element to search for.
+     * @param mixed $element The element to search for.
+     *
      * @return mixed The key/index of the element or FALSE if the element was not found.
      */
     public function indexOf($element, $useIntIndex = false)
@@ -233,7 +240,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             throw new \BackBee\Exception\BBException(__METHOD__." index  parameter must be an integer");
         }
         $newContentsetArr = array();
-        /** revoir * */
+        /* revoir * */
         foreach ($this->getData() as $key => $content) {
             $contentToAdd = ($key == $index) ? $contentSet : $content;
             $newContentsetArr[] = $contentToAdd;
@@ -265,8 +272,10 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Return the item at index
-     * @param  int $index
+     * Return the item at index.
+     *
+     * @param int $index
+     *
      * @return the item or NULL if $index is out of bounds
      */
     public function item($index)
@@ -292,7 +301,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Return the last subcontent of the set
+     * Return the last subcontent of the set.
+     *
      * @return AClassContent the last element
      * @codeCoverageIgnore
      */
@@ -311,7 +321,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Pop the content off the end of the set and return it
+     * Pop the content off the end of the set and return it.
+     *
      * @return AClassContent Returns the last content or NULL if set is empty
      */
     public function pop()
@@ -340,9 +351,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Push one element onto the end of the set
-     * @param  AClassContent $var The pushed values
-     * @return ContentSet    The current content set
+     * Push one element onto the end of the set.
+     *
+     * @param AClassContent $var The pushed values
+     *
+     * @return ContentSet The current content set
      */
     public function push(AClassContent $var)
     {
@@ -379,7 +392,8 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Shift the content off the beginning of the set and return it
+     * Shift the content off the beginning of the set and return it.
+     *
      * @return AClassContent Returns the shifted content or NULL if set is empty
      */
     public function shift()
@@ -407,9 +421,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Prepend one to the beginning of the set
-     * @param  AClassContent $var The prepended values
-     * @return ContentSet    The current content set
+     * Prepend one to the beginning of the set.
+     *
+     * @param AClassContent $var The prepended values
+     *
+     * @return ContentSet The current content set
      */
     public function unshift(AClassContent $var)
     {
@@ -445,10 +461,13 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /*     * **************************************************************** */
 
     /**
-     * Return the data of this content
+     * Return the data of this content.
+     *
      * @param $var string The element to be return, if NULL, all datas are returned
      * @param $forceArray Boolean Force the return as array
-     * @return mixed                                                Could be either NULL or one or array of scalar, array, AClassContent instance
+     *
+     * @return mixed Could be either NULL or one or array of scalar, array, AClassContent instance
+     *
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
@@ -495,13 +514,15 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets options at the construction of a new instance
-     * @param  array                            $options Initial options for the content:
-     *                                                   - label       the label of the content
-     *                                                   - maxentry    the maximum number of content accepted
-     *                                                   - minentry    the minimum number of content accepted
-     *                                                   - accept      an array of classname accepted
-     *                                                   - default     array default value for datas
+     * Sets options at the construction of a new instance.
+     *
+     * @param array $options Initial options for the content:
+     *                       - label       the label of the content
+     *                       - maxentry    the maximum number of content accepted
+     *                       - minentry    the minimum number of content accepted
+     *                       - accept      an array of classname accepted
+     *                       - default     array default value for datas
+     *
      * @return \BackBee\ClassContent\ContentSet
      */
     protected function setOptions($options = null)
@@ -536,12 +557,15 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Dynamically adds and sets new element to this content
-     * @param  string                              $var          the name of the element
-     * @param  string                              $type         the type
-     * @param  array                               $options      Initial options for the content (see this constructor)
-     * @param  Boolean                             $updateAccept dynamically accept or not the type for the new element
+     * Dynamically adds and sets new element to this content.
+     *
+     * @param string  $var          the name of the element
+     * @param string  $type         the type
+     * @param array   $options      Initial options for the content (see this constructor)
+     * @param Boolean $updateAccept dynamically accept or not the type for the new element
+     *
      * @return \BackBee\ClassContent\AClassContent The current instance
+     *
      * @deprecated since version 1.0
      */
     protected function defineData($var, $type = 'scalar', $options = null, $updateAccept = false)
@@ -581,9 +605,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Adds a new accepted type to the element
-     * @param  string                              $type the type to accept
-     * @param  string                              $var  the element
+     * Adds a new accepted type to the element.
+     *
+     * @param string $type the type to accept
+     * @param string $var  the element
+     *
      * @return \BackBee\ClassContent\AClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,15 +24,14 @@
 namespace BackBee\Rest\Test;
 
 use Symfony\Component\HttpFoundation\Request;
-
 use BackBee\Security\User;
 use BackBee\Tests\TestCase;
 
 /**
- * Test Case for REST
+ * Test Case for REST.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -41,11 +40,12 @@ class RestTestCase extends TestCase
     protected static $restUser;
 
     /**
-     * POST request helper
+     * POST request helper.
      *
-     * @param  type                                      $uri
-     * @param  array                                     $data
-     * @param  type                                      $contentType
+     * @param type  $uri
+     * @param array $data
+     * @param type  $contentType
+     *
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
@@ -64,11 +64,12 @@ class RestTestCase extends TestCase
     }
 
     /**
-     * PUT request helper
+     * PUT request helper.
      *
-     * @param  type                                      $uri
-     * @param  array                                     $data
-     * @param  type                                      $contentType
+     * @param type  $uri
+     * @param array $data
+     * @param type  $contentType
+     *
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPut($uri, array $data = [], $contentType = 'application/json', $sign = false)
@@ -76,7 +77,7 @@ class RestTestCase extends TestCase
         $request = new Request([], $data, [], [], [], [
             'REQUEST_URI'    => $uri,
             'CONTENT_TYPE'   => $contentType,
-            'REQUEST_METHOD' => 'PUT'
+            'REQUEST_METHOD' => 'PUT',
         ]);
 
         if ($sign) {
@@ -87,11 +88,12 @@ class RestTestCase extends TestCase
     }
 
     /**
-     * PATCH request helper
+     * PATCH request helper.
      *
-     * @param  type                                      $uri
-     * @param  array                                     $operations  an array of PATCH operations
-     * @param  type                                      $contentType
+     * @param type  $uri
+     * @param array $operations  an array of PATCH operations
+     * @param type  $contentType
+     *
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPatch($uri, array $operations = [], $contentType = 'application/json', $sign = false)
@@ -99,7 +101,7 @@ class RestTestCase extends TestCase
         $request = new Request([], $operations, [], [], [], [
             'REQUEST_URI' => $uri,
             'CONTENT_TYPE' => $contentType,
-            'REQUEST_METHOD' => 'PATCH'
+            'REQUEST_METHOD' => 'PATCH',
         ]);
 
         if ($sign) {
@@ -110,12 +112,13 @@ class RestTestCase extends TestCase
     }
 
     /**
-     * Get request helper
+     * Get request helper.
      *
-     * @param  type                                      $uri
-     * @param  array                                     $data
-     * @param  type                                      $contentType
-     * @param  array                                     $headers
+     * @param type  $uri
+     * @param array $data
+     * @param type  $contentType
+     * @param array $headers
+     *
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestGet($uri, array $filters = [], $sign = false)
@@ -130,9 +133,9 @@ class RestTestCase extends TestCase
     }
 
     /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param BackBee\Security\User                     $user
      *
-     * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  BackBee\Security\User                     $user
      * @return self
      */
     protected static function signRequest(Request $request, User $user = null)
@@ -147,9 +150,9 @@ class RestTestCase extends TestCase
     }
 
     /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \BackBee\Security\User                    $apiUser
      *
-     * @param  \Symfony\Component\HttpFoundation\Request  $request
-     * @param  \BackBee\Security\User                     $apiUser
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function sendRequest(Request $request, User $apiUser = null)

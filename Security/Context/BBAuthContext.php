@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Security\Context;
 
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Http\HttpUtils;
-
 use BackBee\Security\Authentication\Provider\BBAuthenticationProvider;
 use BackBee\Security\Listeners\BBAuthenticationListener;
 use BackBee\Security\Listeners\LogoutListener;
@@ -33,11 +32,10 @@ use BackBee\Security\Logout\BBLogoutHandler;
 use BackBee\Security\Logout\BBLogoutSuccessHandler;
 
 /**
- * Description of AnonymousContext
+ * Description of AnonymousContext.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Context
+ *
  * @copyright   Lp digital system
  * @author      nicolas.dufreche <nicolas.dufreche@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
@@ -81,7 +79,7 @@ class BBAuthContext extends AbstractContext implements ContextInterface
     }
 
     /**
-     * Load LogoutListener into security context
+     * Load LogoutListener into security context.
      *
      * @param AuthenticationProviderInterface $bb_provider
      */
@@ -97,7 +95,7 @@ class BBAuthContext extends AbstractContext implements ContextInterface
     }
 
     /**
-     * Returns the nonce directory path
+     * Returns the nonce directory path.
      *
      * @param array $config
      *
@@ -109,7 +107,7 @@ class BBAuthContext extends AbstractContext implements ContextInterface
     }
 
     /**
-     * Returns the repository to Registry entities
+     * Returns the repository to Registry entities.
      *
      * @return \BackBuillder\Bundle\Registry\Repository
      */

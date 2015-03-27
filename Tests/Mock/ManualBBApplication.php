@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,25 +23,6 @@
 
 namespace BackBee\Tests\Mock;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\ApplicationInterface;
 use BackBee\BBApplication;
 use BackBee\Console\Console;
@@ -49,7 +30,7 @@ use BackBee\Site\Site;
 
 /**
  * @category    BackBee
- * @package     BackBee\Tests\Mock
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -121,7 +102,7 @@ class ManualBBApplication implements ApplicationInterface
     protected $site;
 
     /**
-     * ManualBBApplication's constructor
+     * ManualBBApplication's constructor.
      */
     public function __construct($context = null, $environment = null)
     {
@@ -132,7 +113,7 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * __call allow us to catch everytime user wanted to set a value for a protected attribute;
+     * __call allow us to catch everytime user wanted to set a value for a protected attribute;.
      *
      * @param string $method
      * @param array  $arguments
@@ -156,7 +137,7 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * Stop the current BBApplication instance
+     * Stop the current BBApplication instance.
      */
     public function stop()
     {
@@ -164,7 +145,8 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * Returns the starting context
+     * Returns the starting context.
+     *
      * @return string|NULL
      */
     public function getContext()
@@ -173,7 +155,8 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * Returns the starting context
+     * Returns the starting context.
+     *
      * @return string|NULL
      */
     public function getEnvironment()
@@ -222,7 +205,7 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * Returns path to Data directory
+     * Returns path to Data directory.
      *
      * @return string absolute path to Data directory
      */

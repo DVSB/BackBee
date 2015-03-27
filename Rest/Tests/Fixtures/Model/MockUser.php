@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,12 +25,11 @@ namespace BackBee\Rest\Tests\Fixtures\Model;
 
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 
 /**
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -40,7 +39,8 @@ use BackBee\Rest\Controller\Annotations as Rest;
 class MockUser
 {
     /**
-     * Unique identifier of the user
+     * Unique identifier of the user.
+     *
      * @var integer
      * @Id @Column(type="integer", name="id")
      *
@@ -49,7 +49,8 @@ class MockUser
     public $_id = 1;
 
     /**
-     * The login of this user
+     * The login of this user.
+     *
      * @var string
      * @Column(type="string", name="login")
      *
@@ -58,7 +59,8 @@ class MockUser
     public $_login = 'userLogin';
 
     /**
-     * The password of this user
+     * The password of this user.
+     *
      * @var string
      * @Column(type="string", name="password")
      * @Serializer\Exclude()

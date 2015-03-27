@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,11 +24,10 @@
 namespace BackBee\Util\Sequence\Entity;
 
 /**
- * Sequence Entity
+ * Sequence Entity.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Sequence\Entity
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\Util\Sequence\Sequencer")
@@ -37,21 +36,24 @@ namespace BackBee\Util\Sequence\Entity;
 class Sequence
 {
     /**
-     * Name of the sequence
+     * Name of the sequence.
+     *
      * @var string
      * @Id @Column(name="name", type="string", nullable=false)
      */
     private $_name;
 
     /**
-     * Sequence
+     * Sequence.
+     *
      * @var string
      * @Column(name="value", type="integer", nullable=false)
      */
     private $_value;
 
     /**
-     * Returns the sequence value
+     * Returns the sequence value.
+     *
      * @return int
      * @codeCoverageIgnore
      */

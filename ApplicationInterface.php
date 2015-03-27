@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,33 +23,14 @@
 
 namespace BackBee;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\Console\Console;
 use BackBee\Site\Site;
 
 /**
- * BackBee5 application interface
+ * BackBee5 application interface.
  *
  * @category    BackBee
- * @package     BackBee
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
@@ -69,19 +50,19 @@ interface ApplicationInterface
     public function isStarted();
 
     /**
-     * Stop the current BBApplication instance
+     * Stop the current BBApplication instance.
      */
     public function stop();
 
     /**
-     * Returns the starting context
+     * Returns the starting context.
      *
      * @return string
      */
     public function getContext();
 
     /**
-     * Returns the starting context
+     * Returns the starting context.
      *
      * @return string
      */
@@ -118,7 +99,7 @@ interface ApplicationInterface
     public function getConfigDir();
 
     /**
-     * Returns path to Data directory
+     * Returns path to Data directory.
      *
      * @return string absolute path to Data directory
      */

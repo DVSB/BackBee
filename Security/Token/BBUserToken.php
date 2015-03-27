@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,36 +26,39 @@ namespace BackBee\Security\Token;
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 
 /**
- * Base class for BackBee token's user
+ * Base class for BackBee token's user.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Token
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class BBUserToken extends AbstractToken
 {
     /**
-     * Creation date of the token
+     * Creation date of the token.
+     *
      * @var \DateTime
      */
     private $_created;
 
     /**
-     * Digest to be checks associated to the token
+     * Digest to be checks associated to the token.
+     *
      * @var string
      */
     private $_digest;
 
     /**
-     * User's private nonce for the token
+     * User's private nonce for the token.
+     *
      * @var string
      */
     private $_nonce;
 
     /**
      * Class Constructor.
+     *
      * @param array $roles An array of roles
      */
     public function __construct(array $roles = array())
@@ -65,8 +68,10 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Returns the creation date of the token
+     * Returns the creation date of the token.
+     *
      * @codeCoverageIgnore
+     *
      * @return \DateTime
      */
     public function getCreated()
@@ -75,8 +80,10 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Returns the credentials (empty for this token)
+     * Returns the credentials (empty for this token).
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getCredentials()
@@ -85,8 +92,10 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Returns the current digest
+     * Returns the current digest.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getDigest()
@@ -95,8 +104,10 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Returns the user's private nonce
+     * Returns the user's private nonce.
+     *
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getNonce()
@@ -105,9 +116,12 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Sets the creation date
+     * Sets the creation date.
+     *
      * @codeCoverageIgnore
-     * @param  type                                $created
+     *
+     * @param type $created
+     *
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setCreated($created)
@@ -118,9 +132,12 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Sets the digest
+     * Sets the digest.
+     *
      * @codeCoverageIgnore
-     * @param  type                                $digest
+     *
+     * @param type $digest
+     *
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setDigest($digest)
@@ -131,9 +148,12 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Sets the user's private nonce
+     * Sets the user's private nonce.
+     *
      * @codeCoverageIgnore
-     * @param  type                                $nonce
+     *
+     * @param type $nonce
+     *
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setNonce($nonce)
@@ -144,9 +164,12 @@ class BBUserToken extends AbstractToken
     }
 
     /**
-     * Sets the user
+     * Sets the user.
+     *
      * @codeCoverageIgnore
-     * @param  type                                $user
+     *
+     * @param type $user
+     *
      * @return \BackBee\Security\Token\BBUserToken
      */
     public function setUser($user)

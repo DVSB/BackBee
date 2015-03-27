@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,10 +30,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
 /**
- * Routing data collector
+ * Routing data collector.
  *
  * @category    BackBee
- * @package     BackBee\Profiler
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -42,7 +42,6 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     private $container;
 
     /**
-     *
      * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      */
     public function setContainer(ContainerInterface $container = null)
@@ -51,7 +50,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Collects the Information on the Route
+     * Collects the Information on the Route.
      *
      * @param Request    $request   The Request Object
      * @param Response   $response  The Response Object
@@ -115,7 +114,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns the Amount of Routes
+     * Returns the Amount of Routes.
      *
      * @return integer Amount of Routes
      */
@@ -125,7 +124,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns the Matched Routes Information
+     * Returns the Matched Routes Information.
      *
      * @return array Matched Routes Collection
      */
@@ -135,7 +134,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns the Resources Information
+     * Returns the Resources Information.
      *
      * @return array Resources Information
      */
@@ -145,7 +144,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns the Amount of Ressources
+     * Returns the Amount of Ressources.
      *
      * @return integer Amount of Ressources
      */
@@ -155,7 +154,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns all the Routes
+     * Returns all the Routes.
      *
      * @return array Route Information
      */
@@ -165,7 +164,7 @@ class RoutingDataCollector extends DataCollector implements ContainerAwareInterf
     }
 
     /**
-     * Returns the Time
+     * Returns the Time.
      *
      * @return int Time
      */

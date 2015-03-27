@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,10 +24,10 @@
 namespace BackBee\Validator;
 
 /**
- * ArrayValidator's validator
+ * ArrayValidator's validator.
  *
  * @category    BackBee
- * @package     BackBee\Validator
+ *
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -36,13 +36,14 @@ class ArrayValidator extends AValidator
     const DELIMITER = '__';
 
     /**
-     * Validate all datas with config
+     * Validate all datas with config.
      *
-     * @param  array  $array
-     * @param  array  $datas
-     * @param  array  $errors
-     * @param  array  $form_config
-     * @param  string $prefix
+     * @param array  $array
+     * @param array  $datas
+     * @param array  $errors
+     * @param array  $form_config
+     * @param string $prefix
+     *
      * @return array
      */
     public function validate($array, array $datas = array(), array &$errors = array(), array $form_config = array(), $prefix = '')
@@ -80,10 +81,11 @@ class ArrayValidator extends AValidator
     }
 
     /**
-     * Get data to array
+     * Get data to array.
      *
-     * @param  string      $key
-     * @param  array       $array
+     * @param string $key
+     * @param array  $array
+     *
      * @return null|string
      */
     public function getData($key, $array)
@@ -104,7 +106,7 @@ class ArrayValidator extends AValidator
     }
 
     /**
-     * Set data to array
+     * Set data to array.
      *
      * @param string $key
      * @param string $value

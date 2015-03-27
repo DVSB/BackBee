@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,11 +24,10 @@
 namespace BackBee\Site\Metadata;
 
 /**
- * A metadata entity
+ * A metadata entity.
  *
  * @category    BackBee
- * @package     BackBee\Site
- * @subpackage  Metadata
+ *
  * @copyright   Lp digital system
  * @author      Nicolas BREMONT <nicolas.bremont@lp-digital.fr>
  * @Entity
@@ -38,7 +37,8 @@ namespace BackBee\Site\Metadata;
 class Metadata
 {
     /**
-     * The unique identifier
+     * The unique identifier.
+     *
      * @Id
      * @Column(type="string")
      * @fixture(type="md5")
@@ -73,6 +73,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getUid()
@@ -82,7 +83,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $uid
+     *
+     * @param type $uid
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setUid($uid)
@@ -94,6 +97,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getAttribute()
@@ -103,7 +107,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $attribute
+     *
+     * @param type $attribute
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setAttribute($attribute)
@@ -115,6 +121,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getAttrValue()
@@ -124,7 +131,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $attrValue
+     *
+     * @param type $attrValue
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setAttrValue($attrValue)
@@ -136,6 +145,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getContent()
@@ -145,7 +155,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  string                          $content
+     *
+     * @param string $content
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setContent($content)

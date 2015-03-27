@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,16 +24,14 @@
 namespace BackBee\FrontController\Exception;
 
 use Symfony\Component\HttpFoundation\Request;
-
 use BackBee\Exception\BBException;
 
 /**
  * Exception thrown when an HTTP request can not be handled
- * The associated HTTP Code error is obtain by decreasing the error code by 6000
+ * The associated HTTP Code error is obtain by decreasing the error code by 6000.
  *
  * @category    BackBee
- * @package     BackBee\FrontController
- * @subpackage  Exception
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -47,13 +45,15 @@ class FrontControllerException extends BBException
     protected $_code = self::UNKNOWN_ERROR;
 
     /**
-     * The current request handled
+     * The current request handled.
+     *
      * @var Request
      */
     private $_request;
 
     /**
-     * Set the current request
+     * Set the current request.
+     *
      * @param Request $request
      */
     public function setRequest(Request $request)
@@ -62,7 +62,8 @@ class FrontControllerException extends BBException
     }
 
     /**
-     * Return the current request
+     * Return the current request.
+     *
      * @return Request The current request generating an error
      */
     public function getRequest()
@@ -71,7 +72,7 @@ class FrontControllerException extends BBException
     }
 
     /**
-     * Get the HTTP status code
+     * Get the HTTP status code.
      *
      * @return int
      */

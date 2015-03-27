@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,7 +29,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * A BackBee website entity
+ * A BackBee website entity.
  *
  * A website should be associated to:
  *
@@ -37,7 +37,7 @@ use JMS\Serializer\Annotation as Serializer;
  * * a collection of default metadata sets
  *
  * @category    BackBee
- * @package     BackBee\Site
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\Site\Repository\SiteRepository")
@@ -50,6 +50,7 @@ class Site extends AObjectIdentifiable
 {
     /**
      * The unique identifier of this website.
+     *
      * @var string
      * @Id @Column(type="string", name="uid")
      * @fixture(type="md5")
@@ -62,6 +63,7 @@ class Site extends AObjectIdentifiable
 
     /**
      * The label of this website.
+     *
      * @var string
      * @Column(type="string", name="label", nullable=false)
      * @fixture(type="domainWord")
@@ -72,6 +74,7 @@ class Site extends AObjectIdentifiable
 
     /**
      * The creation datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="created", nullable=false)
      * @fixture(type="dateTime")
@@ -80,6 +83,7 @@ class Site extends AObjectIdentifiable
 
     /**
      * The last modification datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="modified", nullable=false)
      * @fixture(type="dateTime")
@@ -88,6 +92,7 @@ class Site extends AObjectIdentifiable
 
     /**
      * The optional server name.
+     *
      * @var string
      * @Column(type="string", name="server_name", nullable=true)
      * @fixture(type="domainWord")
@@ -102,12 +107,14 @@ class Site extends AObjectIdentifiable
 
     /**
      * The default extension used by the site.
+     *
      * @var string
      */
     protected $_default_ext = '.html';
 
     /**
      * The collection of layouts available for this site.
+     *
      * @OneToMany(targetEntity="BackBee\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
      *
      * @Serializer\Expose
@@ -116,6 +123,7 @@ class Site extends AObjectIdentifiable
 
     /**
      * The default metadatas associated tto the pages of this website.
+     *
      * @ManyToMany(targetEntity="BackBee\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
      * @JoinTable(name="metadata_site",
      *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
@@ -128,6 +136,7 @@ class Site extends AObjectIdentifiable
 
     /**
      * Class constructor.
+     *
      * @param string $uid     The unique identifier of the site.
      * @param array  $options Initial options for the content:
      *                        - label      the default label
@@ -150,8 +159,10 @@ class Site extends AObjectIdentifiable
     }
 
     /**
-     * Returns the unique identifier
+     * Returns the unique identifier.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getUid()
@@ -160,8 +171,10 @@ class Site extends AObjectIdentifiable
     }
 
     /**
-     * Returns the label
+     * Returns the label.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getLabel()
@@ -170,8 +183,10 @@ class Site extends AObjectIdentifiable
     }
 
     /**
-     * Returns the associated server name
+     * Returns the associated server name.
+     *
      * @codeCoverageIgnore
+     *
      * @return string|NULL
      */
     public function getServerName()
@@ -181,7 +196,9 @@ class Site extends AObjectIdentifiable
 
     /**
      * Return the default defined extension.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getDefaultExtension()
@@ -191,7 +208,9 @@ class Site extends AObjectIdentifiable
 
     /**
      * Returns the collection of layouts available for this website.
+     *
      * @codeCoverageIgnore
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getLayouts()
@@ -200,7 +219,6 @@ class Site extends AObjectIdentifiable
     }
 
     /**
-     *
      * @param \BackBee\Site\Layout $layout
      */
     public function addLayout(Layout $layout)
@@ -210,7 +228,9 @@ class Site extends AObjectIdentifiable
 
     /**
      * Returns the default metadatas set for the pages of this wesite.
+     *
      * @codeCoverageIgnore
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getMetadata()
@@ -219,8 +239,10 @@ class Site extends AObjectIdentifiable
     }
 
     /**
-     * Sets the label of the website
-     * @param  string             $label
+     * Sets the label of the website.
+     *
+     * @param string $label
+     *
      * @return \BackBee\Site\Site
      */
     public function setLabel($label)
@@ -231,8 +253,10 @@ class Site extends AObjectIdentifiable
     }
 
     /**
-     * Sets the server name
-     * @param  string             $server_name
+     * Sets the server name.
+     *
+     * @param string $server_name
+     *
      * @return \BackBee\Site\Site
      */
     public function setServerName($server_name)
@@ -244,8 +268,11 @@ class Site extends AObjectIdentifiable
 
     /**
      * Adds a new metadata set to the collection of the website.
+     *
      * @codeCoverageIgnore
-     * @param  \BackBee\Site\Metadata\Metadata $metadata
+     *
+     * @param \BackBee\Site\Metadata\Metadata $metadata
+     *
      * @return \BackBee\Site\Site
      */
     public function setMetadata(Metadata $metadata)

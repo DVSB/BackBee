@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,23 +26,23 @@ namespace BackBee\Bundle;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 
 /**
- * BundleInterface which define somes methods to implements for BackBee bundles; it also define some constants
+ * BundleInterface which define somes methods to implements for BackBee bundles; it also define some constants.
  *
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
 {
     /**
-     * service id pattern (for bundle and bundle's config)
+     * service id pattern (for bundle and bundle's config).
      */
     const BUNDLE_SERVICE_ID_PATTERN = 'bundle.%bundle_name%';
     const CONFIG_SERVICE_ID_PATTERN = '%bundle_service_id%.config';
 
     /**
-     * Config directories names
+     * Config directories names.
      */
     const CONFIG_DIRECTORY_NAME = 'Config';
     const OLD_CONFIG_DIRECTORY_NAME = 'Ressources';
@@ -50,14 +50,14 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
     const DEFAULT_CONFIG_PER_SITE_VALUE = true;
 
     /**
-     * Returns the bundle id
+     * Returns the bundle id.
      *
      * @return string bundle id
      */
     public function getId();
 
     /**
-     * Returns bundle base directory
+     * Returns bundle base directory.
      *
      * @return string bundle base directory
      */
@@ -65,7 +65,7 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
 
     /**
      * Returns bundle property if you provide key, else every properties; a bundle
-     * property is any key/value defined in 'bundle'section in config.yml
+     * property is any key/value defined in 'bundle'section in config.yml.
      *
      * @param string $key name of the property
      *
@@ -74,43 +74,43 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
     public function getProperty($key = null);
 
     /**
-     * Method to call when we get the bundle for the first time
+     * Method to call when we get the bundle for the first time.
      */
     public function start();
 
     /**
-     * Method to call before stop or destroy of current bundle
+     * Method to call before stop or destroy of current bundle.
      */
     public function stop();
 
     /**
-     * Returns the application current bundle is registered into
+     * Returns the application current bundle is registered into.
      *
      * @return BackBee\BBApplication application that own current bundle
      */
     public function getApplication();
 
     /**
-     * Current bundle entity manager
+     * Current bundle entity manager.
      *
      * @return Doctrine\ORM\EntityManager
      */
     public function getEntityManager();
 
     /**
-     * Defines if current bundle is started or not
+     * Defines if current bundle is started or not.
      *
      * @return boolean true if the bundle is started, else false
      */
     public function isStarted();
 
     /**
-     * Switch current bundle as started (so self::isStarted() will return true)
+     * Switch current bundle as started (so self::isStarted() will return true).
      */
     public function started();
 
     /**
-     * Defines if current bundle require different config per site or not
+     * Defines if current bundle require different config per site or not.
      *
      * @return boolean true if current bundle require a different config per site, else false
      */
@@ -118,7 +118,7 @@ interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
 
     /**
      * Checks if current bundle is enabled or not (it also defines if it is
-     * loaded by BundleLoader into application)
+     * loaded by BundleLoader into application).
      *
      * @return boolean true if the bundle is enabled, else false
      */

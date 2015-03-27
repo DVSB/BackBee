@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,10 +31,10 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
- * Profiler Toolbar listener
+ * Profiler Toolbar listener.
  *
  * @category    BackBee
- * @package     BackBee\Profiler
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -55,7 +55,8 @@ class ToolbarListener implements ContainerAwareInterface
     }
 
     /**
-     * @param  Request $request
+     * @param Request $request
+     *
      * @return boolean - true if the listener should be enabled for the $request
      */
     public function isEnabled()

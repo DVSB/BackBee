@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,17 +24,18 @@
 namespace BackBee\Event;
 
 /**
- * A event dispatch after a file was uploaded in BB application
+ * A event dispatch after a file was uploaded in BB application.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class PostUploadEvent extends Event
 {
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $source_file Path to the uploaded file
      * @param string $target_file Target path to copy uploaded file
      */
@@ -44,7 +45,8 @@ class PostUploadEvent extends Event
     }
 
     /**
-     * Returns the path to the uploaded file
+     * Returns the path to the uploaded file.
+     *
      * @return string
      */
     public function getSourceFile()
@@ -53,7 +55,8 @@ class PostUploadEvent extends Event
     }
 
     /**
-     * Returns the target path if exists, NULL otherwise
+     * Returns the target path if exists, NULL otherwise.
+     *
      * @return string|NULL
      */
     public function getTargetFile()
@@ -63,6 +66,7 @@ class PostUploadEvent extends Event
 
     /**
      * Is the source file is a valid readable file ?
+     *
      * @return boolean
      */
     public function hasValidSourceFile()

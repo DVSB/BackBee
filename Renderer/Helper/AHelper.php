@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,8 +27,7 @@ use BackBee\Renderer\ARenderer;
 
 /**
  * @category    BackBee
- * @package     BackBee\Renderer
- * @subpackage  Helper
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -40,7 +39,8 @@ abstract class AHelper
     protected $_renderer;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \BackBee\Renderer\ARenderer $renderer
      */
     public function __construct(ARenderer $renderer)
@@ -49,8 +49,10 @@ abstract class AHelper
     }
 
     /**
-     * Set the renderer
-     * @param  \BackBee\Renderer\ARenderer      $renderer
+     * Set the renderer.
+     *
+     * @param \BackBee\Renderer\ARenderer $renderer
+     *
      * @return \BackBee\Renderer\Helper\AHelper
      */
     public function setRenderer(ARenderer $renderer)

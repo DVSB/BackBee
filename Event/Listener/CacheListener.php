@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Event\Listener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ApplicationInterface;
 use BackBee\Cache\AExtendedCache;
 use BackBee\Cache\CacheIdentifierGenerator;
@@ -39,67 +38,66 @@ use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Util\Doctrine\ScheduledEntities;
 
 /**
- * Listener to Cache events
+ * Listener to Cache events.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 class CacheListener implements EventSubscriberInterface
 {
     /**
-     * The current application instance
+     * The current application instance.
      *
      * @var \BackBee\BBApplication
      */
     private $application;
 
     /**
-     * cache validator
+     * cache validator.
      *
      * @var BackBee\Cache\CacheValidator
      */
     private $validator;
 
     /**
-     * cache identifier generator
+     * cache identifier generator.
      *
      * @var BackBee\Cache\CacheIdentifierGenerator
      */
     private $identifier_generator;
 
     /**
-     * The page cache system
+     * The page cache system.
      *
      * @var \BackBee\Cache\AExtendedCache
      */
     private $cache_page;
 
     /**
-     * The content cache system
+     * The content cache system.
      *
      * @var \BackBee\Cache\AExtendedCache
      */
     private $cache_content;
 
     /**
-     * The object to be rendered
+     * The object to be rendered.
      *
      * @var \BackBee\Renderer\IRenderable
      */
     private $object;
 
     /**
-     * Is the deletion of cached page is done
+     * Is the deletion of cached page is done.
      *
      * @var boolean
      */
     private $page_cache_deletion_done = false;
 
     /**
-     * Cached contents already deleted
+     * Cached contents already deleted.
      *
      * @var boolean
      */
@@ -123,7 +121,7 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * constructor
+     * constructor.
      *
      * @param ApplicationInterface     $application
      * @param CacheValidator           $validator
@@ -151,7 +149,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Looks for available cached data before rendering a content
+     * Looks for available cached data before rendering a content.
+     *
      * @param \BackBee\Event\Event $event
      */
     public function onPreRenderContent(RendererEvent $event)
@@ -182,7 +181,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Saves in cache the rendered cache data
+     * Saves in cache the rendered cache data.
+     *
      * @param \BackBee\Event\Event $event
      */
     public function onPostRenderContent(RendererEvent $event)
@@ -224,7 +224,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Clears cached data associated to the content to be flushed
+     * Clears cached data associated to the content to be flushed.
+     *
      * @param \BackBee\Event\Event $event
      */
     public function onFlushContent(Event $event)
@@ -269,7 +270,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Looks for available cached data before rendering a page
+     * Looks for available cached data before rendering a page.
+     *
      * @param \BackBee\Event\Event $event
      */
     public function onPreRenderPage(RendererEvent $event)
@@ -300,7 +302,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Saves in cache the rendered page data
+     * Saves in cache the rendered page data.
+     *
      * @param \BackBee\Event\Event $event
      */
     public function onPostRenderPage(RendererEvent $event)
@@ -337,7 +340,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Clears cached data associated to the page to be flushed
+     * Clears cached data associated to the page to be flushed.
+     *
      * @param \BackBee\Event\Event $event
      */
     public function onFlushPage(Event $event)
@@ -374,9 +378,11 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Checks the event and system validity then returns the content target, FALSE otherwise
-     * @param  \BackBee\Event\Event $event
-     * @param  boolean              $check_status
+     * Checks the event and system validity then returns the content target, FALSE otherwise.
+     *
+     * @param \BackBee\Event\Event $event
+     * @param boolean              $check_status
+     *
      * @return boolean
      */
     private function checkCacheContentEvent($check_status = true)
@@ -399,9 +405,11 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Checks the event and system validity then returns the page target, FALSE otherwise
-     * @param  \BackBee\Event\Event $event
-     * @param  boolean              $check_status
+     * Checks the event and system validity then returns the page target, FALSE otherwise.
+     *
+     * @param \BackBee\Event\Event $event
+     * @param boolean              $check_status
+     *
      * @return boolean
      */
     private function checkCachePageEvent($check_status = true)
@@ -417,7 +425,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Return the cache id for the current rendered content
+     * Return the cache id for the current rendered content.
+     *
      * @return string|FALSE
      */
     private function getContentCacheId(ARenderer $renderer)
@@ -431,7 +440,8 @@ class CacheListener implements EventSubscriberInterface
     }
 
     /**
-     * Return the cache id for the current requested page
+     * Return the cache id for the current requested page.
+     *
      * @return string|FALSE
      */
     private function getPageCacheId()

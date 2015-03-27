@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,9 +26,10 @@ namespace BackBee\NestedNode;
 use BackBee\ClassContent\AClassContent;
 
 /**
- * Media entity in BackBee
+ * Media entity in BackBee.
+ *
  * @category    BackBee
- * @package     BackBee\NestedNode
+ *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\NestedNode\Repository\MediaRepository")
@@ -39,7 +40,8 @@ class Media implements \JsonSerializable
 {
 
     /**
-     * Unique identifier of the media
+     * Unique identifier of the media.
+     *
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
@@ -47,7 +49,8 @@ class Media implements \JsonSerializable
     protected $_id;
 
     /**
-     * The media folder owning this media
+     * The media folder owning this media.
+     *
      * @var \BackBee\NestedNode\MediaFolder
      * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="media_folder_uid", referencedColumnName="uid")
@@ -55,7 +58,8 @@ class Media implements \JsonSerializable
     protected $_media_folder;
 
     /**
-     * The element content of this media
+     * The element content of this media.
+     *
      * @var \BackBee\ClassContent\AClassContent
      * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
@@ -63,35 +67,40 @@ class Media implements \JsonSerializable
     protected $_content;
 
     /**
-     * The title of this media
+     * The title of this media.
+     *
      * @var string
      * @Column(type="string", name="title")
      */
     protected $_title;
 
     /**
-     * The publication datetime
+     * The publication datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="date")
      */
     protected $_date;
 
     /**
-     * The creation datetime
+     * The creation datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="created")
      */
     protected $_created;
 
     /**
-     * The last modification datetime
+     * The last modification datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="modified")
      */
     protected $_modified;
 
     /**
-     * Class constructor of a media entity
+     * Class constructor of a media entity.
+     *
      * @param string    $title optional, the title of the new media, 'Untitled media' by default
      * @param \DateTime $date  optional, the publication date, current time by default
      */
@@ -105,8 +114,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param \BackBee\ClassContent\AClassContent $content
+     *
      * @return string
+     *
      * @deprecated since version 0.10.0
      */
     public static function getAbsolutePath($content = null)
@@ -115,8 +126,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param \BackBee\ClassContent\AClassContent $content
+     *
      * @return string
+     *
      * @deprecated since version 0.10.0
      */
     public static function getWebPath($content = null)
@@ -126,6 +139,7 @@ class Media implements \JsonSerializable
 
     /**
      * @return string
+     *
      * @deprecated since version 0.10.0
      */
     public static function getUploadTmpDir()
@@ -135,6 +149,7 @@ class Media implements \JsonSerializable
 
     /**
      * @return string
+     *
      * @deprecated since version 0.10.0
      */
     protected static function getUploadDir()
@@ -143,8 +158,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Sets the media folder
-     * @param  \BackBee\NestedNode\MediaFolder $media_folder
+     * Sets the media folder.
+     *
+     * @param \BackBee\NestedNode\MediaFolder $media_folder
+     *
      * @return \BackBee\NestedNode\Media
      */
     public function setMediaFolder(MediaFolder $media_folder)
@@ -155,8 +172,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Sets the element content to the media
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * Sets the element content to the media.
+     *
+     * @param \BackBee\ClassContent\AClassContent $content
+     *
      * @return \BackBee\NestedNode\Media
      */
     public function setContent(AClassContent $content)
@@ -167,8 +186,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Sets the title
-     * @param  string                    $title
+     * Sets the title.
+     *
+     * @param string $title
+     *
      * @return \BackBee\NestedNode\Media
      */
     public function setTitle($title)
@@ -179,8 +200,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Sets the publication date
-     * @param  \DateTime                 $date
+     * Sets the publication date.
+     *
+     * @param \DateTime $date
+     *
      * @return \BackBee\NestedNode\Media
      */
     public function setDate(\DateTime $date)
@@ -191,8 +214,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Sets the created date
-     * @param  \DateTime                 $created
+     * Sets the created date.
+     *
+     * @param \DateTime $created
+     *
      * @return \BackBee\NestedNode\Media
      */
     public function setCreated(\DateTime $created)
@@ -203,8 +228,10 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Sets the last modified date
-     * @param  \DateTime                 $modified
+     * Sets the last modified date.
+     *
+     * @param \DateTime $modified
+     *
      * @return \BackBee\NestedNode\Media
      */
     public function setModified(\DateTime $modified)
@@ -215,7 +242,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Returns the unique identifier
+     * Returns the unique identifier.
+     *
      * @return integer
      * @codeCoverageIgnore
      */
@@ -225,7 +253,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Gets the title
+     * Gets the title.
+     *
      * @return string
      */
     public function getTitle()
@@ -234,7 +263,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Gets the publication date
+     * Gets the publication date.
+     *
      * @return \DateTime
      */
     public function getDate()
@@ -243,7 +273,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Gets the created date
+     * Gets the created date.
+     *
      * @return \DateTime
      */
     public function getCreated()
@@ -252,7 +283,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Gets the last mofified date
+     * Gets the last mofified date.
+     *
      * @return \DateTime
      */
     public function getModified()
@@ -261,7 +293,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Returns the media folder owning the media
+     * Returns the media folder owning the media.
+     *
      * @return \BackBee\NestedNode\MediaFolder
      */
     public function getMediaFolder()
@@ -270,7 +303,8 @@ class Media implements \JsonSerializable
     }
 
     /**
-     * Returns the element content of the media
+     * Returns the element content of the media.
+     *
      * @return \BackBee\ClassContent\AClassContent
      */
     public function getContent()

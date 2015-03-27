@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -38,20 +38,20 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * * \BackBee\Site\AclassContent
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Acl\Domain
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 abstract class AObjectIdentifiable implements IObjectIdentifiable
 {
     /**
-     * An abstract method to gets the unique id of the object
+     * An abstract method to gets the unique id of the object.
      */
     abstract public function getUid();
 
     /**
      * Returns a unique identifier for this domain object.
+     *
      * @return string
      */
     public function getObjectIdentifier()
@@ -61,6 +61,7 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
 
     /**
      * Returns the unique identifier for this object.
+     *
      * @return string
      */
     public function getIdentifier()
@@ -70,6 +71,7 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
 
     /**
      * Returns the PHP class name of the object.
+     *
      * @return string
      */
     public function getType()
@@ -79,7 +81,9 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
 
     /**
      * Checks for an explicit objects equality.
-     * @param  \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     *
+     * @param \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     *
      * @return Boolean
      */
     public function equals(IObjectIdentifiable $identity)

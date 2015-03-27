@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,13 +24,12 @@
 namespace BackBee\Tests\Mock;
 
 use org\bovigo\vfs\vfsStream;
-
 use BackBee\BBApplication;
 use BackBee\Site\Site;
 
 /**
  * @category    BackBee
- * @package     BackBee\Tests\Mock
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -56,13 +55,14 @@ class MockBBApplication extends BBApplication
     private $_overwrite_config;
 
     /**
-     * The mock base directory
+     * The mock base directory.
+     *
      * @var \org\bovigo\vfs\vfsStreamDirectory
      */
     private $_mock_basedir;
 
     /**
-     * Mock the BBApplication class constructor
+     * Mock the BBApplication class constructor.
      *
      * @param string  $context
      * @param boolean $debug
@@ -85,7 +85,7 @@ class MockBBApplication extends BBApplication
     }
 
     /**
-     * Get vendor dir
+     * Get vendor dir.
      *
      * @return string
      */
@@ -95,7 +95,7 @@ class MockBBApplication extends BBApplication
     }
 
     /**
-     * Mock the merhod returning the base repository directory
+     * Mock the merhod returning the base repository directory.
      *
      * @return string
      */
@@ -110,7 +110,7 @@ class MockBBApplication extends BBApplication
     }
 
     /**
-     * Initilizes the mock structure
+     * Initilizes the mock structure.
      *
      * @return \BackBee\Tests\Mock\MockBBApplication
      */
@@ -147,7 +147,6 @@ class MockBBApplication extends BBApplication
     }
 
     /**
-     *
      * @inheritDoc
      */
     public function start(Site $site = null)

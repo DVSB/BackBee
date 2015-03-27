@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,14 +24,13 @@
 namespace BackBee\Workflow;
 
 use JMS\Serializer\Annotation as Serializer;
-
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
 use BackBee\Site\Layout;
 use BackBee\Utils\Numeric;
 
 /**
- * A workflow state for NestedNode\Page
+ * A workflow state for NestedNode\Page.
  *
  * A negative code state is applied before online main state
  * A positive code state is applied after online main state
@@ -39,7 +38,7 @@ use BackBee\Utils\Numeric;
  * A state can be associated to a specific Site\Layout and/or Listener
  *
  * @category    BackBee
- * @package     BackBee\Workflow
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\Workflow\Repository\StateRepository")
@@ -50,7 +49,8 @@ use BackBee\Utils\Numeric;
 class State extends AObjectIdentifiable implements \JsonSerializable
 {
     /**
-     * The unique identifier of the state
+     * The unique identifier of the state.
+     *
      * @var string
      * @Id @Column(type="string", name="uid")
      *
@@ -61,7 +61,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     protected $_uid;
 
     /**
-     * The code of the workflow state
+     * The code of the workflow state.
+     *
      * @var int
      * @Column(type="integer", name="code")
      *
@@ -71,7 +72,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     protected $_code;
 
     /**
-     * The label of the workflow state
+     * The label of the workflow state.
+     *
      * @var string
      * @Column(type="string", name="label")
      *
@@ -82,6 +84,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
 
     /**
      * The optional layout to be applied for state.
+     *
      * @var \BackBee\Site\Layout
      * @ManyToOne(targetEntity="BackBee\Site\Layout", fetch="EXTRA_LAZY")
      * @JoinColumn(name="layout", referencedColumnName="uid")
@@ -89,14 +92,16 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     protected $_layout;
 
     /**
-     * The optional listener classname
+     * The optional listener classname.
+     *
      * @var string
      * @Column(type="string", name="listener")
      */
     protected $_listener;
 
     /**
-     * State's constructor
+     * State's constructor.
+     *
      * @param string $uid
      * @param array  $options
      */
@@ -114,7 +119,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns the unique identifier
+     * Returns the unique identifier.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -124,7 +130,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns the code of the state
+     * Returns the code of the state.
+     *
      * @return int
      * @codeCoverageIgnore
      */
@@ -134,9 +141,12 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Sets the code
-     * @param  int                                         $code
+     * Sets the code.
+     *
+     * @param int $code
+     *
      * @return \BackBee\Workflow\State
+     *
      * @throws \BackBee\Exception\InvalidArgumentException
      */
     public function setCode($code)
@@ -151,7 +161,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns the label
+     * Returns the label.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -161,7 +172,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns the layout if defined, NULL otherwise
+     * Returns the layout if defined, NULL otherwise.
+     *
      * @return \BackBee\Site\Layout
      * @codeCoverageIgnore
      */
@@ -171,7 +183,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns the listener classname if defined, NULL otherwise
+     * Returns the listener classname if defined, NULL otherwise.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -181,8 +194,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Sets the label
-     * @param  type                    $label
+     * Sets the label.
+     *
+     * @param type $label
+     *
      * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
@@ -194,8 +209,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Sets the layout associated to this state
-     * @param  \BackBee\Site\Layout    $layout
+     * Sets the layout associated to this state.
+     *
+     * @param \BackBee\Site\Layout $layout
+     *
      * @return \BackBee\Workflow\State
      */
     public function setLayout(Layout $layout = null)
@@ -206,8 +223,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Sets the optional listener classname
-     * @param  string                  $listener
+     * Sets the optional listener classname.
+     *
+     * @param string $listener
+     *
      * @return \BackBee\Workflow\State
      * @codeCoverageIgnore
      */
@@ -219,8 +238,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns an array representation of the workflow state
+     * Returns an array representation of the workflow state.
+     *
      * @return string
+     *
      * @deprecated since version 1.0
      */
     public function toArray()
@@ -235,8 +256,10 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns a string representation of the workflow state
+     * Returns a string representation of the workflow state.
+     *
      * @return string
+     *
      * @deprecated since version 1.0
      */
     public function serialize()
@@ -250,11 +273,15 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Constructs the state from a string or object
-     * @param  mixed                                       $serialized The string representation of the object.
+     * Constructs the state from a string or object.
+     *
+     * @param mixed $serialized The string representation of the object.
+     *
      * @return \BackBee\Workflow\State
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                                with strict mode, if a property does not exists
+     *                                                     with strict mode, if a property does not exists
+     *
      * @deprecated since version 1.0
      */
     public function unserialize($serialized, $strict = false)
@@ -280,7 +307,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Layout's uid getter
+     * Layout's uid getter.
      *
      * @return null|string
      *
@@ -293,7 +320,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * {@inherit}
+     * {@inherit}.
      */
     public function jsonSerialize()
     {

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,20 +28,23 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Utils\File\File;
 
 /**
- * Set of utility methods to deal with media files
+ * Set of utility methods to deal with media files.
  *
  * @category    BackBee
- * @package     BackBee\Util
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Media
 {
     /**
-     * Returns the computed storage filename of an element file
-     * @param  \BackBee\ClassContent\Element\File          $content
-     * @param  int                                         $folder_size Optional, size in characters of the storing folder
+     * Returns the computed storage filename of an element file.
+     *
+     * @param \BackBee\ClassContent\Element\File $content
+     * @param int                                $folder_size Optional, size in characters of the storing folder
+     *
      * @return string
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided element file is empty
      */
     public static function getPathFromContent(ElementFile $content, $folder_size = 3)
@@ -68,12 +71,15 @@ class Media
     }
 
     /**
-     * Returns the computed storage filename base on an uid
-     * @param  string                                      $uid
-     * @param  string                                      $originalname
-     * @param  int                                         $folder_size
-     * @param  boolean                                     $include_originalname
+     * Returns the computed storage filename base on an uid.
+     *
+     * @param string  $uid
+     * @param string  $originalname
+     * @param int     $folder_size
+     * @param boolean $include_originalname
+     *
      * @return string
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the provided $uid is invalid
      */
     public static function getPathFromUid($uid, $originalname, $folder_size = 3, $include_originalname = false)
@@ -100,12 +106,15 @@ class Media
     }
 
     /**
-     * Resizes an image and saves it to the provided file path
-     * @param  string                         $source The filepath of the source image
-     * @param  string                         $dest   The filepath of the target image
-     * @param  int                            $width
-     * @param  int                            $height
-     * @return boolean                        Returns TRUE on success, FALSE on failure
+     * Resizes an image and saves it to the provided file path.
+     *
+     * @param string $source The filepath of the source image
+     * @param string $dest   The filepath of the target image
+     * @param int    $width
+     * @param int    $height
+     *
+     * @return boolean Returns TRUE on success, FALSE on failure
+     *
      * @throws \BackBee\Exception\BBException Occures if gd extension is not loaded
      * @throws InvalidArgumentException       Occures on unsupported file type or unreadable file source
      */

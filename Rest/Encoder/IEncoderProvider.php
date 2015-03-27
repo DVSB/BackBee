@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,10 +24,10 @@
 namespace BackBee\Rest\Encoder;
 
 /**
- * Defines the interface of encoder providers
+ * Defines the interface of encoder providers.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -36,7 +36,8 @@ interface IEncoderProvider
     /**
      * Check if a certain format is supported.
      *
-     * @param  string  $format Format for the requested decoder.
+     * @param string $format Format for the requested decoder.
+     *
      * @return Boolean
      */
     public function supports($format);
@@ -44,7 +45,8 @@ interface IEncoderProvider
     /**
      * Provides decoders, possibly lazily.
      *
-     * @param  string                                  $format Format for the requested decoder.
+     * @param string $format Format for the requested decoder.
+     *
      * @return FOS\RestBundle\Decoder\DecoderInterface
      */
     public function getEncoder($format);

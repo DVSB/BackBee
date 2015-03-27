@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,24 +26,22 @@ namespace BackBee\Workflow\Listener;
 use BackBee\Event\Event;
 
 /**
- * Listener to page events
+ * Listener to page events.
  *
  * @category    BackBee
- * @package     BackBee\Workflow\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      d.Bensid <djoudi.bensid@lp-digital.fr>
  */
-
 class pageListener
 {
     /**
-     * Occur on nestednode.page.preupdate events
+     * Occur on nestednode.page.preupdate events.
      *
      * @access public
+     *
      * @param Event $event
      */
-
     public static function onPreUpdate(Event $event)
     {
         $page = $event->getTarget();

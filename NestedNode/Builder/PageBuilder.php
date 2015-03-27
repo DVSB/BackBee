@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\NestedNode\Builder;
 
 use Doctrine\ORM\EntityManager;
-
 use BackBee\ClassContent\AClassContent;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Layout;
@@ -85,7 +84,7 @@ class PageBuilder
     private $root;
 
     /**
-     * BackBee\NestedNode\Page
+     * BackBee\NestedNode\Page.
      */
     private $parent;
 
@@ -130,7 +129,7 @@ class PageBuilder
     private $persist;
 
     /**
-     * [__construct description]
+     * [__construct description].
      */
     public function __construct(EntityManager $em)
     {
@@ -140,7 +139,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getPage()
@@ -237,7 +237,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setUid($uid)
@@ -248,7 +249,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getUid()
@@ -257,7 +259,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setTitle($title)
@@ -268,7 +271,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getTitle()
@@ -277,7 +281,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setUrl($url)
@@ -288,7 +293,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getUrl()
@@ -297,7 +303,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setSite(Site $site)
@@ -308,7 +315,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getSite()
@@ -317,7 +325,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setRoot(Page $root, $isRoot = false)
@@ -332,7 +341,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getRoot()
@@ -341,7 +351,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setParent(Page $parent)
@@ -352,7 +363,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getParent()
@@ -361,7 +373,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
@@ -373,7 +386,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getLayout()
@@ -382,7 +396,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setState($state)
@@ -393,7 +408,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function putOnlineAndVisible()
@@ -402,7 +418,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function putOnlineAndHidden()
@@ -411,7 +428,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function pushElement(AClassContent $element, $setMainNode = false, $contentSetPos = 0)
@@ -426,7 +444,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function addElement(AClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
@@ -450,7 +469,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function getElement($index)
@@ -459,7 +479,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function elements()
@@ -468,7 +489,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function clearElements()
@@ -509,7 +531,7 @@ class PageBuilder
     }
 
     /**
-     * Alias of publishedAt
+     * Alias of publishedAt.
      *
      * @see self::publishedAt
      */
@@ -641,7 +663,7 @@ class PageBuilder
     /**
      * Sets the persist mode;
      * /!\ if you set a valid persist mode (SELF::INSERT_AS_FIRST_CHILD or SELF::INSERT_AS_LAST_CHILD),
-     * this page will be persist for you, it also modified the left and right node of the tree
+     * this page will be persist for you, it also modified the left and right node of the tree.
      *
      * @param integer $mode
      */
@@ -651,8 +673,10 @@ class PageBuilder
     }
 
     /**
-     * Call
-     * @param  Page   $page [description]
+     * Call.
+     *
+     * @param Page $page [description]
+     *
      * @return [type] [description]
      */
     private function doPersistIfValid(Page $page)

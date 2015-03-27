@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Renderer\Adapter;
 use Twig_Loader_Filesystem;
 
 /**
- * Extends twig default filesystem loader to override some behaviors
+ * Extends twig default filesystem loader to override some behaviors.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -37,7 +37,7 @@ class TwigLoaderFilesystem extends Twig_Loader_Filesystem
 {
     /**
      * Do same stuff than Twig_Loader_Filesystem::exists() plus check if the file is
-     * readable
+     * readable.
      *
      * @see  Twig_Loader_Filesystem::exists()
      */
@@ -61,7 +61,7 @@ class TwigLoaderFilesystem extends Twig_Loader_Filesystem
 
     /**
      * Do same stuff than Twig_Loader_Filesystem::exists() plus returns the file
-     * itself if it is readable
+     * itself if it is readable.
      *
      * @see  Twig_Loader_Filesystem::findTemplate()
      */

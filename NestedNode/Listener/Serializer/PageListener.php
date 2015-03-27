@@ -25,30 +25,29 @@ namespace BackBee\NestedNode\Listener\Serializer;
 
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
-
 use BackBee\DependencyInjection\ContainerInterface;
 
 /**
  * Listener to NestedNode\Page events :
- *    - serializer.post_serialize: add URI entry to serialized data
+ *    - serializer.post_serialize: add URI entry to serialized data.
  *
  * @category    BackBee
- * @package     BackBee\NestNode
- * @subpackage  Listener\Serializer
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class PageListener implements EventSubscriberInterface
 {
-
     /**
-     * The services container
+     * The services container.
+     *
      * @var \BackBee\DependencyInjection\ContainerInterface
      */
     private $container;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \BackBee\DependencyInjection\ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
@@ -56,7 +55,7 @@ class PageListener implements EventSubscriberInterface
         $this->container = $container;
     }
 
-    /**
+    /*
      * Returns the events to which this class has subscribed.
      *
      * Return format:
@@ -70,7 +69,7 @@ class PageListener implements EventSubscriberInterface
      *
      * @return array
      */
-    static public function getSubscribedEvents()
+    public static function getSubscribedEvents()
     {
         return array(
             array('event' => 'serializer.post_serialize', 'class' => 'BackBee\NestedNode\Page', 'method' => 'onPostSerialize'),
@@ -78,7 +77,8 @@ class PageListener implements EventSubscriberInterface
     }
 
     /**
-     * Method called on serializer.post_serialize event for Page object
+     * Method called on serializer.post_serialize event for Page object.
+     *
      * @param \JMS\Serializer\EventDispatcher\ObjectEvent $event
      */
     public function onPostSerialize(ObjectEvent $event)
@@ -88,5 +88,4 @@ class PageListener implements EventSubscriberInterface
             $event->getVisitor()->addData('uri', $uri);
         }
     }
-
 }

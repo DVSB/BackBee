@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,7 +30,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * A website layout
+ * A website layout.
  *
  * If the layout is not associated to a website, it is proposed as layout template
  * to webmasters
@@ -52,7 +52,7 @@ use JMS\Serializer\Annotation as Serializer;
  * }
  *
  * @category    BackBee
- * @package     BackBee\Site
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\Site\Repository\LayoutRepository")
@@ -65,6 +65,7 @@ class Layout extends AObjectIdentifiable
 {
     /**
      * The unique identifier.
+     *
      * @var string
      * @Id @Column(type="string", name="uid")
      *
@@ -75,6 +76,7 @@ class Layout extends AObjectIdentifiable
 
     /**
      * The label of this layout.
+     *
      * @var string
      * @Column(type="string", name="label", nullable=false)
      *
@@ -85,6 +87,7 @@ class Layout extends AObjectIdentifiable
 
     /**
      * The file name of the layout.
+     *
      * @var string
      * @Column(type="string", name="path", nullable=false)
      *
@@ -95,13 +98,15 @@ class Layout extends AObjectIdentifiable
 
     /**
      * The seralized data.
+     *
      * @var string
      * @Column(type="text", name="data", nullable=false)
      */
     protected $_data;
 
     /**
-     * The creation datetime
+     * The creation datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="created", nullable=false)
      *
@@ -111,7 +116,8 @@ class Layout extends AObjectIdentifiable
     protected $_created;
 
     /**
-     * The last modification datetime
+     * The last modification datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="modified", nullable=false)
      *
@@ -121,7 +127,8 @@ class Layout extends AObjectIdentifiable
     protected $_modified;
 
     /**
-     * The optional path to the layout icon
+     * The optional path to the layout icon.
+     *
      * @var string
      * @Column(type="string", name="picpath", nullable=true)
      *
@@ -132,6 +139,7 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Optional owner site.
+     *
      * @var \BackBee\Site\Site
      * @ManyToOne(targetEntity="BackBee\Site\Site", inversedBy="_layouts", fetch="EXTRA_LAZY")
      * @JoinColumn(name="site_uid", referencedColumnName="uid")
@@ -140,46 +148,53 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Store pages using this layout.
-     * var \Doctrine\Common\Collections\ArrayCollection
+     * var \Doctrine\Common\Collections\ArrayCollection.
+     *
      * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 
     /**
-     * Layout states
+     * Layout states.
      *
      * var \Doctrine\Common\Collections\ArrayCollection
+     *
      * @OneToMany(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY", mappedBy="_layout")
      */
     protected $_states;
 
     /**
-     * The content's parameters
+     * The content's parameters.
+     *
      * @var array
      * @Column(type="array", name="parameters", nullable = true)
      */
     protected $_parameters = array();
 
     /**
-     * The DOM document corresponding to the data
+     * The DOM document corresponding to the data.
+     *
      * @var \DOMDocument
      */
     protected $_domdocument;
 
     /**
      * Is the layout datas are valid ?
+     *
      * @var Boolean
      */
     protected $_isValid;
 
     /**
      * The final DOM zones on layout.
+     *
      * @var array
      */
     protected $_zones;
 
     /**
      * Class constructor.
+     *
      * @param string $uid     The unique identifier of the layout
      * @param array  $options Initial options for the layout:
      *                        - label      the default label
@@ -207,7 +222,9 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Returns the unique identifier.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getUid()
@@ -216,8 +233,10 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Returns the label
+     * Returns the label.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getLabel()
@@ -227,7 +246,9 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Returns the file name of the layout.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getPath()
@@ -237,7 +258,9 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Returns the serialized data of the layout.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getData()
@@ -247,7 +270,9 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Returns the unserialzed object for the layout.
+     *
      * @codeCoverageIgnore
+     *
      * @return \StdClass
      */
     public function getDataObject()
@@ -256,8 +281,10 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Returns the path to the layout icon if defined, NULL otherwise
+     * Returns the path to the layout icon if defined, NULL otherwise.
+     *
      * @codeCoverageIgnore
+     *
      * @return string|NULL
      */
     public function getPicPath()
@@ -266,8 +293,10 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Returns the owner site if defined, NULL otherwise
+     * Returns the owner site if defined, NULL otherwise.
+     *
      * @codeCoverageIgnore
+     *
      * @return \BackBee\Site\Site|NULL
      */
     public function getSite()
@@ -277,6 +306,7 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Return the final zones (ie with contentset) for the layout.
+     *
      * @return array|NULL Returns an array of zones or NULL is the layout datas
      *                    are invalid.
      */
@@ -314,9 +344,11 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Returns defined parameters
-     * @param  string $var The parameter to be return, if NULL, all parameters are returned
-     * @return mixed  the parameter value or NULL if unfound
+     * Returns defined parameters.
+     *
+     * @param string $var The parameter to be return, if NULL, all parameters are returned
+     *
+     * @return mixed the parameter value or NULL if unfound
      */
     public function getParam($var = null)
     {
@@ -332,9 +364,11 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Goes all over the $param and keep looping until $pieces is empty to return
-     * the values user is looking for
-     * @param  mixed $param
-     * @param  array $pieces
+     * the values user is looking for.
+     *
+     * @param mixed $param
+     * @param array $pieces
+     *
      * @return mixed
      */
     private function _getRecursivelyParam($param, array $pieces)
@@ -352,9 +386,12 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Returns the zone at the index $index
-     * @param  int                      $index
+     * Returns the zone at the index $index.
+     *
+     * @param int $index
+     *
      * @return \StdClass|null
+     *
      * @throws InvalidArgumentException
      */
     public function getZone($index)
@@ -373,7 +410,8 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Generates and returns a DOM document according to the unserialized data object
+     * Generates and returns a DOM document according to the unserialized data object.
+     *
      * @return \DOMDocument|NULL Returns a DOM document or NULL is the layout datas
      *                           are invalid.
      */
@@ -430,6 +468,7 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Checks for a valid structure of the unserialized data object.
+     *
      * @return Boolean Returns TRUE if the data object is valid, FALSE otherwise
      */
     public function isValid()
@@ -462,8 +501,11 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Sets the label.
+     *
      * @codeCoverageIgnore
-     * @param  string               $label
+     *
+     * @param string $label
+     *
      * @return \BackBee\Site\Layout
      */
     public function setLabel($label)
@@ -474,9 +516,12 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Set the filename of the layout
+     * Set the filename of the layout.
+     *
      * @codeCoverageIgnore
-     * @param  string               $path
+     *
+     * @param string $path
+     *
      * @return \BackBee\Site\Layout
      */
     public function setPath($path)
@@ -489,7 +534,9 @@ class Layout extends AObjectIdentifiable
     /**
      * Sets the data associated to the layout.
      * No validation checks are performed at this step.
-     * @param  mixed                $data
+     *
+     * @param mixed $data
+     *
      * @return \BackBee\Site\Layout
      */
     public function setData($data)
@@ -511,7 +558,9 @@ class Layout extends AObjectIdentifiable
     /**
      * Sets the data associated to the layout.
      * None validity checks are performed at this step.
-     * @param  mixed                $data
+     *
+     * @param mixed $data
+     *
      * @return \BackBee\Site\Layout
      */
     public function setDataObject($data)
@@ -525,8 +574,11 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Sets the path to the layout icon.
+     *
      * @codeCoverageIgnore
-     * @param  string               $picpath
+     *
+     * @param string $picpath
+     *
      * @return \BackBee\Site\Layout
      */
     public function setPicPath($picpath)
@@ -538,8 +590,11 @@ class Layout extends AObjectIdentifiable
 
     /**
      * Associates this layout to a website.
+     *
      * @codeCoverageIgnore
-     * @param  \BackBee\Site\Site   $site
+     *
+     * @param \BackBee\Site\Site $site
+     *
      * @return \BackBee\Site\Layout
      */
     public function setSite(Site $site)
@@ -550,9 +605,11 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Sets one or all parameters
-     * @param  string               $var    the parameter name to set, if NULL all the parameters array wil be set
-     * @param  mixed                $values the parameter value or all the parameters if $var is NULL
+     * Sets one or all parameters.
+     *
+     * @param string $var    the parameter name to set, if NULL all the parameters array wil be set
+     * @param mixed  $values the parameter value or all the parameters if $var is NULL
+     *
      * @return \BackBee\Site\Layout
      */
     public function setParam($var = null, $values = null)
@@ -567,8 +624,10 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Returns a contentset options according to the layout zone
-     * @param  \StdClass $zone
+     * Returns a contentset options according to the layout zone.
+     *
+     * @param \StdClass $zone
+     *
      * @return array
      */
     private function _getZoneOptions(\stdClass $zone)
@@ -630,9 +689,10 @@ class Layout extends AObjectIdentifiable
     }
 
     /**
-     * Add state
+     * Add state.
      *
-     * @param  \BackBee\Workflow\State $state
+     * @param \BackBee\Workflow\State $state
+     *
      * @return \BackBee\Site\Layout
      */
     public function addState(\BackBee\Workflow\State $state)
@@ -642,7 +702,7 @@ class Layout extends AObjectIdentifiable
         return $this;
     }
     /**
-     * Remove state
+     * Remove state.
      *
      * @param \BackBee\Workflow\State $state
      */
@@ -651,7 +711,7 @@ class Layout extends AObjectIdentifiable
         $this->_states->removeElement($state);
     }
     /**
-     * Get states
+     * Get states.
      *
      * @return \Doctrine\Common\Collections\Collection
      */

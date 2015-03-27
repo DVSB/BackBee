@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,7 +29,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Exception\InvalidArgumentException;
@@ -45,17 +44,17 @@ use BackBee\Site\Layout;
 use BackBee\Workflow\State;
 
 /**
- * Page Controller
+ * Page Controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class PageController extends ARestController
 {
     /**
-     * Returns page entity available status
+     * Returns page entity available status.
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
@@ -65,7 +64,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Get page's metadatas
+     * Get page's metadatas.
      *
      * @param Page $page the page we want to get its metadatas
      *
@@ -83,7 +82,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Update page's metadatas
+     * Update page's metadatas.
      *
      * @param Page    $page    the page we want to update its metadatas
      * @param Request $request
@@ -113,7 +112,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Get collection of page entity
+     * Get collection of page entity.
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -159,7 +158,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Get page by uid
+     * Get page by uid.
      *
      * @param string $uid the unique identifier of the page we want to retrieve
      *
@@ -174,7 +173,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Create a page
+     * Create a page.
      *
      * @Rest\RequestParam(name="title", description="Page title", requirements={
      *   @Assert\Length(min=3, minMessage="Title must contain at least 3 characters"),
@@ -259,7 +258,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Update page
+     * Update page.
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -319,7 +318,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Patch page
+     * Patch page.
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -361,7 +360,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Delete page
+     * Delete page.
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -385,7 +384,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Clone a page
+     * Clone a page.
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -447,7 +446,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Getter for page entity repository
+     * Getter for page entity repository.
      *
      * @return \BackBee\NestedNode\Repository\PageRepository
      */
@@ -457,7 +456,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Returns every pages that contains provided classcontent
+     * Returns every pages that contains provided classcontent.
      *
      * @param string $content_type
      * @param string $content_uid
@@ -492,7 +491,7 @@ class PageController extends ARestController
 
     /**
      * Returns pages collection by doing classic selection and by applying filters provided in request
-     * query parameters
+     * query parameters.
      *
      * @param Request   $request
      * @param integer   $start
@@ -547,7 +546,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Page workflow state setter
+     * Page workflow state setter.
      *
      * @param Page  $page
      * @param State $workflow
@@ -563,7 +562,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Custom patch process for Page's state property
+     * Custom patch process for Page's state property.
      *
      * @param Page  $page
      * @param array $operations passed by reference
@@ -617,7 +616,7 @@ class PageController extends ARestController
     }
 
     /**
-     * Custom patch process for Page's sibling or parent node
+     * Custom patch process for Page's sibling or parent node.
      *
      * @param Page  $page
      * @param array $operations passed by reference
@@ -667,11 +666,12 @@ class PageController extends ARestController
     }
 
     /**
-     * Retrieves page entity with provided uid
+     * Retrieves page entity with provided uid.
      *
      * @param string $uid
      *
      * @return Page
+     *
      * @throws NotFoundHttpException raised if page not found with provided uid
      */
     private function getPageByUid($uid)

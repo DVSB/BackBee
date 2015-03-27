@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,30 +23,9 @@
 
 namespace BackBee\Rest\Patcher;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 /**
- *
- *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -56,7 +35,7 @@ interface PatcherInterface
     const FALSE_ON_INVALID_OPERATION = 2;
 
     /**
-     * list of available operations
+     * list of available operations.
      */
     const TEST_OPERATION = 'test';
     const REMOVE_OPERATION = 'remove';
@@ -66,7 +45,7 @@ interface PatcherInterface
     const COPY_OPEARATION = 'copy';
 
     /**
-     * [setRightManager description]
+     * [setRightManager description].
      *
      * @param RightManager $right_manager [description]
      *
@@ -75,14 +54,14 @@ interface PatcherInterface
     public function setRightManager(RightManager $right_manager);
 
     /**
-     * [getRightManager description]
+     * [getRightManager description].
      *
      * @return [type] [description]
      */
     public function getRightManager();
 
     /**
-     * [patch description]
+     * [patch description].
      *
      * @param object  $entity
      * @param array   $operations

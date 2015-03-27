@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\Event\Listener;
 
 use Doctrine\ORM\Events;
-
 use BackBee\BBApplication;
 
 /**
@@ -53,23 +52,26 @@ use BackBee\BBApplication;
  *              to entities have been removed from the unit of work.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ *
  * @see         http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/events.html
  */
 class DoctrineListener
 {
     /**
-     * Current BackBee application
+     * Current BackBee application.
+     *
      * @var BackBee\BBApplication
      */
     private $_application;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @access public
+     *
      * @param BBApplication $application The current instance of BB application
      */
     public function __construct(BBApplication $application = null)
@@ -78,8 +80,10 @@ class DoctrineListener
     }
 
     /**
-     * Trigger a BackBee\Event\Event depending on the entity and event name
+     * Trigger a BackBee\Event\Event depending on the entity and event name.
+     *
      * @access protected
+     *
      * @param string    $eventName The doctrine event name
      * @param Object    $entity    The entity instance
      * @param EventArgs $eventArgs The doctrine event arguments
@@ -97,8 +101,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur after the mapping metadata for a class has been loaded from a mapping source
+     * Occur after the mapping metadata for a class has been loaded from a mapping source.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function loadClassMetadata($eventArgs)
@@ -106,8 +112,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur when the EntityManager#clear() operation is invoked
+     * Occur when the EntityManager#clear() operation is invoked.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function onClear($eventArgs)
@@ -115,8 +123,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on preFlush events
+     * Occur on preFlush events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function preFlush($eventArgs)
@@ -138,8 +148,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on onFlush events
+     * Occur on onFlush events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function onFlush($eventArgs)
@@ -161,8 +173,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on postFlush events
+     * Occur on postFlush events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function postFlush($eventArgs)
@@ -184,8 +198,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on postLoad events
+     * Occur on postLoad events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function postLoad($eventArgs)
@@ -200,8 +216,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on postPersist events
+     * Occur on postPersist events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function postPersist($eventArgs)
@@ -212,8 +230,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on preRemove events
+     * Occur on preRemove events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function preRemove($eventArgs)
@@ -224,8 +244,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on postRemove events
+     * Occur on postRemove events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function postRemove($eventArgs)
@@ -236,8 +258,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on postUpdate events
+     * Occur on postUpdate events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function postUpdate($eventArgs)
@@ -248,8 +272,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on prePersist events
+     * Occur on prePersist events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function prePersist($eventArgs)
@@ -260,8 +286,10 @@ class DoctrineListener
     }
 
     /**
-     * Occur on preUpdate events
+     * Occur on preUpdate events.
+     *
      * @access public
+     *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
     public function preUpdate($eventArgs)

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,31 +27,31 @@ use Metadata\MetadataFactoryInterface;
 
 /**
  * RightManager is able to build a mapping of authorized action on entity's properties with
- * the provided Metadata\MetadataFactoryInterface
+ * the provided Metadata\MetadataFactoryInterface.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class RightManager
 {
     /**
-     * This factory will be used to build authorization mapping
+     * This factory will be used to build authorization mapping.
      *
      * @var \Metadata\MetadataFactoryInterface
      */
     private $metadataFactory;
 
     /**
-     * mapping of entity namespace and properties authorized actions
+     * mapping of entity namespace and properties authorized actions.
      *
      * @var array
      */
     private $rights;
 
     /**
-     * RightManager's constructor
+     * RightManager's constructor.
      *
      * @param MetadataFactoryInterface $metadataFactory the factory to use to build authorization mapping
      */
@@ -62,7 +62,7 @@ class RightManager
     }
 
     /**
-     * Return true if the $operation is authorized on $entity's $attribute, else false
+     * Return true if the $operation is authorized on $entity's $attribute, else false.
      *
      * @param object $entity
      * @param string $attribute
@@ -91,7 +91,7 @@ class RightManager
     }
 
     /**
-     * Add authorization mapping for entity
+     * Add authorization mapping for entity.
      *
      * @param object $entity
      * @param array  $mapping
@@ -106,7 +106,7 @@ class RightManager
     }
 
     /**
-     * Builds the authtorization mapping for the given $classname
+     * Builds the authtorization mapping for the given $classname.
      *
      * @param string $classname
      */
@@ -132,7 +132,7 @@ class RightManager
     }
 
     /**
-     * This method will replace '_' by '' of $propertyName if its first letter is an underscore (_)
+     * This method will replace '_' by '' of $propertyName if its first letter is an underscore (_).
      *
      * @param string $propertyName the property we want to clean
      *
@@ -145,9 +145,9 @@ class RightManager
 
     /**
      * Builds a valid method name for property name; Replaces every '_' by ''
-     * and apply ucfirst to every words seperated by an underscore
+     * and apply ucfirst to every words seperated by an underscore.
      *
-     * @param string $prefix        the prefix to prepend to the method name (example: 'get', 'set', 'is')
+     * @param string $prefix       the prefix to prepend to the method name (example: 'get', 'set', 'is')
      * @param string $propertyName
      *
      * @return string a valid method name

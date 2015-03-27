@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-
 use BackBee\ApplicationInterface;
 use BackBee\DependencyInjection\Exception\ContainerAlreadyExistsException;
 use BackBee\DependencyInjection\Exception\MissingBootstrapParametersException;
@@ -35,79 +34,79 @@ use BackBee\Util\Resolver\ConfigDirectory;
 /**
  * This class build and hydrate a BackBee\DependencyInjection\Container for any class
  * which implements BackBee\ApplicationInterface; it will first hydrate container with application
- * default value (data directory, repository directory, cache directory, etc.);
+ * default value (data directory, repository directory, cache directory, etc.);.
  *
  * ContainerBuilder also manage container dump to not reload and parse every xml and yml.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class ContainerBuilder
 {
     /**
-     * Define default name for data folder
+     * Define default name for data folder.
      */
     const DATA_FOLDER_NAME = 'Data';
 
     /**
-     * Define default name for media folder
+     * Define default name for media folder.
      */
     const MEDIA_FOLDER_NAME = 'Media';
 
     /**
-     * Define default name for cache folder
+     * Define default name for cache folder.
      */
     const CACHE_FOLDER_NAME = 'cache';
 
     /**
-     * Define default name for log folder
+     * Define default name for log folder.
      */
     const LOG_FOLDER_NAME = 'log';
 
     /**
-     * Define service filename (without extension)
+     * Define service filename (without extension).
      */
     const SERVICE_FILENAME = 'services';
 
     /**
-     * Current application which we are building a container for
+     * Current application which we are building a container for.
      *
      * @var BackBee\ApplicationInterface
      */
     private $application;
 
     /**
-     * The container we are building
+     * The container we are building.
      *
      * @var BackBee\DependencyInjection\Container
      */
     private $container;
 
     /**
-     * Application's default repository directory
+     * Application's default repository directory.
      *
      * @var string
      */
     private $repository_directory;
 
     /**
-     * Application's context
+     * Application's context.
      *
      * @var string
      */
     private $context;
 
     /**
-     * Application's environment
+     * Application's environment.
      *
      * @var string
      */
     private $environment;
 
     /**
-     * ContainerBuilder's constructor;
+     * ContainerBuilder's constructor;.
      *
      * @param BackBee\ApplicationInterface $application the application we want to build a container for
      */
@@ -120,7 +119,7 @@ class ContainerBuilder
     }
 
     /**
-     * Every time you invoke this method it will return a new BackBee\DependencyInjection\Container
+     * Every time you invoke this method it will return a new BackBee\DependencyInjection\Container.
      *
      * @return BackBee\DependencyInjection\Container
      *
@@ -146,7 +145,7 @@ class ContainerBuilder
     }
 
     /**
-     * [removeContainerDump description]
+     * [removeContainerDump description].
      *
      * @return [type] [description]
      */
@@ -169,7 +168,7 @@ class ContainerBuilder
     }
 
     /**
-     * Hydrate container with bootstrap.yml parameter
+     * Hydrate container with bootstrap.yml parameter.
      *
      * @throws MissingBootstrapParametersException raises if we are not able to find bootstrap.yml file
      */
@@ -197,7 +196,7 @@ class ContainerBuilder
 
     /**
      * Try to add $parameters[$key] into container with "$prefix + $key" as container key;
-     * add $key into missing_parameters if it does not exist as key in $parameter
+     * add $key into missing_parameters if it does not exist as key in $parameter.
      *
      * @param array  $key                key we are looking for
      * @param array  $parameters         array from where we are looking for $key
@@ -214,7 +213,7 @@ class ContainerBuilder
     }
 
     /**
-     * Hydrates container with application core parameters (like bbapp.context, bbapp.environement, etc.)
+     * Hydrates container with application core parameters (like bbapp.context, bbapp.environement, etc.).
      */
     private function hydrateContainerWithApplicationParameters()
     {
@@ -257,7 +256,7 @@ class ContainerBuilder
 
     /**
      * This method try to restore container from a dump if it is possible, otherwise it will set
-     * container.class, container.file and container.dir parameters into container
+     * container.class, container.file and container.dir parameters into container.
      */
     private function tryParseContainerDump()
     {
@@ -286,7 +285,7 @@ class ContainerBuilder
     }
 
     /**
-     * Generates and returns an uniq container dump classname depending on context and environment
+     * Generates and returns an uniq container dump classname depending on context and environment.
      *
      * @param string $bootstrap_filepath the bootstrap.yml used file path
      *
@@ -299,7 +298,7 @@ class ContainerBuilder
 
     /**
      * Load and override services into container; the load order is from the most global to the most specific
-     * depends on context and environment
+     * depends on context and environment.
      */
     private function loadApplicationServices()
     {
@@ -338,7 +337,7 @@ class ContainerBuilder
     }
 
     /**
-     * Load on the fly logging service definition, depends on debug value
+     * Load on the fly logging service definition, depends on debug value.
      */
     private function loadLoggerDefinition()
     {

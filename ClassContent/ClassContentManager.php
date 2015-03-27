@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -38,7 +38,6 @@ class ClassContentManager
 {
     private $application;
     private $categoryManager;
-    private $contents;
     private $em;
     private $thumbnailBaseDir;
     private $token;
@@ -53,8 +52,6 @@ class ClassContentManager
         $this->application = $application;
         $this->em = $application->getEntityManager();
         $this->categoryManager = $application->getContainer()->get('classcontent.category_manager');
-
-        $this->contents = new \SplObjectStorage();
     }
 
     /**
@@ -72,9 +69,11 @@ class ClassContentManager
     /**
      * Updates the content which provided data.
      *
-     * @param  AClassContent $content
-     * @param  array         $data    array of data that must contains parameters and/or elements key
+     * @param AClassContent $content
+     * @param array         $data    array of data that must contains parameters and/or elements key
+     *
      * @return AClassContent
+     *
      * @throws \InvalidArgumentException if provided data doesn't have parameters and elements key
      */
     public function update(AClassContent $content, array $data)
@@ -95,17 +94,18 @@ class ClassContentManager
     }
 
     /**
-     * Calls ::jsonSerialize of the content and build valid url for image
+     * Calls ::jsonSerialize of the content and build valid url for image.
      *
-     * @param  AClassContent $content
-     * @param  integer       $format
+     * @param AClassContent $content
+     * @param integer       $format
+     *
      * @return array
      */
     public function jsonEncode(AClassContent $content, $format = AClassContent::JSON_DEFAULT_FORMAT)
     {
         if (AClassContent::JSON_DEFINITION_FORMAT === $format) {
             $classname = get_class($content);
-            $content = new $classname;
+            $content = new $classname();
         }
 
         return $this->updateClassContentImageUrl($content->jsonSerialize($format));
@@ -117,7 +117,9 @@ class ClassContentManager
      * It can manage collection type of array or object that implements \IteratorAggregate and/or \Traversable.
      *
      * @param Paginator $paginator the paginator to convert
+     *
      * @return array
+     *
      * @throws \InvalidArgumentException if provided collection is not supported type
      */
     public function jsonEncodeCollection($collection, $format = AClassContent::JSON_DEFAULT_FORMAT)
@@ -149,7 +151,7 @@ class ClassContentManager
     }
 
     /**
-     * Returns all classcontents classnames
+     * Returns all classcontents classnames.
      *
      * @return array An array that contains all classcontents classnames
      */
@@ -166,7 +168,7 @@ class ClassContentManager
     }
 
     /**
-     * Returns classnames of all classcontents element
+     * Returns classnames of all classcontents element.
      *
      * @return array Contains every BackBee's element classcontent classnames
      */
@@ -190,10 +192,11 @@ class ClassContentManager
         return $classnames;
     }
 
-        /**
-     * Returns current revision for the given $content
+    /**
+     * Returns current revision for the given $content.
      *
      * @param AClassContent $content content we want to get the latest revision
+     *
      * @return null|BackBee\ClassContent\Revision
      */
     public function getDraft(AClassContent $content, $checkoutOnMissing = false)
@@ -208,8 +211,9 @@ class ClassContentManager
     /**
      * Computes provided data to define what to commit from given content.
      *
-     * @param  AClassContent $content
-     * @param  array         $data
+     * @param AClassContent $content
+     * @param array         $data
+     *
      * @return self
      */
     public function commit(AClassContent $content, array $data)
@@ -237,8 +241,9 @@ class ClassContentManager
     /**
      * Computes provided data to define what to revert from given content.
      *
-     * @param  AClassContent $content
-     * @param  array         $data
+     * @param AClassContent $content
+     * @param array         $data
+     *
      * @return self
      */
     public function revert(AClassContent $content, array $data)
@@ -265,10 +270,12 @@ class ClassContentManager
      * Alias to ClassContentRepository::findOneByTypeAndUid. In addition, it can also manage content's revision.
      *
      * @see BackBee\ClassContent\Repository\ClassContentRepository
-     * @param  string  $type
-     * @param  string  $uid
-     * @param  boolean $hydrateDraft      if true and BBUserToken is setted, will try to get and set draft to content
-     * @param  boolean $checkoutOnMissing this parameter is used only if hydrateDraft is true
+     *
+     * @param string  $type
+     * @param string  $uid
+     * @param boolean $hydrateDraft      if true and BBUserToken is setted, will try to get and set draft to content
+     * @param boolean $checkoutOnMissing this parameter is used only if hydrateDraft is true
+     *
      * @return AClassContent
      */
     public function findOneByTypeAndUid($type, $uid, $hydrateDraft = false, $checkoutOnMissing = false)
@@ -287,6 +294,7 @@ class ClassContentManager
      * Update a single classcontent image url.
      *
      * @param array $classcontent the classcontent we want to update its image url
+     *
      * @return array
      */
     private function updateClassContentImageUrl(array $data)
@@ -316,7 +324,7 @@ class ClassContentManager
     }
 
     /**
-     * Getter of class content thumbnail folder path
+     * Getter of class content thumbnail folder path.
      *
      * @return string
      */
@@ -344,10 +352,11 @@ class ClassContentManager
     }
 
     /**
-     * Updates provided content's elements with data
+     * Updates provided content's elements with data.
      *
-     * @param  AClassContent $content
-     * @param  array         $elementsData
+     * @param AClassContent $content
+     * @param array         $elementsData
+     *
      * @return self
      */
     private function updateElements(AClassContent $content, array $elementsData)
@@ -388,8 +397,9 @@ class ClassContentManager
     /**
      * Updates provided content's parameters.
      *
-     * @param  AClassContent $content
-     * @param  array         $paramsData
+     * @param AClassContent $content
+     * @param array         $paramsData
+     *
      * @return self
      */
     private function updateParameters(AClassContent $content, array $paramsData)
@@ -404,9 +414,10 @@ class ClassContentManager
     /**
      * Prepares draft for commit.
      *
-     * @param  AClassContent $content
-     * @param  Revision      $draft
-     * @param  array         $data
+     * @param AClassContent $content
+     * @param Revision      $draft
+     * @param array         $data
+     *
      * @return self
      */
     private function prepareDraftForCommit(AClassContent $content, Revision $draft, array $data)
@@ -444,8 +455,9 @@ class ClassContentManager
     /**
      * Executes commit action on content and its draft.
      *
-     * @param  AClassContent $content
-     * @param  Revision      $draft
+     * @param AClassContent $content
+     * @param Revision      $draft
+     *
      * @return self
      */
     private function executeCommit(AClassContent $content, Revision $draft)
@@ -499,8 +511,9 @@ class ClassContentManager
     /**
      * Runs process of post commit.
      *
-     * @param  AClassContent $content
-     * @param  Revision      $draft
+     * @param AClassContent $content
+     * @param Revision      $draft
+     *
      * @return self
      */
     private function commitPostProcess(AClassContent $content, Revision $draft)
@@ -516,9 +529,10 @@ class ClassContentManager
     /**
      * Executes revert action on content and its draft.
      *
-     * @param  AClassContent $content
-     * @param  Revision      $draft
-     * @param  array         $data
+     * @param AClassContent $content
+     * @param Revision      $draft
+     * @param array         $data
+     *
      * @return self
      */
     private function executeRevert(AClassContent $content, Revision $draft, array $data)
@@ -552,8 +566,9 @@ class ClassContentManager
     /**
      * Runs revert post action on content and its draft.
      *
-     * @param  AClassContent $content
-     * @param  Revision      $draft
+     * @param AClassContent $content
+     * @param Revision      $draft
+     *
      * @return self
      */
     private function revertPostProcess(AClassContent $content, Revision $draft)

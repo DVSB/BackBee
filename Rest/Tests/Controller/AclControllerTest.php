@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,6 @@ namespace BackBee\Rest\Tests\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-
 use BackBee\Rest\Controller\AclController;
 use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Security\Group;
@@ -34,10 +33,10 @@ use BackBee\Site\Site;
 use BackBee\Tests\TestCase;
 
 /**
- * Test for AclController class
+ * Test for AclController class.
  *
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -138,7 +137,7 @@ class AclControllerTest extends TestCase
 
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
-            '_controller' =>  $this->getController()
+            '_controller' =>  $this->getController(),
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -162,7 +161,7 @@ class AclControllerTest extends TestCase
 
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
-            '_controller' =>  $this->getController()
+            '_controller' =>  $this->getController(),
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -179,7 +178,7 @@ class AclControllerTest extends TestCase
 
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
-            '_controller' =>  $this->getController()
+            '_controller' =>  $this->getController(),
         ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -223,13 +222,13 @@ class AclControllerTest extends TestCase
                     'edit' => 1,
                     'commit' => '0',
                     'publish' => 'off',
-                ]
+                ],
             ],
         ];
 
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
-            '_controller' =>  $this->getController()
+            '_controller' =>  $this->getController(),
         ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST']));
 
         $this->assertEquals(204, $response->getStatusCode());
@@ -263,7 +262,8 @@ class AclControllerTest extends TestCase
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
             '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/acl', 'REQUEST_METHOD' => 'POST']));
+            '_controller' =>  $this->getController(),
+        ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -369,8 +369,8 @@ class AclControllerTest extends TestCase
         ];
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postObjectAceAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
+            '_controller' =>  $this->getController(),
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -392,8 +392,8 @@ class AclControllerTest extends TestCase
     {
         $response = $this->getBBApp()->getController()->handle(new Request([], [], [
             '_action' => 'postObjectAceAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
+            '_controller' =>  $this->getController(),
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -420,8 +420,8 @@ class AclControllerTest extends TestCase
         ];
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postClassAceAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
+            '_controller' =>  $this->getController(),
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 
@@ -442,8 +442,8 @@ class AclControllerTest extends TestCase
     {
         $response = $this->getBBApp()->getController()->handle(new Request([], [], [
             '_action' => 'postClassAceAction',
-            '_controller' =>  $this->getController()
-        ], [], [], ['REQUEST_URI' => '/rest/1/test', 'REQUEST_METHOD' => 'POST']));
+            '_controller' =>  $this->getController(),
+        ], [], [], ['REQUEST_URI' => '/rest/1/test/', 'REQUEST_METHOD' => 'POST']));
 
         $res = json_decode($response->getContent(), true);
 

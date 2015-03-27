@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,10 +28,10 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * User object in BackBee5
+ * User object in BackBee5.
  *
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
@@ -45,7 +45,8 @@ class User implements UserInterface
     const PASSWORD_NOT_PICKED = 0;
     const PASSWORD_PICKED = 0;
     /**
-     * Unique identifier of the user
+     * Unique identifier of the user.
+     *
      * @var integer
      * @Id @Column(type="integer", name="id")
      * @GeneratedValue(strategy="IDENTITY")
@@ -57,7 +58,8 @@ class User implements UserInterface
     protected $_id;
 
     /**
-     * The login of this user
+     * The login of this user.
+     *
      * @var string
      * @Column(type="string", name="login")
      * @fixture(type="word")
@@ -68,7 +70,8 @@ class User implements UserInterface
     protected $_login;
 
     /**
-     * The login of this user
+     * The login of this user.
+     *
      * @var string
      * @Column(type="string", name="email")
      * @fixture(type="email")
@@ -79,13 +82,15 @@ class User implements UserInterface
     protected $_email;
 
     /**
-     * The raw password of this user
+     * The raw password of this user.
+     *
      * @var string
      */
     protected $_raw_password;
 
     /**
-     * The password of this user
+     * The password of this user.
+     *
      * @var string
      * @Column(type="string", name="password")
      * @fixture(type="word")
@@ -93,7 +98,8 @@ class User implements UserInterface
     protected $_password;
 
     /**
-     * The User state
+     * The User state.
+     *
      * @var Integer
      * @Column(type="integer", name="state", length=2, options={"default": \BackBee\Security\User::PASSWORD_NOT_PICKED})
      *
@@ -103,7 +109,8 @@ class User implements UserInterface
     protected $_state = self::PASSWORD_NOT_PICKED;
 
     /**
-     * The access state
+     * The access state.
+     *
      * @var Boolean
      * @Column(type="boolean", name="activated")
      * @fixture(type="boolean")
@@ -114,7 +121,8 @@ class User implements UserInterface
     protected $_activated = false;
 
     /**
-     * The firstame of this user
+     * The firstame of this user.
+     *
      * @var string
      * @Column(type="string", name="firstname", nullable=true)
      * @fixture(type="firstName")
@@ -125,7 +133,8 @@ class User implements UserInterface
     protected $_firstname;
 
     /**
-     * The lastname of this user
+     * The lastname of this user.
+     *
      * @var string
      * @Column(type="string", name="lastname", nullable=true)
      * @fixture(type="lastName")
@@ -152,7 +161,8 @@ class User implements UserInterface
     protected $_groups;
 
     /**
-     * User's public api key
+     * User's public api key.
+     *
      * @var String
      * @Column(type="string", name="api_key_public", nullable=true)
      * @fixture(type="string")
@@ -163,7 +173,8 @@ class User implements UserInterface
     protected $_api_key_public;
 
     /**
-     * User's private api key
+     * User's private api key.
+     *
      * @var String
      * @Column(type="string", name="api_key_private", nullable=true)
      * @fixture(type="string")
@@ -171,7 +182,8 @@ class User implements UserInterface
     protected $_api_key_private;
 
     /**
-     * Whether the api key is enabled (default false)
+     * Whether the api key is enabled (default false).
+     *
      * @var Boolean
      * @Column(type="boolean", name="api_key_enabled", options={"default": false})
      *
@@ -182,7 +194,8 @@ class User implements UserInterface
     protected $_api_key_enabled = false;
 
     /**
-     * The creation datetime
+     * The creation datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="created")
      *
@@ -192,7 +205,8 @@ class User implements UserInterface
     protected $_created;
 
     /**
-     * The last modification datetime
+     * The last modification datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="modified")
      *
@@ -202,7 +216,7 @@ class User implements UserInterface
     protected $_modified;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @param string $login
      * @param string $password
@@ -223,7 +237,7 @@ class User implements UserInterface
     }
 
     /**
-     * Stringify the user object
+     * Stringify the user object.
      *
      * @return string
      * @codeCoverageIgnore
@@ -234,7 +248,7 @@ class User implements UserInterface
     }
 
     /**
-     * Serialize the user object
+     * Serialize the user object.
      *
      * @return Json_object
      */
@@ -248,8 +262,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param boolean $bool
      *
-     * @param  boolean                $bool
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -263,8 +277,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $login
      *
-     * @param  string                 $login
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -276,8 +290,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $email
      *
-     * @param  string                 $email
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -289,8 +303,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $password
      *
-     * @param  string                 $password
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -302,8 +316,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $password
      *
-     * @param  string                 $password
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -315,8 +329,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $firstname
      *
-     * @param  string                 $firstname
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -328,8 +342,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $lastname
      *
-     * @param  string                 $lastname
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -341,7 +355,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -351,7 +364,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -361,7 +373,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -371,7 +382,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -381,7 +391,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -391,7 +400,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -429,6 +437,7 @@ class User implements UserInterface
 
     /**
      * @param ArrayCollection
+     *
      * @return User
      * @codeCoverageIgnore
      */
@@ -440,7 +449,8 @@ class User implements UserInterface
     }
 
     /**
-     * @param  Group $group
+     * @param Group $group
+     *
      * @return User
      * @codeCoverageIgnore
      */
@@ -470,7 +480,6 @@ class User implements UserInterface
     }
 
     /**
-     * @return null
      * @codeCoverageIgnore
      */
     public function getSalt()
@@ -495,7 +504,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -505,8 +513,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $api_key_public
      *
-     * @param  string                 $api_key_public
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -518,7 +526,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -528,8 +535,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $api_key_private
      *
-     * @param  string                 $api_key_private
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -541,7 +548,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return bool
      * @codeCoverageIgnore
      */
@@ -551,8 +557,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param bool $api_key_enabled
      *
-     * @param  bool                   $api_key_enabled
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */

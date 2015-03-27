@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,8 +28,7 @@ use BackBee\ClassContent\Element\Date;
 
 /**
  * @category    BackBee
- * @package     BackBee\Renderer
- * @subpackage  Helper
+ *
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
@@ -157,10 +156,10 @@ class dateHelper extends AHelper
     }
 
     /**
+     * @param string|DateTime|timestamp $date
+     * @param string                    $format
+     * @param string                    $timezone
      *
-     * @param  string|DateTime|timestamp $date
-     * @param  string                    $format
-     * @param  string                    $timezone
      * @return string
      */
     public function __invoke($date = null, $format = null, $timezone = null, $culture = null)

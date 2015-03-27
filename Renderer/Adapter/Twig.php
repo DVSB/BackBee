@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,34 +23,15 @@
 
 namespace BackBee\Renderer\Adapter;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\Renderer\ARenderer;
 use BackBee\Renderer\ARendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 
 /**
- * twig renderer adapter for BackBee\Renderer\Renderer
+ * twig renderer adapter for BackBee\Renderer\Renderer.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -67,7 +48,8 @@ class Twig extends ARendererAdapter
     private $twig;
 
     /**
-     * Extensions to include in searching file
+     * Extensions to include in searching file.
+     *
      * @var array
      */
     protected $extensions = array(
@@ -77,7 +59,7 @@ class Twig extends ARendererAdapter
     );
 
     /**
-     * Twig adapter constructor
+     * Twig adapter constructor.
      *
      * @param ARenderer $renderer
      */
@@ -102,7 +84,7 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * [addExtension description]
+     * [addExtension description].
      *
      * @param [type] $extension [description]
      */
@@ -112,7 +94,7 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * [setTwigCache description]
+     * [setTwigCache description].
      *
      * @param [type] $cache_directory [description]
      */
@@ -146,10 +128,11 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * Check if $filename exists in directories provided by $templateDir
+     * Check if $filename exists in directories provided by $templateDir.
      *
-     * @param  [type]  $filename
-     * @param  array   $templateDir
+     * @param [type] $filename
+     * @param array  $templateDir
+     *
      * @return boolean true if the file was found and is readable
      */
     public function isValidTemplateFile($filename, array $templateDir)
@@ -164,7 +147,7 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * Add dir path into loader only if it not already exists
+     * Add dir path into loader only if it not already exists.
      *
      * @param array $templateDir
      */
@@ -182,12 +165,13 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * Generate the render of $filename template with $params and $vars
+     * Generate the render of $filename template with $params and $vars.
      *
-     * @param  string $filename
-     * @param  array  $templateDir
-     * @param  array  $params
-     * @param  array  $vars
+     * @param string $filename
+     * @param array  $templateDir
+     * @param array  $params
+     * @param array  $vars
+     *
      * @return string
      */
     public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
@@ -210,8 +194,8 @@ class Twig extends ARendererAdapter
     }
 
     /**
+     * @param string $filename
      *
-     * @param  string                  $filename
      * @return \Twig_TemplateInterface
      */
     public function loadTemplate($filename)

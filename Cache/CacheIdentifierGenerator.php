@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,10 +29,10 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\IRenderer;
 
 /**
- * CacheIdentifierGenerator allows you to easily customize cache identifier by adding appenders
+ * CacheIdentifierGenerator allows you to easily customize cache identifier by adding appenders.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -41,14 +41,14 @@ class CacheIdentifierGenerator
     const APPENDER_SERVICE_TAG = 'cache.identifier.appender';
 
     /**
-     * contains every declared appenders
+     * contains every declared appenders.
      *
      * @var array
      */
     private $appenders;
 
     /**
-     * constructor
+     * constructor.
      *
      * @param ContainerInterface $container service container from where we will retrieve every identifier appenders
      */
@@ -61,7 +61,7 @@ class CacheIdentifierGenerator
     }
 
     /**
-     * Add appender to current CacheIdentifierGenerator, sorted it by groups names
+     * Add appender to current CacheIdentifierGenerator, sorted it by groups names.
      *
      * @param IdentifierAppenderInterface $appender the appender to add
      */
@@ -77,7 +77,7 @@ class CacheIdentifierGenerator
     }
 
     /**
-     * This method will compute cache identifier with every appenders that belong to group name
+     * This method will compute cache identifier with every appenders that belong to group name.
      *
      * @param string    $group_name the group name of appenders to apply
      * @param string    $identifier identifier we want to update
@@ -99,7 +99,7 @@ class CacheIdentifierGenerator
     }
 
     /**
-     * Define if provided group name is associated to any appenders or not
+     * Define if provided group name is associated to any appenders or not.
      *
      * @return boolean true if the provided group name is associated to one appender atleast, else false
      */

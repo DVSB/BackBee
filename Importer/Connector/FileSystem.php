@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,8 +29,7 @@ use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
- * @subpackage  Connector
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -42,13 +41,15 @@ class FileSystem implements IImporterConnector
     private $_application;
 
     /**
-     * The base directory where to look for files
+     * The base directory where to look for files.
+     *
      * @var string
      */
     private $_basedir;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \BackBee\BBApplication $application
      * @param array                  $config
      */
@@ -66,7 +67,7 @@ class FileSystem implements IImporterConnector
     }
 
     /**
-     * Get the root dir
+     * Get the root dir.
      *
      * @return string
      */
@@ -76,9 +77,10 @@ class FileSystem implements IImporterConnector
     }
 
     /**
-     * Return the path files according to the provided pattern
+     * Return the path files according to the provided pattern.
      *
-     * @param  string $pattern file pattern
+     * @param string $pattern file pattern
+     *
      * @return array
      */
     public function find($pattern)

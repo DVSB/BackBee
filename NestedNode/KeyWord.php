@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,15 +25,14 @@ namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
-
 use BackBee\ClassContent\AClassContent;
 use BackBee\Renderer\IRenderable;
 
 /**
- * A keywords entry of a tree in BackBee
+ * A keywords entry of a tree in BackBee.
  *
  * @category    BackBee
- * @package     BackBee\NestedNode
+ *
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  * @Entity(repositoryClass="BackBee\NestedNode\Repository\KeyWordRepository")
@@ -44,7 +43,8 @@ use BackBee\Renderer\IRenderable;
 class KeyWord extends ANestedNode implements IRenderable
 {
     /**
-     * Unique identifier of the content
+     * Unique identifier of the content.
+     *
      * @var string
      * @Id @Column(type="string", name="uid")
      *
@@ -56,6 +56,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * The root node, cannot be NULL.
+     *
      * @var \BackBee\NestedNode\KeyWord
      * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
      * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
@@ -65,6 +66,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * The parent node.
+     *
      * @var \BackBee\NestedNode\KeyWord
      * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="parent_uid", referencedColumnName="uid")
@@ -72,7 +74,8 @@ class KeyWord extends ANestedNode implements IRenderable
     protected $_parent;
 
     /**
-     * The keyword
+     * The keyword.
+     *
      * @var string
      * @Column(type="string", name="keyword")
      *
@@ -84,6 +87,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Descendants nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
      * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
      */
@@ -91,13 +95,15 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Direct children nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
      * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
-     * A collection of AClassContent indexed by this keyword
+     * A collection of AClassContent indexed by this keyword.
+     *
      * @ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
      * @JoinTable(name="keywords_contents",
      *      joinColumns={@JoinColumn(name="keyword_uid", referencedColumnName="uid")},
@@ -107,7 +113,8 @@ class KeyWord extends ANestedNode implements IRenderable
     protected $_content;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $uid The unique identifier of the keyword
      */
     public function __construct($uid = null)
@@ -118,7 +125,8 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns the keyword
+     * Returns the keyword.
+     *
      * @return string
      */
     public function getKeyWord()
@@ -127,7 +135,8 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns a collection of indexed AClassContent
+     * Returns a collection of indexed AClassContent.
+     *
      * @return Doctrine\Common\Collections\Collection
      * @codeCoverageIgnore
      */
@@ -137,8 +146,10 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Sets the keyword
-     * @param  string                      $keyWord
+     * Sets the keyword.
+     *
+     * @param string $keyWord
+     *
      * @return \BackBee\NestedNode\KeyWord
      */
     public function setKeyWord($keyWord)
@@ -149,8 +160,10 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Adds a content to the collection
-     * @param  BackBee\ClassContent\AClassContent $content
+     * Adds a content to the collection.
+     *
+     * @param BackBee\ClassContent\AClassContent $content
+     *
      * @return \BackBee\NestedNode\KeyWord
      */
     public function addContent(AClassContent $content)
@@ -161,7 +174,8 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Removes a content from the collection
+     * Removes a content from the collection.
+     *
      * @param \BackBee\ClassContent\AClassContent $content
      */
     public function removeContent(AClassContent $content)
@@ -171,6 +185,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns an array representation of the keyword.
+     *
      * @return array
      */
     public function toArray()
@@ -182,8 +197,10 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
+     * Returns data associated to $var for rendering assignation, all data if NULL provided.
+     *
+     * @param string $var
+     *
      * @return string|array|null
      */
     public function getData($var = null)
@@ -202,8 +219,10 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
+     * Returns parameters associated to $var for rendering assignation, all data if NULL provided.
+     *
+     * @param string $var
+     *
      * @return string|array|null
      */
     public function getParam($var = null)
@@ -227,6 +246,7 @@ class KeyWord extends ANestedNode implements IRenderable
 
     /**
      * Returns TRUE if the page can be rendered.
+     *
      * @return Boolean
      * @codeCoverageIgnore
      */
@@ -236,7 +256,8 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns default template name
+     * Returns default template name.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -246,7 +267,8 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns a stdObj representation of the node
+     * Returns a stdObj representation of the node.
+     *
      * @return \stdClass
      */
     public function toStdObject()

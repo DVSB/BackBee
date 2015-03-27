@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,32 +24,32 @@
 namespace BackBee\Cache\File;
 
 use Psr\Log\LoggerInterface;
-
 use BackBee\Cache\ACache;
 use BackBee\Cache\Exception\CacheException;
 use BackBee\Utils\String;
 
 /**
- * Filesystem cache adapter
+ * Filesystem cache adapter.
  *
  * A simple cache system storing data in files, it does not provide tag or expire features
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  File
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Cache extends ACache
 {
     /**
-     * The cache directory
+     * The cache directory.
+     *
      * @var string
      */
     private $cachedir;
 
     /**
-     * Memcached adapter options
+     * Memcached adapter options.
+     *
      * @var array
      */
     protected $_instance_options = array(
@@ -58,13 +58,15 @@ class Cache extends ACache
     );
 
     /**
-     * Class constructor
-     * @param  array                                   $options Initial options for the cache adapter:
-     *                                                          - cachedir string The cache directory
-     * @param  string                                  $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
+     * Class constructor.
+     *
+     * @param array                    $options Initial options for the cache adapter:
+     *                                          - cachedir string The cache directory
+     * @param string                   $context An optional cache context
+     * @param \Psr\Log\LoggerInterface $logger  An optional logger
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the cache directory doesn't exist, can not
-     *                                                         be created or is not writable.
+     *                                                 be created or is not writable.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
     {
@@ -89,10 +91,12 @@ class Cache extends ACache
     }
 
     /**
-     * Returns the available cache for the given id if found returns false else
-     * @param  string       $id          Cache id
-     * @param  boolean      $bypassCheck Allow to find cache without test it before
-     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
+     * Returns the available cache for the given id if found returns false else.
+     *
+     * @param string    $id          Cache id
+     * @param boolean   $bypassCheck Allow to find cache without test it before
+     * @param \DateTime $expire      Optionnal, the expiration time (now by default)
+     *
      * @return string|FALSE
      */
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
@@ -122,8 +126,10 @@ class Cache extends ACache
     }
 
     /**
-     * Tests if a cache is available or not (for the given id)
-     * @param  string    $id Cache id
+     * Tests if a cache is available or not (for the given id).
+     *
+     * @param string $id Cache id
+     *
      * @return int|FALSE the last modified timestamp of the available cache record
      */
     public function test($id)
@@ -139,12 +145,14 @@ class Cache extends ACache
     }
 
     /**
-     * Save some string datas into a cache record
-     * @param  string  $id       Cache id
-     * @param  string  $data     Datas to cache
-     * @param  int     $lifetime Optional, the specific lifetime for this record
-     *                           (by default null, infinite lifetime)
-     * @param  string  $tag      Optional, an associated tag to the data stored
+     * Save some string datas into a cache record.
+     *
+     * @param string $id       Cache id
+     * @param string $data     Datas to cache
+     * @param int    $lifetime Optional, the specific lifetime for this record
+     *                         (by default null, infinite lifetime)
+     * @param string $tag      Optional, an associated tag to the data stored
+     *
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null)
@@ -163,8 +171,10 @@ class Cache extends ACache
     }
 
     /**
-     * Removes a cache record
-     * @param  string  $id Cache id
+     * Removes a cache record.
+     *
+     * @param string $id Cache id
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function remove($id)
@@ -177,7 +187,8 @@ class Cache extends ACache
     }
 
     /**
-     * Clears all cache records
+     * Clears all cache records.
+     *
      * @return boolean TRUE if cache is cleared FALSE otherwise
      */
     public function clear()
@@ -204,8 +215,10 @@ class Cache extends ACache
     }
 
     /**
-     * Returns the cache file if a cache is available for the given id
-     * @param  string $id Cache id
+     * Returns the cache file if a cache is available for the given id.
+     *
+     * @param string $id Cache id
+     *
      * @return string The file path of the available cache record
      * @codeCoverageIgnore
      */

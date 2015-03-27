@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,31 +24,31 @@
 namespace BackBee\Cache\Validator;
 
 /**
- * PatternValidator will invalid string that match with pattern to exclude
+ * PatternValidator will invalid string that match with pattern to exclude.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class PatternValidator implements ValidatorInterface
 {
     /**
-     * List of url pattern to exclude from cache candidates
+     * List of url pattern to exclude from cache candidates.
      *
      * @var array
      */
     private $patterns_to_exclude;
 
     /**
-     * list of group name this validator belong to
+     * list of group name this validator belong to.
      *
      * @var array
      */
     private $groups;
 
     /**
-     * constructor
+     * constructor.
      *
      * @param array $supported_methods list of supported methods
      * @param array $groups            list of groups this validator belongs to

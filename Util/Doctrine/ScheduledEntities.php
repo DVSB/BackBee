@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,25 +25,25 @@ namespace BackBee\Util\Doctrine;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\Revision;
 
 /**
- * Utility class to deal with managed Doctrine entities
+ * Utility class to deal with managed Doctrine entities.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Doctrine
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class ScheduledEntities
 {
     /**
-     * Returns an array of scheduled entities by classname for insertions
-     * @param  \Doctrine\ORM\EntityManager $em
+     * Returns an array of scheduled entities by classname for insertions.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
      * @param string|array Classnames
+     *
      * @return array
      */
     public static function getScheduledEntityInsertionsByClassname(EntityManager $em, $classnames)
@@ -61,9 +61,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of scheduled entities by classname for updates
-     * @param  \Doctrine\ORM\EntityManager $em
+     * Returns an array of scheduled entities by classname for updates.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
      * @param string|array Classnames
+     *
      * @return array
      */
     public static function getScheduledEntityUpdatesByClassname(EntityManager $em, $classnames)
@@ -81,9 +83,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of scheduled entities by classname for deletions
-     * @param  \Doctrine\ORM\EntityManager $em
+     * Returns an array of scheduled entities by classname for deletions.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
      * @param string|array Classnames
+     *
      * @return array
      */
     public static function getScheduledEntityDeletionsByClassname(EntityManager $em, $classnames)
@@ -101,9 +105,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of scheduled entities by classname for insertions, updates or deletions
-     * @param  \Doctrine\ORM\EntityManager $em
+     * Returns an array of scheduled entities by classname for insertions, updates or deletions.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
      * @param string|array Classnames
+     *
      * @return array
      */
     public static function getScheduledEntityByClassname(EntityManager $em, $classnames)
@@ -116,9 +122,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for insertions
-     * @param  \Doctrine\ORM\EntityManager $em
-     * @param  boolean                     $with_revision Includes AClassContent which has scheduled revision
+     * Returns an array of AClassContent scheduled for insertions.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param boolean                     $with_revision Includes AClassContent which has scheduled revision
+     *
      * @return array
      */
     public static function getScheduledAClassContentInsertions(EntityManager $em, $with_revision = false, $exclude_base_element = false)
@@ -134,9 +142,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for updates
-     * @param  \Doctrine\ORM\EntityManager $em
-     * @param  boolean                     $with_revision Includes AClassContent which has scheduled revision
+     * Returns an array of AClassContent scheduled for updates.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param boolean                     $with_revision Includes AClassContent which has scheduled revision
+     *
      * @return array
      */
     public static function getScheduledAClassContentUpdates(EntityManager $em, $with_revision = false, $exclude_base_element = false)
@@ -166,8 +176,10 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for deletions
-     * @param  \Doctrine\ORM\EntityManager $em
+     * Returns an array of AClassContent scheduled for deletions.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     *
      * @return array
      */
     public static function getSchedulesAClassContentDeletions(EntityManager $em, $exclude_base_element = false)
@@ -184,9 +196,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for insertions or updates
-     * @param  \Doctrine\ORM\EntityManager $em
-     * @param  boolean                     $with_revision Includes AClassContent which has scheduled revision
+     * Returns an array of AClassContent scheduled for insertions or updates.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param boolean                     $with_revision Includes AClassContent which has scheduled revision
+     *
      * @return array
      */
     public static function getScheduledAClassContentNotForDeletions(EntityManager $em, $with_revision = false)
@@ -195,9 +209,11 @@ class ScheduledEntities
     }
 
     /**
-     * Returns TRUE if a entity of $classname is scheduled for insertion or update
-     * @param  \Doctrine\ORM\EntityManager $em
-     * @param  string                      $classname
+     * Returns TRUE if a entity of $classname is scheduled for insertion or update.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     * @param string                      $classname
+     *
      * @return boolean
      */
     public static function hasScheduledEntitiesNotForDeletions(EntityManager $em, $classname)
@@ -214,8 +230,10 @@ class ScheduledEntities
     }
 
     /**
-     * Returns TRUE is a \BackBee\NestedNode\Page is scheduled for insertion or update
-     * @param  \Doctrine\ORM\EntityManager $em
+     * Returns TRUE is a \BackBee\NestedNode\Page is scheduled for insertion or update.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     *
      * @return boolean
      */
     public static function hasScheduledPageNotForDeletions(EntityManager $em)

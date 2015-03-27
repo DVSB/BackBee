@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,7 +28,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Bundle\BundleInterface;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Patcher\EntityPatcher;
@@ -38,17 +37,17 @@ use BackBee\Rest\Patcher\OperationSyntaxValidator;
 use BackBee\Rest\Patcher\RightManager;
 
 /**
- * REST API for application bundles
+ * REST API for application bundles.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class BundleController extends ARestController
 {
     /**
-     * Returns a collection of declared bundles
+     * Returns a collection of declared bundles.
      */
     public function getCollectionAction()
     {
@@ -65,7 +64,7 @@ class BundleController extends ARestController
     }
 
     /**
-     * Returns the bundle with id $id if it exists, else a 404 response will be generated
+     * Returns the bundle with id $id if it exists, else a 404 response will be generated.
      *
      * @param string $id the id of the bundle we are looking for
      */
@@ -87,7 +86,7 @@ class BundleController extends ARestController
     }
 
     /**
-     * Patch the bundle
+     * Patch the bundle.
      *
      * @Rest\RequestParam(name="0", description="Patch operations", requirements={
      *   @Assert\NotBlank(message="Request must contain at least one operation")
@@ -131,7 +130,7 @@ class BundleController extends ARestController
     }
 
     /**
-     * This method is the front controller of every bundles exposed actions
+     * This method is the front controller of every bundles exposed actions.
      *
      * @param string $bundle_name     name of bundle we want to reach its exposed actions
      * @param string $controller_name controller name
@@ -176,7 +175,7 @@ class BundleController extends ARestController
     }
 
     /**
-     * Returns a bundle by id
+     * Returns a bundle by id.
      *
      * @param string $id
      *

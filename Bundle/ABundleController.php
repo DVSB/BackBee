@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,17 +28,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-
 use BackBee\BBApplication;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\FrontController\FrontController;
 use BackBee\Utils\File\File;
 
 /**
- * Abstract class for bundle controller in BackBee5 application
+ * Abstract class for bundle controller in BackBee5 application.
  *
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -53,9 +52,10 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     private $renderer;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @access public
+     *
      * @param BBApplication $application The current BBapplication
      */
     public function __construct(ABundle $bundle)
@@ -67,9 +67,10 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Returns the current request
+     * Returns the current request.
      *
      * @access public
+     *
      * @return Request
      */
     public function getRequest()
@@ -82,7 +83,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Returns the current bundle config
+     * Returns the current bundle config.
      *
      * @return \BackBee\Config\Config
      */
@@ -92,7 +93,8 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Return the bundle
+     * Return the bundle.
+     *
      * @return \BackBee\Bundle\ABundle
      */
     public function getBundle()
@@ -101,7 +103,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Returns the current renderer
+     * Returns the current renderer.
      *
      * @return \BackBee\Renderer\ARenderer
      */
@@ -116,7 +118,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Returns the template directory of the current bundle
+     * Returns the template directory of the current bundle.
      *
      * @return string
      */
@@ -126,7 +128,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Returns the layout directory of the current bundle
+     * Returns the layout directory of the current bundle.
      *
      * @return string
      */
@@ -136,9 +138,10 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Dispatch FilterResponseEvent then send response
+     * Dispatch FilterResponseEvent then send response.
      *
      * @acces protected
+     *
      * @param Response $response The repsonse to filter then send
      * @param integer  $type     The type of the request
      *                           (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
@@ -158,13 +161,15 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     }
 
     /**
-     * Handles a request
+     * Handles a request.
      *
      * @access public
-     * @param  Request                  $request The request to handle
-     * @param  integer                  $type    The type of the request
-     *                                           (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
-     * @param  Boolean                  $catch   Whether to catch exceptions or not
+     *
+     * @param Request $request The request to handle
+     * @param integer $type    The type of the request
+     *                         (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     * @param Boolean $catch   Whether to catch exceptions or not
+     *
      * @throws FrontControllerException
      */
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true)

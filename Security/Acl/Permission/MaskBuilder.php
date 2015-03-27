@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -58,8 +58,7 @@ use Symfony\Component\Security\Acl\Permission\MaskBuilder as sfMaskBuilder;
  *          action on the domain object as well as grant any permission
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Acl\Permission
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */

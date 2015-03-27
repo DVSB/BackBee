@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Validator\Tests\Mock;
 use BackBee\Tests\Mock\IMock;
 
 /**
- * Mock entity
+ * Mock entity.
  *
  * @category    BackBee
- * @package     BackBee\Validator\Tests\Mock
+ *
  * @copyright   Lp digital system
  * @author      f.kroockmann
  * @Table(name="mock_entity")
@@ -38,8 +38,9 @@ use BackBee\Tests\Mock\IMock;
 class MockEntity implements IMock
 {
     /**
-     * Identifier
-     * @var int $id
+     * Identifier.
+     *
+     * @var int
      * @Column(name="id", type="integer")
      * @Id
      * @GeneratedValue(strategy="AUTO")
@@ -47,21 +48,24 @@ class MockEntity implements IMock
     private $id;
 
     /**
-     * Numeric code
+     * Numeric code.
+     *
      * @var int
      * @Column(name="numeric_code", type="integer", unique=true)
      */
     private $numeric_code;
 
     /**
-     * English's name
-     * @var string $name
+     * English's name.
+     *
+     * @var string
      * @Column(name="name", type="string", length=100)
      */
     private $name;
 
     /**
-     * get id
+     * get id.
+     *
      * @return int
      */
     public function getId()
@@ -70,7 +74,8 @@ class MockEntity implements IMock
     }
 
     /**
-     * get numeric code
+     * get numeric code.
+     *
      * @return int
      */
     public function getNumericCode()
@@ -79,7 +84,8 @@ class MockEntity implements IMock
     }
 
     /**
-     * get name
+     * get name.
+     *
      * @return string
      */
     public function getName()
@@ -88,8 +94,10 @@ class MockEntity implements IMock
     }
 
     /**
-     * Set numeric code
-     * @param  int                                      $numeric_code
+     * Set numeric code.
+     *
+     * @param int $numeric_code
+     *
      * @return \BackBee\Validator\Tests\Mock\MockEntity
      */
     public function setNumericCode($numeric_code)
@@ -100,8 +108,10 @@ class MockEntity implements IMock
     }
 
     /**
-     *  set name
-     * @param  type                                     $name
+     *  set name.
+     *
+     * @param type $name
+     *
      * @return \BackBee\Validator\Tests\Mock\MockEntity
      */
     public function setName($name)

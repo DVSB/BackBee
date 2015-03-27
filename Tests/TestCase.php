@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\Tests;
 
 use Doctrine\ORM\Tools\SchemaTool;
-
 use BackBee\AutoLoader\AutoLoader;
 use BackBee\Installer\EntityFinder;
 use BackBee\Security\Group;
@@ -34,7 +33,7 @@ use BackBee\Tests\Mock\MockBBApplication;
 
 /**
  * @category    BackBee
- * @package     BackBee\Tests
+ *
  * @copyright   Lp system
  * @author      n.dufreche
  */
@@ -48,7 +47,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected $bbapp;
 
     /**
-     * Autoloader initialisation
+     * Autoloader initialisation.
      */
     public function initAutoload()
     {
@@ -63,34 +62,34 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->registerNamespace('BackBee\Bundle\Tests', implode(DIRECTORY_SEPARATOR, [
                 $this->root_folder,
                 'bundle',
-                'Tests'
+                'Tests',
             ]))
             ->registerNamespace('BackBee\Bundle', implode(DIRECTORY_SEPARATOR, [
                 $this->root_folder,
-                'bundle'
+                'bundle',
             ]))
             ->registerNamespace('BackBee\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, [
                 $this->repository_folder,
-                'Fixtures'
+                'Fixtures',
             ]))
             ->registerNamespace('BackBee\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, [
                 $this->repository_folder,
                 'ClassContent',
-                'Repositories'
+                'Repositories',
             ]))
             ->registerNamespace('BackBee\Renderer\Helper', implode(DIRECTORY_SEPARATOR, [
                 $this->repository_folder,
                 'Templates',
-                'helpers'
+                'helpers',
             ]))
             ->registerNamespace('BackBee\Event\Listener', implode(DIRECTORY_SEPARATOR, [
                 $this->repository_folder,
-                'Listeners'
+                'Listeners',
             ]))
             ->registerNamespace('BackBee\Services\Public', implode(DIRECTORY_SEPARATOR, [
                 $this->repository_folder,
                 'Services',
-                'Public'
+                'Public',
             ]))
             ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, [
                 $this->root_folder,
@@ -99,7 +98,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 'orm',
                 'tests',
                 'Doctrine',
-                'Tests'
+                'Tests',
             ]))
         ;
     }
@@ -113,9 +112,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Simple load class function
+     * Simple load class function.
      *
-     * @param  type       $namespace
+     * @param type $namespace
+     *
      * @throws \Exception
      */
     public function load($namespace)
@@ -133,7 +133,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * get the root folder BackBee application
+     * get the root folder BackBee application.
      *
      * @return string
      */
@@ -143,7 +143,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * get the BackBee application folder
+     * get the BackBee application folder.
      *
      * @return string
      */
@@ -153,7 +153,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * get the repository BackBee application folder
+     * get the repository BackBee application folder.
      *
      * @return string
      */
@@ -163,10 +163,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Return the mock entity corresponding at the string pass in parameter
+     * Return the mock entity corresponding at the string pass in parameter.
      *
-     * @param  string $obj_name the mock entity name
-     * @return IMock  MockObject
+     * @param string $obj_name the mock entity name
+     *
+     * @return IMock MockObject
      */
     public function getMockObjectContainer($obj_name)
     {
@@ -233,8 +234,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param type $config
      *
-     * @param  type                   $config
      * @return \BackBee\BBApplication
      */
     public function getBBApp(array $config = null)
@@ -247,9 +248,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Returns application
+     * Returns application.
      *
-     * @param  array|null $config
+     * @param array|null $config
+     *
      * @return BackBee\ApplicationInterface
      */
     public function getApplication(array $config = null)
@@ -263,8 +265,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Creates a user for the specified group, and authenticates a BBUserToken
-     * @param  string                              $groupId
+     * Creates a user for the specified group, and authenticates a BBUserToken.
+     *
+     * @param string $groupId
+     *
      * @return \BackBee\Security\Token\BBUserToken
      */
     protected function createAuthUser($groupId, $roles = array())
@@ -302,7 +306,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     *
      * @return \BackBee\Security\SecurityContext
      */
     protected function getSecurityContext()
@@ -311,7 +314,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     *
      * @return \Doctrine\ORM\EntityManager
      */
     protected function getEntityManager($name = 'default')
@@ -320,7 +322,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     *
      * @return \BackBee\Security\Acl\AclManager
      */
     protected function getAclManager()

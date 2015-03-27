@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,25 +23,6 @@
 
 namespace BackBee\Config;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\ApplicationInterface;
 use BackBee\Config\Exception\PersistorListNotFoundException;
 use BackBee\Config\Persistor\PersistorInterface;
@@ -50,10 +31,10 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Utils\Collection\Collection;
 
 /**
- * Persistor allows us to handle with ease persistence of Config settings
+ * Persistor allows us to handle with ease persistence of Config settings.
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -62,28 +43,28 @@ class Persistor
     const DEFAULT_CONFIG_PER_SITE_VALUE = false;
 
     /**
-     * Application this persistor belongs to
+     * Application this persistor belongs to.
      *
      * @var BackBee\BBApplication
      */
     private $application;
 
     /**
-     * Configurator will provide the default settings of application and bundles configs
+     * Configurator will provide the default settings of application and bundles configs.
      *
      * @var BackBee\Config\Configurator
      */
     private $configurator;
 
     /**
-     * List of declared persistor
+     * List of declared persistor.
      *
      * @var array
      */
     private $persistors;
 
     /**
-     * Persistor's constructor
+     * Persistor's constructor.
      *
      * @param ApplicationInterface $application  the application this persistor belongs to
      * @param Configurator         $configurator provider of config default settings
@@ -95,7 +76,7 @@ class Persistor
     }
 
     /**
-     * Persist current settings $config
+     * Persist current settings $config.
      *
      * @param Config  $config                 the config to persist
      * @param boolean $enable_config_per_site if true we only persist difference between current config settings
@@ -126,7 +107,7 @@ class Persistor
     }
 
     /**
-     * Tries to persist config by calling every declared persistors; it will stop on first success
+     * Tries to persist config by calling every declared persistors; it will stop on first success.
      *
      * @param Config $config            the concern this persist action concern
      * @param array  $config_to_persist settings to persist for provided config
@@ -142,7 +123,7 @@ class Persistor
     }
 
     /**
-     * Loads every declared persistors in application config.yml, config section
+     * Loads every declared persistors in application config.yml, config section.
      *
      * @throws PersistorListNotFoundException occurs if there is no persistor list in config.yml, section: config
      *                                        it also occurs if config section does not exist in application config.yml
@@ -175,7 +156,7 @@ class Persistor
 
     /**
      * Add or update 'override_site' section to provided $config with difference between current config settings
-     * and config default settings
+     * and config default settings.
      *
      * @param Config $config the config we want to add/update its 'override_site' section
      */

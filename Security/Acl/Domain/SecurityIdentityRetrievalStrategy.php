@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,20 +29,21 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
- * Strategy for retrieving security identities unshifting group identities to BackBee users
+ * Strategy for retrieving security identities unshifting group identities to BackBee users.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Acl\Domain
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class SecurityIdentityRetrievalStrategy extends sfStrategy
 {
     /**
-     * Retrieves the available security identities for the given token
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return array                                                                An array of SecurityIdentityInterface implementations
+     * Retrieves the available security identities for the given token.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @return array An array of SecurityIdentityInterface implementations
      */
     public function getSecurityIdentities(TokenInterface $token)
     {

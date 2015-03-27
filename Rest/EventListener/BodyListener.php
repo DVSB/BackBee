@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,15 +27,14 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
-
 use BackBee\Event\Listener\APathEnabledListener;
 use BackBee\Rest\Encoder\IEncoderProvider;
 
 /**
- * Body listener/encoder
+ * Body listener/encoder.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -65,9 +64,10 @@ class BodyListener extends APathEnabledListener
     }
 
     /**
-     * Core request handler
+     * Core request handler.
      *
-     * @param  GetResponseEvent                  $event The event
+     * @param GetResponseEvent $event The event
+     *
      * @throws BadRequestHttpException
      * @throws UnsupportedMediaTypeHttpException
      */

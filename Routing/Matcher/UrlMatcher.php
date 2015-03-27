@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,13 +25,11 @@ namespace BackBee\Routing\Matcher;
 
 use Symfony\Component\Routing\Matcher\UrlMatcher as sfUrlMatcher;
 use Symfony\Component\Routing\Route;
-
 use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
- * @package     BackBee\Routing
- * @subpackage  Matcher
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\DependencyInjection\Tests;
 
 use org\bovigo\vfs\vfsStream;
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\DependencyInjection\ContainerProxy;
@@ -33,10 +32,10 @@ use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBee\DependencyInjection\Util\ServiceLoader;
 
 /**
- * Test for ContainerProxy
+ * Test for ContainerProxy.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -47,21 +46,21 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     const RANDOM_SERVICE_NEW_SIZE_VALUE = 42;
 
     /**
-     * [$container description]
+     * [$container description].
      *
      * @var [type]
      */
     private $container;
 
     /**
-     * [$services_yml_array description]
+     * [$services_yml_array description].
      *
      * @var array
      */
     private $services_array;
 
     /**
-     * setup the environment for test
+     * setup the environment for test.
      */
     public function setUp()
     {

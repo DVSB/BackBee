@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,6 @@ namespace BackBee\Rest\Tests\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-
 use BackBee\Rest\Controller\SiteController;
 use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Site\Layout;
@@ -34,10 +33,10 @@ use BackBee\Site\Site;
 use BackBee\Tests\TestCase;
 
 /**
- * Test for UserController class
+ * Test for UserController class.
  *
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -48,13 +47,11 @@ class SiteControllerTest extends TestCase
     protected $bbapp;
 
     /**
-     *
      * @var Site
      */
     protected $site;
 
     /**
-     *
      * @var Layout
      */
     protected $layout;

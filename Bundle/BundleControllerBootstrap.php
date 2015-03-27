@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,13 +24,12 @@
 namespace BackBee\Bundle;
 
 use Symfony\Component\HttpFoundation\Response;
-
 use BackBee\Bundle\Exception\RequestErrorException;
 use BackBee\FrontController\Exception\FrontControllerException;
 
 /**
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -55,7 +54,7 @@ class BundleControllerBootstrap
      * BundleControllerBootstrap's constructor; initialize 3 protected attributes:
      *     - $_bundle
      *     - $_application
-     *     - $_em
+     *     - $_em.
      *
      * @param BackBee\Bundle\ABundle $bundle
      */
@@ -68,10 +67,11 @@ class BundleControllerBootstrap
 
     /**
      * It will act as the main controller of current controller; it will dispatch
-     * resquest to the right protected action method
+     * resquest to the right protected action method.
      *
-     * @param  string                                                     $method
-     * @param  mixed                                                      $args
+     * @param string $method
+     * @param mixed  $args
+     *
      * @throws BackBee\FrontController\Exception\FrontControllerException if called action is not available
      */
     public function __call($method, $args)
@@ -112,7 +112,7 @@ class BundleControllerBootstrap
     }
 
     /**
-     * Throws exception and stop current action if current user is not a bbuser
+     * Throws exception and stop current action if current user is not a bbuser.
      *
      * @throws BackBee\Bundle\Exception\RequestErrorException if current user is not a bbuser
      */
@@ -127,7 +127,7 @@ class BundleControllerBootstrap
     }
 
     /**
-     * Generic way to send response back to client browser
+     * Generic way to send response back to client browser.
      *
      * @param string  $content    the string to print on client browser screen
      * @param integer $statusCode the request status code (default: 200)

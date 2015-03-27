@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,8 +27,7 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken as sfAno
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Token
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -36,7 +35,9 @@ class AnonymousToken extends sfAnonymousToken
 {
     /**
      * Constructor.
+     *
      * @codeCoverageIgnore
+     *
      * @param string          $key   The key shared with the authentication provider
      * @param string          $user  The user
      * @param RoleInterface[] $roles An array of roles

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,15 +24,14 @@
 namespace BackBee\Controller\Tests;
 
 use Symfony\Component\HttpFoundation\Request;
-
 use BackBee\Controller\ControllerResolver;
 use BackBee\Tests\TestCase;
 
 /**
- * ControllerResolver Test
+ * ControllerResolver Test.
  *
  * @category    BackBee
- * @package     BackBee\Controller
+ *
  * @copyright   Lp system
  * @author      k.golovin
  *

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,21 +27,19 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 use BackBee\BBApplication;
 
 /**
- * BackBee Console Application
+ * BackBee Console Application.
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class Console extends ConsoleApplication
 {
     /**
-     *
      * @var BBApplication
      */
     private $_application;
@@ -63,7 +61,7 @@ class Console extends ConsoleApplication
     }
 
     /**
-     * Gets the BackBee Application
+     * Gets the BackBee Application.
      *
      * @return BBApplication
      */

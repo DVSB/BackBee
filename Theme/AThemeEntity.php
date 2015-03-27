@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,57 +25,64 @@ namespace BackBee\Theme;
 
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class AThemeEntity implements IThemeEntity
 {
     /**
-     * Unique identifier of the object
+     * Unique identifier of the object.
+     *
      * @var string
      */
     protected $_uid;
 
     /**
-     * Site identifier
+     * Site identifier.
+     *
      * @var string
      */
     protected $_site_uid;
 
     /**
-     * Name of the theme
+     * Name of the theme.
+     *
      * @var string
      */
     protected $_name;
 
     /**
-     * Name of the theme
+     * Name of the theme.
+     *
      * @var string
      */
     protected $_description;
 
     /**
-     * Graphic representation of the theme
+     * Graphic representation of the theme.
+     *
      * @var string
      */
     protected $_screenshot;
 
     /**
-     * Name of the folder theme
+     * Name of the folder theme.
+     *
      * @var string
      */
     protected $_folder_name;
 
     /**
-     * Architecture of the folder theme
+     * Architecture of the folder theme.
+     *
      * @var string
      * @column(type="string", name="architecture")
      */
     protected $_architecture;
 
     /**
-     * Return the Unique identifier of the current theme
+     * Return the Unique identifier of the current theme.
      *
      * @return string
      * @codeCoverageIgnore
@@ -86,7 +93,7 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Return the site identifier of the current theme
+     * Return the site identifier of the current theme.
      *
      * @return string
      * @codeCoverageIgnore
@@ -97,7 +104,7 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Return the name of the current theme
+     * Return the name of the current theme.
      *
      * @return string
      * @codeCoverageIgnore
@@ -108,7 +115,7 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Return the screenshot of the current theme
+     * Return the screenshot of the current theme.
      *
      * @return string
      * @codeCoverageIgnore
@@ -119,7 +126,7 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Return the description of the current theme
+     * Return the description of the current theme.
      *
      * @return string
      * @codeCoverageIgnore
@@ -130,7 +137,7 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Return the name of the current theme
+     * Return the name of the current theme.
      *
      * @return string
      * @codeCoverageIgnore
@@ -141,9 +148,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme Unique identifier
+     * Set the theme Unique identifier.
      *
-     * @param  string $uid
+     * @param string $uid
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -155,9 +163,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme site identifier
+     * Set the theme site identifier.
      *
-     * @param  string $site_uid
+     * @param string $site_uid
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -169,9 +178,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme site identifier
+     * Set the theme site identifier.
      *
-     * @param  string $site_uid
+     * @param string $site_uid
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -183,9 +193,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme name
+     * Set the theme name.
      *
-     * @param  string $name
+     * @param string $name
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -197,9 +208,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme description
+     * Set the theme description.
      *
-     * @param  string $description
+     * @param string $description
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -211,9 +223,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme grafic representation
+     * Set the theme grafic representation.
      *
-     * @param  string $file
+     * @param string $file
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -225,9 +238,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme folder name
+     * Set the theme folder name.
      *
-     * @param  string $folder_name
+     * @param string $folder_name
+     *
      * @return Theme
      * @codeCoverageIgnore
      */
@@ -239,7 +253,7 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Return the theme architecture
+     * Return the theme architecture.
      *
      * @return array
      * @codeCoverageIgnore
@@ -250,9 +264,10 @@ abstract class AThemeEntity implements IThemeEntity
     }
 
     /**
-     * Set the theme architecture
+     * Set the theme architecture.
      *
-     * @param  array $folder_architecture
+     * @param array $folder_architecture
+     *
      * @return Theme
      * @codeCoverageIgnore
      */

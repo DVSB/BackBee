@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -33,22 +33,24 @@ use BackBee\Util\Transport\Exception\MisconfigurationException;
  *    host: {<<Transport host>>}
  *    remotepath: {<<Transport remote path>>}
  *    ...
- * </code>
+ * </code>.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Transport
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class TransportFactory
 {
     /**
-     * Creates a new ATransport instance
-     * @param  array                              $config An array containing the key 'transport' with the classname to use
-     *                                                    and optional options depending on the transport to start
+     * Creates a new ATransport instance.
+     *
+     * @param array $config An array containing the key 'transport' with the classname to use
+     *                      and optional options depending on the transport to start
+     *
      * @return \BackBee\Util\Transport\ATransport
-     * @throws MisconfigurationException          occures if $config is not valid
+     *
+     * @throws MisconfigurationException occures if $config is not valid
      */
     public static function create(array $config)
     {

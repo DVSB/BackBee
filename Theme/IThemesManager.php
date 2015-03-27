@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,7 @@ namespace BackBee\Theme;
 
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -47,21 +47,21 @@ interface IThemesManager
     public function create(ThemeEntity $theme);
 
     /**
-     * Delete the theme specified
+     * Delete the theme specified.
      *
      * @param string $name
      */
     public function delete($name);
 
     /**
-     * Return the configuration of the specified theme
+     * Return the configuration of the specified theme.
      *
      * @param string $name
      */
     public function getTheme($name);
 
     /**
-     * Return all the themes inside the path set in the constructor
+     * Return all the themes inside the path set in the constructor.
      */
     public function getThemesCollection();
 
@@ -74,17 +74,19 @@ interface IThemesManager
     public function rename($name, $new_name);
 
     /**
-     * Update the config.yml
+     * Update the config.yml.
      *
      * @param \BackBee\Theme\IThemeEntity $theme
      */
     public function updateConfig(IThemeEntity $theme);
 
     /**
-     * Generate a theme object
+     * Generate a theme object.
      *
-     * @param  array                              $theme_config
+     * @param array $theme_config
+     *
      * @return \BackBee\Theme\PersonalThemeEntity
+     *
      * @throws ThemeException
      */
     public function hydrateTheme(array $theme_config);

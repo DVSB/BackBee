@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Stream\ClassWrapper\Adapter;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as parserYaml;
-
 use BackBee\Exception\BBException;
 use BackBee\Stream\ClassWrapper\AClassWrapper;
 use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
@@ -33,42 +32,45 @@ use BackBee\Utils\File\File;
 
 /**
  * Stream wrapper to interprate yaml file as class content description
- * Extends AClassWrapper
+ * Extends AClassWrapper.
  *
  * @category    BackBee
- * @package     BackBee\Stream\ClassWrapper
- * @subpackage  Adapter
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Yaml extends AClassWrapper
 {
     /**
-     * Current BackBee application
+     * Current BackBee application.
+     *
      * @var BackBee\BBApplication
      */
     private $_application;
 
     /**
-     * Extensions to include searching file
+     * Extensions to include searching file.
+     *
      * @var array
      */
     private $_includeExtensions = array('.yml', '.yaml');
 
     /**
-     * Path to the yaml file
+     * Path to the yaml file.
+     *
      * @var string
      */
     private $_path;
 
     /**
-     * Ordered directories file path to look for yaml file
+     * Ordered directories file path to look for yaml file.
+     *
      * @var array
      */
     private $_classcontentdir;
 
     /**
-     * Class constructor
+     * Class constructor.
      */
     public function __construct()
     {
@@ -89,8 +91,10 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * Extract and format datas from parser
-     * @param  array $datas
+     * Extract and format datas from parser.
+     *
+     * @param array $datas
+     *
      * @return array The extracted datas
      */
     protected function _extractDatas($datas)
@@ -142,9 +146,12 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * Checks the validity of the extracted data from yaml file
-     * @param  array                 $yamlDatas The yaml datas
-     * @return Boolean               Returns TRUE if datas are valid, FALSE if not
+     * Checks the validity of the extracted data from yaml file.
+     *
+     * @param array $yamlDatas The yaml datas
+     *
+     * @return Boolean Returns TRUE if datas are valid, FALSE if not
+     *
      * @throws ClassWrapperException Occurs when datas are not valid
      */
     private function _checkDatas($yamlDatas)
@@ -250,8 +257,10 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * Return the real yaml file path of the loading class
-     * @param  string $path
+     * Return the real yaml file path of the loading class.
+     *
+     * @param string $path
+     *
      * @return string The real path if found
      */
     private function _resolveFilePath($path)
@@ -302,8 +311,10 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * Opens a stream content for a yaml file
+     * Opens a stream content for a yaml file.
+     *
      * @see BackBee\Stream\ClassWrapper.IClassWrapper::stream_open()
+     *
      * @throws BBException           Occurs when none yamel files were found
      * @throws ClassWrapperException Occurs when yaml file is not a valid class content description
      */
@@ -354,7 +365,8 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * Retrieve information about a yaml file
+     * Retrieve information about a yaml file.
+     *
      * @see BackBee\Stream\ClassWrapper.AClassWrapper::url_stat()
      */
     public function url_stat($path, $flag)

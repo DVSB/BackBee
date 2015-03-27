@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,11 +27,10 @@ use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\Element\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Tests\Mock\MockContent;
-use BackBee\Exception\BBException;
 
 /**
  * @category    BackBee
- * @package     BackBee\NestedNode\Tests
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
@@ -47,7 +46,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test getProperty
+     * test getProperty.
      *
      * @coverage \BackBee\ClassContent\AClassContent::getProperty
      */
@@ -59,7 +58,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test setProperty
+     * test setProperty.
      *
      * @coverage \BackBee\ClassContent\AClassContent::setProperty
      */
@@ -70,7 +69,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test createClone
+     * test createClone.
      *
      * @coverage \BackBee\ClassContent\AClassContent::createClone
      */
@@ -87,7 +86,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test setProperty
+     * test setProperty.
      */
     public function testAcceptedType()
     {
@@ -209,11 +208,10 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->content->isAccepted($this->content->date, 'title'));
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
         try {
-
-        $this->assertFalse($this->content->isAccepted(new Image(), 'title'));
-    } catch (\Exception $e) {
-        var_dump($e->getMessage(), get_class($e));
-    }
+            $this->assertFalse($this->content->isAccepted(new Image(), 'title'));
+        } catch (\Exception $e) {
+            var_dump($e->getMessage(), get_class($e));
+        }
 
         $this->assertEquals('A date', $this->content->date->value);
     }

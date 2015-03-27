@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,31 +25,31 @@ namespace BackBee\Bundle;
 
 /**
  * This interface ensure that an exposed controller has an entry point (indexAction),
- * a label getter and a description getter
+ * a label getter and a description getter.
  *
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 interface BundleExposedControllerInterface
 {
     /**
-     * This exposed controller entry point
+     * This exposed controller entry point.
      *
      * @return Symfony\Component\HttpFoundation\Response the response object to send
      */
     public function indexAction();
 
     /**
-     * This exposed controller entry point label
+     * This exposed controller entry point label.
      *
      * @return string
      */
     public function getLabel();
 
     /**
-     * This exposed controller description
+     * This exposed controller description.
      *
      * @return string
      */

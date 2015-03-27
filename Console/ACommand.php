@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Console;
 use Symfony\Component\Console\Command\Command;
 
 /**
- * Abstract Command
+ * Abstract Command.
  *
  * @category    BackBee
- * @package     BackBee\Console
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -41,7 +41,6 @@ class ACommand extends Command
     private $container;
 
     /**
-     *
      * @var \BackBee\Bundle\ABundle
      */
     protected $bundle;
@@ -67,7 +66,6 @@ class ACommand extends Command
     }
 
     /**
-     *
      * @param \BackBee\Bundle\ABundle $bundle
      */
     public function setBundle($bundle)
@@ -76,7 +74,6 @@ class ACommand extends Command
     }
 
     /**
-     *
      * @return \BackBee\Bundle\ABundle
      */
     public function getBundle()

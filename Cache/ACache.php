@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,27 +24,27 @@
 namespace BackBee\Cache;
 
 use Psr\Log\LoggerInterface;
-
 use BackBee\Cache\Exception\CacheException;
 
 /**
- * Abstract class for cache adapters
+ * Abstract class for cache adapters.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 abstract class ACache
 {
     /**
-     * Cache adapter options
+     * Cache adapter options.
+     *
      * @var array
      */
     protected $_instance_options = array();
 
     /**
-     * Default cache apdater options
+     * Default cache apdater options.
      *
      * @var array
      */
@@ -54,22 +54,26 @@ abstract class ACache
     );
 
     /**
-     * A logger
+     * A logger.
+     *
      * @var \Psr\Log\LoggerInterface
      */
     protected $_logger = null;
 
     /**
-     * A cache context
+     * A cache context.
+     *
      * @var string
      */
     private $_context = null;
 
     /**
-     * Class constructor
-     * @param  array                                   $options An array of options allowing to construct the cache adapter
-     * @param  string                                  $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
+     * Class constructor.
+     *
+     * @param array                    $options An array of options allowing to construct the cache adapter
+     * @param string                   $context An optional cache context
+     * @param \Psr\Log\LoggerInterface $logger  An optional logger
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the cache adapter cannot be construct
      * @codeCoverageIgnore
      */
@@ -83,48 +87,59 @@ abstract class ACache
     }
 
     /**
-     * Returns the available cache for the given id if found returns FALSE else
-     * @param  string       $id          Cache id
-     * @param  boolean      $bypassCheck Allow to find cache without test it before
-     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
+     * Returns the available cache for the given id if found returns FALSE else.
+     *
+     * @param string    $id          Cache id
+     * @param boolean   $bypassCheck Allow to find cache without test it before
+     * @param \DateTime $expire      Optionnal, the expiration time (now by default)
+     *
      * @return string|FALSE
      */
     abstract public function load($id, $bypassCheck = false, \DateTime $expire = null);
 
     /**
-     * Tests if a cache is available or not (for the given id)
-     * @param  string    $id Cache id
+     * Tests if a cache is available or not (for the given id).
+     *
+     * @param string $id Cache id
+     *
      * @return int|FALSE the last modified timestamp of the available cache record (0 infinite expiration date)
      */
     abstract public function test($id);
 
     /**
-     * Saves some string datas into a cache record
-     * @param  string  $id       Cache id
-     * @param  string  $data     Datas to cache
-     * @param  int     $lifetime Optional, the specific lifetime for this record
-     *                           (by default null, infinite lifetime)
-     * @param  string  $tag      Optional, an associated tag to the data stored
+     * Saves some string datas into a cache record.
+     *
+     * @param string $id       Cache id
+     * @param string $data     Datas to cache
+     * @param int    $lifetime Optional, the specific lifetime for this record
+     *                         (by default null, infinite lifetime)
+     * @param string $tag      Optional, an associated tag to the data stored
+     *
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     abstract public function save($id, $data, $lifetime = null, $tag = null);
 
     /**
-     * Removes a cache record
-     * @param  string  $id Cache id
+     * Removes a cache record.
+     *
+     * @param string $id Cache id
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     abstract public function remove($id);
 
     /**
-     * Clears all cache records
+     * Clears all cache records.
+     *
      * @return boolean TRUE if cache is cleared FALSE otherwise
      */
     abstract public function clear();
 
     /**
-     * Sets the cache logger
-     * @param  \Psr\Log\LoggerInterface $logger
+     * Sets the cache logger.
+     *
+     * @param \Psr\Log\LoggerInterface $logger
+     *
      * @return \BackBee\Cache\ACache
      * @codeCoverageIgnore
      */
@@ -136,7 +151,8 @@ abstract class ACache
     }
 
     /**
-     * Gets the cache logger
+     * Gets the cache logger.
+     *
      * @return \Psr\Log\LoggerInterface $logger
      * @codeCoverageIgnore
      */
@@ -146,7 +162,8 @@ abstract class ACache
     }
 
     /**
-     * Returns the cache context
+     * Returns the cache context.
+     *
      * @return string|NULL
      * @codeCoverageIgnore
      */
@@ -156,8 +173,10 @@ abstract class ACache
     }
 
     /**
-     * Sets the cache coontext
-     * @param  string                $context
+     * Sets the cache coontext.
+     *
+     * @param string $context
+     *
      * @return \BackBee\Cache\ACache
      * @codeCoverageIgnore
      */
@@ -169,9 +188,12 @@ abstract class ACache
     }
 
     /**
-     * Sets the cache adapter instance options
-     * @param  array                                   $options
+     * Sets the cache adapter instance options.
+     *
+     * @param array $options
+     *
      * @return \BackBee\Cache\ACache
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
     private function setInstanceOptions(array $options = array())
@@ -188,7 +210,8 @@ abstract class ACache
     }
 
     /**
-     * Logs a message on provided level if a logger is defined
+     * Logs a message on provided level if a logger is defined.
+     *
      * @param string $level   The log level
      * @param string $message The message to log
      * @param array  $context The logging context
@@ -202,8 +225,10 @@ abstract class ACache
     }
 
     /**
-     * Returns the expiration timestamp
-     * @param  int $lifetime
+     * Returns the expiration timestamp.
+     *
+     * @param int $lifetime
+     *
      * @return int
      * @codeCoverageIgnore
      */
@@ -231,8 +256,10 @@ abstract class ACache
     }
 
     /**
-     * Control the lifetime against min and max lifetime if provided
-     * @param  int $lifetime
+     * Control the lifetime against min and max lifetime if provided.
+     *
+     * @param int $lifetime
+     *
      * @return int
      */
     protected function getControledLifetime($lifetime)
@@ -253,8 +280,10 @@ abstract class ACache
     }
 
     /**
-     * Control the expiration time against min and max lifetime if provided
-     * @param  int $expire
+     * Control the expiration time against min and max lifetime if provided.
+     *
+     * @param int $expire
+     *
      * @return int
      */
     private function _getControledExpireTime($expire)

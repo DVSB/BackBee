@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,31 +24,34 @@
 namespace BackBee\Renderer\Helper;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
-
 use BackBee\Renderer\ARenderer;
 
 class HelperManager
 {
     /**
-     * [$renderer description]
+     * [$renderer description].
+     *
      * @var [type]
      */
     private $renderer;
 
     /**
-     * [$bbapp description]
+     * [$bbapp description].
+     *
      * @var [type]
      */
     private $bbapp;
 
     /**
-     * [$helpers description]
+     * [$helpers description].
+     *
      * @var [type]
      */
     private $helpers;
 
     /**
-     * [__construct description]
+     * [__construct description].
+     *
      * @param ARenderer $renderer [description]
      */
     public function __construct(ARenderer $renderer)
@@ -59,8 +62,10 @@ class HelperManager
     }
 
     /**
-     * [get description]
-     * @param  [type] $method [description]
+     * [get description].
+     *
+     * @param [type] $method [description]
+     *
      * @return [type] [description]
      */
     public function get($method)
@@ -74,9 +79,11 @@ class HelperManager
     }
 
     /**
-     * [create description]
-     * @param  [type] $method [description]
-     * @param  [type] $argv   [description]
+     * [create description].
+     *
+     * @param [type] $method [description]
+     * @param [type] $argv   [description]
+     *
      * @return [type] [description]
      */
     public function create($method, $argv)
@@ -90,9 +97,11 @@ class HelperManager
     }
 
     /**
-     * [updateRenderer description]
-     * @param  ARenderer $renderer [description]
-     * @return [type]    [description]
+     * [updateRenderer description].
+     *
+     * @param ARenderer $renderer [description]
+     *
+     * @return [type] [description]
      */
     public function updateRenderer(ARenderer $renderer)
     {

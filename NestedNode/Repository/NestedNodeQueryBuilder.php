@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,29 +24,31 @@
 namespace BackBee\NestedNode\Repository;
 
 use Doctrine\ORM\QueryBuilder;
-
 use BackBee\NestedNode\ANestedNode;
 
 /**
- * This class is responsible for building DQL query strings for NestedNode
+ * This class is responsible for building DQL query strings for NestedNode.
  *
  * @category    BackBee
- * @package     BackBee\NestedNode\Repository
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class NestedNodeQueryBuilder extends QueryBuilder
 {
     /**
-     * The root alias of this query
+     * The root alias of this query.
+     *
      * @var string
      */
     private $_root_alias;
 
     /**
-     * Add query part to exclude $node from selection
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to exclude $node from selection.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsNot(ANestedNode $node, $alias = null)
@@ -58,9 +60,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select a specific tree (by its root)
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select a specific tree (by its root).
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andRootIs(ANestedNode $node, $alias = null)
@@ -72,9 +76,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select a specific subbranch of tree
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select a specific subbranch of tree.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andParentIs(ANestedNode $node = null, $alias = null)
@@ -90,9 +96,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes by level
-     * @param  int                                                   $level
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select nodes by level.
+     *
+     * @param int    $level
+     * @param string $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andLevelEquals($level, $alias = null)
@@ -104,10 +112,12 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes having level lower than or equal to $level
-     * @param  int                                                   $level  the level to test
-     * @param  boolean                                               $strict if TRUE, having strictly level lower than $level
-     * @param  string                                                $alias  optional, the alias to use
+     * Add query part to select nodes having level lower than or equal to $level.
+     *
+     * @param int     $level  the level to test
+     * @param boolean $strict if TRUE, having strictly level lower than $level
+     * @param string  $alias  optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andLevelIsLowerThan($level, $strict = false, $alias = null)
@@ -119,10 +129,12 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes having level upper than or equal to $level
-     * @param  int                                                   $level  the level to test
-     * @param  boolean                                               $strict if TRUE, having strictly level upper than $level
-     * @param  string                                                $alias  optional, the alias to use
+     * Add query part to select nodes having level upper than or equal to $level.
+     *
+     * @param int     $level  the level to test
+     * @param boolean $strict if TRUE, having strictly level upper than $level
+     * @param string  $alias  optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andLevelIsUpperThan($level, $strict = false, $alias = null)
@@ -134,9 +146,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select node with leftnode equals to $leftnode
-     * @param  int                                                   $leftnode
-     * @param  string                                                $alias    optional, the alias to use
+     * Add query part to select node with leftnode equals to $leftnode.
+     *
+     * @param int    $leftnode
+     * @param string $alias    optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andLeftnodeEquals($leftnode, $alias = null)
@@ -148,10 +162,12 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes having leftnode lower than or equal to $leftnode
-     * @param  int                                                   $leftnode
-     * @param  boolean                                               $strict   If TRUE, having strictly leftnode lower than $leftnode
-     * @param  string                                                $alias    optional, the alias to use
+     * Add query part to select nodes having leftnode lower than or equal to $leftnode.
+     *
+     * @param int     $leftnode
+     * @param boolean $strict   If TRUE, having strictly leftnode lower than $leftnode
+     * @param string  $alias    optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andLeftnodeIsLowerThan($leftnode, $strict = false, $alias = null)
@@ -163,10 +179,12 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes having leftnode upper than or equal to $leftnode
-     * @param  int                                                   $leftnode
-     * @param  boolean                                               $strict   If TRUE, having strictly leftnode upper than $leftnode
-     * @param  string                                                $alias    optional, the alias to use
+     * Add query part to select nodes having leftnode upper than or equal to $leftnode.
+     *
+     * @param int     $leftnode
+     * @param boolean $strict   If TRUE, having strictly leftnode upper than $leftnode
+     * @param string  $alias    optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andLeftnodeIsUpperThan($leftnode, $strict = false, $alias = null)
@@ -178,9 +196,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select node with rightnode equals to $rightnode
-     * @param  int                                                   $rightnode
-     * @param  string                                                $alias     optional, the alias to use
+     * Add query part to select node with rightnode equals to $rightnode.
+     *
+     * @param int    $rightnode
+     * @param string $alias     optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andRightnodeEquals($rightnode, $alias = null)
@@ -192,10 +212,12 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes having rightnode lower than or equal to $rightnode
-     * @param  int                                                   $rightnode
-     * @param  boolean                                               $strict    If TRUE, having strictly rightnode lower than $rightnode
-     * @param  string                                                $alias     optional, the alias to use
+     * Add query part to select nodes having rightnode lower than or equal to $rightnode.
+     *
+     * @param int     $rightnode
+     * @param boolean $strict    If TRUE, having strictly rightnode lower than $rightnode
+     * @param string  $alias     optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andRightnodeIsLowerThan($rightnode, $strict = false, $alias = null)
@@ -207,10 +229,12 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select nodes having rightnode upper than or equal to $rightnode
-     * @param  int                                                   $rightnode
-     * @param  boolean                                               $strict    If TRUE, having strictly rightnode upper than $rightnode
-     * @param  string                                                $alias     optional, the alias to use
+     * Add query part to select nodes having rightnode upper than or equal to $rightnode.
+     *
+     * @param int     $rightnode
+     * @param boolean $strict    If TRUE, having strictly rightnode upper than $rightnode
+     * @param string  $alias     optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andRightnodeIsUpperThan($rightnode, $strict = false, $alias = null)
@@ -222,13 +246,15 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select siblings of $node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  boolean                                               $strict if TRUE, $node is exclude
-     * @param  array                                                 $order  ordering spec ( array($field => $sort) )
-     * @param  int                                                   $limit  max number of results
-     * @param  int                                                   $start  first result index
-     * @param  string                                                $alias  optional, the alias to use
+     * Add query part to select siblings of $node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param boolean                         $strict if TRUE, $node is exclude
+     * @param array                           $order  ordering spec ( array($field => $sort) )
+     * @param int                             $limit  max number of results
+     * @param int                             $start  first result index
+     * @param string                          $alias  optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsSiblingsOf(ANestedNode $node, $strict = false, $order = null, $limit = null, $start = 0, $alias = null)
@@ -255,9 +281,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select previous sibling of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select previous sibling of node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsPreviousSiblingOf(ANestedNode $node, $alias = null)
@@ -267,9 +295,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select previous siblings of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select previous siblings of node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsPreviousSiblingsOf(ANestedNode $node, $alias = null)
@@ -279,9 +309,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select next sibling of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select next sibling of node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsNextSiblingOf(ANestedNode $node, $alias = null)
@@ -291,9 +323,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select next siblings of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  string                                                $alias optional, the alias to use
+     * Add query part to select next siblings of node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param string                          $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsNextSiblingsOf(ANestedNode $node, $alias = null)
@@ -303,11 +337,13 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select ancestors of $node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  boolean                                               $strict   If TRUE, $node is excluded from the selection
-     * @param  int                                                   $at_level Filter ancestors by their level
-     * @param  string                                                $alias    optional, the alias to use
+     * Add query part to select ancestors of $node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param boolean                         $strict   If TRUE, $node is excluded from the selection
+     * @param int                             $at_level Filter ancestors by their level
+     * @param string                          $alias    optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsAncestorOf(ANestedNode $node, $strict = false, $at_level = null, $alias = null)
@@ -324,11 +360,13 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add query part to select descendants of $node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
-     * @param  boolean                                               $strict   If TRUE, $node is excluded from the selection
-     * @param  int                                                   $at_level Filter ancestors by their level
-     * @param  string                                                $alias    optional, the alias to use
+     * Add query part to select descendants of $node.
+     *
+     * @param \BackBee\NestedNode\ANestedNode $node
+     * @param boolean                         $strict   If TRUE, $node is excluded from the selection
+     * @param int                             $at_level Filter ancestors by their level
+     * @param string                          $alias    optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function andIsDescendantOf(ANestedNode $node, $strict = false, $at_level = null, $alias = null)
@@ -345,9 +383,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add multiple ordering criteria
-     * @param  array                                                 $order optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
-     * @param  string                                                $alias optional, the alias to use
+     * Add multiple ordering criteria.
+     *
+     * @param array  $order optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
+     * @param string $alias optional, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function orderByMultiple($order = array('_leftnode' => 'asc'), $alias = null)
@@ -370,9 +410,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add qery part to select page having modified date lower than $date
-     * @param  \DateTime                                       $date  the date to test
-     * @param  string                                          $alias optiona, the alias to use
+     * Add qery part to select page having modified date lower than $date.
+     *
+     * @param \DateTime $date  the date to test
+     * @param string    $alias optiona, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andModifiedIsLowerThan(\DateTime $date, $alias = null)
@@ -384,9 +426,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add qery part to select page having modified date greater than $date
-     * @param  \DateTime                                       $date  the date to test
-     * @param  string                                          $alias optiona, the alias to use
+     * Add qery part to select page having modified date greater than $date.
+     *
+     * @param \DateTime $date  the date to test
+     * @param string    $alias optiona, the alias to use
+     *
      * @return \BackBee\NestedNode\Repository\PageQueryBuilder
      */
     public function andModifiedIsGreaterThan(\DateTime $date, $alias = null)
@@ -398,8 +442,10 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Try to retreive the root alias for this builder
+     * Try to retreive the root alias for this builder.
+     *
      * @return string
+     *
      * @throws \BackBee\Exception\BBException
      */
     protected function getFirstAlias($alias = null)
@@ -421,8 +467,10 @@ class NestedNodeQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Compute suffix and alias used by query part
-     * @param  string $alias
+     * Compute suffix and alias used by query part.
+     *
+     * @param string $alias
+     *
      * @return array
      */
     protected function getAliasAndSuffix($alias = null)

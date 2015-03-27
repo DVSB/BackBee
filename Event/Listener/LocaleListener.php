@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,18 +30,18 @@ use BackBee\NestedNode\Page;
 use BackBee\Rewriting\IUrlGenerator;
 
 /**
- * Listener to rewriting events
+ * Listener to rewriting events.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class LocaleListener
 {
     /**
-     * Occur on classcontent.onflush events
+     * Occur on classcontent.onflush events.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushContent(Event $event)
@@ -62,7 +62,8 @@ class LocaleListener
     }
 
     /**
-     * Occur on nestednode.page.onflush events
+     * Occur on nestednode.page.onflush events.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushPage(Event $event)
@@ -90,7 +91,7 @@ class LocaleListener
     }
 
     /**
-     * Update URL for a page and its descendants according to the application IUrlGenerator
+     * Update URL for a page and its descendants according to the application IUrlGenerator.
      *
      * @param \BackBee\BBApplication              $application
      * @param \BackBee\NestedNode\Page            $page

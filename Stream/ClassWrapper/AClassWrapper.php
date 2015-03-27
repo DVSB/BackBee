@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,7 +28,7 @@ use BackBee\Stream\IStreamWrapper;
 
 /**
  * Abstract class for content wrapper in BackBee 4
- * Implements IClassWrapper
+ * Implements IClassWrapper.
  *
  * BackBee defines bb.class protocol to include its class definition
  * Several wrappers could be defined for several storing formats:
@@ -38,98 +38,113 @@ use BackBee\Stream\IStreamWrapper;
  *  - ...
  *
  * @category    BackBee
- * @package     BackBee\Stream\ClassWrapper
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 abstract class AClassWrapper implements IStreamWrapper
 {
     /**
-     * The registered BackBee autoloader
+     * The registered BackBee autoloader.
+     *
      * @var \BackBee\Autoloader\Autoloader
      */
     protected $_autoloader;
 
     /**
-     * The data of the stream
+     * The data of the stream.
+     *
      * @var string
      */
     protected $_data;
 
     /**
-     * The seek position in the stream
+     * The seek position in the stream.
+     *
      * @var int
      */
     protected $_pos = 0;
 
     /**
-     * The protocol handled by the wrapper
+     * The protocol handled by the wrapper.
+     *
      * @var string
      */
     protected $_protocol = "bb.class";
 
     /**
-     * Information about the stream ressource
+     * Information about the stream ressource.
+     *
      * @var array
      */
     protected $_stat;
 
     /**
-     * the class content name to load
+     * the class content name to load.
+     *
      * @var string
      */
     protected $classname;
 
     /**
-     * The class to be extended by the class content loaded
+     * The class to be extended by the class content loaded.
+     *
      * @var string
      */
     protected $extends = '\BackBee\ClassContent\AClassContent';
 
     /**
-     * Interface(s) used by the class content
+     * Interface(s) used by the class content.
+     *
      * @var string
      */
     protected $interfaces;
 
     /**
-     * Trait(s) used by the class content
+     * Trait(s) used by the class content.
+     *
      * @var string
      */
     protected $traits;
 
     /**
-     * The doctrine repository associated to the class content loaded
+     * The doctrine repository associated to the class content loaded.
+     *
      * @var string
      */
     protected $repository = 'BackBee\ClassContent\Repository\ClassContentRepository';
 
     /**
-     * The elements of the class content
+     * The elements of the class content.
+     *
      * @var array
      */
     protected $elements;
 
     /**
-     * The namespace of the class content loaded
+     * The namespace of the class content loaded.
+     *
      * @var string
      */
     protected $namespace = "BackBee\ClassContent";
 
     /**
-     * the user parameters of the class content
+     * the user parameters of the class content.
+     *
      * @var array
      */
     protected $parameters;
 
     /**
-     * the properties of the class content
+     * the properties of the class content.
+     *
      * @var array
      */
     protected $properties;
 
     /**
-     * Default php template to build the class file
+     * Default php template to build the class file.
+     *
      * @var string
      */
     protected $template =
@@ -164,7 +179,7 @@ class <classname> extends <extends> <interface>
 
     /**
      * Class constructor
-     * Retreive the registered BackBee autoloader
+     * Retreive the registered BackBee autoloader.
      */
     public function __construct()
     {
@@ -187,7 +202,7 @@ class <classname> extends <extends> <interface>
     }
 
     /**
-     * Build the php code corresponding to the loading class
+     * Build the php code corresponding to the loading class.
      *
      * @return string The generated php code
      */
@@ -242,9 +257,10 @@ class <classname> extends <extends> <interface>
     }
 
     /**
-     * Checks for a normalize var name
+     * Checks for a normalize var name.
      *
-     * @param  string                $var The var name to check
+     * @param string $var The var name to check
+     *
      * @throws ClassWrapperException Occurs for a syntax error
      */
     protected function _normalizeVar($var, $includeSeparator = false)
@@ -358,9 +374,11 @@ class <classname> extends <extends> <interface>
     }
 
     /**
-     * Extract and format datas from parser
-     * @param  array $datas
-     * @return the   extracted datas
+     * Extract and format datas from parser.
+     *
+     * @param array $datas
+     *
+     * @return the extracted datas
      */
     abstract protected function _extractDatas($datas);
 

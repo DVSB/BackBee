@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -32,31 +32,26 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-
 use BackBee\Controller\Controller;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Rest\Formatter\FormatterInterface;
-use BackBee\Serializer\SerializerBuilder;
 
 /**
- * Abstract class for an api controller
+ * Abstract class for an api controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 abstract class ARestController extends Controller implements RestControllerInterface, FormatterInterface
 {
     /**
-     *
      * @var \JMS\Serializer\Serializer
      */
     protected $serializer;
 
     /**
-     *
-     *
      * @access public
      */
     public function optionsAction($endpoint)
@@ -87,10 +82,12 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
-     * Serializes an object
+     * Serializes an object.
      *
      * Implements FormatterInterface::formatItem($item)
-     * @param  mixed $item
+     *
+     * @param mixed $item
+     *
      * @return array
      */
     public function formatItem($item, $format = 'json')
@@ -129,9 +126,10 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
-     * Deserialize data into Doctrine entity
+     * Deserialize data into Doctrine entity.
      *
-     * @param  string|mixed $item Either a valid Entity class name, or a Doctrine Entity object
+     * @param string|mixed $item Either a valid Entity class name, or a Doctrine Entity object
+     *
      * @return mixed
      */
     public function deserializeEntity(array $data, $entityOrClass)
@@ -148,7 +146,7 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
-     * Create a JsonResponse
+     * Create a JsonResponse.
      *
      * @see JsonResponse::__construct()
      *
@@ -164,7 +162,8 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
-     * Create a RESTful response
+     * Create a RESTful response.
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function createResponse($content = '', $statusCode = 200, $contentType = 'application/json')
@@ -193,8 +192,8 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
+     * @param type $message
      *
-     * @param  type $message
      * @return type
      */
     protected function create404Response($message = null)
@@ -211,6 +210,7 @@ abstract class ARestController extends Controller implements RestControllerInter
     protected function getSerializer()
     {
         $this->serializer = $this->getContainer()->get('serializer');
+
         return $this->serializer;
     }
 
@@ -222,7 +222,7 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
-     * Same as isGranted() but throw exception if it is not instead of return false
+     * Same as isGranted() but throw exception if it is not instead of return false.
      *
      * @param string $attributes
      * @param mixed  $object
@@ -241,7 +241,6 @@ abstract class ARestController extends Controller implements RestControllerInter
     }
 
     /**
-     *
      * @param string $name
      *
      * @return object|null

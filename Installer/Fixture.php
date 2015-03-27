@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Installer;
 
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\ORM\Mapping\ClassMetadata;
-
 use BackBee\BBApplication;
 use BackBee\Installer\Annotation\Fixture as AnnotationFixture;
 use BackBee\Installer\Annotation\Fixtures as AnnotationFixtures;
@@ -127,8 +126,9 @@ class Fixture
     }
 
     /**
-     * @param  \ReflectionProperty $property
-     * @return AnnotationFixture   or null
+     * @param \ReflectionProperty $property
+     *
+     * @return AnnotationFixture or null
      */
     private function getPropertyAnnotation(\ReflectionProperty $property)
     {
@@ -136,8 +136,9 @@ class Fixture
     }
 
     /**
-     * @param  \ReflectionProperty $property
-     * @return AnnotationFixture   or null
+     * @param \ReflectionProperty $property
+     *
+     * @return AnnotationFixture or null
      */
     private function getClassAnnotation(\ReflectionClass $class)
     {

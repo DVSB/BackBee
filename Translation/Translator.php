@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,11 +25,10 @@ namespace BackBee\Translation;
 
 use Symfony\Component\Translation\Loader\XliffFileLoader;
 use Symfony\Component\Translation\Translator as sfTranslator;
-
 use BackBee\BBApplication;
 
 /**
- * Extends Symfony\Component\Translation\Translator to allow lazy load of BackBee catalogues
+ * Extends Symfony\Component\Translation\Translator to allow lazy load of BackBee catalogues.
  *
  * @author e.chau <eric.chau@lp-digital.fr>
  */
@@ -39,7 +38,7 @@ class Translator extends sfTranslator
      * Override Symfony\Component\Translation\Translator to lazy load every catalogues from:
      *     - BackBee\Resources\translations
      *     - PATH_TO_REPOSITORY\Ressources\translations
-     *     - PATH_TO_CONTEXT_REPOSITORY\Ressources\translations
+     *     - PATH_TO_CONTEXT_REPOSITORY\Ressources\translations.
      *
      * @param BBApplication $application
      * @param string        $locale

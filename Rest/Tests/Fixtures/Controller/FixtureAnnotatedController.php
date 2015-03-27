@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,16 +24,15 @@
 namespace BackBee\Rest\Tests\Fixtures\Controller;
 
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 
 /**
- * Fixture Controller
+ * Fixture Controller.
  *
  * @Annotation
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -84,7 +83,6 @@ class FixtureAnnotatedController
      *  @Assert\Length(min = "2", max = "50")
      * })
      * @Rest\RequestParam(name = "fieldWithoutRequirements")
-     *
      */
     public function requestParamsWithoutViolationsArgumentAction()
     {
@@ -92,7 +90,6 @@ class FixtureAnnotatedController
 
     /**
      * @Rest\QueryParam(name = "queryParamField")
-     *
      */
     public function queryParamsAction()
     {
@@ -109,7 +106,7 @@ class FixtureAnnotatedController
     }
 
     /**
-     * this is not a controller action
+     * this is not a controller action.
      */
     public function justARandomMethod()
     {
@@ -117,7 +114,7 @@ class FixtureAnnotatedController
     }
 
     /**
-     * This is not a valid controller action as it is not a public method
+     * This is not a valid controller action as it is not a public method.
      */
     private function privateMethodInvalidAction()
     {
@@ -125,7 +122,6 @@ class FixtureAnnotatedController
     }
 
     /**
-     *
      *
      */
     public function noMetadataAction()

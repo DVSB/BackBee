@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,18 +24,18 @@
 namespace BackBee\ClassContent\Exception;
 
 /**
- * Exception thrown if the revision is conflicted
+ * Exception thrown if the revision is conflicted.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Exception
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class RevisionConflictedException extends ClassContentException
 {
     /**
-     * The default error code
+     * The default error code.
+     *
      * @var int
      */
     protected $_code = self::REVISION_CONFLICTED;

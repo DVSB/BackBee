@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,17 +26,17 @@ namespace BackBee\Cache\IdentifierAppender;
 use BackBee\Renderer\IRenderer;
 
 /**
- * Every cache identifier appender must implements this interface to be usable
+ * Every cache identifier appender must implements this interface to be usable.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 interface IdentifierAppenderInterface
 {
     /**
-     * This method allows every identifier appender to customize cache identifier with its own logic
+     * This method allows every identifier appender to customize cache identifier with its own logic.
      *
      * @param string    $identifier the identifier to update if needed
      * @param IRenderer $renderer   the current renderer, can be null
@@ -46,7 +46,7 @@ interface IdentifierAppenderInterface
     public function computeIdentifier($identifier, IRenderer $renderer = null);
 
     /**
-     * Returns every group name this appender is associated with
+     * Returns every group name this appender is associated with.
      *
      * @return array
      */

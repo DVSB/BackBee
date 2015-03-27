@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,37 +24,43 @@
 namespace BackBee\Renderer;
 
 /**
- * Interface for the object that can be rendered
+ * Interface for the object that can be rendered.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 interface IRenderable
 {
     /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
+     * Returns data associated to $var for rendering assignation, all data if NULL provided.
+     *
+     * @param string $var
+     *
      * @return string|array|null
      */
     public function getData($var = null);
 
     /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
+     * Returns parameters associated to $var for rendering assignation, all data if NULL provided.
+     *
+     * @param string $var
+     *
      * @return string|array|null
      */
     public function getParam($var);
 
     /**
      * Returns TRUE if the object can be rendered.
+     *
      * @return Boolean
      */
     public function isRenderable();
 
     /**
-     * Returns return the entity template name
+     * Returns return the entity template name.
+     *
      * @return string
      */
     public function getTemplateName();

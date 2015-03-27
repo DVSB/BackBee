@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,29 +23,9 @@
 
 namespace BackBee\Rest\Patcher;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 /**
- *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -54,9 +34,9 @@ class OperationBuilder
     protected $operations = [];
 
     /**
+     * @param string $path
+     * @param mixed  $value
      *
-     * @param  string                                 $path
-     * @param  mixed                                  $value
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function test($path, $value)
@@ -71,8 +51,8 @@ class OperationBuilder
     }
 
     /**
+     * @param string $path
      *
-     * @param  string                                 $path
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function remove($path)
@@ -86,9 +66,9 @@ class OperationBuilder
     }
 
     /**
+     * @param string $path
+     * @param mixed  $value
      *
-     * @param  string                                 $path
-     * @param  mixed                                  $value
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function add($path, $value)
@@ -103,9 +83,9 @@ class OperationBuilder
     }
 
     /**
+     * @param string $path
+     * @param mixed  $value
      *
-     * @param  string                                 $path
-     * @param  mixed                                  $value
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function replace($path, $value)
@@ -120,9 +100,9 @@ class OperationBuilder
     }
 
     /**
+     * @param string $fromPath
+     * @param mixed  $toPath
      *
-     * @param  string                                 $fromPath
-     * @param  mixed                                  $toPath
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function move($fromPath, $toPath)
@@ -137,9 +117,9 @@ class OperationBuilder
     }
 
     /**
+     * @param string $fromPath
+     * @param mixed  $toPath
      *
-     * @param  string                                 $fromPath
-     * @param  mixed                                  $toPath
      * @return \BackBee\Rest\Patcher\OperationBuilder
      */
     public function copy($fromPath, $toPath)
@@ -154,7 +134,6 @@ class OperationBuilder
     }
 
     /**
-     *
      * @return array
      */
     public function getOperations()

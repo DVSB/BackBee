@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,7 +29,6 @@ use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\PlaintextPasswordEncoder;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-
 use BackBee\Bundle\Registry;
 use BackBee\Security\Encoder\RequestSignatureEncoder;
 use BackBee\Security\Exception\SecurityException;
@@ -37,48 +36,53 @@ use BackBee\Security\Exception\UnknownUserException;
 use BackBee\Security\Token\BBUserToken;
 
 /**
- * Retrieves BBUser for BBUserToken
+ * Retrieves BBUser for BBUserToken.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Authentication\Provider
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class BBAuthenticationProvider implements AuthenticationProviderInterface
 {
     /**
-     * The nonce directory
+     * The nonce directory.
+     *
      * @var string
      */
     private $nonce_directory;
 
     /**
-     * The user provider use to retrieve user
+     * The user provider use to retrieve user.
+     *
      * @var \Symfony\Component\Security\Core\User\UserProviderInterface
      */
     protected $user_provider;
 
     /**
-     * The life time of the connection
+     * The life time of the connection.
+     *
      * @var int
      */
     protected $lifetime;
 
     /**
-     * The DB Registry repository to used to store nonce rather than file
+     * The DB Registry repository to used to store nonce rather than file.
+     *
      * @var \BackBuillder\Bundle\Registry\Repository
      */
     private $registry_repository;
 
     /**
-     * The encoders factory
+     * The encoders factory.
+     *
      * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
      */
     protected $encoder_factory;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
      * @param string                                                      $nonceDir
      * @param int                                                         $lifetime
@@ -99,8 +103,11 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Attempts to authenticates a TokenInterface object.
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
      * @return \BackBee\Security\Token\BBUserToken
+     *
      * @throws \BackBee\Security\Exception\SecurityException
      */
     public function authenticate(TokenInterface $token)
@@ -153,8 +160,11 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks whether this provider supports the given token.
+     *
      * @codeCoverageIgnore
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
      * @return boolean
      */
     public function supports(TokenInterface $token)
@@ -163,7 +173,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Clear nonce file for the current token
+     * Clear nonce file for the current token.
+     *
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      */
     public function clearNonce(TokenInterface $token)
@@ -174,12 +185,15 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Checks for a valid nonce file according to the WSE
-     * @param  string                                        $digest  The digest string send by the client
-     * @param  string                                        $nonce   The nonce file
-     * @param  string                                        $created The creation date of the nonce
-     * @param  string                                        $secret  The secret (ie password) to be check
+     * Checks for a valid nonce file according to the WSE.
+     *
+     * @param string $digest  The digest string send by the client
+     * @param string $nonce   The nonce file
+     * @param string $created The creation date of the nonce
+     * @param string $secret  The secret (ie password) to be check
+     *
      * @return boolean
+     *
      * @throws \BackBee\Security\Exception\SecurityException
      */
     protected function checkNonce(BBUserToken $token, $secret)
@@ -205,8 +219,10 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Returns the nonce value if found, NULL otherwise
-     * @param  type     $nonce
+     * Returns the nonce value if found, NULL otherwise.
+     *
+     * @param type $nonce
+     *
      * @return NULL|int
      */
     protected function readNonceValue($nonce)
@@ -229,7 +245,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Updates the nonce value
+     * Updates the nonce value.
+     *
      * @param string $nonce
      */
     protected function writeNonceValue(BBUserToken $token)
@@ -247,7 +264,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Removes the nonce
+     * Removes the nonce.
+     *
      * @param string $nonce
      */
     protected function removeNonce($nonce)
@@ -261,8 +279,10 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Returns a Registry entry for $nonce
-     * @param  string                   $nonce
+     * Returns a Registry entry for $nonce.
+     *
+     * @param string $nonce
+     *
      * @return \BackBee\Bundle\Registry
      */
     private function getRegistry($nonce)

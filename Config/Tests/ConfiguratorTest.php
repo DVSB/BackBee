@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,34 +23,15 @@
 
 namespace BackBee\Config\Tests;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\Config\Config;
 use BackBee\Config\Configurator;
 use BackBee\Tests\Mock\ManualBBApplication;
 
 /**
- * Set of tests for BackBee\Config\Configurator
+ * Set of tests for BackBee\Config\Configurator.
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -59,21 +40,21 @@ use BackBee\Tests\Mock\ManualBBApplication;
 class ConfiguratorTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * mocked application with minimalist properties setted
+     * mocked application with minimalist properties setted.
      *
      * @var BackBee\Tests\Mock\ManualBBApplication
      */
     private $application;
 
     /**
-     * mocked BundleLoader
+     * mocked BundleLoader.
      *
      * @var BundleLoader
      */
     private $bundleLoader;
 
     /**
-     * setup the test environment with every needed variables
+     * setup the test environment with every needed variables.
      */
     public function setUp()
     {
@@ -85,7 +66,7 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test extend application config with and without context and environment
+     * test extend application config with and without context and environment.
      *
      * @covers ::__construct
      * @covers ::extend

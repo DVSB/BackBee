@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,23 +26,25 @@ namespace BackBee\MetaData;
 use BackBee\NestedNode\Page;
 
 /**
- * A set of metadata
+ * A set of metadata.
  *
  * @category    BackBee
- * @package     BackBee\MetaData
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 {
     /**
-     * The array of metadata
+     * The array of metadata.
+     *
      * @var array
      */
     private $metadatas = array();
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param array                    $definitions
      * @param \BackBee\NestedNode\Page $page
      * @codeCoverageIgnore
@@ -54,8 +56,10 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Compute all metadata according to the provided page
-     * @param  \BackBee\NestedNode\Page      $page
+     * Compute all metadata according to the provided page.
+     *
+     * @param \BackBee\NestedNode\Page $page
+     *
      * @return \BackBee\MetaData\MetaDataBag
      */
     public function compute(Page $page = null)
@@ -72,7 +76,8 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Updates the associated definition of the set of metadata
+     * Updates the associated definition of the set of metadata.
+     *
      * @param array                    $definitions
      * @param \BackBee\NestedNode\Page $page
      */
@@ -128,8 +133,10 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Adds a new matadata to the bag
-     * @param  \BackBee\MetaData\MetaData    $metadata
+     * Adds a new matadata to the bag.
+     *
+     * @param \BackBee\MetaData\MetaData $metadata
+     *
      * @return \BackBee\MetaData\MetaDataBag
      * @codeCoverageIgnore
      */
@@ -141,8 +148,10 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Checks if a metadata exists with the given name
-     * @param  string  $name
+     * Checks if a metadata exists with the given name.
+     *
+     * @param string $name
+     *
      * @return Boolean
      */
     public function has($name)
@@ -151,8 +160,10 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Returns the metadata associated to $name or NULL if it doesn't exist
-     * @param  string                          $name
+     * Returns the metadata associated to $name or NULL if it doesn't exist.
+     *
+     * @param string $name
+     *
      * @return \BackBee\MetaData\MetaData|NULL
      */
     public function get($name)
@@ -161,9 +172,10 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * An array representation of the bag
+     * An array representation of the bag.
      *
      * @return array
+     *
      * @deprecated since version 1.0
      *
      * @codeCoverageIgnore
@@ -181,8 +193,10 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * @param  \stdClass                     $object
+     * @param \stdClass $object
+     *
      * @return \BackBee\MetaData\MetaDataBag
+     *
      * @deprecated since version 1.0
      */
     public function fromStdClass(\stdClass $object)
@@ -202,6 +216,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns the number of attributes.
+     *
      * @return int
      * @codeCoverageIgnore
      */
@@ -212,6 +227,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns an iterator for attributes.
+     *
      * @return \ArrayIterator
      * @codeCoverageIgnore
      */

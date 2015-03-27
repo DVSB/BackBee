@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-
 use BackBee\NestedNode\Page;
 use BackBee\Rest\Controller\PageController;
 use BackBee\Rest\Patcher\OperationBuilder;
@@ -35,10 +34,10 @@ use BackBee\Site\Layout;
 use BackBee\Site\Site;
 
 /**
- * Test for PageController class
+ * Test for PageController class.
  *
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -107,7 +106,7 @@ class PageControllerTest extends RestTestCase
         $response = $this->sendRequest(self::requestPost('/rest/1/page', [
             'title' => 'New Page',
             'url' => 'url',
-            'layout_uid' => $layout->getUid()
+            'layout_uid' => $layout->getUid(),
         ]));
 
         $this->assertEquals(201, $response->getStatusCode());
@@ -155,7 +154,7 @@ class PageControllerTest extends RestTestCase
             'url' => 'url',
             'target' => Page::DEFAULT_TARGET,
             'state' => Page::STATE_ONLINE,
-            'layout_uid' => $layout->getUid()
+            'layout_uid' => $layout->getUid(),
         ]));
 
         $this->assertEquals(204, $response->getStatusCode());

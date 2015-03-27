@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,11 +26,10 @@ namespace BackBee\Util\Doctrine;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
- * Settable paginator
+ * Settable paginator.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Doctrine
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -47,8 +46,10 @@ class SettablePaginator extends Paginator
     private $_result;
 
     /**
-     * Sets the number of results
-     * @param  int                                      $count
+     * Sets the number of results.
+     *
+     * @param int $count
+     *
      * @return \BackBee\Util\Doctrine\SettablePaginator
      */
     public function setCount($count)
@@ -59,8 +60,10 @@ class SettablePaginator extends Paginator
     }
 
     /**
-     * Sets the first set of results
-     * @param  array                                    $result
+     * Sets the first set of results.
+     *
+     * @param array $result
+     *
      * @return \BackBee\Util\Doctrine\SettablePaginator
      */
     public function setResult(array $result)

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Event;
 
 use Symfony\Component\EventDispatcher\Event as sfEvent;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-
 use BackBee\BBApplication;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\Container;
@@ -33,45 +32,45 @@ use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBee\Event\Exception\ContainerNotFoundException;
 
 /**
- * An event dispatcher for BB application
+ * An event dispatcher for BB application.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 {
     /**
-     * Current BackBee application
+     * Current BackBee application.
      *
      * @var BackBee\BBApplication
      */
     protected $application;
 
     /**
-     * Container we use to get services as listener
+     * Container we use to get services as listener.
      *
      * @var BackBee\DependencyInjection\Container
      */
     protected $container;
 
     /**
-     * every registered listeners; we need it so we can dump Dispatcher properly
+     * every registered listeners; we need it so we can dump Dispatcher properly.
      *
      * @var array
      */
     protected $raw_listeners;
 
     /**
-     * define if dispatcher is already restored by container or not
+     * define if dispatcher is already restored by container or not.
      *
      * @var boolean
      */
     protected $_is_restored;
 
     /**
-     * Dispatcher constructor
+     * Dispatcher constructor.
      *
      * @param \BackBee\BBApplication $application The current instance of BB application
      */
@@ -97,7 +96,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Setter of Event\Dispatcher's container
+     * Setter of Event\Dispatcher's container.
      *
      * @param Container $container the container to set into Event\Dispatcher
      */
@@ -107,7 +106,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Add listener to events
+     * Add listener to events.
      *
      * @param array $events_config
      */
@@ -128,6 +127,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 
     /**
      * @see EventDispatcherInterface::dispatch
+     *
      * @api
      */
     public function dispatch($eventName, sfEvent $event = null)
@@ -140,7 +140,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Trigger a BackBee\Event\Event depending on the entity and event name
+     * Trigger a BackBee\Event\Event depending on the entity and event name.
+     *
      * @param string    $eventName The doctrine event name
      * @param Object    $entity    The entity instance
      * @param EventArgs $eventArgs The doctrine event arguments
@@ -167,7 +168,8 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Return the current instance of BBapplication
+     * Return the current instance of BBapplication.
+     *
      * @return \BackBee\BBApplication
      */
     public function getApplication()
@@ -176,8 +178,10 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * return the normalize prefix of the eventname depending on classname
-     * @param  Object $entity
+     * return the normalize prefix of the eventname depending on classname.
+     *
+     * @param Object $entity
+     *
      * @return string
      */
     public function getEventNamePrefix($entity)
@@ -215,7 +219,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
+     * Returns the namespace of the class proxy to use or null if no proxy is required.
      *
      * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
      */
@@ -226,7 +230,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
 
     /**
      * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
+     * with the dump array produced by this method.
      *
      * @return array contains every datas required by this service to be restored at the same state
      */
@@ -281,7 +285,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * returns the container of current dispatcher (try to get it application if current dispatcher don't have it)
+     * returns the container of current dispatcher (try to get it application if current dispatcher don't have it).
      *
      * @return mixed null if no container has been found, else the container
      */
@@ -295,7 +299,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
     }
 
     /**
-     * Format the name of an event
+     * Format the name of an event.
      *
      * @param string $event_name
      * @param object $entity

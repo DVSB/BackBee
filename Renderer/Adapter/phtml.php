@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\Renderer\Adapter;
 
 use Exception;
-
 use BackBee\Renderer\ARenderer;
 use BackBee\Renderer\ARendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
@@ -32,11 +31,10 @@ use BackBee\Site\Layout;
 use BackBee\Utils\File\File;
 
 /**
- * Rendering adapter for phtml templating files
+ * Rendering adapter for phtml templating files.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
- * @subpackage  Adapter
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
@@ -44,7 +42,8 @@ use BackBee\Utils\File\File;
 class phtml extends ARendererAdapter
 {
     /**
-     * Extensions to include searching file
+     * Extensions to include searching file.
+     *
      * @var array
      */
     protected $includeExtensions = array('.phtml', '.php');
@@ -60,7 +59,8 @@ class phtml extends ARendererAdapter
     private $vars;
 
     /**
-     * [__construct description]
+     * [__construct description].
+     *
      * @param ARenderer $renderer [description]
      */
     public function __construct(ARenderer $renderer)
@@ -72,9 +72,11 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * Magic method to get an assign var
-     * @param  string $var the name of the variable
-     * @return mixed  the value
+     * Magic method to get an assign var.
+     *
+     * @param string $var the name of the variable
+     *
+     * @return mixed the value
      */
     public function __get($var)
     {
@@ -82,9 +84,12 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * Magic method to test the setting of an assign var
+     * Magic method to test the setting of an assign var.
+     *
      * @codeCoverageIgnore
-     * @param  string  $var the name of the variable
+     *
+     * @param string $var the name of the variable
+     *
      * @return boolean
      */
     public function __isset($var)
@@ -93,10 +98,13 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * Magic method to assign a var
+     * Magic method to assign a var.
+     *
      * @codeCoverageIgnore
-     * @param  string    $var   the name of the variable
-     * @param  mixed     $value the value of the variable
+     *
+     * @param string $var   the name of the variable
+     * @param mixed  $value the value of the variable
+     *
      * @return ARenderer the current renderer
      */
     public function __set($var, $value = null)
@@ -154,9 +162,11 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * Assign one or more variables
-     * @param  mixed     $var   A variable name or an array of variables to set
-     * @param  mixed     $value The variable value to set
+     * Assign one or more variables.
+     *
+     * @param mixed $var   A variable name or an array of variables to set
+     * @param mixed $value The variable value to set
+     *
      * @return ARenderer The current renderer
      */
     public function assign($var, $value = null)
@@ -177,8 +187,10 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * Return the current page to be rendered
+     * Return the current page to be rendered.
+     *
      * @codeCoverageIgnore
+     *
      * @return null|BackBee\NestedNode\Page
      */
     public function setParam($param, $value = null)
@@ -199,9 +211,11 @@ class phtml extends ARendererAdapter
     }
 
     /**
-     * Return parameters
-     * @param  string $param The parameter to return
-     * @return mixed  The parameter value asked or array of the parameters
+     * Return parameters.
+     *
+     * @param string $param The parameter to return
+     *
+     * @return mixed The parameter value asked or array of the parameters
      */
     public function getParam($param = null)
     {

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,8 +29,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * This methods should be implemented by objects to be stored in ACLs.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Acl\Domain
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -38,19 +37,23 @@ interface IObjectIdentifiable extends DomainObjectInterface
 {
     /**
      * Checks for an explicit objects equality.
-     * @param  \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     *
+     * @param \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     *
      * @return Boolean
      */
     public function equals(IObjectIdentifiable $identity);
 
     /**
      * Returns the unique identifier for this object.
+     *
      * @return string
      */
     public function getIdentifier();
 
     /**
      * Returns a type for the domain object. Typically, this is the PHP class name.
+     *
      * @return string cannot return null
      */
     public function getType();

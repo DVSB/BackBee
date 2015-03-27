@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Config;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\Cache\ACache;
 use BackBee\Config\Exception\InvalidConfigException;
 use BackBee\DependencyInjection\Container;
@@ -36,78 +35,87 @@ use BackBee\Utils\File\File;
 /**
  * A set of configuration parameters store in a yaml file
  * The parameters had to be filtered by section
- * Note that parameters and services will be set only if setContainer() is called
+ * Note that parameters and services will be set only if setContainer() is called.
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 class Config implements DispatchTagEventInterface, DumpableServiceInterface
 {
     /**
-     * Config proxy classname
+     * Config proxy classname.
+     *
      * @var string
      */
     const CONFIG_PROXY_CLASSNAME = 'BackBee\Config\ConfigProxy';
 
     /**
-     * Default config file to look for
+     * Default config file to look for.
+     *
      * @var string
      */
     const CONFIG_FILE = 'config';
 
     /**
-     * System extention config file
+     * System extention config file.
+     *
      * @var string
      */
     const EXTENSION = 'yml';
 
     /**
-     * The base directory to looking for configuration files
+     * The base directory to looking for configuration files.
+     *
      * @var string
      */
     protected $basedir;
 
     /**
-     * The extracted configuration parameters from the config file
+     * The extracted configuration parameters from the config file.
+     *
      * @var array
      */
     protected $raw_parameters;
 
     /**
-     * The already compiled parameters
+     * The already compiled parameters.
+     *
      * @var array
      */
     protected $parameters;
 
     /**
-     * The optional cache system
+     * The optional cache system.
+     *
      * @var \BackBee\Cache\ACache
      */
     protected $cache;
 
     /**
-     * The service container
+     * The service container.
+     *
      * @var \BackBee\DependencyInjection\Container
      */
     protected $container;
 
     /**
-     * Application's environment
+     * Application's environment.
+     *
      * @var string
      */
     protected $environment = \BackBee\ApplicationInterface::DEFAULT_ENVIRONMENT;
 
     /**
-     * Is debug mode enabled
+     * Is debug mode enabled.
      *
      * @var boolean
      */
     protected $debug = false;
 
     /**
-     * Debug info
+     * Debug info.
      *
      * Only populated in dev environment
      *
@@ -116,21 +124,22 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     protected $debug_data = array();
 
     /**
-     * list of yaml filename we don't want to parse and load
+     * list of yaml filename we don't want to parse and load.
      *
      * @var array
      */
     protected $yml_names_to_ignore;
 
     /**
-     * represents if current service has been already restored or not
+     * represents if current service has been already restored or not.
      *
      * @var boolean
      */
     protected $is_restored;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string                                 $basedir   The base directory in which look for config files
      * @param \BackBee\Cache\ACache                  $cache     Optional cache system
      * @param \BackBee\DependencyInjection\Container $container
@@ -150,12 +159,14 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Magic function to get configuration section
      * The called method has to match the pattern getSectionConfig()
-     * for example getDoctrineConfig() aliases getSection('doctrine')
+     * for example getDoctrineConfig() aliases getSection('doctrine').
      *
      * @access public
-     * @param  string $name      The name of the called method
-     * @param  array  $arguments The arguments passed to the called method
-     * @return array  The configuration section if exists NULL else
+     *
+     * @param string $name      The name of the called method
+     * @param array  $arguments The arguments passed to the called method
+     *
+     * @return array The configuration section if exists NULL else
      */
     public function __call($name, $arguments)
     {
@@ -175,8 +186,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Set the service container to be able to parse parameter and service in config
-     * Resets the compiled parameters array
-     * @param  \BackBee\DependencyInjection\Container $container
+     * Resets the compiled parameters array.
+     *
+     * @param \BackBee\DependencyInjection\Container $container
+     *
      * @return \BackBee\Config\Config
      */
     public function setContainer(Container $container = null)
@@ -195,7 +208,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Get debug info
+     * Get debug info.
      *
      * Populated only in dev env
      *
@@ -207,7 +220,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Add more yaml filename to ignore when we will try to find every yaml files of a directory
+     * Add more yaml filename to ignore when we will try to find every yaml files of a directory.
      *
      * @param string|array $filename yaml filename(s) to ignore
      */
@@ -217,8 +230,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns, if exists, the raw parameter section, NULL otherwise
-     * @param  string     $section
+     * Returns, if exists, the raw parameter section, NULL otherwise.
+     *
+     * @param string $section
+     *
      * @return mixed|NULL
      */
     public function getRawSection($section = null)
@@ -233,7 +248,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns all raw paramter sections
+     * Returns all raw paramter sections.
+     *
      * @return array
      */
     public function getAllRawSections()
@@ -242,8 +258,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns, if exists, the parameter section
-     * @param  string     $section
+     * Returns, if exists, the parameter section.
+     *
+     * @param string $section
+     *
      * @return array|NULL
      */
     public function getSection($section = null)
@@ -256,7 +274,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns all sections
+     * Returns all sections.
+     *
      * @return array
      */
     public function getAllSections()
@@ -265,8 +284,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Delete section by name and its parameters
-     * @param  string $section the name of the section you want to delete
+     * Delete section by name and its parameters.
+     *
+     * @param string $section the name of the section you want to delete
+     *
      * @return self
      */
     public function deleteSection($section)
@@ -278,7 +299,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Delete every sections of current Config
+     * Delete every sections of current Config.
+     *
      * @return self
      */
     public function deleteAllSections()
@@ -290,8 +312,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Set environment context
-     * @param  string $env
+     * Set environment context.
+     *
+     * @param string $env
+     *
      * @return self
      */
     public function setEnvironment($env)
@@ -302,8 +326,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Set debug mode
-     * @param  boolean $debug
+     * Set debug mode.
+     *
+     * @param boolean $debug
+     *
      * @return self
      */
     public function setDebug($debug)
@@ -314,9 +340,11 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Checks if the key exists in the parameter section
-     * @param  string  $section
-     * @param  string  $key
+     * Checks if the key exists in the parameter section.
+     *
+     * @param string $section
+     * @param string $key
+     *
      * @return boolean
      */
     public function sectionHasKey($section, $key)
@@ -333,10 +361,12 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Sets a parameter section
-     * @param  string                 $section
-     * @param  array                  $config
-     * @param  boolean                $overwrite
+     * Sets a parameter section.
+     *
+     * @param string  $section
+     * @param array   $config
+     * @param boolean $overwrite
+     *
      * @return \BackBee\Config\Config The current config object
      */
     public function setSection($section, array $config, $overwrite = false)
@@ -355,7 +385,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Extends the current instance with a new base directory
+     * Extends the current instance with a new base directory.
+     *
      * @param string $basedir Optional base directory
      */
     public function extend($basedir = null, $overwrite = false)
@@ -383,7 +414,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns setted base directory
+     * Returns setted base directory.
+     *
      * @return string absolute path to current Config base directory
      */
     public function getBaseDir()
@@ -400,7 +432,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
+     * Returns the namespace of the class proxy to use or null if no proxy is required.
      *
      * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
      */
@@ -411,7 +443,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
+     * with the dump array produced by this method.
      *
      * @return array contains every datas required by this service to be restored at the same state
      */
@@ -437,8 +469,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * If a cache system is defined, try to load a cache for the current basedir
-     * @param  string  $basedir The base directory
+     * If a cache system is defined, try to load a cache for the current basedir.
+     *
+     * @param string $basedir The base directory
+     *
      * @return boolean Returns TRUE if a valid cache has been found, FALSE otherwise
      */
     private function loadFromCache($basedir)
@@ -469,8 +503,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Saves the parameters in cache system if defined
-     * @param  string  $basedir The base directory
+     * Saves the parameters in cache system if defined.
+     *
+     * @param string $basedir The base directory
+     *
      * @return boolean Returns TRUE if a valid cache has been saved, FALSE otherwise
      */
     private function saveToCache($basedir)
@@ -487,8 +523,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns a cache expiration date time (the newer modification date of files)
-     * @param  string    $basedir The base directory
+     * Returns a cache expiration date time (the newer modification date of files).
+     *
+     * @param string $basedir The base directory
+     *
      * @return \DateTime
      */
     private function getCacheExpire($basedir)
@@ -511,8 +549,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns a cache id for the current instance
-     * @param  string $basedir The base directory
+     * Returns a cache id for the current instance.
+     *
+     * @param string $basedir The base directory
+     *
      * @return string
      */
     private function getCacheId($basedir)
@@ -521,10 +561,13 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns an array of YAML files in the directory
-     * @param  string                                            $basedir
-     * @param  string                                            $basedir The base directory
+     * Returns an array of YAML files in the directory.
+     *
+     * @param string $basedir
+     * @param string $basedir The base directory
+     *
      * @return array
+     *
      * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function getYmlFiles($basedir)
@@ -550,8 +593,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Loads the config files from the base directory
-     * @param  string                                            $basedir The base directory
+     * Loads the config files from the base directory.
+     *
+     * @param string $basedir The base directory
+     *
      * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
      */
     private function loadFromBaseDir($basedir, $overwrite = false)
@@ -562,8 +607,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Try to parse a yaml config file
-     * @param  string                                           $filename
+     * Try to parse a yaml config file.
+     *
+     * @param string $filename
+     *
      * @throws \BackBee\Config\Exception\InvalidConfigException Occurs when the file can't be parsed
      */
     private function loadFromFile($filename, $overwrite = false)
@@ -594,7 +641,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Replace services and container parameters keys by their values for the whole config
+     * Replace services and container parameters keys by their values for the whole config.
+     *
      * @return array
      */
     private function compileAllParameters()
@@ -607,7 +655,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Replace services and container parameters keys by their values for the provided section
+     * Replace services and container parameters keys by their values for the provided section.
+     *
      * @return array
      */
     private function compileParameters($section = null)

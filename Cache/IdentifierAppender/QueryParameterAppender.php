@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,6 @@ namespace BackBee\Cache\IdentifierAppender;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ClassContent\AClassContent;
 use BackBee\Renderer\IRenderer;
 
@@ -36,52 +35,52 @@ use BackBee\Renderer\IRenderer;
  *     - NO_PARAMS_STRATEGY (=0): no request query parameters will be append to cache identifier
  *     - ALL_PARAMS_STRATEGY (=1): every request query parameters will be append to cache identifier
  *     - CLASSCONTENT_PARAMS_STRATEGY (=2): every request query parameters declared in classcontent yaml file will
- *     be append to cache identifier
+ *     be append to cache identifier.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class QueryParameterAppender implements IdentifierAppenderInterface
 {
     /**
-     * Constants which define cache query params strategy
+     * Constants which define cache query params strategy.
      */
     const NO_PARAMS_STRATEGY = 0;
     const ALL_PARAMS_STRATEGY = 1;
     const CLASSCONTENT_PARAMS_STRATEGY = 2;
 
     /**
-     * Request we will use to find query parameters
+     * Request we will use to find query parameters.
      *
      * @var Symfony\Component\HttpFoundation\Request
      */
     private $request;
 
     /**
-     * Application main entity manager
+     * Application main entity manager.
      *
      * @var Doctrine\ORM\EntityManager
      */
     private $em;
 
     /**
-     * The strategy to use
+     * The strategy to use.
      *
      * @var integer
      */
     private $strategy;
 
     /**
-     * list of group name this validator belong to
+     * list of group name this validator belong to.
      *
      * @var array
      */
     private $groups;
 
     /**
-     * constructor
+     * constructor.
      *
      * @param Request       $request  request in which we will looking for query parameter
      * @param EntityManager $em       application main entity manager
@@ -141,7 +140,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     }
 
     /**
-     * Returns content cache query parameters by exploring class content yaml files
+     * Returns content cache query parameters by exploring class content yaml files.
      *
      * @param AClassContent $content the content we want to get its cache query parameters
      *

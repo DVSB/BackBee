@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,18 +27,16 @@ use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Security\Acl\Permission\PermissionMap;
 
 /**
- * Yml Loader
+ * Yml Loader.
  *
  * Loads yml acl data into the DB
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Acl\Loader
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */

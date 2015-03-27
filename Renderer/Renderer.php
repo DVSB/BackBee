@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\Renderer;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
-
 use BackBee\BBApplication;
 use BackBee\ClassContent\AClassContent;
 use BackBee\DependencyInjection\ContainerInterface;
@@ -38,60 +37,66 @@ use BackBee\Utils\File\File;
 use BackBee\Utils\String;
 
 /**
- * Renderer engine class; able to manage multiple template engine
+ * Renderer engine class; able to manage multiple template engine.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class Renderer extends ARenderer implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
     /**
-     * constants used to manage external resources
+     * constants used to manage external resources.
      */
     const CSS_LINK = 'css';
     const HEADER_JS = 'js_header';
     const FOOTER_JS = 'js_footer';
 
     /**
-     * contains every IRendererAdapter added by user
+     * contains every IRendererAdapter added by user.
+     *
      * @var ParameterBag
      */
     private $renderer_adapters;
 
     /**
-     * contains every extensions that Renderer can manage thanks to registered IRendererAdapter
+     * contains every extensions that Renderer can manage thanks to registered IRendererAdapter.
+     *
      * @var ParameterBag
      */
     private $manageable_ext;
 
     /**
-     * key of the default adapter to use when there is a conflict
+     * key of the default adapter to use when there is a conflict.
+     *
      * @var string
      */
     private $default_adapter;
 
     /**
-     * The file path to the template
+     * The file path to the template.
+     *
      * @var string
      */
     private $template_file;
 
     /**
-     * define if renderer has been restored by container or not
+     * define if renderer has been restored by container or not.
+     *
      * @var boolean
      */
     private $is_restored;
 
     /**
-     * contains every external resources of current page (js and css)
+     * contains every external resources of current page (js and css).
+     *
      * @var ParameterBag
      */
     private $external_resources;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param BBApplication $application
      * @param array|null    $config
@@ -117,7 +122,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Update every helpers and every registered renderer adapters with the right ARenderer;
-     * this method is called everytime we clone a renderer
+     * this method is called everytime we clone a renderer.
      */
     public function updatesAfterClone()
     {
@@ -131,7 +136,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Register a renderer adapter ($rendererAdapter); this method also set
-     * current $rendererAdapter as default adapter if it is not set
+     * current $rendererAdapter as default adapter if it is not set.
      *
      * @param IRendererAdapter $rendererAdapter
      */
@@ -149,8 +154,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
+     * @param string $ext
      *
-     * @param  string           $ext
      * @return IRendererAdapter
      */
     public function getAdapterByExt($ext)
@@ -164,9 +169,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Set the adapter referenced by $adapterKey as defaultAdapter to use in conflict
-     * case; the default adapter is also considered by self::getRightAdapter()
+     * case; the default adapter is also considered by self::getRightAdapter().
      *
-     * @param  string  $adapterKey
+     * @param string $adapterKey
+     *
      * @return boolean
      */
     public function defaultAdapter($adapterKey)
@@ -181,7 +187,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Return template file extension of the default adapter
+     * Return template file extension of the default adapter.
+     *
      * @return String
      */
     public function getDefaultAdapterExt()
@@ -192,7 +199,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Getters of renderer adapter by $key
+     * Getters of renderer adapter by $key.
      *
      * @return BackBee\Renderer\IRendererAdapter
      */
@@ -202,7 +209,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Getters of renderer adapters
+     * Getters of renderer adapters.
      *
      * @return array<BackBee\Renderer\IRendererAdapter>
      */
@@ -365,8 +372,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Check if $filename exists
-     * @param  string  $filename
+     * Check if $filename exists.
+     *
+     * @param string $filename
+     *
      * @return boolean
      */
     public function isTemplateFileExists($filename)
@@ -375,7 +384,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns image url
+     * Returns image url.
      *
      * @param string            $pathinfo
      * @param BackBee\Site\Site $site
@@ -388,7 +397,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns image url
+     * Returns image url.
      *
      * @param string            $pathinfo
      * @param BackBee\Site\Site $site
@@ -401,7 +410,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns resource url
+     * Returns resource url.
      *
      * @param string            $pathinfo
      * @param BackBee\Site\Site $site
@@ -415,12 +424,14 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Compute route which matched with route_name and replace every token by its values specified in route_params;
-     * You can also give base url (by default current site base url will be used)
-     * @param  string      $route_name
-     * @param  array|null  $route_params
-     * @param  string|null $base_url
-     * @param  boolean     $add_ext
+     * You can also give base url (by default current site base url will be used).
+     *
+     * @param string      $route_name
+     * @param array|null  $route_params
+     * @param string|null $base_url
+     * @param boolean     $add_ext
      * @param  \BackBee\Site\Site
+     *
      * @return string
      */
     public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
@@ -429,9 +440,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns an array of template files according the provided pattern
+     * Returns an array of template files according the provided pattern.
      *
-     * @param  string $pattern
+     * @param string $pattern
+     *
      * @return array
      */
     public function getTemplatesByPattern($pattern)
@@ -445,9 +457,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns the list of available render mode for the provided object
+     * Returns the list of available render mode for the provided object.
      *
-     * @param  \BackBee\Renderer\IRenderable $object
+     * @param \BackBee\Renderer\IRenderable $object
+     *
      * @return array
      */
     public function getAvailableRenderMode(IRenderable $object)
@@ -483,7 +496,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Adds provided href as stylesheet to add to current page head tag
-     * Note: provided href will be added only if it does not already exist in stylesheet list
+     * Note: provided href will be added only if it does not already exist in stylesheet list.
      *
      * @param string $href
      */
@@ -494,7 +507,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Adds provided href as javascript script to add to current page head tag
-     * Note: provided href will be added only if it does not already exist in javascript script list
+     * Note: provided href will be added only if it does not already exist in javascript script list.
      *
      * @param string $href
      */
@@ -505,7 +518,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Adds provided href as javascript script to add to current page footer
-     * Note: provided href will be added only if it does not already exist in javascript script list
+     * Note: provided href will be added only if it does not already exist in javascript script list.
      *
      * @param string $href
      */
@@ -515,7 +528,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Alias to self::addHeaderJs()
+     * Alias to self::addHeaderJs().
      *
      * @deprecated since version 0.12
      */
@@ -525,7 +538,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Alias to self::addFooterJs()
+     * Alias to self::addFooterJs().
      *
      * @deprecated since version 0.12
      */
@@ -535,7 +548,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
+     * Returns the namespace of the class proxy to use or null if no proxy is required.
      *
      * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
      */
@@ -546,7 +559,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
+     * with the dump array produced by this method.
      *
      * @return array contains every datas required by this service to be restored at the same state
      */
@@ -559,7 +572,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Restore current service to the dump's state
+     * Restore current service to the dump's state.
      *
      * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
      *                    restore current service
@@ -581,10 +594,12 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Return the file path to current layout, try to create it if not exists
+     * Return the file path to current layout, try to create it if not exists.
      *
-     * @param  Layout            $layout
-     * @return string            the file path
+     * @param Layout $layout
+     *
+     * @return string the file path
+     *
      * @throws RendererException
      */
     protected function getLayoutFile(Layout $layout)
@@ -614,7 +629,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Update every helpers and every registered renderer adapters with the right ARenderer;
-     * this method is called everytime we unset a renderer
+     * this method is called everytime we unset a renderer.
      */
     protected function updatesAfterUnset()
     {
@@ -627,7 +642,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Generic method to add an external resource (css, javascript in page header or footer)
+     * Generic method to add an external resource (css, javascript in page header or footer).
      *
      * @param string $type
      * @param string $href
@@ -648,7 +663,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Insert every external resources: css and header js will be added before page '</head>' and
-     * footer javascript will be added before page '</body>'
+     * footer javascript will be added before page '</body>'.
      *
      * @return self
      */
@@ -685,7 +700,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Generates HTML5 link tag with provided href
+     * Generates HTML5 link tag with provided href.
      *
      * @param string $href
      *
@@ -697,7 +712,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Generates HTML5 script tag with provided src
+     * Generates HTML5 script tag with provided src.
      *
      * @param string $src
      *
@@ -709,9 +724,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Compute a key for renderer adapter ($rendererAdapter)
+     * Compute a key for renderer adapter ($rendererAdapter).
      *
-     * @param  IRendererAdapter $rendererAdapter
+     * @param IRendererAdapter $rendererAdapter
+     *
      * @return string
      */
     private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
@@ -722,7 +738,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Extract managed extensions from rendererAdapter and store it
+     * Extract managed extensions from rendererAdapter and store it.
      *
      * @param IRendererAdapter $rendererAdapter
      */
@@ -742,9 +758,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Returns an adapter containing in $adapeters; it will returns in prior
-     * the defaultAdpater if it is in $adapters or the first adapter found
+     * the defaultAdpater if it is in $adapters or the first adapter found.
      *
-     * @param  array            $adapters contains object of type IRendererAdapter
+     * @param array $adapters contains object of type IRendererAdapter
+     *
      * @return IRendererAdapter
      */
     private function getRightAdapter(array $adapters)
@@ -760,7 +777,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Returns the right adapter to use according to the filename extension
+     * Returns the right adapter to use according to the filename extension.
      *
      * @return IRendererAdapter
      */
@@ -787,10 +804,12 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Render a page object
+     * Render a page object.
      *
-     * @param  string            $layoutfile A force layout script to be rendered
-     * @return string            The rendered output
+     * @param string $layoutfile A force layout script to be rendered
+     *
+     * @return string The rendered output
+     *
      * @throws RendererException
      */
     private function renderPage($layoutFile = null, $params = null)
@@ -842,10 +861,13 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Render a ClassContent object
-     * @param  array             $params   A Force set of parameters to render the object
-     * @param  string            $template A force template script to be rendered
-     * @return string            The rendered output
+     * Render a ClassContent object.
+     *
+     * @param array  $params   A Force set of parameters to render the object
+     * @param string $template A force template script to be rendered
+     *
+     * @return string The rendered output
+     *
      * @throws RendererException
      */
     private function renderContent($params = null, $template = null)
@@ -930,7 +952,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Set parameters to a renderer object in parameter
+     * Set parameters to a renderer object in parameter.
      *
      * @param ARenderer $render
      * @param array     $params
@@ -948,10 +970,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Try to compute and guess a valid filename for $object:
      * 		- on success return string which is the right filename with its extension
-     * 		- on fail return false
+     * 		- on fail return false.
      *
-     * @param  IRenderable    $object
-     * @param  [type]         $mode
+     * @param IRenderable $object
+     * @param [type]      $mode
+     *
      * @return string|boolean string if successfully found a valid file name, else false
      */
     private function getTemplateFile(IRenderable $object, $mode = null)
@@ -980,10 +1003,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
 
     /**
      * Use the right adapter depending on $filename extension to define if
-     * $filename is a valid template filename or not
+     * $filename is a valid template filename or not.
      *
-     * @param  string  $filename
-     * @param  boolean $isLayout if you want to check $filename in layout dir, default: false
+     * @param string  $filename
+     * @param boolean $isLayout if you want to check $filename in layout dir, default: false
+     *
      * @return boolean
      */
     private function isValidTemplateFile($filename, $isLayout = false)
@@ -999,8 +1023,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @param  boolean $isPartial
-     * @param  boolean $isLayout
+     * @param boolean $isPartial
+     * @param boolean $isLayout
+     *
      * @return string
      */
     private function renderTemplate($isPartial = false, $isLayout = false)

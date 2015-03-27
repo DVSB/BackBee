@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,7 +29,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @category    BackBee Bundle
- * @package     BackBee\Logging
+ *
  * @copyright   Lp digital system
  * @Entity(repositoryClass="BackBee\Logging\Repository\AdminLogRepository")
  * @Table(name="admin_log")
@@ -82,7 +82,8 @@ class AdminLog
     }
 
     /**
-     * Get the owner of the log
+     * Get the owner of the log.
+     *
      * @return UserInterface
      */
     public function getOwner()
@@ -91,8 +92,10 @@ class AdminLog
     }
 
     /**
-     * Set the owner of the log
-     * @param  UserInterface $user
+     * Set the owner of the log.
+     *
+     * @param UserInterface $user
+     *
      * @return AdminLog
      */
     public function setOwner(UserInterface $user)
@@ -103,7 +106,8 @@ class AdminLog
     }
 
     /**
-     * Get the controller
+     * Get the controller.
+     *
      * @return String
      */
     public function getController()
@@ -112,8 +116,10 @@ class AdminLog
     }
 
     /**
-     * Set the controller
-     * @param  string   $controller
+     * Set the controller.
+     *
+     * @param string $controller
+     *
      * @return AdminLog
      */
     public function setController($controller)
@@ -124,7 +130,8 @@ class AdminLog
     }
 
     /**
-     * Get the action call in the controller
+     * Get the action call in the controller.
+     *
      * @return String
      */
     public function getAction()
@@ -133,8 +140,10 @@ class AdminLog
     }
 
     /**
-     * Set the action call in the controller
-     * @param  String   $action
+     * Set the action call in the controller.
+     *
+     * @param String $action
+     *
      * @return AdminLog
      */
     public function setAction($action)
@@ -145,7 +154,8 @@ class AdminLog
     }
 
     /**
-     * Set the entity call in the controller
+     * Set the entity call in the controller.
+     *
      * @return Object
      */
     public function getEntity()
@@ -154,8 +164,10 @@ class AdminLog
     }
 
     /**
-     * Set the entity call in the controller
-     * @param  Object   $entity
+     * Set the entity call in the controller.
+     *
+     * @param Object $entity
+     *
      * @return AdminLog
      */
     public function setEntity($entity)
@@ -166,7 +178,8 @@ class AdminLog
     }
 
     /**
-     * Get the datetime of the log
+     * Get the datetime of the log.
+     *
      * @return \DateTime
      */
     public function getCreatedAt()

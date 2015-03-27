@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,27 +23,7 @@
 
 namespace BackBee\Config;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use Doctrine\DBAL\DBALException;
-
 use BackBee\ApplicationInterface;
 use BackBee\Bundle\BundleLoader;
 use BackBee\Config\Exception\InvalidConfigTypeException;
@@ -53,10 +33,10 @@ use BackBee\Util\Resolver\ConfigDirectory;
 
 /**
  * Allow us to build and extend config depending on the type (which can be equals to
- * self::APPLICATION_CONFIG and self::BUNDLE_CONFIG)
+ * self::APPLICATION_CONFIG and self::BUNDLE_CONFIG).
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -65,7 +45,7 @@ class Configurator
     /**
      * constants we need to define which type of extend and build we have to perform;
      * indeed, we do different stuff depending on if it's a config for application or
-     * bundle
+     * bundle.
      */
     const APPLICATION_CONFIG = 0;
     const BUNDLE_CONFIG = 1;
@@ -81,28 +61,28 @@ class Configurator
     private $bundleLoader;
 
     /**
-     * repository base directory
+     * repository base directory.
      *
      * @var string
      */
     private $baseRepository;
 
     /**
-     * application's context
+     * application's context.
      *
      * @var string
      */
     private $context;
 
     /**
-     * application's environment
+     * application's environment.
      *
      * @var string
      */
     private $environment;
 
     /**
-     * define if we should override config or not on extend
+     * define if we should override config or not on extend.
      *
      * @var boolean
      */
@@ -114,7 +94,7 @@ class Configurator
     private $configsDefaultSections = [];
 
     /**
-     * Configurator's constructor
+     * Configurator's constructor.
      *
      * @param boolean $overrideConfig define if we should override config on extend()
      */
@@ -129,7 +109,7 @@ class Configurator
     }
 
     /**
-     * Do every extend according to application context, environment and config target type (APPLICATION OR BUNDLE)
+     * Do every extend according to application context, environment and config target type (APPLICATION OR BUNDLE).
      *
      * @param integer $type    define which kind of extend we want to apply
      *                         (self::APPLICATION_CONFIG or self::BUNDLE_CONFIG)
@@ -159,7 +139,7 @@ class Configurator
     }
 
     /**
-     * @param  Config $config
+     * @param Config $config
      */
     public function configureBundleConfig(Config $config)
     {
@@ -171,6 +151,7 @@ class Configurator
 
     /**
      * @param Config $config
+     *
      * @return array
      */
     public function getConfigDefaultSections(Config $config)
@@ -212,7 +193,7 @@ class Configurator
     }
 
     /**
-     * Do every extend according to application context and envrionment for application's Config
+     * Do every extend according to application context and envrionment for application's Config.
      *
      * @param Config $config config we want to apply Application Config extend type
      */
@@ -285,7 +266,7 @@ class Configurator
     }
 
     /**
-     * Returns the registry entry for bundle's config storing
+     * Returns the registry entry for bundle's config storing.
      *
      * @param string $bundleId the id of the bundle we are looking for override config in registry
      *

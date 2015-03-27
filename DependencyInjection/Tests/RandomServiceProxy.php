@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,17 +27,17 @@ use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 
 /**
- * RandomServiceProxy is the proxy class for RandomService when container will restore RandomService
+ * RandomServiceProxy is the proxy class for RandomService when container will restore RandomService.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class RandomServiceProxy extends RandomService implements DumpableServiceProxyInterface
 {
     /**
-     * ConfigProxy's constructor
+     * ConfigProxy's constructor.
      *
      * @param array $dump
      */
@@ -47,7 +47,7 @@ class RandomServiceProxy extends RandomService implements DumpableServiceProxyIn
     }
 
     /**
-     * Restore current service to the dump's state
+     * Restore current service to the dump's state.
      *
      * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
      *                    restore current service

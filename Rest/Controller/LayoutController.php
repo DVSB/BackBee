@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,22 +25,22 @@ namespace BackBee\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Site\Layout;
 
 /**
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class LayoutController extends ARestController
 {
     /**
-     * Returns every workflow states associated to provided layout
+     * Returns every workflow states associated to provided layout.
      *
-     * @param  Layout                                    $layout
+     * @param Layout $layout
+     *
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
@@ -133,7 +133,7 @@ class LayoutController extends ARestController
     }
 
     /**
-     * /!\ IMPORTANT: This route is currently disabled in route.yml
+     * /!\ IMPORTANT: This route is currently disabled in route.yml.
      *
      * @Rest\RequestParam(name="label", requirements={
      *   @Assert\NotBlank()

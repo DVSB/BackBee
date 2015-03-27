@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\ClassContent;
 
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\Exception\InvalidArgumentException;
@@ -33,10 +32,10 @@ use BackBee\Security\Acl\Domain\IObjectIdentifiable;
 use BackBee\Util\Parameter;
 
 /**
- * Abstract class for every content and its revisions in BackBee
+ * Abstract class for every content and its revisions in BackBee.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  * @MappedSuperclass
@@ -44,12 +43,12 @@ use BackBee\Util\Parameter;
 abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerializable
 {
     /**
-     * BackBee's class content classname must be prefixed by this
+     * BackBee's class content classname must be prefixed by this.
      */
     const CLASSCONTENT_BASE_NAMESPACE = 'BackBee\ClassContent\\';
 
     /**
-     * Supported formats by ::jsonSerialize
+     * Supported formats by ::jsonSerialize.
      */
     const JSON_DEFAULT_FORMAT = 0;
     const JSON_DEFINITION_FORMAT = 1;
@@ -57,84 +56,96 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     const JSON_INFO_FORMAT = 3;
 
     /**
-     * Unique identifier
+     * Unique identifier.
+     *
      * @var string
      * @Id @Column(type="string", name="uid")
      */
     protected $_uid;
 
     /**
-     * The label of this content
+     * The label of this content.
+     *
      * @var string
      * @Column(type="string", name="label", nullable=true)
      */
     protected $_label;
 
     /**
-     * The acceptable class name for values
+     * The acceptable class name for values.
+     *
      * @var array
      * @Column(type="array", name="accept")
      */
     protected $_accept = array();
 
     /**
-     * A map of content
+     * A map of content.
+     *
      * @var mixed
      * @Column(type="array", name="data")
      */
     protected $_data = array();
 
     /**
-     * The content's parameters
+     * The content's parameters.
+     *
      * @var array
      * @Column(type="array", name="parameters")
      */
     protected $_parameters = array();
 
     /**
-     * The maximal number of items for values
+     * The maximal number of items for values.
+     *
      * @var array
      * @Column(type="array", name="maxentry")
      */
     protected $_maxentry = array();
 
     /**
-     * The minimal number of items for values
+     * The minimal number of items for values.
+     *
      * @var array
      * @Column(type="array", name="minentry")
      */
     protected $_minentry = array();
 
     /**
-     * The creation datetime
+     * The creation datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="created")
      */
     protected $_created;
 
     /**
-     * The last modification datetime
+     * The last modification datetime.
+     *
      * @var \DateTime
      * @Column(type="datetime", name="modified")
      */
     protected $_modified;
 
     /**
-     * Revision number
+     * Revision number.
+     *
      * @var int
      * @Column(type="integer", name="revision")
      */
     protected $_revision;
 
     /**
-     * The current state
+     * The current state.
+     *
      * @var int
      * @Column(type="integer", name="state")
      */
     protected $_state;
 
     /**
-     * Formats supported by ::jsonSerialize
+     * Formats supported by ::jsonSerialize.
+     *
      * @var array
      */
     public static $jsonFormats = [
@@ -145,10 +156,12 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     ];
 
     /**
-     * Returns complete namespace of classcontent with provided $type
+     * Returns complete namespace of classcontent with provided $type.
      *
      * @param string $type
+     *
      * @return string classname associated to provided
+     *
      * @throws
      */
     public static function getClassnameByContentType($type)
@@ -170,7 +183,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $uid     The unique identifier
      * @param array  $options Initial options for the content:
      *                        - accept      array Acceptable class names for the value
@@ -188,9 +202,12 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Magical function to get value for given element
-     * @param  string $var The name of the element
+     * Magical function to get value for given element.
+     *
+     * @param string $var The name of the element
+     *
      * @return mixed The value
+     *
      * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __get($var)
@@ -207,10 +224,13 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Magical function to set value to given element
-     * @param  string $var   The name of the element
-     * @param  mixed  $value The value to set
+     * Magical function to set value to given element.
+     *
+     * @param string $var   The name of the element
+     * @param mixed  $value The value to set
+     *
      * @return AClassContent The current instance content
+     *
      * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __set($var, $value)
@@ -262,9 +282,12 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Magical function to check the setting of an element
-     * @param  string  $var The name of the element
+     * Magical function to check the setting of an element.
+     *
+     * @param string $var The name of the element
+     *
      * @return boolean TRUE if an element is set for $var, FALSE otherwise
+     *
      * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __isset($var)
@@ -281,8 +304,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Magical function to unset an element
-     * @param  string $var The name of the element to unset
+     * Magical function to unset an element.
+     *
+     * @param string $var The name of the element to unset
+     *
      * @throws UnknownPropertyException Occurs when $var does not match an element
      */
     public function __unset($var)
@@ -302,7 +327,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Magical function to get a string representation of the content
+     * Magical function to get a string representation of the content.
+     *
      * @return string
      */
     public function __toString()
@@ -320,7 +346,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the unique identifier
+     * Returns the unique identifier.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -330,7 +357,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the label
+     * Returns the label.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -340,7 +368,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Return the current accepted subcontents
+     * Return the current accepted subcontents.
+     *
      * @return array
      * @codeCoverageIgnore
      */
@@ -350,7 +379,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the raw datas array
+     * Returns the raw datas array.
+     *
      * @return array
      * @codeCoverageIgnore
      */
@@ -360,7 +390,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Gets the maxentry
+     * Gets the maxentry.
+     *
      * @return array
      * @codeCoverageIgnore
      */
@@ -370,7 +401,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Gets the minentry
+     * Gets the minentry.
+     *
      * @return array
      * @codeCoverageIgnore
      */
@@ -380,7 +412,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the creation date
+     * Returns the creation date.
+     *
      * @return DateTime
      * @codeCoverageIgnore
      */
@@ -390,7 +423,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the last modified date
+     * Returns the last modified date.
+     *
      * @return DateTime
      * @codeCoverageIgnore
      */
@@ -400,7 +434,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the revision number
+     * Returns the revision number.
+     *
      * @return int
      * @codeCoverageIgnore
      */
@@ -410,7 +445,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the state
+     * Returns the state.
+     *
      * @return int
      * @codeCoverageIgnore
      */
@@ -420,8 +456,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets the label
-     * @param  string                         $label
+     * Sets the label.
+     *
+     * @param string $label
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -433,8 +471,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Set the acceptable classname
-     * @param  array                          $accept
+     * Set the acceptable classname.
+     *
+     * @param array $accept
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -448,8 +488,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     /**
      * Sets one parameter.
      *
-     * @param  string $key   the parameter name to set
-     * @param  mixed  $value the parameter value, if null is passed it will unset provided key parameter
+     * @param string $key   the parameter name to set
+     * @param mixed  $value the parameter value, if null is passed it will unset provided key parameter
+     *
      * @return AContent The current instance
      */
     public function setParam($key, $value = null)
@@ -467,6 +508,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * Sets all parameters.
      *
      * @param array $params
+     *
      * @return self
      */
     public function setAllParams(array $params)
@@ -479,8 +521,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets the maximum number of items for elements
-     * @param  array                          $maxentry
+     * Sets the maximum number of items for elements.
+     *
+     * @param array $maxentry
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -492,8 +536,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets the minimum number of items for elements
-     * @param  array                          $minentry
+     * Sets the minimum number of items for elements.
+     *
+     * @param array $minentry
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -505,8 +551,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets creation date
-     * @param  \DateTime                      $created Current date time by default
+     * Sets creation date.
+     *
+     * @param \DateTime $created Current date time by default
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -518,8 +566,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets the last modification date
-     * @param  DateTime                       $modified Current date time by default
+     * Sets the last modification date.
+     *
+     * @param DateTime $modified Current date time by default
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -531,8 +581,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets the revision number
-     * @param  int                            $revision
+     * Sets the revision number.
+     *
+     * @param int $revision
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -544,8 +596,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets the state
-     * @param  int                            $state
+     * Sets the state.
+     *
+     * @param int $state
+     *
      * @return \BackBee\ClassContent\AContent The current instance
      * @codeCoverageIgnore
      */
@@ -558,6 +612,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Is this content is a primary content ?
+     *
      * @return Boolean TRUE if the content is a primary content
      * @codeCoverageIgnore
      */
@@ -570,8 +625,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Checks if the element accept subcontent
-     * @param  string  $var the element
+     * Checks if the element accept subcontent.
+     *
+     * @param string $var the element
+     *
      * @return Boolean TRUE if a subcontents are accepted, FALSE otherwise
      */
     public function acceptSubcontent($var)
@@ -590,16 +647,18 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Initialized datas on postLoad doctrine event
+     * Initialized datas on postLoad doctrine event.
      */
     public function postLoad()
     {
     }
 
     /**
-     * Checks for an accepted type
-     * @param  mixed   $value the value from which the type will be checked
-     * @param  string  $var   the element to be checks
+     * Checks for an accepted type.
+     *
+     * @param mixed  $value the value from which the type will be checked
+     * @param string $var   the element to be checks
+     *
      * @return Boolean
      */
     public function isAccepted($value, $var = null)
@@ -630,9 +689,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Return a subcontent instance by its type and value, FALSE if not found
-     * @param  string                                    $type  The classname of the subcontent
-     * @param  string                                    $value The value of the subcontent (uid)
+     * Return a subcontent instance by its type and value, FALSE if not found.
+     *
+     * @param string $type  The classname of the subcontent
+     * @param string $value The value of the subcontent (uid)
+     *
      * @return \BackBee\ClassContent\AClassContent|FALSE
      */
     protected function getContentByDataValue($type, $value)
@@ -641,7 +702,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the content
+     * Returns the content.
+     *
      * @return \BackBee\ClassContent\AClassContent
      * @codeCoverageIgnore
      */
@@ -651,9 +713,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Sets options at the construction of a new instance
-     * @param  mixed $options Initial options for the content:
-     *                            - label: the label of the content
+     * Sets options at the construction of a new instance.
+     *
+     * @param mixed $options Initial options for the content:
+     *                       - label: the label of the content
+     *
      * @return self
      */
     protected function setOptions($options = null)
@@ -670,8 +734,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the type of a given value, either classname, array or scalar
-     * @param  mixed  $value
+     * Returns the type of a given value, either classname, array or scalar.
+     *
+     * @param mixed $value
+     *
      * @return string
      */
     protected function _getType($value)
@@ -689,8 +755,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Adds a subcontent to the colection.
-     * @param  \BackBee\ClassContent\AClassContent $value
-     * @return string                              the unique identifier of the add subcontent
+     *
+     * @param \BackBee\ClassContent\AClassContent $value
+     *
+     * @return string the unique identifier of the add subcontent
      * @codeCoverageIgnore
      */
     protected function _addSubcontent(AClassContent $value)
@@ -699,7 +767,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Removes the association with subcontents of the element $var
+     * Removes the association with subcontents of the element $var.
+     *
      * @param string $var
      * @codeCoverageIgnore
      */
@@ -709,7 +778,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns a unique identifier for this domain object.
+     *
      * @return string
+     *
      * @see \BackBee\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
      */
@@ -720,7 +791,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns the unique identifier for this object.
+     *
      * @return string
+     *
      * @see \BackBee\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
      */
@@ -731,7 +804,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Returns the PHP class name of the object.
+     *
      * @return string
+     *
      * @see \BackBee\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
      */
@@ -742,8 +817,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Checks for an explicit objects equality.
-     * @param  \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     *
+     * @param \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     *
      * @return Boolean
+     *
      * @see \BackBee\Security\Acl\Domain\IObjectIdentifiable
      * @codeCoverageIgnore
      */
@@ -765,12 +843,15 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the set of data
-     * @param  string  $var        The element to be return, if NULL, all datas are returned
-     * @param  boolean $forceArray Force the return as array
+     * Returns the set of data.
+     *
+     * @param string  $var        The element to be return, if NULL, all datas are returned
+     * @param boolean $forceArray Force the return as array
+     *
      * @return mixed Could be either one or array of scalar, array, AClassContent instance
+     *
      * @throws UnknownPropertyException Occurs when $var does not match an element
-     * @throws ClassNotFoundException     Occurs if the class of a subcontent can not be loaded
+     * @throws ClassNotFoundException   Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
     {
@@ -833,8 +914,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns TRUE if $var is an declared element of this content
-     * @param  string  $var
+     * Returns TRUE if $var is an declared element of this content.
+     *
+     * @param string $var
+     *
      * @return boolean
      */
     public function hasElement($var)
@@ -843,8 +926,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns the first element of one of the provided class is exists
-     * @param  mixed              $classnames
+     * Returns the first element of one of the provided class is exists.
+     *
+     * @param mixed $classnames
+     *
      * @return AClassContent|NULL
      */
     public function getFirstElementOfType($classnames)
@@ -871,8 +956,9 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     /**
      * Returns parameters if requested key exist.
      *
-     * @param  string $key  The parameter to be return, if NULL, all parameters are returned
-     * @return mixed  the parameter value or NULL if unfound
+     * @param string $key The parameter to be return, if NULL, all parameters are returned
+     *
+     * @return mixed the parameter value or NULL if unfound
      */
     public function getParam($key)
     {
@@ -885,7 +971,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns all parameters
+     * Returns all parameters.
      *
      * @return array
      */
@@ -895,7 +981,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Checks for state of the content before rendering it
+     * Checks for state of the content before rendering it.
+     *
      * @return Boolean Always FALSE by default
      * @codeCoverageIgnore
      */
@@ -905,7 +992,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Returns formatted template name
+     * Returns formatted template name.
      *
      * @return string
      */
@@ -920,9 +1007,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * Computes an array that contains current content data; it can also lighten result according to
-     * requested format
+     * requested format.
      *
-     * @param  integer $format
+     * @param integer $format
+     *
      * @return array
      */
     public function jsonSerialize($format = self::JSON_DEFAULT_FORMAT)
@@ -955,9 +1043,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Computes elements key for ::jsonSerialize
+     * Computes elements key for ::jsonSerialize.
      *
-     * @param  array  $elements
+     * @param array $elements
+     *
      * @return array
      */
     private function computeElementsToJson(array $elements)
@@ -981,10 +1070,11 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
 
     /**
      * This method will lighten provided data into requested format, if format is equal to 0 this method
-     * won't transform anything
+     * won't transform anything.
      *
-     * @param  array   $data
-     * @param  integer $format
+     * @param array   $data
+     * @param integer $format
+     *
      * @return array
      */
     private function formatJsonData(array $data, $format)
