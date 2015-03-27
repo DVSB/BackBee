@@ -35,8 +35,9 @@ use BackBee\ClassContent\AClassContent;
  * @Table(name="media")
  * @HasLifecycleCallbacks
  */
-class Media
+class Media implements \JsonSerializable
 {
+
     /**
      * Unique identifier of the media
      * @var integer
@@ -110,7 +111,7 @@ class Media
      */
     public static function getAbsolutePath($content = null)
     {
-        return __DIR__.'/../../repository/'.Media::getUploadDir();
+        return __DIR__ . '/../../repository/' . Media::getUploadDir();
     }
 
     /**
@@ -129,7 +130,7 @@ class Media
      */
     public static function getUploadTmpDir()
     {
-        return __DIR__.'/../../repository/Data/Tmp/';
+        return __DIR__ . '/../../repository/Data/Tmp/';
     }
 
     /**
@@ -276,4 +277,21 @@ class Media
     {
         return $this->_content;
     }
+
+    public function jsonSerialize()
+    {
+        $result = array();
+        $result['id'] = $this->getId();
+        $result['uid'] = $this->getId();
+        $result['image'] = $this->getContent() ? $this->getContent()->getImageName() : null;
+        $result['content_uid'] = $this->getContent()->getUid();
+        $result['mediaFolder'] = $this->getMediaFolder()->getUid();
+        $result['title'] = $this->getTitle();
+        $contentInfos = array();
+        $contentInfos["uid"] =  $this->getContent()->getUid();
+        $contentInfos["type"] = $this->getContent()->getContentType();
+        $result ["content"] = $contentInfos;
+        return $result;
+    }
+
 }

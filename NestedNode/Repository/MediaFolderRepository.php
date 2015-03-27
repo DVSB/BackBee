@@ -34,6 +34,7 @@ namespace BackBee\NestedNode\Repository;
  */
 class MediaFolderRepository extends NestedNodeRepository
 {
+
     public function getRoot()
     {
         try {
@@ -49,9 +50,33 @@ class MediaFolderRepository extends NestedNodeRepository
         }
     }
 
+    public function getMediaFolders($parent, $orderInfos, $paging = array())
+    {
+        $qb = $this->createQueryBuilder("mf");
+        $qb->andParentIs($parent);
+
+        /* order */
+        if(is_array($orderInfos)) {
+            if (array_key_exists("field", $orderInfos) && array_key_exists("dir", $orderInfos)) {
+                 $qb->orderBy("mf.".$orderInfos["field"], $orderInfos["dir"]);
+            }
+        }
+        /* paging */
+        if (is_array($paging) && !empty($paging)) {
+           if (array_key_exists("start", $paging) && array_key_exists("limit", $paging)) {
+               $qb->setFirstResult($paging["start"])
+                       ->setMaxResults($paging["limit"]);
+               $result = new \Doctrine\ORM\Tools\Pagination\Paginator($qb);
+           }
+       } else {
+           $result = $qb->getQuery()->getResult();
+       }
+       return $result;
+    }
+
     private function preloadMediaType(\BackBee\BBApplication $bbApp)
     {
-        $classnames = $bbApp->getAutoloader()->glob('Media'.DIRECTORY_SEPARATOR.'*');
+        $classnames = $bbApp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
         foreach ($classnames as $classname) {
             class_exists($classname);
         }
@@ -90,4 +115,5 @@ class MediaFolderRepository extends NestedNodeRepository
             $em->remove($media);
         }
     }
+
 }
