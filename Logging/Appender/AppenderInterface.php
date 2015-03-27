@@ -21,27 +21,22 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Importer;
+namespace BackBee\Logging\Appender;
 
-use BackBee\BBApplication;
+use BackBee\Logging\Formatter\FormatterInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
+ * @package     BackBee/Logging
+ * @subpackage  Appender
  * @copyright   Lp digital system
- * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IImporterConnector
+interface AppenderInterface
 {
-    public function __construct(BBApplication $application, array $values);
+    public function setFormatter(FormatterInterface $formatter);
 
-    /**
-     * @return array|Traversable|Countable
-     */
-    public function find($string);
+    public function write($event);
 
-    /**
-     * Called when connector is stopped
-     */
-    public function tearDown();
+    public function close();
 }

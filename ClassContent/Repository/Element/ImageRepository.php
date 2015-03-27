@@ -23,7 +23,7 @@
 
 namespace BackBee\ClassContent\Repository\Element;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Image;
 
 /**
@@ -38,14 +38,14 @@ class ImageRepository extends FileRepository
 {
     /**
      * Move an uploaded file to the temporary directory and update image content
-     * @param  \BackBee\ClassContent\AClassContent                   $file
+     * @param  \BackBee\ClassContent\AbstractClassContent            $file
      * @param  string                                                $newfilename
      * @param  string                                                $originalname
      * @param  string                                                $src
      * @return boolean|string
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function updateFile(AClassContent $file, $newfilename, $originalname = null, $src = null)
+    public function updateFile(AbstractClassContent $file, $newfilename, $originalname = null, $src = null)
     {
         if (false === ($file instanceof Image)) {
             throw new \BackBee\ClassContent\Exception\ClassContentException('Invalid content type');

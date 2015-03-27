@@ -23,7 +23,7 @@
 
 namespace BackBee\Cache\IdentifierAppender;
 
-use BackBee\Renderer\IRenderer;
+use BackBee\Renderer\RendererInterface;
 
 /**
  * Every cache identifier appender must implements this interface to be usable
@@ -39,11 +39,11 @@ interface IdentifierAppenderInterface
      * This method allows every identifier appender to customize cache identifier with its own logic
      *
      * @param string    $identifier the identifier to update if needed
-     * @param IRenderer $renderer   the current renderer, can be null
+     * @param RendererInterface $renderer   the current renderer, can be null
      *
      * @return string return the new identifier
      */
-    public function computeIdentifier($identifier, IRenderer $renderer = null);
+    public function computeIdentifier($identifier, RendererInterface $renderer = null);
 
     /**
      * Returns every group name this appender is associated with

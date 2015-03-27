@@ -35,7 +35,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ACache
+abstract class AbstractCache
 {
     /**
      * Cache adapter options
@@ -125,7 +125,7 @@ abstract class ACache
     /**
      * Sets the cache logger
      * @param  \Psr\Log\LoggerInterface $logger
-     * @return \BackBee\Cache\ACache
+     * @return \BackBee\Cache\AbstractCache
      * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger = null)
@@ -158,7 +158,7 @@ abstract class ACache
     /**
      * Sets the cache coontext
      * @param  string                $context
-     * @return \BackBee\Cache\ACache
+     * @return \BackBee\Cache\AbstractCache
      * @codeCoverageIgnore
      */
     protected function setContext($context = null)
@@ -171,7 +171,7 @@ abstract class ACache
     /**
      * Sets the cache adapter instance options
      * @param  array                                   $options
-     * @return \BackBee\Cache\ACache
+     * @return \BackBee\Cache\AbstractCache
      * @throws \BackBee\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
     private function setInstanceOptions(array $options = array())

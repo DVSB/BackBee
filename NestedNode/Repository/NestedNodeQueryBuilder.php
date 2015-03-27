@@ -25,7 +25,7 @@ namespace BackBee\NestedNode\Repository;
 
 use Doctrine\ORM\QueryBuilder;
 
-use BackBee\NestedNode\ANestedNode;
+use BackBee\NestedNode\AbstractNestedNode;
 
 /**
  * This class is responsible for building DQL query strings for NestedNode
@@ -45,11 +45,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to exclude $node from selection
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsNot(ANestedNode $node, $alias = null)
+    public function andIsNot(AbstractNestedNode $node, $alias = null)
     {
         list($alias, $suffix) = $this->getAliasAndSuffix($alias);
 
@@ -59,11 +59,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select a specific tree (by its root)
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andRootIs(ANestedNode $node, $alias = null)
+    public function andRootIs(AbstractNestedNode $node, $alias = null)
     {
         list($alias, $suffix) = $this->getAliasAndSuffix($alias);
 
@@ -73,11 +73,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select a specific subbranch of tree
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andParentIs(ANestedNode $node = null, $alias = null)
+    public function andParentIs(AbstractNestedNode $node = null, $alias = null)
     {
         list($alias, $suffix) = $this->getAliasAndSuffix($alias);
 
@@ -223,7 +223,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select siblings of $node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  boolean                                               $strict if TRUE, $node is exclude
      * @param  array                                                 $order  ordering spec ( array($field => $sort) )
      * @param  int                                                   $limit  max number of results
@@ -231,7 +231,7 @@ class NestedNodeQueryBuilder extends QueryBuilder
      * @param  string                                                $alias  optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsSiblingsOf(ANestedNode $node, $strict = false, $order = null, $limit = null, $start = 0, $alias = null)
+    public function andIsSiblingsOf(AbstractNestedNode $node, $strict = false, $order = null, $limit = null, $start = 0, $alias = null)
     {
         list($alias, $suffix) = $this->getAliasAndSuffix($alias);
 
@@ -256,11 +256,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select previous sibling of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsPreviousSiblingOf(ANestedNode $node, $alias = null)
+    public function andIsPreviousSiblingOf(AbstractNestedNode $node, $alias = null)
     {
         return $this->andRootIs($node->getRoot(), $alias)
                         ->andRightnodeEquals($node->getLeftnode() - 1, $alias);
@@ -268,11 +268,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select previous siblings of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsPreviousSiblingsOf(ANestedNode $node, $alias = null)
+    public function andIsPreviousSiblingsOf(AbstractNestedNode $node, $alias = null)
     {
         return $this->andParentIs($node->getParent(), $alias)
                         ->andLeftnodeIsLowerThan($node->getLeftnode(), true, $alias);
@@ -280,11 +280,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select next sibling of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsNextSiblingOf(ANestedNode $node, $alias = null)
+    public function andIsNextSiblingOf(AbstractNestedNode $node, $alias = null)
     {
         return $this->andRootIs($node->getRoot(), $alias)
                         ->andLeftnodeEquals($node->getRightnode() + 1, $alias);
@@ -292,11 +292,11 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select next siblings of node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  string                                                $alias optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsNextSiblingsOf(ANestedNode $node, $alias = null)
+    public function andIsNextSiblingsOf(AbstractNestedNode $node, $alias = null)
     {
         return $this->andParentIs($node->getParent(), $alias)
                         ->andLeftnodeIsUpperThan($node->getRightnode(), true, $alias);
@@ -304,13 +304,13 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select ancestors of $node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  boolean                                               $strict   If TRUE, $node is excluded from the selection
      * @param  int                                                   $at_level Filter ancestors by their level
      * @param  string                                                $alias    optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsAncestorOf(ANestedNode $node, $strict = false, $at_level = null, $alias = null)
+    public function andIsAncestorOf(AbstractNestedNode $node, $strict = false, $at_level = null, $alias = null)
     {
         $this->andRootIs($node->getRoot(), $alias)
                 ->andLeftnodeIsLowerThan($node->getLeftnode(), $strict, $alias)
@@ -325,13 +325,13 @@ class NestedNodeQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select descendants of $node
-     * @param  \BackBee\NestedNode\ANestedNode                       $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  boolean                                               $strict   If TRUE, $node is excluded from the selection
      * @param  int                                                   $at_level Filter ancestors by their level
      * @param  string                                                $alias    optional, the alias to use
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
-    public function andIsDescendantOf(ANestedNode $node, $strict = false, $at_level = null, $alias = null)
+    public function andIsDescendantOf(AbstractNestedNode $node, $strict = false, $at_level = null, $alias = null)
     {
         $this->andRootIs($node->getRoot(), $alias)
                 ->andLeftnodeIsUpperThan($node->getLeftnode(), $strict, $alias)

@@ -42,14 +42,14 @@ use BackBee\Utils\File\File;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class ABundleController extends FrontController implements HttpKernelInterface
+abstract class AbstractBundleController extends FrontController implements HttpKernelInterface
 {
     /* @var \BackBee\Config\Config */
 
     private $config;
     /* @var \BackBee\Bundle\ABundle */
     private $bundle;
-    /* @var \BackBee\Renderer\ARenderer */
+    /* @var \BackBee\Renderer\AbstractRenderer */
     private $renderer;
 
     /**
@@ -103,7 +103,7 @@ abstract class ABundleController extends FrontController implements HttpKernelIn
     /**
      * Returns the current renderer
      *
-     * @return \BackBee\Renderer\ARenderer
+     * @return \BackBee\Renderer\AbstractRenderer
      */
     public function getRenderer()
     {

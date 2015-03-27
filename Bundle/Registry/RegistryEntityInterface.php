@@ -21,28 +21,35 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Event\Listener;
-
-use Symfony\Component\HttpFoundation\Request;
+namespace BackBee\Bundle\Registry;
 
 /**
- * Interface for listeners that are enabled for a certain request path only
- *
  * @category    BackBee
- * @package     BackBee\Event
+ * @package     BackBee\Bundle
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IPathEnabledListener
+interface RegistryEntityInterface
 {
     /**
-     * @param $path - route path for which this listener will be enabled
+     * Return all class properties.
+     *
+     * @return array(property_name => property_value)
      */
-    public function setPath($path);
+    public function getObjectProperties();
 
     /**
-     * @param  Request $request
-     * @return boolean - true if the listener should be enabled for the $request
+     * Set all class properties.
+     *
+     * @param string $property the property name
+     * @param mixed  $value    the property value
      */
-    public function isEnabled(Request $request = null);
+    public function setObjectProperty($property, $value);
+
+    /**
+     * Set class class identifier.
+     *
+     * @param sting|integer $property;
+     */
+    public function setObjectIdentifier($property);
 }

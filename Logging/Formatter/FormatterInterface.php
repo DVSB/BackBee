@@ -21,22 +21,16 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Logging\Appender;
-
-use BackBee\Logging\Formatter\IFormatter;
+namespace BackBee\Logging\Formatter;
 
 /**
  * @category    BackBee
  * @package     BackBee/Logging
- * @subpackage  Appender
+ * @subpackage  Formatter
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IAppender
+interface FormatterInterface
 {
-    public function setFormatter(IFormatter $formatter);
-
-    public function write($event);
-
-    public function close();
+    public function format($event);
 }

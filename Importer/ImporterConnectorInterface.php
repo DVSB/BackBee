@@ -21,52 +21,27 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Job\Queue;
+namespace BackBee\Importer;
 
-use BackBee\Job\AJob;
+use BackBee\BBApplication;
 
 /**
- * Queue Interface
- *
  * @category    BackBee
- * @package     BackBee\Job
+ * @package     BackBee\Importer
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class AQueue
+interface ImporterConnectorInterface
 {
-    const JOB_STATUS_NEW = 'new';
-    const JOB_STATUS_RUNNING = 'running';
-
-    private $name;
+    public function __construct(BBApplication $application, array $values);
 
     /**
-     *
-     * @param type string
+     * @return array|Traversable|Countable
      */
-    public function __construct($name)
-    {
-        $this->name = $name;
-    }
+    public function find($string);
 
     /**
-     *
-     * @return string
+     * Called when connector is stopped
      */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     *
-     * @param \BackBee\Job\AJob $job
-     */
-    abstract public function enqueue(AJob $job);
-
-    /**
-     * @param  string $status
-     * @return AJob[]
-     */
-    abstract public function getJobs($status = null);
+    public function tearDown();
 }

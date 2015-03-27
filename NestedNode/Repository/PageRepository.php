@@ -25,10 +25,10 @@ namespace BackBee\NestedNode\Repository;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\NestedNode\ANestedNode;
+use BackBee\NestedNode\AbstractNestedNode;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Layout;
@@ -154,7 +154,7 @@ class PageRepository extends NestedNodeRepository
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
      *                                                            or if $page or $parent are not an instance of Page
      */
-    public function insertNodeAsFirstChildOf(ANestedNode $page, ANestedNode $parent)
+    public function insertNodeAsFirstChildOf(AbstractNestedNode $page, AbstractNestedNode $parent)
     {
         if (false === ($page instanceof Page)) {
             throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($page)));
@@ -177,7 +177,7 @@ class PageRepository extends NestedNodeRepository
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
      *                                                            or if $page or $parent are not an instance of Page
      */
-    public function insertNodeAsLastChildOf(ANestedNode $page, ANestedNode $parent)
+    public function insertNodeAsLastChildOf(AbstractNestedNode $page, AbstractNestedNode $parent)
     {
         if (false === ($page instanceof Page)) {
             throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($page)));
@@ -609,12 +609,12 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Replace subcontents of ContentSet by their clones if exist
-     * @param  \BackBee\ClassContent\AClassContent           $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  \BackBee\Security\Token\BBUserToken           $token
      * @param  array                                         $cloning_datas
      * @return \BackBee\NestedNode\Repository\PageRepository
      */
-    private function updateRelatedPostCloning(AClassContent $content, BBUserToken $token, array $cloning_datas)
+    private function updateRelatedPostCloning(AbstractClassContent $content, BBUserToken $token, array $cloning_datas)
     {
         if (
                 false === ($content instanceof ContentSet) ||
@@ -658,12 +658,12 @@ class PageRepository extends NestedNodeRepository
 
     /**
      * Update mainnode of the content if need
-     * @param  \BackBee\ClassContent\AClassContent           $content
+     * @param  \BackBee\ClassContent\AbstractClassContent           $content
      * @param  \BackBee\Security\Token\BBUserToken           $token
      * @param  array                                         $cloning_pages
      * @return \BackBee\NestedNode\Repository\PageRepository
      */
-    private function updateMainNodePostCloning(AClassContent $content, BBUserToken $token, array $cloning_pages)
+    private function updateMainNodePostCloning(AbstractClassContent $content, BBUserToken $token, array $cloning_pages)
     {
         $mainnode = $content->getMainNode();
         if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {

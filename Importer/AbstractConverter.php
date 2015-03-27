@@ -23,7 +23,7 @@
 
 namespace BackBee\Importer;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Utils\String;
 
 /**
@@ -32,7 +32,7 @@ use BackBee\Utils\String;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class AConverter implements IConverter
+abstract class AbstractConverterInterface implements ConverterInterface
 {
     /**
      * @var Object
@@ -71,8 +71,8 @@ abstract class AConverter implements IConverter
     /**
      * Set BackBee Entity Object
      *
-     * @param  Object                       $entity
-     * @return \BackBee\Importer\AConverter
+     * @param  Object $entity
+     * @return AbstractConverterInterface
      */
     public function setBBEntity($entity)
     {
@@ -104,13 +104,14 @@ abstract class AConverter implements IConverter
 
     /**
      * Update Status and revision value
-     * @param  \BackBee\ClassContent\AClassContent                $element
-     * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
+     * @param  \BackBee\ClassContent\AbstractClassContent $element
+     *
+     * @return AbstractConverterInterface
      */
-    protected function _updateRevision(AClassContent $element)
+    protected function _updateRevision(AbstractClassContent $element)
     {
         $element->setRevision(1 + $element->getRevision())
-                ->setState(AClassContent::STATE_NORMAL);
+                ->setState(AbstractClassContent::STATE_NORMAL);
 
         return $this;
     }
@@ -128,7 +129,7 @@ abstract class AConverter implements IConverter
     /**
      * Set the value of an scalar element
      */
-    protected function _setScalar(AClassContent $element, $var, $value)
+    protected function _setScalar(AbstractClassContent $element, $var, $value)
     {
         $element->$var = $this->_cleanText($value);
 
@@ -137,11 +138,11 @@ abstract class AConverter implements IConverter
 
     /**
      * Set the value of an Element\Text
-     * @param  \BackBee\ClassContent\AClassContent                $element
+     * @param  \BackBee\ClassContent\AbstractClassContent                $element
      * @param  string                                             $value
      * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
-    protected function _setElementText(AClassContent $element, $value)
+    protected function _setElementText(AbstractClassContent $element, $value)
     {
         $element->value = $this->_cleanText($value);
 
@@ -150,13 +151,13 @@ abstract class AConverter implements IConverter
 
     /**
      * Set the value of an Element\Date
-     * @param  \BackBee\ClassContent\AClassContent                $element
+     * @param  \BackBee\ClassContent\AbstractClassContent                $element
      * @param  string                                             $value
      * @param  \DateTimeZone                                      $timezone
      * @param  string                                             $format
      * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
-    protected function _setElementDate(AClassContent $element, $value, \DateTimeZone $timezone = null, $format = 'Y-m-d H:i:s')
+    protected function _setElementDate(AbstractClassContent $element, $value, \DateTimeZone $timezone = null, $format = 'Y-m-d H:i:s')
     {
         if (null !== $timezone) {
             $date = \DateTime::createFromFormat($format, $value, $timezone);

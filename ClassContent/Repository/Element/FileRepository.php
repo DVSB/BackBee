@@ -24,7 +24,7 @@
 namespace BackBee\ClassContent\Repository\Element;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
@@ -91,13 +91,13 @@ class FileRepository extends ClassContentRepository
 
     /**
      * Move an uploaded file to the temporary directory and update file content
-     * @param  \BackBee\ClassContent\AClassContent                   $file
+     * @param  \BackBee\ClassContent\AbstractClassContent            $file
      * @param  string                                                $newfilename
      * @param  string                                                $originalname
      * @return boolean|string
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function updateFile(AClassContent $file, $newfilename, $originalname = null, $src = null)
+    public function updateFile(AbstractClassContent $file, $newfilename, $originalname = null, $src = null)
     {
         if (false === ($file instanceof ElementFile)) {
             throw new ClassContentException('Invalid content type');
@@ -167,13 +167,13 @@ class FileRepository extends ClassContentRepository
 
     /**
      * Do stuf on update by post of the content editing form
-     * @param  \BackBee\ClassContent\AClassContent                   $content
+     * @param  \BackBee\ClassContent\AbstractClassContent            $content
      * @param  stdClass                                              $value
-     * @param  \BackBee\ClassContent\AClassContent                   $parent
+     * @param  \BackBee\ClassContent\AbstractClassContent            $parent
      * @return \BackBee\ClassContent\Element\File
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
+    public function getValueFromPost(AbstractClassContent $content, $value, AbstractClassContent $parent = null)
     {
         if (false === ($content instanceof ElementFile)) {
             throw new ClassContentException('Invalid content type');

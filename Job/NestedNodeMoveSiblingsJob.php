@@ -33,7 +33,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class NestedNodeMoveSiblingsJob extends AJob
+class NestedNodeMoveSiblingsJob extends AbstractJob
 {
     /**
      * The entity manager to be used

@@ -25,7 +25,7 @@ namespace BackBee\Cache\MemCache;
 
 use Psr\Log\LoggerInterface;
 
-use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Cache\Exception\CacheException;
 
 /**
@@ -39,7 +39,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AMemcache extends AExtendedCache
+abstract class AbstractMemcache extends AbstractExtendedCache
 {
     /**
      * Default Memcache host

@@ -25,7 +25,7 @@ namespace BackBee\Cache\APC;
 
 use Psr\Log\LoggerInterface;
 
-use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Cache\Exception\CacheException;
 
 /**
@@ -36,7 +36,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      Cédric Bouillot <cedric.bouillot@lp-digital.fr>
  */
-class Cache extends AExtendedCache
+class Cache extends AbstractExtendedCache
 {
     /**
      * Hashmap id prefix

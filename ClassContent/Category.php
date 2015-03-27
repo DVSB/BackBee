@@ -69,12 +69,12 @@ class Category implements \JsonSerializable
      * This method allows us to build new block according to provided classcontent ($content) and
      * add it into Category blocks attribute
      *
-     * @param AClassContent $content the class content to add to this category
+     * @param AbstractClassContent $content the class content to add to this category
      * @param boolean       $visible if this block is visible or not
      *
      * @return self
      */
-    public function addBlock(AClassContent $content, $visible = true, array $options = array())
+    public function addBlock(AbstractClassContent $content, $visible = true, array $options = array())
     {
         $block = new \stdClass();
         $block->visible = $visible;

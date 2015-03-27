@@ -27,7 +27,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\ApplicationInterface;
 use BackBee\Routing\RouteCollection;
-use BackBee\Security\Acl\Domain\IObjectIdentifiable;
+use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
 
 /**
  * Abstract class for BackBee's bundle
@@ -345,7 +345,7 @@ abstract class AbstractBundle implements BundleInterface
      * @codeCoverageIgnore
      * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::equals
      */
-    public function equals(IObjectIdentifiable $identity)
+    public function equals(ObjectIdentifiableInterface $identity)
     {
         return ($this->getType() === $identity->getType() && $this->getIdentifier() === $identity->getIdentifier());
     }

@@ -30,7 +30,7 @@ namespace BackBee\Logging\Formatter;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Simple implements IFormatter
+class Simple implements FormatterInterface
 {
     private $_format = '%d %p [%u]: %m';
 

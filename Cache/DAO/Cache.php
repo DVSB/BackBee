@@ -26,7 +26,7 @@ namespace BackBee\Cache\DAO;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
 
-use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Cache\Exception\CacheException;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Util\Doctrine\EntityManagerCreator;
@@ -42,7 +42,7 @@ use BackBee\Util\Doctrine\EntityManagerCreator;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Cache extends AExtendedCache
+class Cache extends AbstractExtendedCache
 {
     /**
      * The cache entity class name

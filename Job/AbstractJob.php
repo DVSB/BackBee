@@ -25,7 +25,7 @@ namespace BackBee\Job;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 
-use BackBee\Job\Queue\AQueue;
+use BackBee\Job\Queue\AbstractQueue;
 
 /**
  * A base class for jobs
@@ -35,7 +35,7 @@ use BackBee\Job\Queue\AQueue;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class AJob extends ContainerAware
+abstract class AbstractJob extends ContainerAware
 {
     /**
      * @var array The job args
@@ -47,7 +47,7 @@ abstract class AJob extends ContainerAware
      */
     public $queue;
 
-    public $status = AQueue::JOB_STATUS_NEW;
+    public $status = AbstractQueue::JOB_STATUS_NEW;
 
     public function setUp()
     {

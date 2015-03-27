@@ -25,7 +25,7 @@ namespace BackBee\Event\Listener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Indexation;
 use BackBee\Event\Event;
 use BackBee\Util\Doctrine\ScheduledEntities;
@@ -55,7 +55,7 @@ class IndexationListener implements EventSubscriberInterface
 
     /**
      * The content to be indexed
-     * @var \BackBee\ClassContent\AClassContent
+     * @var \BackBee\ClassContent\AbstractClassContent
      */
     private static $_content;
 
@@ -72,7 +72,7 @@ class IndexationListener implements EventSubscriberInterface
     private static $_site_content_done = array();
 
     /**
-     * Updates the site-content indexes for the scheduled AClassContent
+     * Updates the site-content indexes for the scheduled AbstractClassContent
      * @param array $contents_inserted
      * @param array $contents_removed
      */
@@ -90,7 +90,7 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Updates the content-content indexes for the scheduled AClassContent
+     * Updates the content-content indexes for the scheduled AbstractClassContent
      * @param array $contents_saved
      * @param array $contents_removed
      */
@@ -127,7 +127,7 @@ class IndexationListener implements EventSubscriberInterface
     {
         self::$_content = $event->getTarget();
 
-        return self::$_content instanceof AClassContent;
+        return self::$_content instanceof AbstractClassContent;
     }
 
     /**
@@ -183,7 +183,7 @@ class IndexationListener implements EventSubscriberInterface
         self::_updateIdxSiteContents($contents_inserted, $contents_deleted);
 
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             return;
         }
         $dispatcher = $event->getDispatcher();
@@ -217,13 +217,13 @@ class IndexationListener implements EventSubscriberInterface
                         $value = $content;
                         foreach ($elements as $element) {
                             $owner = $value;
-                            if (!$value instanceof \BackBee\ClassContent\AClassContent) {
+                            if (!$value instanceof \BackBee\ClassContent\AbstractClassContent) {
                                 continue;
                             }
 
                             if (null !== $value) {
                                 $value = $value->getData($element);
-                                if ($value instanceof AClassContent && false == $em->contains($value)) {
+                                if ($value instanceof AbstractClassContent && false == $em->contains($value)) {
                                     $value = $em->find(get_class($value), $value->getUid());
                                 }
                             }

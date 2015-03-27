@@ -23,7 +23,7 @@
 
 namespace BackBee\MetaData;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\File;
 use BackBee\ClassContent\Element\Keyword;
@@ -151,11 +151,11 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
      * Sets the value of the attribute
      * @param  string                              $attribute
      * @param  string                              $value
-     * @param  \BackBee\ClassContent\AClassContent $content   Optional, if the attribute is computed
+     * @param  \BackBee\ClassContent\AbstractClassContent $content   Optional, if the attribute is computed
      *                                                        the content on which apply the scheme
      * @return \BackBee\MetaData\MetaData
      */
-    public function setAttribute($attribute, $value, AClassContent $content = null)
+    public function setAttribute($attribute, $value, AbstractClassContent $content = null)
     {
         $originalValue = $value;
         $functions = explode('||', $value);
@@ -181,11 +181,11 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
      * Updates the scheme of the attribute
      * @param  string                              $attribute
      * @param  string                              $scheme
-     * @param  \BackBee\ClassContent\AClassContent $content   Optional, if the attribute is computed
+     * @param  \BackBee\ClassContent\AbstractClassContent $content   Optional, if the attribute is computed
      *                                                        the content on which apply the scheme
      * @return \BackBee\MetaData\MetaData
      */
-    public function updateAttributeScheme($attribute, $scheme, AClassContent $content = null)
+    public function updateAttributeScheme($attribute, $scheme, AbstractClassContent $content = null)
     {
         $functions = explode('||', $scheme);
         $value = array_shift($functions);
@@ -202,11 +202,12 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Compute values of attributes according to the AClassContent provided
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * Compute values of attributes according to the AbstractClassContent provided
+     *
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return \BackBee\MetaData\MetaData
      */
-    public function computeAttributes(AClassContent $content, Page $page = null)
+    public function computeAttributes(AbstractClassContent $content, Page $page = null)
     {
         foreach ($this->attributes as $attribute => $value) {
             if (true === $this->is_computed[$attribute] && true === array_key_exists($attribute, $this->scheme)) {
@@ -261,7 +262,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                                 $content = $newcontent;
                             }
 
-                            if ($content instanceof AClassContent && $content->isElementContent()) {
+                            if ($content instanceof AbstractClassContent && $content->isElementContent()) {
                                 if (null !== $draft = $content->getDraft()) {
                                     $content->releaseDraft();
                                 }

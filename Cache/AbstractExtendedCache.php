@@ -32,7 +32,7 @@ namespace BackBee\Cache;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AExtendedCache extends ACache
+abstract class AbstractExtendedCache extends AbstractCache
 {
     /**
      * Removes all cache records associated to one of the tags

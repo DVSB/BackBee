@@ -26,7 +26,7 @@ namespace BackBee\Config;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-use BackBee\Cache\ACache;
+use BackBee\Cache\AbstractCache;
 use BackBee\Config\Exception\InvalidConfigException;
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\DispatchTagEventInterface;
@@ -83,7 +83,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
     /**
      * The optional cache system
-     * @var \BackBee\Cache\ACache
+     * @var \BackBee\Cache\AbstractCache
      */
     protected $cache;
 
@@ -132,10 +132,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Class constructor
      * @param string                                 $basedir   The base directory in which look for config files
-     * @param \BackBee\Cache\ACache                  $cache     Optional cache system
+     * @param \BackBee\Cache\AbstractCache           $cache     Optional cache system
      * @param \BackBee\DependencyInjection\Container $container
      */
-    public function __construct($basedir, ACache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
+    public function __construct($basedir, AbstractCache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
     {
         $this->basedir = $basedir;
         $this->raw_parameters = array();
@@ -187,7 +187,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
         return $this;
     }
 
-    public function setCache(ACache $cache)
+    public function setCache(AbstractCache $cache)
     {
         $this->cache = $cache;
 

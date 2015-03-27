@@ -29,7 +29,7 @@ namespace BackBee\Importer;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IConverter
+interface ConverterInterface
 {
     /**
      * Returns the values
@@ -65,7 +65,7 @@ interface IConverter
     /**
      * Returns an existing or new object of BB Entity according to $identifier
      * @param  string                             $identifier
-     * @return BackBee\ClassContent\AClassContent $entity
+     * @return BackBee\ClassContent\AbstractClassContent $entity
      */
     public function getBBEntity($identifier);
 

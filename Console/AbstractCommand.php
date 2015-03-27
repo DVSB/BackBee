@@ -24,6 +24,7 @@
 namespace BackBee\Console;
 
 use Symfony\Component\Console\Command\Command;
+use BackBee\Bundle\AbstractBundle;
 
 /**
  * Abstract Command
@@ -33,7 +34,7 @@ use Symfony\Component\Console\Command\Command;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ACommand extends Command
+class AbstractCommand extends Command
 {
     /**
      * @var ContainerInterface|null
@@ -42,7 +43,7 @@ class ACommand extends Command
 
     /**
      *
-     * @var \BackBee\Bundle\ABundle
+     * @var AbstractBundle
      */
     protected $bundle;
 
@@ -67,8 +68,7 @@ class ACommand extends Command
     }
 
     /**
-     *
-     * @param \BackBee\Bundle\ABundle $bundle
+     * @param AbstractBundle $bundle
      */
     public function setBundle($bundle)
     {
@@ -77,7 +77,7 @@ class ACommand extends Command
 
     /**
      *
-     * @return \BackBee\Bundle\ABundle
+     * @return AbstractBundle
      */
     public function getBundle()
     {

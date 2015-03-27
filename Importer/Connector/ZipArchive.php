@@ -24,7 +24,7 @@
 namespace BackBee\Importer\Connector;
 
 use BackBee\BBApplication;
-use BackBee\Importer\IImporterConnector;
+use BackBee\Importer\ImporterConnectorInterface;
 use BackBee\Utils\File\Dir;
 use BackBee\Utils\File\File;
 
@@ -40,7 +40,7 @@ use BackBee\Utils\File\File;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ZipArchive implements IImporterConnector
+class ZipArchive implements ImporterConnectorInterface
 {
     /**
      * @var BackBee\BBApplication

@@ -26,53 +26,23 @@ namespace BackBee\Event\Listener;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Abstract listener implementing IPathEnabledListener
+ * Interface for listeners that are enabled for a certain request path only
  *
  * @category    BackBee
  * @package     BackBee\Event
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class APathEnabledListener implements IPathEnabledListener
+interface PathEnabledListenerInterface
 {
-    protected $path;
-    protected $request;
     /**
      * @param $path - route path for which this listener will be enabled
      */
-    public function setPath($path)
-    {
-        $this->path = $path;
-    }
-
-    /**
-     *
-     * @param Request $request
-     */
-    public function setRequest(Request $request)
-    {
-        $this->request = $request;
-    }
+    public function setPath($path);
 
     /**
      * @param  Request $request
      * @return boolean - true if the listener should be enabled for the $request
      */
-    public function isEnabled(Request $request = null)
-    {
-        if (null === $this->path) {
-            return true;
-        }
-
-        if (null === $request) {
-            $request = $this->request;
-        }
-
-        // skip if route does not match
-        if (0 === strpos($request->getPathInfo(), $this->path)) {
-            return true;
-        }
-
-        return false;
-    }
+    public function isEnabled(Request $request = null);
 }

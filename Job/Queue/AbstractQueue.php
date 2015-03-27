@@ -21,35 +21,51 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Bundle\Registry;
+namespace BackBee\Job\Queue;
+
+use BackBee\Job\AbstractJob;
 
 /**
+ * Queue Interface
+ *
  * @category    BackBee
- * @package     BackBee\Bundle
+ * @package     BackBee\Job
  * @copyright   Lp digital system
- * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
+ * @author      k.golovin
  */
-interface IRegistryEntity
+abstract class AbstractQueue
 {
-    /**
-     * Return all class properties.
-     *
-     * @return array(property_name => property_value)
-     */
-    public function getObjectProperties();
+    const JOB_STATUS_NEW = 'new';
+    const JOB_STATUS_RUNNING = 'running';
+
+    private $name;
 
     /**
-     * Set all class properties.
      *
-     * @param string $property the property name
-     * @param mixed  $value    the property value
+     * @param type string
      */
-    public function setObjectProperty($property, $value);
+    public function __construct($name)
+    {
+        $this->name = $name;
+    }
 
     /**
-     * Set class class identifier.
      *
-     * @param sting|integer $property;
+     * @return string
      */
-    public function setObjectIdentifier($property);
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param \BackBee\Job\AbstractJob $job
+     */
+    abstract public function enqueue(AbstractJob $job);
+
+    /**
+     * @param  string $status
+     * @return AbstractJob[]
+     */
+    abstract public function getJobs($status = null);
 }

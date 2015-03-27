@@ -27,8 +27,8 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
-use BackBee\ClassContent\AClassContent;
-use BackBee\Renderer\IRenderer;
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\Renderer\RendererInterface;
 
 /**
  * This appender add request query parameters to cache identifier; you can specify the strategy to use.
@@ -99,7 +99,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     /**
      * @see BackBee\Cache\IdentifierAppender\IdentifierAppenderInterface::computeIdentifier
      */
-    public function computeIdentifier($identifier, IRenderer $renderer = null)
+    public function computeIdentifier($identifier, RendererInterface $renderer = null)
     {
         if (self::NO_PARAMS_STRATEGY === $this->strategy) {
             return $identifier;
@@ -115,7 +115,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
 
                 break;
             case self::CLASSCONTENT_PARAMS_STRATEGY:
-                if (null !== $renderer && true === ($renderer->getObject() instanceof AClassContent)) {
+                if (null !== $renderer && true === ($renderer->getObject() instanceof AbstractClassContent)) {
                     $object = $renderer->getObject();
                     foreach ($this->getClassContentCacheQueryParameters($object) as $query) {
                         $query = str_replace('#uid#', $object->getUid(), $query);
@@ -143,11 +143,11 @@ class QueryParameterAppender implements IdentifierAppenderInterface
     /**
      * Returns content cache query parameters by exploring class content yaml files
      *
-     * @param AClassContent $content the content we want to get its cache query parameters
+     * @param AbstractClassContent $content the content we want to get its cache query parameters
      *
      * @return array contains every query parameters, can be empty if there is no cache query parameter found
      */
-    private function getClassContentCacheQueryParameters(AClassContent $content)
+    private function getClassContentCacheQueryParameters(AbstractClassContent $content)
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
@@ -158,7 +158,7 @@ class QueryParameterAppender implements IdentifierAppenderInterface
         if (0 < count($content_uids)) {
             $classnames = array_merge(
                 $classnames,
-                $this->em->getRepository('\BackBee\ClassContent\AClassContent')->getClassnames($content_uids)
+                $this->em->getRepository('\BackBee\ClassContent\AbstractClassContent')->getClassnames($content_uids)
             );
         }
 

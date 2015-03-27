@@ -24,7 +24,7 @@
 namespace BackBee\Importer\Connector;
 
 use BackBee\BBApplication;
-use BackBee\Importer\IImporterConnector;
+use BackBee\Importer\ImporterConnectorInterface;
 
 /**
  * @category    BackBee
@@ -33,7 +33,7 @@ use BackBee\Importer\IImporterConnector;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class Soap implements IImporterConnector
+class Soap implements ImporterConnectorInterface
 {
     private $_config;
     /**
