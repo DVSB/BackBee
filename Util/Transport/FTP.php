@@ -32,7 +32,7 @@ use BackBee\Util\Transport\Exception\TransportException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class FTP extends ATransport
+class FTP extends AbstractTransport
 {
     protected $_port = 21;
     protected $_passive = true;

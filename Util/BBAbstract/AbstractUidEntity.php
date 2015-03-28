@@ -32,7 +32,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class AUidEntity implements DomainObjectInterface
+abstract class AbstractUidEntity implements DomainObjectInterface
 {
     /**
      * @var string

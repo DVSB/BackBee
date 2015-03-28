@@ -32,7 +32,7 @@ namespace BackBee\Util\Transport;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class ATransport
+abstract class AbstractTransport
 {
     /**
      * The protocol used by transport
@@ -156,7 +156,7 @@ abstract class ATransport
      * Establish a new connection to the remose server
      * @param  string                                                $host
      * @param  string                                                $port
-     * @return \BackBee\Util\Transport\ATransport
+     * @return \BackBee\Util\Transport\AbstractTransport
      * @throws \BackBee\Util\Transport\Exception\ConnectionException Occurs if connection failed
      */
     abstract public function connect($host = null, $port = null);
@@ -165,14 +165,14 @@ abstract class ATransport
      * Authenticate on remote server
      * @param  string                                                    $username
      * @param  string                                                    $password
-     * @return \BackBee\Util\Transport\ATransport
+     * @return \BackBee\Util\Transport\AbstractTransport
      * @throws \BackBee\Util\Transport\Exception\AuthenticationException Occurs if authentication failed
      */
     abstract public function login($username = null, $password = null);
 
     /**
      * Disconnect from the remote server and unset resources
-     * @return \BackBee\Util\Transport\ATransport
+     * @return \BackBee\Util\Transport\AbstractTransport
      */
     abstract public function disconnect();
 

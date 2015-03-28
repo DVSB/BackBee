@@ -34,7 +34,7 @@ use BackBee\Util\Transport\Exception\TransportException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class FileSystem extends ATransport
+class FileSystem extends AbstractTransport
 {
     /**
      * Class constructor, config should overwrite following option:

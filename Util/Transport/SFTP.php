@@ -35,7 +35,7 @@ use BackBee\Util\Transport\Exception\TransportException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class SFTP extends ATransport
+class SFTP extends AbstractTransport
 {
     /**
      * The default port number
