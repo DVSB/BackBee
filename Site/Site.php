@@ -23,7 +23,7 @@
 
 namespace BackBee\Site;
 
-use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Site\Metadata\Metadata;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
@@ -46,7 +46,7 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Site extends AObjectIdentifiable
+class Site extends AbstractObjectIdentifiable
 {
     /**
      * The unique identifier of this website.

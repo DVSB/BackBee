@@ -31,7 +31,7 @@ namespace BackBee\Stream;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IStreamWrapper
+interface StreamWrapperInterface
 {
     /**
      * Renames a content

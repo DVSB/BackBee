@@ -24,7 +24,7 @@
 namespace BackBee\Stream\ClassWrapper;
 
 use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
-use BackBee\Stream\IStreamWrapper;
+use BackBee\Stream\StreamWrapperInterface;
 
 /**
  * Abstract class for content wrapper in BackBee 4
@@ -42,7 +42,7 @@ use BackBee\Stream\IStreamWrapper;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AClassWrapper implements IStreamWrapper
+abstract class AbstractClassWrapper implements StreamWrapperInterface
 {
     /**
      * The registered BackBee autoloader
