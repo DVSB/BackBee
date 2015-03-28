@@ -34,7 +34,7 @@ use BackBee\Site\Layout;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-abstract class AbstractRendererAdapterInterface implements RendererAdapterInterface
+abstract class AbstractRendererAdapter implements RendererAdapterInterface
 {
     /**
      * @var AbstractRenderer

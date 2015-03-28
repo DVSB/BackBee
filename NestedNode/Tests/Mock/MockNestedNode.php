@@ -36,7 +36,7 @@ use BackBee\Tests\Mock\MockInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MockInterfaceNestedNode extends AbstractNestedNode implements MockInterface
+class MockNestedNode extends AbstractNestedNode implements MockInterface
 {
     /**
      * Unique identifier of the node

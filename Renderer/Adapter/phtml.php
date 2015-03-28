@@ -26,7 +26,7 @@ namespace BackBee\Renderer\Adapter;
 use Exception;
 
 use BackBee\Renderer\AbstractRenderer;
-use BackBee\Renderer\AbstractRendererAdapterInterface;
+use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
 use BackBee\Utils\File\File;
@@ -41,7 +41,7 @@ use BackBee\Utils\File\File;
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
  */
-class phtml extends AbstractRendererAdapterInterface
+class phtml extends AbstractRendererAdapter
 {
     /**
      * Extensions to include searching file

@@ -43,7 +43,7 @@ namespace BackBee\Renderer\Adapter;
  */
 
 use BackBee\Renderer\AbstractRenderer;
-use BackBee\Renderer\AbstractRendererAdapterInterface;
+use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 
 /**
@@ -54,7 +54,7 @@ use BackBee\Renderer\Exception\RendererException;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Twig extends AbstractRendererAdapterInterface
+class Twig extends AbstractRendererAdapter
 {
     /**
      * @var BackBee\Renderer\Adapter\TwigLoaderFilesystem

@@ -422,7 +422,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Sets the label
      * @param  string                         $label
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setLabel($label)
@@ -435,7 +435,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Set the acceptable classname
      * @param  array                          $accept
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setAccept($accept)
@@ -481,7 +481,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Sets the maximum number of items for elements
      * @param  array                          $maxentry
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setMaxEntry(array $maxentry)
@@ -494,7 +494,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Sets the minimum number of items for elements
      * @param  array                          $minentry
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setMinEntry(array $minentry = null)
@@ -507,7 +507,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Sets creation date
      * @param  \DateTime                      $created Current date time by default
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setCreated(\DateTime $created = null)
@@ -520,7 +520,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Sets the last modification date
      * @param  DateTime                       $modified Current date time by default
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setModified(\DateTime $modified = null)
@@ -533,7 +533,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Sets the revision number
      * @param  int                            $revision
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractContent The current instance
      * @codeCoverageIgnore
      */
     public function setRevision($revision)
@@ -654,7 +654,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      * Sets options at the construction of a new instance
      * @param  mixed $options Initial options for the content:
      *                            - label: the label of the content
-     * @return AbstractClassContent
+     * @return AbstractContent
      */
     protected function setOptions($options = null)
     {
