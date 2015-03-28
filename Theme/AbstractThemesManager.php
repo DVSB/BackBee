@@ -35,7 +35,7 @@ use BackBee\Utils\File\Dir;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class AThemesManager implements IThemesManager
+abstract class AbstractThemesManager implements ThemesManagerInterface
 {
     /**
      * Default theme config file name
@@ -66,7 +66,7 @@ abstract class AThemesManager implements IThemesManager
      *
      * @param \BackBee\Theme\ThemeEntity $theme
      */
-    public function updateConfig(IThemeEntity $theme)
+    public function updateConfig(ThemeEntityInterface $theme)
     {
         return file_put_contents(
                         $this->_path.$theme->getFolder().DIRECTORY_SEPARATOR.self::CONFIG_FILE, Yaml::dump($theme->toArray())

@@ -29,7 +29,7 @@ namespace BackBee\Theme;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IThemeEntity
+interface ThemeEntityInterface
 {
     /**
      * object constructor

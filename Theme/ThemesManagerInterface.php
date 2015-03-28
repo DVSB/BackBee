@@ -29,7 +29,7 @@ namespace BackBee\Theme;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IThemesManager
+interface ThemesManagerInterface
 {
     /**
      * Create a copy of the theme.
@@ -76,9 +76,9 @@ interface IThemesManager
     /**
      * Update the config.yml
      *
-     * @param \BackBee\Theme\IThemeEntity $theme
+     * @param \BackBee\Theme\ThemeEntityInterface $theme
      */
-    public function updateConfig(IThemeEntity $theme);
+    public function updateConfig(ThemeEntityInterface $theme);
 
     /**
      * Generate a theme object

@@ -31,7 +31,7 @@ namespace BackBee\Theme;
  * @Entity(repositoryClass="BackBee\Theme\Repository\ThemeRepository")
  * @Table(name="theme", indexes={@index(name="site_idx", columns={"site_uid"})})
  */
-class PersonalThemeEntity extends AThemeEntity
+class PersonalThemeEntity extends AbstractThemeEntity
 {
     /**
      * Unique identifier of the object

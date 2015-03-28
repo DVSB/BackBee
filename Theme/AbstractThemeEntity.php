@@ -29,7 +29,7 @@ namespace BackBee\Theme;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class AThemeEntity implements IThemeEntity
+abstract class AbstractThemeEntity implements ThemeEntityInterface
 {
     /**
      * Unique identifier of the object
