@@ -37,9 +37,9 @@ use BackBee\Tests\TestCase;
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @coversDefaultClass \BackBee\Rest\Controller\ARestController
+ * @coversDefaultClass \BackBee\Rest\Controller\AbstractRestController
  */
-class ARestControllerTest extends TestCase
+class AbstractRestControllerTest extends TestCase
 {
     protected $user;
     protected $site;
@@ -55,7 +55,7 @@ class ARestControllerTest extends TestCase
 
     protected function getController()
     {
-        $controller = new \BackBee\Rest\Tests\Fixtures\Controller\MockARestImplController();
+        $controller = new \BackBee\Rest\Tests\Fixtures\Controller\MockAbstractRestImplController();
         $controller->setContainer($this->getBBApp()->getContainer());
 
         return $controller;

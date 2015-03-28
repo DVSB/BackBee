@@ -31,7 +31,7 @@ namespace BackBee\Rest\Encoder;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-interface IEncoderProvider
+interface EncoderProviderInterface
 {
     /**
      * Check if a certain format is supported.

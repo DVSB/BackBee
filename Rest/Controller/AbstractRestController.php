@@ -46,7 +46,7 @@ use BackBee\Serializer\SerializerBuilder;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-abstract class ARestController extends Controller implements RestControllerInterface, FormatterInterface
+abstract class AbstractRestController extends Controller implements RestControllerInterface, FormatterInterface
 {
     /**
      *

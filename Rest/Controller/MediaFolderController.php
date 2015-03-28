@@ -22,7 +22,7 @@ use BackBee\Rest\Patcher\RightManager;
  *
  * @author h.baptiste
  */
-class MediaFolderController extends ARestController
+class MediaFolderController extends AbstractRestController
 {
 
     /**

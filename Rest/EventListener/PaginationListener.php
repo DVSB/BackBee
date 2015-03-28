@@ -47,7 +47,7 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator;
 
-use BackBee\Event\Listener\APathEnabledListener;
+use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\Rest\Exception\ValidationException;
 
 /**
@@ -58,7 +58,7 @@ use BackBee\Rest\Exception\ValidationException;
  * @copyright   Lp digital system
  * @author      k.golovin, e.chau <eric.chau@lp-digital.fr>
  */
-class PaginationListener extends APathEnabledListener
+class PaginationListener extends AbstractPathEnabledListener
 {
     /**
      * @var MetadataFactory

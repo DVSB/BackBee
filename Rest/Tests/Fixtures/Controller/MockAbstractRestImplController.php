@@ -33,7 +33,7 @@ namespace BackBee\Rest\Tests\Fixtures\Controller;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class MockARestImplController extends \BackBee\Rest\Controller\ARestController
+class MockAbstractRestImplController extends \BackBee\Rest\Controller\AbstractRestController
 {
     public function create404ResponseAction()
     {
