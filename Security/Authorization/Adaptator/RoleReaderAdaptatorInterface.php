@@ -21,22 +21,33 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Rewriting;
+namespace BackBee\Security\Authorization\Adaptator;
 
-use BackBee\ClassContent\AClassContent;
-use BackBee\NestedNode\Page;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+
+use BackBee\BBApplication;
 
 /**
- * Interface for the rewriting url generation
- *
  * @category    BackBee
- * @package     BackBee\Rewriting
+ * @package     BackBee\Security
+ * @subpackage  Authorization\Adaptator
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface IUrlGenerator
+interface RoleReaderAdaptatorInterface
 {
-    public function getDiscriminators();
+    /**
+     * Object Constructor
+     *
+     * @param \BackBee\BBApplication $application
+     */
+    public function __construct(BBApplication $application);
 
-    public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true);
+    /**
+     * retrieve the users role thanks to the Token
+     *
+     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token;
+     * @return Array                                                                of \BackBee\Security\Role\Role
+     */
+    public function extractRoles(TokenInterface $token);
 }

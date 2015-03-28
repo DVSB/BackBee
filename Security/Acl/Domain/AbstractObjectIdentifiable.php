@@ -43,7 +43,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AObjectIdentifiable implements IObjectIdentifiable
+abstract class AbstractObjectIdentifiable implements ObjectIdentifiableInterface
 {
     /**
      * An abstract method to gets the unique id of the object
@@ -79,10 +79,10 @@ abstract class AObjectIdentifiable implements IObjectIdentifiable
 
     /**
      * Checks for an explicit objects equality.
-     * @param  \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     * @param  \BackBee\Security\Acl\Domain\ObjectIdentifiableInterface $identity
      * @return Boolean
      */
-    public function equals(IObjectIdentifiable $identity)
+    public function equals(ObjectIdentifiableInterface $identity)
     {
         return ($this->getType() === $identity->getType()
                 && $this->getIdentifier() === $identity->getIdentifier());

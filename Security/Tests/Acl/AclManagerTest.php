@@ -48,7 +48,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::getAcl
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_getAcl_invalidObjectIdentity()
     {
@@ -60,7 +60,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::updateClassAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_updateClassAce_invalidObjectIdentity()
     {
@@ -72,7 +72,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::updateClassAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_updateClassAce_invalidSecurityIdentity()
     {
@@ -84,7 +84,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::updateObjectAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_updateObjectAce_invalidObjectIdentity()
     {
@@ -96,7 +96,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::updateObjectAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_updateObjectAce_invalidSecurityIdentity()
     {
@@ -108,7 +108,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::insertOrUpdateObjectAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_insertOrUpdateObjectAce_invalidObjectIdentity()
     {
@@ -120,7 +120,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::insertOrUpdateObjectAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_insertOrUpdateObjectAce_invalidSecurityIdentity()
     {
@@ -132,7 +132,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::insertOrUpdateClassAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_insertOrUpdateClassAce_invalidObjectIdentity()
     {
@@ -144,7 +144,7 @@ class AclManagerTest extends TestCase
     /**
      * @covers ::insertOrUpdateClassAce
      * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Object must implement IObjectIdentifiable
+     * @expectedExceptionMessage Object must implement ObjectIdentifiableInterface
      */
     public function test_insertOrUpdateClassAce_invalidSecurityIdentity()
     {

@@ -24,7 +24,7 @@
 namespace BackBee\Rewriting;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\NestedNode\Page;
 use BackBee\Rewriting\Exception\RewritingException;
 use BackBee\Utils\String;
@@ -56,7 +56,7 @@ use BackBee\Utils\String;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class UrlGenerator implements IUrlGenerator
+class UrlGenerator implements UrlGeneratorInterface
 {
     /**
      * Current BackBee application
@@ -141,10 +141,10 @@ class UrlGenerator implements IUrlGenerator
     /**
      * Returns the URL of the page
      * @param  \BackBee\NestedNode\Page            $page    The page
-     * @param  \BackBee\ClassContent\AClassContent $content The optionnal main content of the page
+     * @param  \BackBee\ClassContent\AbstractClassContent $content The optionnal main content of the page
      * @return string                              The URL                                  The generated URL
      */
-    public function generate(Page $page, AClassContent $content = null, $exceptionOnMissingScheme = true)
+    public function generate(Page $page, AbstractClassContent $content = null, $exceptionOnMissingScheme = true)
     {
         if (
             null !== $page->getUrl(false)
@@ -192,10 +192,10 @@ class UrlGenerator implements IUrlGenerator
      * Computes the URL of a page according to a scheme
      * @param  array         $scheme  The scheme to apply
      * @param  Page          $page    The page
-     * @param  AClassContent $content The optionnal main content of the page
+     * @param  AbstractClassContent $content The optionnal main content of the page
      * @return string        The generated URL
      */
-    private function doGenerate($scheme, Page $page, AClassContent $content = null)
+    private function doGenerate($scheme, Page $page, AbstractClassContent $content = null)
     {
         $replacement = array(
             '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(false),

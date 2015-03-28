@@ -34,9 +34,9 @@ use Symfony\Component\Security\Acl\Voter\AclVoter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
-use BackBee\Bundle\ABundle;
-use BackBee\ClassContent\AClassContent;
-use BackBee\NestedNode\ANestedNode;
+use BackBee\Bundle\AbstractBundle;
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\NestedNode\AbstractNestedNode;
 
 /**
  * @category    BackBee
@@ -72,11 +72,11 @@ class BBAclVoter extends AclVoter
             return self::ACCESS_ABSTAIN;
         }
 
-        if ($object instanceof ANestedNode) {
+        if ($object instanceof AbstractNestedNode) {
             return $this->_voteForNestedNode($token, $object, $attributes);
-        } elseif ($object instanceof AClassContent) {
+        } elseif ($object instanceof AbstractClassContent) {
             return $this->_voteForClassContent($token, $object, $attributes);
-        } elseif ($object instanceof ABundle) {
+        } elseif ($object instanceof AbstractBundle) {
             return parent::vote($token, $object, $attributes);
         }
 
@@ -111,11 +111,11 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for nested node object, recursively till root
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBee\NestedNode\ANestedNode                                      $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
-    private function _voteForNestedNode(TokenInterface $token, ANestedNode $node, array $attributes)
+    private function _voteForNestedNode(TokenInterface $token, AbstractNestedNode $node, array $attributes)
     {
         if (self::ACCESS_DENIED === $result = $this->_vote($token, $node, $attributes)) {
             if (null !== $node->getParent()) {
@@ -129,11 +129,11 @@ class BBAclVoter extends AclVoter
     /**
      * Returns the vote for class content object, recursively till AClassContent
      * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \BackBee\ClassContent\AClassContent                                  $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
-    private function _voteForClassContent(TokenInterface $token, AClassContent $content, array $attributes)
+    private function _voteForClassContent(TokenInterface $token, AbstractClassContent $content, array $attributes)
     {
         if (null === $content->getProperty('category')) {
             return self::ACCESS_GRANTED;

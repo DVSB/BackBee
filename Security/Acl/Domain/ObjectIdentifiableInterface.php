@@ -34,14 +34,14 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IObjectIdentifiable extends DomainObjectInterface
+interface ObjectIdentifiableInterface extends DomainObjectInterface
 {
     /**
      * Checks for an explicit objects equality.
-     * @param  \BackBee\Security\Acl\Domain\IObjectIdentifiable $identity
+     * @param  ObjectIdentifiableInterface $identity
      * @return Boolean
      */
-    public function equals(IObjectIdentifiable $identity);
+    public function equals(ObjectIdentifiableInterface $identity);
 
     /**
      * Returns the unique identifier for this object.
