@@ -29,6 +29,6 @@ namespace BackBee\Tests\Mock;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-interface IMock
+interface MockInterface
 {
 }

@@ -31,7 +31,7 @@ use BackBee\Config\Config;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-class MockConfig extends Config implements IMock
+class MockInterfaceConfig extends Config implements MockInterface
 {
     public function __construct()
     {
