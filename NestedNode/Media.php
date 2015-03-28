@@ -23,7 +23,7 @@
 
 namespace BackBee\NestedNode;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 
 /**
  * Media entity in BackBee
@@ -55,8 +55,8 @@ class Media
 
     /**
      * The element content of this media
-     * @var \BackBee\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @var \BackBee\ClassContent\AbstractClassContent
+     * @ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
@@ -104,7 +104,7 @@ class Media
     }
 
     /**
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return string
      * @deprecated since version 0.10.0
      */
@@ -114,7 +114,7 @@ class Media
     }
 
     /**
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return string
      * @deprecated since version 0.10.0
      */
@@ -155,10 +155,10 @@ class Media
 
     /**
      * Sets the element content to the media
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return \BackBee\NestedNode\Media
      */
-    public function setContent(AClassContent $content)
+    public function setContent(AbstractClassContent $content)
     {
         $this->_content = $content;
 
@@ -270,7 +270,7 @@ class Media
 
     /**
      * Returns the element content of the media
-     * @return \BackBee\ClassContent\AClassContent
+     * @return \BackBee\ClassContent\AbstractClassContent
      */
     public function getContent()
     {

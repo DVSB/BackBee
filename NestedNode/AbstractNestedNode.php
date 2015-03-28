@@ -28,7 +28,7 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Utils\Numeric;
 
 /**
@@ -48,7 +48,7 @@ use BackBee\Utils\Numeric;
  * @MappedSuperclass
  * @Serializer\ExclusionPolicy("all")
  */
-abstract class ANestedNode extends AObjectIdentifiable
+abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 {
     /**
      * Unique identifier of the node
@@ -61,14 +61,14 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * The root node, cannot be NULL.
-     * @var \BackBee\NestedNode\ANestedNode
+     * @var \BackBee\NestedNode\AbstractNestedNode
      * @Serializer\Exclude
      */
     protected $_root;
 
     /**
      * The parent node.
-     * @var \BackBee\NestedNode\ANestedNode
+     * @var \BackBee\NestedNode\AbstractNestedNode
      */
     protected $_parent;
 
@@ -155,7 +155,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Returns the root node.
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function getRoot()
     {
@@ -164,7 +164,7 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Returns the parent node, NULL if this node is root
-     * @return \BackBee\NestedNode\ANestedNode|NULL
+     * @return \BackBee\NestedNode\AbstractNestedNode|NULL
      */
     public function getParent()
     {
@@ -263,11 +263,11 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Is this node is an ancestor of the provided one ?
-     * @param  \BackBee\NestedNode\ANestedNode $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  Boolean                         $strict Optional, if TRUE (default) this node is excluded of ancestors list
      * @return Boolean                         TRUE if this node is an anscestor or provided node, FALSE otherwise
      */
-    public function isAncestorOf(ANestedNode $node, $strict = true)
+    public function isAncestorOf(AbstractNestedNode $node, $strict = true)
     {
         if (true === $strict) {
             return (($node->getRoot() === $this->getRoot()) && ($node->getLeftnode() > $this->getLeftnode()) && ($node->getRightnode() < $this->getRightnode()));
@@ -278,11 +278,11 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Is this node is a descendant of the provided one ?
-     * @param  \BackBee\NestedNode\ANestedNode $node
+     * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  Boolean                         $strict Optional, if TRUE (default) this node is excluded of descendants list
      * @return Boolean                         TRUE if this node is a descendant or provided node, FALSE otherwise
      */
-    public function isDescendantOf(ANestedNode $node, $strict = true)
+    public function isDescendantOf(AbstractNestedNode $node, $strict = true)
     {
         if (true === $strict) {
             return (($this->getLeftnode() > $node->getLeftnode()) && ($this->getRightnode() < $node->getRightnode()) && ($this->getRoot() === $node->getRoot()));
@@ -314,10 +314,10 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the root node.
-     * @param  \BackBee\NestedNode\ANestedNode $root
-     * @return \BackBee\NestedNode\ANestedNode
+     * @param  \BackBee\NestedNode\AbstractNestedNode $root
+     * @return \BackBee\NestedNode\AbstractNestedNode
      */
-    public function setRoot(ANestedNode $root)
+    public function setRoot(AbstractNestedNode $root)
     {
         $this->_root = $root;
 
@@ -326,10 +326,10 @@ abstract class ANestedNode extends AObjectIdentifiable
 
     /**
      * Sets the parent node.
-     * @param  \BackBee\NestedNode\ANestedNode $parent
-     * @return \BackBee\NestedNode\ANestedNode
+     * @param  \BackBee\NestedNode\AbstractNestedNode $parent
+     * @return \BackBee\NestedNode\AbstractNestedNode
      */
-    public function setParent(ANestedNode $parent)
+    public function setParent(AbstractNestedNode $parent)
     {
         $this->_parent = $parent;
 
@@ -339,7 +339,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the left position.
      * @param  int                                         $leftnode
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setLeftnode($leftnode)
@@ -356,7 +356,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the right position.
      * @param  int                                         $rightnode
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setRightnode($rightnode)
@@ -373,7 +373,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the level.
      * @param  type                                        $level
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
      */
     public function setLevel($level)
@@ -390,7 +390,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the creation date
      * @param  \DateTime                       $created
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function setCreated(\DateTime $created)
     {
@@ -402,7 +402,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Sets the last modified date
      * @param  \DateTime                       $modified
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function setModified($modified)
     {
@@ -446,7 +446,7 @@ abstract class ANestedNode extends AObjectIdentifiable
     /**
      * Constructs the node from a string or object
      * @param  mixed                                       $serialized The string representation of the object.
-     * @return \BackBee\NestedNode\ANestedNode
+     * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                                with strict mode, if a property does not exists
      */
