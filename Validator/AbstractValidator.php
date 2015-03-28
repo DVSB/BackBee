@@ -31,7 +31,7 @@ namespace BackBee\Validator;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-abstract class AValidator
+abstract class AbstractValidator
 {
     const CONFIG_PARAMETER_VALIDATOR = 'validator';
     const CONFIG_PARAMETER_ERROR = 'error';

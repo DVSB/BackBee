@@ -34,7 +34,7 @@ use BackBee\Event\Event;
  * @author      d.Bensid <djoudi.bensid@lp-digital.fr>
  */
 
-interface IWorkflowListener
+interface WorkflowListenerInterface
 {
     public function arrivedInState(Event $event);
 

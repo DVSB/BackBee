@@ -23,7 +23,7 @@
 
 namespace BackBee\Validator\Tests\Mock;
 
-use BackBee\Tests\Mock\IMock;
+use BackBee\Tests\Mock\MockInterface;
 
 /**
  * Mock entity
@@ -35,7 +35,7 @@ use BackBee\Tests\Mock\IMock;
  * @Table(name="mock_entity2")
  * @Entity()
  */
-class MockEntity2 implements IMock
+class MockEntity2 implements MockInterface
 {
     /**
      * Identifier
@@ -112,7 +112,7 @@ class MockEntity2 implements IMock
     /**
      * Set numeric code
      * @param  int                                      $numeric_code
-     * @return \BackBee\Validator\Tests\Mock\MockEntity
+     * @return \BackBee\Validator\Tests\Mock\MockInterface
      */
     public function setNumericCode($numeric_code)
     {
@@ -124,7 +124,7 @@ class MockEntity2 implements IMock
     /**
      *  set name
      * @param  type                                     $name
-     * @return \BackBee\Validator\Tests\Mock\MockEntity
+     * @return \BackBee\Validator\Tests\Mock\MockInterface
      */
     public function setName($name)
     {
