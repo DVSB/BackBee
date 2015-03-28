@@ -33,14 +33,14 @@ use BackBee\Site\Layout;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface IRendererAdapter
+interface RendererAdapterInterface
 {
     /**
-     * Constructor; every RendererAdapter need to be construct with a ARenderer
+     * Constructor; every RendererAdapter need to be construct with a AbstractRenderer
      *
-     * @param ARenderer $renderer
+     * @param AbstractRenderer $renderer
      */
-    public function __construct(ARenderer $renderer);
+    public function __construct(AbstractRenderer $renderer);
 
     /**
      * Returns array that contains every single file's extension managed by this adapter
@@ -82,11 +82,11 @@ interface IRendererAdapter
      * This is called everytime we clone a renderer
      * @param Renderer $renderer the new renderer
      */
-    public function onNewRenderer(ARenderer $renderer);
+    public function onNewRenderer(AbstractRenderer $renderer);
 
     /**
      * This is called everytime we restore previous renderer
      * @param Renderer $renderer the previous renderer
      */
-    public function onRestorePreviousRenderer(ARenderer $renderer);
+    public function onRestorePreviousRenderer(AbstractRenderer $renderer);
 }

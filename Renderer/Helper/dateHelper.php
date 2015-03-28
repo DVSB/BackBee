@@ -33,7 +33,7 @@ use BackBee\ClassContent\Element\Date;
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
-class dateHelper extends AHelper
+class dateHelper extends AbstractHelper
 {
     private static $DATE_ERROR = 0;
     private static $DATE_TIMESTAMP = 1;

@@ -23,7 +23,7 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\AbstractRenderer;
 
 /**
  * @category    BackBee
@@ -32,28 +32,28 @@ use BackBee\Renderer\ARenderer;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AHelper
+abstract class AbstractHelper
 {
     /**
-     * @var \BackBee\Renderer\ARenderer
+     * @var \BackBee\Renderer\AbstractRenderer
      */
     protected $_renderer;
 
     /**
      * Class constructor
-     * @param \BackBee\Renderer\ARenderer $renderer
+     * @param \BackBee\Renderer\AbstractRenderer $renderer
      */
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         $this->setRenderer($renderer);
     }
 
     /**
      * Set the renderer
-     * @param  \BackBee\Renderer\ARenderer      $renderer
-     * @return \BackBee\Renderer\Helper\AHelper
+     * @param  \BackBee\Renderer\AbstractRenderer      $renderer
+     * @return \BackBee\Renderer\Helper\AbstractHelper
      */
-    public function setRenderer(ARenderer $renderer)
+    public function setRenderer(AbstractRenderer $renderer)
     {
         $this->_renderer = $renderer;
 

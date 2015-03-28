@@ -23,39 +23,29 @@
 
 namespace BackBee\Renderer;
 
+use BackBee\Site\Layout;
+
 /**
- * Interface for the object that can be rendered
+ * Interface for the templates renderers
  *
  * @category    BackBee
  * @package     BackBee\Renderer
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-interface IRenderable
+interface RendererInterface
 {
-    /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
-     * @return string|array|null
-     */
-    public function getData($var = null);
+    public function assign($var, $value = null);
 
-    /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
-     * @return string|array|null
-     */
-    public function getParam($var);
+    public function getAssignedVars();
 
-    /**
-     * Returns TRUE if the object can be rendered.
-     * @return Boolean
-     */
-    public function isRenderable();
+    public function render(RenderableInterface $content = null, $mode = null, $params = null, $template = null);
 
-    /**
-     * Returns return the entity template name
-     * @return string
-     */
-    public function getTemplateName();
+    public function partial($template = null, $params = null);
+
+    public function error($error_code, $title = null, $message = null, $trace = null);
+
+    public function updateLayout(Layout $layout);
+
+    public function removeLayout(Layout $layout);
 }

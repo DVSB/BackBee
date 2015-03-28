@@ -26,7 +26,7 @@ namespace BackBee\Renderer;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 use BackBee\BBApplication;
-use BackBee\NestedNode\ANestedNode;
+use BackBee\NestedNode\AbstractNestedNode;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
@@ -42,7 +42,7 @@ use BackBee\Utils\String;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
-abstract class ARenderer implements IRenderer
+abstract class AbstractRenderer implements RendererInterface
 {
     /**
      * Current BackBee application
@@ -58,7 +58,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * The current object to be render
-     * @var Irenderable
+     * @var RenderableInterface
      */
     protected $_object;
 
@@ -237,7 +237,7 @@ abstract class ARenderer implements IRenderer
      * @codeCoverageIgnore
      * @param  string    $var   the name of the variable
      * @param  mixed     $value the value of the variable
-     * @return ARenderer the current renderer
+     * @return AbstractRenderer the current renderer
      */
     public function __set($var, $value = null)
     {
@@ -364,10 +364,10 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Returns the list of available render mode for the provided object
-     * @param  \BackBee\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\RenderableInterface $object
      * @return array
      */
-    public function getAvailableRenderMode(IRenderable $object)
+    public function getAvailableRenderMode(RenderableInterface $object)
     {
         $templatePath = $this->getTemplatePath($object);
         $templates = $this->getTemplatesByPattern($templatePath.'.*');
@@ -394,7 +394,7 @@ abstract class ARenderer implements IRenderer
      * Assign one or more variables
      * @param  mixed     $var   A variable name or an array of variables to set
      * @param  mixed     $value The variable value to set
-     * @return ARenderer The current renderer
+     * @return AbstractRenderer The current renderer
      */
     public function assign($var, $value = null)
     {
@@ -406,7 +406,7 @@ abstract class ARenderer implements IRenderer
 
         if (is_array($var)) {
             foreach ($var as $key => $value) {
-                if ($value instanceof \BackBee\ClassContent\AClassContent) {
+                if ($value instanceof \BackBee\ClassContent\AbstractClassContent) {
                     // trying to load subcontent
                     $subcontent = $this->getApplication()
                             ->getEntityManager()
@@ -526,7 +526,7 @@ abstract class ARenderer implements IRenderer
     /**
      * Return the object to be rendered
      * @codeCoverageIgnore
-     * @return IRenderable
+     * @return RenderableInterface
      */
     public function getObject()
     {
@@ -545,7 +545,7 @@ abstract class ARenderer implements IRenderer
     /**
      * Return the previous object to be rendered
      * @codeCoverageIgnore
-     * @return IRenderable or null
+     * @return RenderableInterface or null
      */
     public function getPreviousObject()
     {
@@ -608,7 +608,7 @@ abstract class ARenderer implements IRenderer
      * Processes a view script and returns the output.
      *
      * @access public
-     * @param  IRenderable $content                        The object to be rendered
+     * @param  RenderableInterface $content                        The object to be rendered
      * @param  string      $mode                           The rendering mode
      * @param  array       $params                         A force set of parameters
      * @param  string      $template                       A force template script to be rendered
@@ -616,7 +616,7 @@ abstract class ARenderer implements IRenderer
      *                                                     available if TRUE, use the default template otherwise
      * @return string      The view script output
      */
-    public function render(IRenderable $content = null, $mode = null, $params = null, $template = null, $ignoreIfRenderModeNotAvailable = true)
+    public function render(RenderableInterface $content = null, $mode = null, $params = null, $template = null, $ignoreIfRenderModeNotAvailable = true)
     {
         // Nothing to do
     }
@@ -656,7 +656,7 @@ abstract class ARenderer implements IRenderer
      * @param  string    $mode
      * @param  Boolean   $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not
      *                                                   available if TRUE, use the default template otherwise
-     * @return ARenderer The current renderer
+     * @return AbstractRenderer The current renderer
      */
     public function setMode($mode = null, $ignoreIfRenderModeNotAvailable = true)
     {
@@ -668,10 +668,10 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @param  ANestedNode $node
-     * @return self
+     * @param  AbstractNestedNode $node
+     * @return AbstractRenderer
      */
-    public function setNode(ANestedNode $node)
+    public function setNode(AbstractNestedNode $node)
     {
         $this->_node = $node;
 
@@ -680,10 +680,10 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Set the object to render
-     * @param  IRenderable $object
-     * @return ARenderer   The current renderer
+     * @param  RenderableInterface $object
+     * @return AbstractRenderer   The current renderer
      */
-    public function setObject(IRenderable $object = null)
+    public function setObject(RenderableInterface $object = null)
     {
         $this->__currentelement = null;
         $this->_object = $object;
@@ -702,7 +702,7 @@ abstract class ARenderer implements IRenderer
     /**
      * Set the current page
      * @param  BackBee\NestedNode\Page $page
-     * @return ARenderer               The current renderer
+     * @return AbstractRenderer               The current renderer
      */
     public function setCurrentPage(\BackBee\NestedNode\Page $page = null)
     {
@@ -715,7 +715,7 @@ abstract class ARenderer implements IRenderer
      * Set one or set of parameters
      * @param  mixed     $param A parameter name or an array of parameters to set
      * @param  mixed     $value The parameter value to set
-     * @return ARenderer The current renderer
+     * @return AbstractRenderer The current renderer
      */
     public function setParam($param, $value = null)
     {
@@ -737,7 +737,7 @@ abstract class ARenderer implements IRenderer
     /**
      * @codeCoverageIgnore
      * @param  type $render
-     * @return self
+     * @return AbstractRenderer
      */
     public function setRender($render)
     {
@@ -839,10 +839,10 @@ abstract class ARenderer implements IRenderer
 
     /**
      * Return the relative path from the classname of an object
-     * @param  \BackBee\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\RenderableInterface $object
      * @return string
      */
-    protected function getTemplatePath(IRenderable $object)
+    protected function getTemplatePath(RenderableInterface $object)
     {
         return $object->getTemplateName();
     }
@@ -935,7 +935,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBee\Renderer\ARenderer
+     * @return AbstractRenderer
      */
     private function resetVars()
     {
@@ -946,7 +946,7 @@ abstract class ARenderer implements IRenderer
 
     /**
      * @codeCoverageIgnore
-     * @return \BackBee\Renderer\ARenderer
+     * @return AbstractRenderer
      */
     private function resetParams()
     {

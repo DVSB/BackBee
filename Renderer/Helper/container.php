@@ -25,7 +25,7 @@ namespace BackBee\Renderer\Helper;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
-use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\AbstractRenderer;
 
 /**
  * @category    BackBee
@@ -34,11 +34,11 @@ use BackBee\Renderer\ARenderer;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class container extends AHelper
+class container extends AbstractHelper
 {
     protected $_container;
 
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         parent::__construct($renderer);
 

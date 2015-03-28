@@ -34,19 +34,19 @@ use BackBee\Site\Layout;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-abstract class ARendererAdapter implements IRendererAdapter
+abstract class AbstractRendererAdapterInterface implements RendererAdapterInterface
 {
     /**
-     * @var BackBee\Renderer\ARenderer
+     * @var AbstractRenderer
      */
     protected $renderer;
 
     /**
      * Constructor
      *
-     * @param ARenderer $renderer
+     * @param AbstractRenderer $renderer
      */
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         $this->renderer = $renderer;
     }
@@ -67,13 +67,13 @@ abstract class ARendererAdapter implements IRendererAdapter
     /**
      * @param HelperManager $helperManager [description]
      */
-    public function setRenderer(ARenderer $renderer)
+    public function setRenderer(AbstractRenderer $renderer)
     {
         $this->renderer = $renderer;
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\RendererAdapterInterface::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -81,7 +81,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::isValidTemplateFile()
+     * @see BackBee\Renderer\RendererAdapterInterface::isValidTemplateFile()
      */
     public function isValidTemplateFile($filename, array $templateDir)
     {
@@ -89,7 +89,7 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::renderTemplate()
+     * @see BackBee\Renderer\RendererAdapterInterface::renderTemplate()
      */
     public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
     {
@@ -97,24 +97,24 @@ abstract class ARendererAdapter implements IRendererAdapter
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::updateLayout()
+     * @see BackBee\Renderer\RendererAdapterInterface::updateLayout()
      */
     public function updateLayout(Layout $layout, $layoutFile)
     {
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::onNewRenderer()
+     * @see BackBee\Renderer\RendererAdapterInterface::onNewRenderer()
      */
-    public function onNewRenderer(ARenderer $renderer)
+    public function onNewRenderer(AbstractRenderer $renderer)
     {
         $this->setRenderer($renderer);
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::onRestorePreviousRenderer()
+     * @see BackBee\Renderer\RendererAdapterInterface::onRestorePreviousRenderer()
      */
-    public function onRestorePreviousRenderer(ARenderer $renderer)
+    public function onRestorePreviousRenderer(AbstractRenderer $renderer)
     {
         $this->setRenderer($renderer);
     }

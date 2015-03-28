@@ -23,7 +23,7 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 
 /**
  * Helper to get the main node uri from a content
@@ -33,20 +33,20 @@ use BackBee\ClassContent\AClassContent;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class mainnodeuri extends AHelper
+class mainnodeuri extends AbstractHelper
 {
     /**
      * Returns the main node uri form content if found '#' otherwise
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return string
      */
-    public function __invoke(AClassContent $content = null)
+    public function __invoke(AbstractClassContent $content = null)
     {
         if (null === $content) {
             $content = $this->_renderer->getObject();
         }
 
-        if ($content instanceof AClassContent) {
+        if ($content instanceof AbstractClassContent) {
             $page = $content->getMainNode();
             if (null !== $page) {
                 return $this->_renderer->getUri($page->getUrl(), null, $page->getSite());

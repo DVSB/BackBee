@@ -32,7 +32,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class analytics extends AHelper
+class analytics extends AbstractHelper
 {
     /**
      * Return the analytics parameter bag

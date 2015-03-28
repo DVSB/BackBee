@@ -23,7 +23,7 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\NestedNode\Page;
 
 /**
@@ -33,9 +33,9 @@ use BackBee\NestedNode\Page;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class hasmainnodeonline extends AHelper
+class hasmainnodeonline extends AbstractHelper
 {
-    public function __invoke(AClassContent $content = null)
+    public function __invoke(AbstractClassContent $content = null)
     {
         if (null === $content) {
             $content = $this->_renderer->getObject();

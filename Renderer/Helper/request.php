@@ -34,7 +34,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class request extends AHelper
+class request extends AbstractHelper
 {
     /**
      * Return the current request parameter bag

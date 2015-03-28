@@ -32,7 +32,7 @@ use BackBee\Renderer\Exception\RendererException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AClassContentHelper extends AHelper
+abstract class AbstractClassContentHelper extends AbstractHelper
 {
     protected $object;
 
@@ -56,7 +56,7 @@ abstract class AClassContentHelper extends AHelper
      * @deprecated since version 1.0
      * @param  string              $instanceOf
      * @param  object              $object
-     * @return AClassContentHelper
+     * @return AbstractClassContentHelper
      */
     // public function __invoke($instanceOf, $object)
     // {
