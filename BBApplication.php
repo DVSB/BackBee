@@ -257,7 +257,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     /**
      * @param  type    $name
-     * @return ABundle
+     * @return AbstractBundle
      */
     public function getBundle($name)
     {

@@ -480,7 +480,7 @@ class PageController extends AbstractRestController
             throw new NotFoundHttpException("No `$classname` exists with uid `$content_uid`");
         }
 
-        $pages = $em->getRepository("BackBee\ClassContent\AClassContent")->findPagesByContent($content);
+        $pages = $em->getRepository("BackBee\ClassContent\AbstractClassContent")->findPagesByContent($content);
 
         $response = $this->createResponse($this->formatCollection($pages));
         if (0 < count($pages)) {

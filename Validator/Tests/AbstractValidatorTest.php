@@ -31,7 +31,7 @@ namespace BackBee\Validator\Tests;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class AValidatorTest extends \PHPUnit_Framework_TestCase
+class AbstractValidatorTest extends \PHPUnit_Framework_TestCase
 {
     private $validator_test;
 
@@ -80,6 +80,6 @@ class AValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->validator_test = $this->getMockForAbstractClass('BackBee\Validator\AValidator');
+        $this->validator_test = $this->getMockForAbstractClass('BackBee\Validator\AbstractValidator');
     }
 }

@@ -105,7 +105,7 @@ class LocaleListener
 
         $em = $application->getEntityManager();
         if (null === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
-            $maincontent = $em->getRepository('BackBee\ClassContent\AClassContent')->getLastByMainnode($page, $urlGenerator->getDiscriminators());
+            $maincontent = $em->getRepository('BackBee\ClassContent\AbstractClassContent')->getLastByMainnode($page, $urlGenerator->getDiscriminators());
         }
 
         $newUrl = $urlGenerator->generate($page, $maincontent);

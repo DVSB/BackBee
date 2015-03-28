@@ -71,7 +71,7 @@ EOF
         $bbapp = $this->getContainer()->get('bbapp');
 
         $bundle = $bbapp->getBundle($name);
-        /* @var $bundle \BackBee\Bundle\ABundle */
+        /* @var $bundle \BackBee\Bundle\AbstractBundle */
 
         if (null === $bundle) {
             throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));

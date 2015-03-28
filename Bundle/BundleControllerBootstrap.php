@@ -37,7 +37,7 @@ use BackBee\FrontController\Exception\FrontControllerException;
 class BundleControllerBootstrap
 {
     /**
-     * @var BackBee\Bundle\ABundle
+     * @var BackBee\Bundle\AbstractBundle
      */
     protected $_bundle;
 
@@ -57,7 +57,7 @@ class BundleControllerBootstrap
      *     - $_application
      *     - $_em
      *
-     * @param BackBee\Bundle\ABundle $bundle
+     * @param BackBee\Bundle\AbstractBundle $bundle
      */
     public function __construct(BundleInterface $bundle)
     {

@@ -141,7 +141,7 @@ class BBAclVoter extends AclVoter
 
         if (self::ACCESS_DENIED === $result = $this->_vote($token, $content, $attributes)) {
             if (false !== $parent_class = get_parent_class($content)) {
-                if ('BackBee\ClassContent\AClassContent' !== $parent_class) {
+                if ('BackBee\ClassContent\AbstractClassContent' !== $parent_class) {
                     $parent_class = NAMESPACE_SEPARATOR.$parent_class;
                     $result = $this->_voteForClassContent($token, new $parent_class('*'), $attributes);
                 }

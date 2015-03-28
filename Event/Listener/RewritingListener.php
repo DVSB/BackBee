@@ -122,7 +122,7 @@ class RewritingListener
 
         $em = $application->getEntityManager();
         if (null === $maincontent && 0 < count($url_generator->getDiscriminators())) {
-            $maincontent = $em->getRepository('BackBee\ClassContent\AClassContent')
+            $maincontent = $em->getRepository('BackBee\ClassContent\AbstractClassContent')
                 ->getLastByMainnode($page, $url_generator->getDiscriminators())
             ;
         }

@@ -95,7 +95,7 @@ class PageBuilder
     private $layout;
 
     /**
-     * @var BackBee\ClassContent\AClassContent
+     * @var BackBee\ClassContent\AbstractClassContent
      */
     private $itemToPushInMainZone;
 

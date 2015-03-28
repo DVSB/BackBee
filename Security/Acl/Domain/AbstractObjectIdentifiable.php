@@ -35,7 +35,7 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * * \BackBee\Site\Site
  * * \BackBee\Site\Layout
  * * \BackBee\Site\NestedNode
- * * \BackBee\Site\AclassContent
+ * * \BackBee\Site\AbstractClassContent
  *
  * @category    BackBee
  * @package     BackBee\Security

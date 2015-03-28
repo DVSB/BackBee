@@ -38,7 +38,7 @@ use BackBee\Tests\Mock\MockInterface;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class MockInterfaceContent extends AbstractClassContent implements MockInterface
+class MockContent extends AbstractClassContent implements MockInterface
 {
     public function __construct($uid = null, $options = null)
     {

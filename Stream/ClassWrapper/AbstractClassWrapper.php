@@ -84,7 +84,7 @@ abstract class AbstractClassWrapper implements StreamWrapperInterface
      * The class to be extended by the class content loaded
      * @var string
      */
-    protected $extends = '\BackBee\ClassContent\AClassContent';
+    protected $extends = '\BackBee\ClassContent\AbstractClassContent';
 
     /**
      * Interface(s) used by the class content

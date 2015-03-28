@@ -26,7 +26,7 @@ namespace BackBee\ClassContent\Tests;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Image;
 use BackBee\ClassContent\Revision;
-use BackBee\ClassContent\Tests\Mock\MockInterfaceContent;
+use BackBee\ClassContent\Tests\Mock\MockContent;
 use BackBee\Exception\BBException;
 
 /**
@@ -42,7 +42,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->content = new MockInterfaceContent();
+        $this->content = new MockContent();
         $this->content->load();
     }
 

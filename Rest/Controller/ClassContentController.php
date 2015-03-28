@@ -278,7 +278,7 @@ class ClassContentController extends AbstractRestController
         $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
 
         try {
-            $this->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')->deleteContent($content);
+            $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($content);
         } catch (\Exception $e) {
             throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
@@ -627,7 +627,7 @@ class ClassContentController extends AbstractRestController
         unset($criterias['order_direction']);
 
         return $this->getEntityManager()
-            ->getRepository('BackBee\ClassContent\AClassContent')
+            ->getRepository('BackBee\ClassContent\AbstractClassContent')
             ->findContentsBySearch($classnames, $order_infos, $pagination, $criterias)
         ;
     }

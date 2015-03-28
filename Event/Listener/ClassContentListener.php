@@ -63,7 +63,7 @@ class ClassContentListener
             foreach (class_parents($discriminatorValue) as $classname) {
                 $em->getClassMetadata($classname)->addDiscriminatorMapClass($discriminatorValue, $discriminatorValue);
 
-                if ('BackBee\ClassContent\AClassContent' === $classname) {
+                if ('BackBee\ClassContent\AbstractClassContent' === $classname) {
                     break;
                 }
             }

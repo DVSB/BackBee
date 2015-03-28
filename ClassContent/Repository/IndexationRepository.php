@@ -344,7 +344,7 @@ class IndexationRepository extends EntityRepository
      */
     public function getNodeUids(array $content_uids)
     {
-        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\AClassContent');
+        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\AbstractClassContent');
 
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()

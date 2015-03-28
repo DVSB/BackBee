@@ -155,7 +155,7 @@ class Dispatcher extends EventDispatcher implements DumpableServiceInterface
             $this->dispatch(strtolower('classcontent.'.$eventName), $event);
 
             foreach (class_parents($entity) as $class) {
-                if ($class === 'BackBee\ClassContent\AClassContent') {
+                if ($class === 'BackBee\ClassContent\AbstractClassContent') {
                     break;
                 }
 

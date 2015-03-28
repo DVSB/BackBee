@@ -244,7 +244,7 @@ class Importer
      * Return an existing class content or a new one if unfound
      * @param  string                                  $classname
      * @param  string                                  $uid
-     * @return \BaclBuilder\ClassContent\AClassContent
+     * @return \BaclBuilder\ClassContent\AbstractClassContent
      */
     public function getBBEntity($classname, $uid)
     {

@@ -47,7 +47,7 @@ abstract class AbstractBundleController extends FrontController implements HttpK
     /* @var \BackBee\Config\Config */
 
     private $config;
-    /* @var \BackBee\Bundle\ABundle */
+    /* @var \BackBee\Bundle\AbstractBundle */
     private $bundle;
     /* @var \BackBee\Renderer\AbstractRenderer */
     private $renderer;
@@ -58,7 +58,7 @@ abstract class AbstractBundleController extends FrontController implements HttpK
      * @access public
      * @param BBApplication $application The current BBapplication
      */
-    public function __construct(ABundle $bundle)
+    public function __construct(AbstractBundle $bundle)
     {
         $this->application = $bundle->getApplication();
         $this->bundle = $bundle;
@@ -93,7 +93,7 @@ abstract class AbstractBundleController extends FrontController implements HttpK
 
     /**
      * Return the bundle
-     * @return \BackBee\Bundle\ABundle
+     * @return \BackBee\Bundle\AbstractBundle
      */
     public function getBundle()
     {

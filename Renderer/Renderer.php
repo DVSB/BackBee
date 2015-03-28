@@ -900,7 +900,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         // Assign vars and parameters
         if (null !== $this->_object) {
             $draft = $this->_object->getDraft();
-            $aClassContentClassname = 'BackBee\ClassContent\AClassContent';
+            $aClassContentClassname = 'BackBee\ClassContent\AbstractClassContent';
             if (true === is_a($this->_object, $aClassContentClassname) && false === $this->_object->isLoaded()) {
                 // trying to refresh unloaded content
                 $em = $application->getEntityManager();
