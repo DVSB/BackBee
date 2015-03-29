@@ -213,7 +213,7 @@ class EntityValidator extends AValidator
         $ids = array();
         $reflection_class = $this->getReflectionClass($entity);
         foreach ($reflection_class->getProperties() as $property) {
-            if (false !== strpos($property->getDocComment(), '@Id')) {
+            if (false !== strpos($property->getDocComment(), '@ORM\Id')) {
                 $ids[] = $property->getName();
             }
         }

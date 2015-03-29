@@ -27,14 +27,16 @@ use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 use BackBee\Rest\Controller\Annotations as Rest;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
- * @Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
- * @Table(name="user", uniqueConstraints={@UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
+ * @ORM\Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
+ * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
  */
 class MockUser
 {
@@ -42,9 +44,10 @@ class MockUser
      * Unique identifier of the user.
      *
      * @var integer
-     * @Id @Column(type="integer", name="id")
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
      *
-     * @Serializer\Type('integer'))
+     * @Serializer\Type("integer"))
      */
     public $_id = 1;
 
@@ -52,9 +55,9 @@ class MockUser
      * The login of this user.
      *
      * @var string
-     * @Column(type="string", name="login")
+     * @ORM\Column(type="string", name="login")
      *
-     * @Serializer\Type('string'))
+     * @Serializer\Type("string"))
      */
     public $_login = 'userLogin';
 
@@ -62,7 +65,7 @@ class MockUser
      * The password of this user.
      *
      * @var string
-     * @Column(type="string", name="password")
+     * @ORM\Column(type="string", name="password")
      * @Serializer\Exclude()
      */
     public $_password = 'userPassword';

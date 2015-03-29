@@ -28,6 +28,7 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
 use BackBee\Site\Layout;
 use BackBee\Utils\Numeric;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * A workflow state for NestedNode\Page.
@@ -41,8 +42,8 @@ use BackBee\Utils\Numeric;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Workflow\Repository\StateRepository")
- * @Table(name="workflow")
+ * @ORM\Entity(repositoryClass="BackBee\Workflow\Repository\StateRepository")
+ * @ORM\Table(name="workflow")
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -52,7 +53,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
      * The unique identifier of the state.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -64,7 +66,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
      * The code of the workflow state.
      *
      * @var int
-     * @Column(type="integer", name="code")
+     * @ORM\Column(type="integer", name="code")
      *
      * @Serializer\Expose
      * @Serializer\Type("integer")
@@ -75,7 +77,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
      * The label of the workflow state.
      *
      * @var string
-     * @Column(type="string", name="label")
+     * @ORM\Column(type="string", name="label")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -86,8 +88,8 @@ class State extends AObjectIdentifiable implements \JsonSerializable
      * The optional layout to be applied for state.
      *
      * @var \BackBee\Site\Layout
-     * @ManyToOne(targetEntity="BackBee\Site\Layout", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="layout", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Layout", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="layout", referencedColumnName="uid")
      */
     protected $_layout;
 
@@ -95,7 +97,7 @@ class State extends AObjectIdentifiable implements \JsonSerializable
      * The optional listener classname.
      *
      * @var string
-     * @Column(type="string", name="listener")
+     * @ORM\Column(type="string", name="listener")
      */
     protected $_listener;
 

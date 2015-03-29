@@ -26,6 +26,8 @@ namespace BackBee\ClassContent;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\NestedNode\Page;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * A set of content objects in BackBee
  * Implements Iterator, Countable.
@@ -34,9 +36,9 @@ use BackBee\NestedNode\Page;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
- * @Table(name="content")
- * @HasLifecycleCallbacks
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
+ * @ORM\Table(name="content")
+ * @ORM\HasLifecycleCallbacks
  */
 class ContentSet extends AClassContent implements \Iterator, \Countable
 {
@@ -52,7 +54,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
      *
-     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_contentset", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 
@@ -77,18 +79,18 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * Initialized datas on postLoad doctrine event.
+     * Initialized data on postLoad doctrine event.
      */
     public function postLoad()
     {
         // Ensure class content are known
-        $datas = (array) $this->_data;
-        foreach ($datas as $data) {
-            $type = key($data);
+        $data = (array) $this->_data;
+        foreach ($data as $dataEntry) {
+            $type = key($dataEntry);
 
-            $data = array_pop($data);
-            if (true === is_array($data)) {
-                $type = key($data);
+            $dataEntry = array_pop($dataEntry);
+            if (true === is_array($dataEntry)) {
+                $type = key($dataEntry);
             }
 
             if (0 === strpos($type, 'BackBee\ClassContent')) {
@@ -240,7 +242,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
             throw new \BackBee\Exception\BBException(__METHOD__." index  parameter must be an integer");
         }
         $newContentsetArr = array();
-        /* revoir * */
+
         foreach ($this->getData() as $key => $content) {
             $contentToAdd = ($key == $index) ? $contentSet : $content;
             $newContentsetArr[] = $contentToAdd;
@@ -456,7 +458,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /*     * **************************************************************** */
     /*                                                                        */
-    /*                   Implementation of IRenderable                        */
+    /*                   Implementation of RenderableInterface                */
     /*                                                                        */
     /*     * **************************************************************** */
 

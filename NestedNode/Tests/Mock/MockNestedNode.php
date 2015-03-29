@@ -26,11 +26,14 @@ namespace BackBee\NestedNode\Tests\Mock;
 use BackBee\NestedNode\ANestedNode;
 use BackBee\Tests\Mock\IMock;
 
+use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
+
 /**
  * NestedNode mock.
  *
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\NestedNodeRepository")
- * @Table(name="nestednode")
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\NestedNodeRepository")
+ * @ORM\Table(name="nestednode")
  *
  * @category    BackBee
  *
@@ -43,7 +46,8 @@ class MockNestedNode extends ANestedNode implements IMock
      * Unique identifier of the node.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Type("string")
      */
@@ -53,7 +57,7 @@ class MockNestedNode extends ANestedNode implements IMock
      * The nested node left position.
      *
      * @var int
-     * @Column(type="integer", name="leftnode", nullable=false)
+     * @ORM\Column(type="integer", name="leftnode", nullable=false)
      */
     protected $_leftnode;
 
@@ -61,7 +65,7 @@ class MockNestedNode extends ANestedNode implements IMock
      * The nested node right position.
      *
      * @var int
-     * @Column(type="integer", name="rightnode", nullable=false)
+     * @ORM\Column(type="integer", name="rightnode", nullable=false)
      */
     protected $_rightnode;
 
@@ -69,7 +73,7 @@ class MockNestedNode extends ANestedNode implements IMock
      * The nested node level in the tree.
      *
      * @var int
-     * @Column(type="integer", name="level", nullable=false)
+     * @ORM\Column(type="integer", name="level", nullable=false)
      */
     protected $_level;
 
@@ -77,7 +81,7 @@ class MockNestedNode extends ANestedNode implements IMock
      * The creation datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created", nullable=false)
+     * @ORM\Column(type="datetime", name="created", nullable=false)
      */
     protected $_created;
 
@@ -85,7 +89,7 @@ class MockNestedNode extends ANestedNode implements IMock
      * The last modification datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="modified", nullable=false)
+     * @ORM\Column(type="datetime", name="modified", nullable=false)
      */
     protected $_modified;
 
@@ -93,8 +97,8 @@ class MockNestedNode extends ANestedNode implements IMock
      * The root node, cannot be NULL.
      *
      * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
@@ -102,8 +106,8 @@ class MockNestedNode extends ANestedNode implements IMock
      * The parent node.
      *
      * @var \BackBee\NestdNode\Tests\Mock\MockNestedNode
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_children", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_children", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 }

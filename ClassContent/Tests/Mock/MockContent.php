@@ -28,11 +28,13 @@ use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\Text;
 use BackBee\Tests\Mock\IMock;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * ClassContent mock emulate a yml content cached.
  *
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
- * @Table(name="content")
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
+ * @ORM\Table(name="content")
  *
  * @category    BackBee
  *

@@ -25,6 +25,8 @@ namespace BackBee\NestedNode;
 
 use BackBee\ClassContent\AClassContent;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Media entity in BackBee.
  *
@@ -32,9 +34,9 @@ use BackBee\ClassContent\AClassContent;
  *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\MediaRepository")
- * @Table(name="media")
- * @HasLifecycleCallbacks
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\MediaRepository")
+ * @ORM\Table(name="media")
+ * @ORM\HasLifecycleCallbacks
  */
 class Media implements \JsonSerializable
 {
@@ -43,8 +45,9 @@ class Media implements \JsonSerializable
      * Unique identifier of the media.
      *
      * @var integer
-     * @Id @Column(type="integer", name="id")
-     * @GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $_id;
 
@@ -52,8 +55,8 @@ class Media implements \JsonSerializable
      * The media folder owning this media.
      *
      * @var \BackBee\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="media_folder_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_medias", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="media_folder_uid", referencedColumnName="uid")
      */
     protected $_media_folder;
 
@@ -61,8 +64,8 @@ class Media implements \JsonSerializable
      * The element content of this media.
      *
      * @var \BackBee\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="content_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
 
@@ -70,7 +73,7 @@ class Media implements \JsonSerializable
      * The title of this media.
      *
      * @var string
-     * @Column(type="string", name="title")
+     * @ORM\Column(type="string", name="title")
      */
     protected $_title;
 
@@ -78,7 +81,7 @@ class Media implements \JsonSerializable
      * The publication datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="date")
+     * @ORM\Column(type="datetime", name="date")
      */
     protected $_date;
 
@@ -86,7 +89,7 @@ class Media implements \JsonSerializable
      * The creation datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created")
+     * @ORM\Column(type="datetime", name="created")
      */
     protected $_created;
 
@@ -94,7 +97,7 @@ class Media implements \JsonSerializable
      * The last modification datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="modified")
+     * @ORM\Column(type="datetime", name="modified")
      */
     protected $_modified;
 

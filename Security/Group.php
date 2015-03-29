@@ -29,13 +29,15 @@ use JMS\Serializer\Annotation as Serializer;
 
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
- * @Entity()
- * @Table(name="`group`", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"id"})})
+ * @ORM\Entity
+ * @ORM\Table(name="`group`", uniqueConstraints={@ORM\UniqueConstraint(name="UNI_IDENTIFIER",columns={"id"})})
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -45,8 +47,9 @@ class Group implements DomainObjectInterface
      * Unique identifier of the group.
      *
      * @var integer
-     * @Id @Column(type="integer", name="id")
-     * @GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      *
      * @Serializer\Expose
      * @Serializer\ReadOnly
@@ -57,7 +60,7 @@ class Group implements DomainObjectInterface
      * Group name.
      *
      * @var string
-     * @Column(type="string", name="name")
+     * @ORM\Column(type="string", name="name")
      *
      * @Serializer\Expose
      */
@@ -65,17 +68,21 @@ class Group implements DomainObjectInterface
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBee\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
-     * @JoinTable(
-     *      name="user_group",
-     *      joinColumns={@JoinColumn(name="group_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")}
-     * )
      *
      * @Serializer\Expose
      * @Serializer\MaxDepth(2)
      * @Serializer\SerializedName("users")
      * @Serializer\ReadOnly
+     * @ORM\ManyToMany(targetEntity="BackBee\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(
+     *     name="user_group",
+     *     joinColumns={
+     *         @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     *     },
+     *     inverseJoinColumns={
+     *         @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     *     }
+     * )
      */
     protected $_users;
 
@@ -83,8 +90,8 @@ class Group implements DomainObjectInterface
      * Optional site.
      *
      * @var \BackBee\Site\Site
-     * @ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="site_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
 

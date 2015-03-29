@@ -23,9 +23,11 @@
 
 namespace BackBee\Site;
 
+use BackBee\Installer\Annotation as BB;
 use BackBee\Security\Acl\Domain\AObjectIdentifiable;
 use BackBee\Site\Metadata\Metadata;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
@@ -40,9 +42,11 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Site\Repository\SiteRepository")
- * @Table(name="site", indexes={@Index(name="IDX_SERVERNAME", columns={"server_name"}), @Index(name="IDX_LABEL", columns={"label"})})
- * @fixtures(qty=1)
+ * @ORM\Entity(repositoryClass="BackBee\Site\Repository\SiteRepository")
+ * @ORM\Table(name="site", indexes={
+ *     @ORM\Index(name="IDX_SERVERNAME", columns={"server_name"}),
+ *     @ORM\Index(name="IDX_LABEL", columns={"label"})})
+ * @BB\Fixtures(qty=1)
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -52,8 +56,9 @@ class Site extends AObjectIdentifiable
      * The unique identifier of this website.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
-     * @fixture(type="md5")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
+     * @BB\Fixture(type="md5")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("id")
@@ -65,8 +70,8 @@ class Site extends AObjectIdentifiable
      * The label of this website.
      *
      * @var string
-     * @Column(type="string", name="label", nullable=false)
-     * @fixture(type="domainWord")
+     * @ORM\Column(type="string", name="label", nullable=false)
+     * @BB\Fixture(type="domainWord")
      *
      * @Serializer\Expose
      */
@@ -76,8 +81,8 @@ class Site extends AObjectIdentifiable
      * The creation datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created", nullable=false)
-     * @fixture(type="dateTime")
+     * @ORM\Column(type="datetime", name="created", nullable=false)
+     * @BB\Fixture(type="dateTime")
      */
     protected $_created;
 
@@ -85,8 +90,8 @@ class Site extends AObjectIdentifiable
      * The last modification datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="modified", nullable=false)
-     * @fixture(type="dateTime")
+     * @ORM\Column(type="datetime", name="modified", nullable=false)
+     * @BB\Fixture(type="dateTime")
      */
     protected $_modified;
 
@@ -94,8 +99,8 @@ class Site extends AObjectIdentifiable
      * The optional server name.
      *
      * @var string
-     * @Column(type="string", name="server_name", nullable=true)
-     * @fixture(type="domainWord")
+     * @ORM\Column(type="string", name="server_name", nullable=true)
+     * @BB\Fixture(type="domainWord")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("server_name")
@@ -115,7 +120,7 @@ class Site extends AObjectIdentifiable
     /**
      * The collection of layouts available for this site.
      *
-     * @OneToMany(targetEntity="BackBee\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
      *
      * @Serializer\Expose
      */
@@ -124,10 +129,13 @@ class Site extends AObjectIdentifiable
     /**
      * The default metadatas associated tto the pages of this website.
      *
-     * @ManyToMany(targetEntity="BackBee\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
-     * @JoinTable(name="metadata_site",
-     *      joinColumns={@JoinColumn(name="site_uid", referencedColumnName="uid")},
-     *      inverseJoinColumns={@JoinColumn(name="metadata_uid", referencedColumnName="uid")}
+     * @ORM\ManyToMany(targetEntity="BackBee\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(name="metadata_site",
+     *      joinColumns={
+     *         @ORM\JoinColumn(name="site_uid", referencedColumnName="uid")
+     *      },
+     *      inverseJoinColumns={
+     *         @ORM\JoinColumn(name="metadata_uid", referencedColumnName="uid")}
      *      )
      *
      * @Serializer\Expose

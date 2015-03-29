@@ -29,6 +29,8 @@ use BackBee\Utils\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * A website layout.
  *
@@ -36,14 +38,14 @@ use JMS\Serializer\Annotation as Serializer;
  * to webmasters
  *
  * The stored data is a serialized standard object. The object must have the
- * folowing structure :
+ * following structure :
  *
  * layout: {
- *   templateLayouts: [      // Array of final dropable zones
+ *   templateLayouts: [      // Array of final droppable zones
  *     zone1: {
  *       id:                 // unique identifier of the zone
  *       defaultContainer:   // default AClassContent drop at creation
- *       target:             // array of accepted AClassContent dropable
+ *       target:             // array of accepted AClassContent droppable
  *       gridClassPrefix:    // prefix of responsive CSS classes
  *       gridSize:           // size of this zone for responsive CSS
  *     },
@@ -55,9 +57,9 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Site\Repository\LayoutRepository")
- * @Table(name="layout",indexes={@index(name="IDX_SITE", columns={"site_uid"})})
- * @HasLifecycleCallbacks
+ * @ORM\Entity(repositoryClass="BackBee\Site\Repository\LayoutRepository")
+ * @ORM\Table(name="layout",indexes={@ORM\Index(name="IDX_SITE", columns={"site_uid"})})
+ * @ORM\HasLifecycleCallbacks
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -67,7 +69,8 @@ class Layout extends AObjectIdentifiable
      * The unique identifier.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -78,7 +81,7 @@ class Layout extends AObjectIdentifiable
      * The label of this layout.
      *
      * @var string
-     * @Column(type="string", name="label", nullable=false)
+     * @ORM\Column(type="string", name="label", nullable=false)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -89,7 +92,7 @@ class Layout extends AObjectIdentifiable
      * The file name of the layout.
      *
      * @var string
-     * @Column(type="string", name="path", nullable=false)
+     * @ORM\Column(type="string", name="path", nullable=false)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -100,7 +103,7 @@ class Layout extends AObjectIdentifiable
      * The seralized data.
      *
      * @var string
-     * @Column(type="text", name="data", nullable=false)
+     * @ORM\Column(type="text", name="data", nullable=false)
      */
     protected $_data;
 
@@ -108,7 +111,7 @@ class Layout extends AObjectIdentifiable
      * The creation datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created", nullable=false)
+     * @ORM\Column(type="datetime", name="created", nullable=false)
      *
      * @Serializer\Expose
      * @Serializer\Type("DateTime<'U'>")
@@ -119,7 +122,7 @@ class Layout extends AObjectIdentifiable
      * The last modification datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="modified", nullable=false)
+     * @ORM\Column(type="datetime", name="modified", nullable=false)
      *
      * @Serializer\Expose
      * @Serializer\Type("DateTime<'U'>")
@@ -130,7 +133,7 @@ class Layout extends AObjectIdentifiable
      * The optional path to the layout icon.
      *
      * @var string
-     * @Column(type="string", name="picpath", nullable=true)
+     * @ORM\Column(type="string", name="picpath", nullable=true)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -141,8 +144,8 @@ class Layout extends AObjectIdentifiable
      * Optional owner site.
      *
      * @var \BackBee\Site\Site
-     * @ManyToOne(targetEntity="BackBee\Site\Site", inversedBy="_layouts", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="site_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Site", inversedBy="_layouts", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
 
@@ -150,7 +153,7 @@ class Layout extends AObjectIdentifiable
      * Store pages using this layout.
      * var \Doctrine\Common\Collections\ArrayCollection.
      *
-     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_layout", fetch="EXTRA_LAZY")
      */
     protected $_pages;
 
@@ -159,7 +162,7 @@ class Layout extends AObjectIdentifiable
      *
      * var \Doctrine\Common\Collections\ArrayCollection
      *
-     * @OneToMany(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY", mappedBy="_layout")
+     * @ORM\OneToMany(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY", mappedBy="_layout")
      */
     protected $_states;
 
@@ -167,7 +170,7 @@ class Layout extends AObjectIdentifiable
      * The content's parameters.
      *
      * @var array
-     * @Column(type="array", name="parameters", nullable = true)
+     * @ORM\Column(type="array", name="parameters", nullable = true)
      */
     protected $_parameters = array();
 

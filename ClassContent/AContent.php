@@ -26,10 +26,10 @@ namespace BackBee\ClassContent;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
-use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\IRenderable;
 use BackBee\Security\Acl\Domain\IObjectIdentifiable;
-use BackBee\Util\Parameter;
+
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Abstract class for every content and its revisions in BackBee.
@@ -38,7 +38,7 @@ use BackBee\Util\Parameter;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @MappedSuperclass
+ * @ORM\MappedSuperclass
  */
 abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerializable
 {
@@ -59,7 +59,8 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * Unique identifier.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
@@ -67,7 +68,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The label of this content.
      *
      * @var string
-     * @Column(type="string", name="label", nullable=true)
+     * @ORM\Column(type="string", name="label", nullable=true)
      */
     protected $_label;
 
@@ -75,7 +76,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The acceptable class name for values.
      *
      * @var array
-     * @Column(type="array", name="accept")
+     * @ORM\Column(type="array", name="accept")
      */
     protected $_accept = array();
 
@@ -83,7 +84,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * A map of content.
      *
      * @var mixed
-     * @Column(type="array", name="data")
+     * @ORM\Column(type="array", name="data")
      */
     protected $_data = array();
 
@@ -91,7 +92,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The content's parameters.
      *
      * @var array
-     * @Column(type="array", name="parameters")
+     * @ORM\Column(type="array", name="parameters")
      */
     protected $_parameters = array();
 
@@ -99,7 +100,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The maximal number of items for values.
      *
      * @var array
-     * @Column(type="array", name="maxentry")
+     * @ORM\Column(type="array", name="maxentry")
      */
     protected $_maxentry = array();
 
@@ -107,7 +108,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The minimal number of items for values.
      *
      * @var array
-     * @Column(type="array", name="minentry")
+     * @ORM\Column(type="array", name="minentry")
      */
     protected $_minentry = array();
 
@@ -115,7 +116,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The creation datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created")
+     * @ORM\Column(type="datetime", name="created")
      */
     protected $_created;
 
@@ -123,7 +124,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The last modification datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="modified")
+     * @ORM\Column(type="datetime", name="modified")
      */
     protected $_modified;
 
@@ -131,7 +132,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * Revision number.
      *
      * @var int
-     * @Column(type="integer", name="revision")
+     * @ORM\Column(type="integer", name="revision")
      */
     protected $_revision;
 
@@ -139,7 +140,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      * The current state.
      *
      * @var int
-     * @Column(type="integer", name="state")
+     * @ORM\Column(type="integer", name="state")
      */
     protected $_state;
 
@@ -166,11 +167,10 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
      */
     public static function getClassnameByContentType($type)
     {
-        $classname = self::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
-        $exists = true;
+        $className = self::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
 
         try {
-            $exists = class_exists($classname);
+            $exists = class_exists($className);
         } catch (\Exception $e) {
             $exists = false;
         }
@@ -179,7 +179,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
             throw new \InvalidArgumentException("`$type` is not a classcontent valid type.");
         }
 
-        return $classname;
+        return $className;
     }
 
     /**
@@ -647,7 +647,7 @@ abstract class AContent implements IObjectIdentifiable, IRenderable, \JsonSerial
     }
 
     /**
-     * Initialized datas on postLoad doctrine event.
+     * Initialized data on postLoad doctrine event.
      */
     public function postLoad()
     {

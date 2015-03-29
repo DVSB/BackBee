@@ -28,6 +28,8 @@ use JMS\Serializer\Annotation as Serializer;
 use BackBee\ClassContent\AClassContent;
 use BackBee\Renderer\IRenderable;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * A keywords entry of a tree in BackBee.
  *
@@ -35,8 +37,13 @@ use BackBee\Renderer\IRenderable;
  *
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\KeyWordRepository")
- * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\KeyWordRepository")
+ * @ORM\Table(name="keyword",indexes={
+ *     @ORM\Index(name="IDX_ROOT", columns={"root_uid"}),
+ *     @ORM\Index(name="IDX_PARENT", columns={"parent_uid"}),
+ *     @ORM\Index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}),
+ *     @ORM\Index(name="IDX_KEYWORD", columns={"keyword"})
+ * })
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -46,7 +53,8 @@ class KeyWord extends ANestedNode implements IRenderable
      * Unique identifier of the content.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("id")
@@ -58,8 +66,8 @@ class KeyWord extends ANestedNode implements IRenderable
      * The root node, cannot be NULL.
      *
      * @var \BackBee\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
      * @Serializer\Exclude
      */
     protected $_root;
@@ -68,8 +76,8 @@ class KeyWord extends ANestedNode implements IRenderable
      * The parent node.
      *
      * @var \BackBee\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 
@@ -77,7 +85,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * The keyword.
      *
      * @var string
-     * @Column(type="string", name="keyword")
+     * @ORM\Column(type="string", name="keyword")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("keyword")
@@ -89,7 +97,7 @@ class KeyWord extends ANestedNode implements IRenderable
      * Descendants nodes.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
@@ -97,17 +105,19 @@ class KeyWord extends ANestedNode implements IRenderable
      * Direct children nodes.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
      * A collection of AClassContent indexed by this keyword.
      *
-     * @ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
-     * @JoinTable(name="keywords_contents",
-     *      joinColumns={@JoinColumn(name="keyword_uid", referencedColumnName="uid")},
-     *      inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}
+     * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(name="keywords_contents",
+     *      joinColumns={
+     *          @ORM\JoinColumn(name="keyword_uid", referencedColumnName="uid")},
+     *      inverseJoinColumns={
+     *          @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")}
      *      )
      */
     protected $_content;

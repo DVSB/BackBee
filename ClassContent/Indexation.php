@@ -23,6 +23,8 @@
 
 namespace BackBee\ClassContent;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Indexation entry for content.
  *
@@ -30,8 +32,8 @@ namespace BackBee\ClassContent;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @Table(name="indexation",indexes={@index(name="IDX_OWNER", columns={"owner_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_VALUE", columns={"value"}), @index(name="IDX_SEARCH", columns={"field", "value"})})
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
+ * @ORM\Table(name="indexation",indexes={@ORM\Index(name="IDX_OWNER", columns={"owner_uid"}), @ORM\Index(name="IDX_CONTENT", columns={"content_uid"}), @ORM\Index(name="IDX_VALUE", columns={"value"}), @ORM\Index(name="IDX_SEARCH", columns={"field", "value"})})
  */
 class Indexation
 {
@@ -39,9 +41,9 @@ class Indexation
      * The indexed content.
      *
      * @var string
-     * @Id
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="content_uid", referencedColumnName="uid")
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
 
@@ -49,8 +51,8 @@ class Indexation
      * The indexed field of the content.
      *
      * @var string
-     * @Id
-     * @Column(type="string", name="field")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="field")
      */
     protected $_field;
 
@@ -58,8 +60,8 @@ class Indexation
      * The owner content of the indexed field.
      *
      * @var AClassContent
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="owner_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="owner_uid", referencedColumnName="uid")
      */
     protected $_owner;
 
@@ -67,7 +69,7 @@ class Indexation
      * The value of the indexed field.
      *
      * @var string
-     * @Column(type="string", name="value")
+     * @ORM\Column(type="string", name="value")
      */
     protected $_value;
 
@@ -75,7 +77,7 @@ class Indexation
      * The optional callback to apply while indexing.
      *
      * @var string
-     * @Column(type="string", name="callback", nullable=true)
+     * @ORM\Column(type="string", name="callback", nullable=true)
      */
     protected $_callback;
 

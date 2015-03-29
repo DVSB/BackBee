@@ -261,7 +261,6 @@ class AclControllerTest extends TestCase
 
         $response = $this->getBBApp()->getController()->handle(new Request([], $data, [
             '_action' => 'postPermissionMapAction',
-            '_controller' =>  $this->getController()
             '_controller' =>  $this->getController(),
         ], [], [], ['REQUEST_URI' => '/rest/1/acl/', 'REQUEST_METHOD' => 'POST']));
 

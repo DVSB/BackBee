@@ -24,11 +24,13 @@
 namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 use BackBee\ClassContent\AClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Exception\InvalidArgumentException;
+use BackBee\Installer\Annotation as BB;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\Renderer\IRenderable;
 use BackBee\Site\Layout;
@@ -52,10 +54,20 @@ use BackBee\Workflow\State;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\PageRepository")
- * @Table(name="page",indexes={@index(name="IDX_STATEP", columns={"state"}), @index(name="IDX_ARCHIVING", columns={"archiving"}), @index(name="IDX_PUBLISHING", columns={"publishing"}), @index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_PAGE", columns={"root_uid", "leftnode", "rightnode", "state", "publishing", "archiving", "modified"}), @index(name="IDX_URL", columns={"site_uid", "url"}), @index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})})
- * @HasLifecycleCallbacks
- * @fixtures(qty=1)
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\PageRepository")
+ * @ORM\Table(name="page",indexes={
+ *     @ORM\Index(name="IDX_STATEP", columns={"state"}),
+ *     @ORM\Index(name="IDX_ARCHIVING", columns={"archiving"}),
+ *     @ORM\Index(name="IDX_PUBLISHING", columns={"publishing"}),
+ *     @ORM\Index(name="IDX_ROOT", columns={"root_uid"}),
+ *     @ORM\Index(name="IDX_PARENT", columns={"parent_uid"}),
+ *     @ORM\Index(name="IDX_SELECT_PAGE",
+ *        columns={"root_uid", "leftnode", "rightnode", "state", "publishing", "archiving", "modified"}),
+ *        @ORM\Index(name="IDX_URL", columns={"site_uid", "url"}),
+ *        @ORM\Index(name="IDX_ROOT_RIGHT", columns={"root_uid", "rightnode"})
+ * })
+ * @ORM\HasLifecycleCallbacks
+ * @BB\Fixtures(qty=1)
  *
  * @Serializer\ExclusionPolicy("all")
  */
@@ -114,8 +126,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Unique identifier of the page.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
-     * @fixture(type="md5")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
+     * @BB\Fixtures(type="md5")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -127,8 +140,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The owner site of this node.
      *
      * @var \BackBee\Site\Site
-     * @ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="site_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
 
@@ -136,8 +149,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The layout associated to the page.
      *
      * @var \BackBee\Site\Layout
-     * @ManyToOne(targetEntity="BackBee\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="layout_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Layout", inversedBy="_pages", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="layout_uid", referencedColumnName="uid")
      */
     protected $_layout;
 
@@ -145,8 +158,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The root node, cannot be NULL.
      *
      * @var \BackBee\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
@@ -154,8 +167,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The parent node.
      *
      * @var \BackBee\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_children", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_children", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 
@@ -163,8 +176,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The title of this page.
      *
      * @var string
-     * @Column(type="string", name="title", nullable=false)
-     * @fixture(type="sentence", value=6)
+     * @ORM\Column(type="string", name="title", nullable=false)
+     * @BB\Fixtures(type="sentence", value=6)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -175,8 +188,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The alternate title of this page.
      *
      * @var string
-     * @Column(type="string", name="alttitle", nullable=true)
-     * @fixture(type="sentence", value=6)
+     * @ORM\Column(type="string", name="alttitle", nullable=true)
+     * @BB\Fixtures(type="sentence", value=6)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -187,7 +200,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The URI of this page.
      *
      * @var string
-     * @Column(type="string", name="url", nullable=false)
+     * @ORM\Column(type="string", name="url", nullable=false)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -198,7 +211,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Target of this page if redirect defined.
      *
      * @var string
-     * @column(type="string", name="target", nullable=false)
+     * @ORM\Column(type="string", name="target", nullable=false)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -209,7 +222,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Permanent redirect.
      *
      * @var string
-     * @column(type="string", name="redirect", nullable=true)
+     * @ORM\Column(type="string", name="redirect", nullable=true)
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -220,7 +233,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Metadatas associated to the page.
      *
      * @var \BackBee\MetaData\MetaDataBag
-     * @Column(type="object", name="metadata", nullable=true)
+     * @ORM\Column(type="object", name="metadata", nullable=true)
      */
     protected $_metadata;
 
@@ -228,8 +241,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The associated ContentSet.
      *
      * @var \BackBee\ClassContent\ContentSet
-     * @ManyToOne(targetEntity="BackBee\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="contentset", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\ContentSet", inversedBy="_pages", cascade={"persist", "remove"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="contentset", referencedColumnName="uid")
      */
     protected $_contentset;
 
@@ -237,8 +250,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The publication datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="date", nullable=true)
-     * @fixture(type="dateTime")
+     * @ORM\Column(type="datetime", name="date", nullable=true)
+     * @BB\Fixture(type="dateTime")
      *
      * @Serializer\Expose
      * @Serializer\Type("DateTime<'U'>")
@@ -249,8 +262,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The state of the page.
      *
      * @var int
-     * @Column(type="smallint", name="state", nullable=false)
-     * @fixture(type="boolean")
+     * @ORM\Column(type="smallint", name="state", nullable=false)
+     * @BB\Fixture(type="boolean")
      *
      * @Serializer\Expose
      * @Serializer\Type("integer")
@@ -261,7 +274,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto publishing datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="publishing", nullable=true)
+     * @ORM\Column(type="datetime", name="publishing", nullable=true)
      *
      * @Serializer\Expose
      * @Serializer\Type("DateTime<'U'>")
@@ -272,7 +285,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The auto-archiving datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="archiving", nullable=true)
+     * @ORM\Column(type="datetime", name="archiving", nullable=true)
      *
      * @Serializer\Expose
      * @Serializer\Type("DateTime<'U'>")
@@ -283,8 +296,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * The optional workflow state.
      *
      * @var \BackBee\Workflow\State
-     * @ManyToOne(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="workflow_state", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\Workflow\State", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="workflow_state", referencedColumnName="uid")
      */
     protected $_workflow_state;
 
@@ -292,7 +305,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Descendants nodes.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_root", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
@@ -300,7 +313,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Direct children nodes.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_parent", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\Page", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
@@ -308,7 +321,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Revisions of the current page.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_page", fetch="EXTRA_LAZY")
      */
     protected $_revisions;
 
@@ -495,7 +508,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     /**
      * Returns the URL of the page.
      *
-     * @params bool $doRedirect : if true - returns redirect url (if exists), otherwise - current page url
+     * @param bool $doRedirect : if true - returns redirect url (if exists), otherwise - current page url
      *
      * @return string
      */

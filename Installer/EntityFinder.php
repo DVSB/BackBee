@@ -186,6 +186,7 @@ class EntityFinder
      */
     private function getEntityAnnotation(\ReflectionClass $class)
     {
+        die('coucou');
         if (!$this->annotationReader) {
             $this->annotationReader = new SimpleAnnotationReader();
             $this->annotationReader->addNamespace('Doctrine\ORM\Mapping');

@@ -23,6 +23,8 @@
 
 namespace BackBee\ClassContent\Indexes;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Entity class for Page-Content join table.
  *
@@ -30,20 +32,25 @@ namespace BackBee\ClassContent\Indexes;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_page_content",indexes={@index(name="IDX_PAGE", columns={"page_uid"}), @index(name="IDX_CONTENT_PAGE", columns={"content_uid"})})
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
+ * @ORM\Table(name="idx_page_content",indexes={
+ *     @ORM\Index(name="IDX_PAGE", columns={"page_uid"}),
+ *     @ORM\Index(name="IDX_CONTENT_PAGE", columns={"content_uid"})
+ * })
  */
 class IdxPageContent
 {
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @ORM\Id
+     * @ORM\Column(type="string", length=32)
      */
     private $page_uid;
 
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @ORM\Id
+     * @ORM\Column(type="string", length=32)
      */
     private $content_uid;
 }

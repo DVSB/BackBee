@@ -58,12 +58,6 @@ class ImageRepository extends FileRepository
             return false;
         }
 
-        /*$size = getimagesize($newfilename);
-        list($width, $height) = $size;
-        $file->setParam('width', $width, 'scalar');
-        $file->setParam('height', $height, 'scalar');
-        */
-
         return $newfilename;
     }
 }

@@ -23,6 +23,8 @@
 
 namespace BackBee\ClassContent\Indexes;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Entity class for Site-Content join table.
  *
@@ -30,20 +32,25 @@ namespace BackBee\ClassContent\Indexes;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_site_content",indexes={@index(name="IDX_SITE", columns={"site_uid"}), @index(name="IDX_CONTENT_SITE", columns={"content_uid"})})
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
+ * @ORM\Table(name="idx_site_content",indexes={
+ *     @ORM\Index(name="IDX_SITE", columns={"site_uid"}),
+ *     @ORM\Index(name="IDX_CONTENT_SITE", columns={"content_uid"})
+ * })
  */
 class IdxSiteContent
 {
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @ORM\Id
+     * @ORM\Column(type="string", length=32)
      */
     private $site_uid;
 
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @ORM\Id
+     * @ORM\Column(type="string", length=32)
      */
     private $content_uid;
 }

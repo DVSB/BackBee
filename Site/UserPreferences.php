@@ -27,8 +27,10 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * UserPreferences object in BackBee 5.
+ * UserPreferences object in BackBee.
  *
  * User preferences persistence
  *
@@ -36,8 +38,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Site\Repository\UserPreferencesRepository")
- * @Table(name="user_preferences",indexes={@index(name="IDX_OWNER", columns={"owner"})})
+ * @ORM\Entity(repositoryClass="BackBee\Site\Repository\UserPreferencesRepository")
+ * @ORM\Table(name="user_preferences",indexes={
+ *     @ORM\Index(name="IDX_OWNER", columns={"owner"})})
  */
 class UserPreferences
 {
@@ -45,7 +48,8 @@ class UserPreferences
      * Unique identifier of the revision.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     private $_uid;
 
@@ -54,7 +58,7 @@ class UserPreferences
      *
      * @var Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      *
-     * @Column(type="string", name="owner")
+     * @ORM\Column(type="string", name="owner")
      */
     private $_owner;
 
@@ -63,7 +67,7 @@ class UserPreferences
      *
      * @var text
      *
-     * @Column(type="text", name="preferences")
+     * @ORM\Column(type="text", name="preferences")
      */
     private $_preferences;
 

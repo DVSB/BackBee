@@ -27,48 +27,51 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @category    BackBee Bundle
  *
  * @copyright   Lp digital system
- * @Entity(repositoryClass="BackBee\Logging\Repository\AdminLogRepository")
- * @Table(name="admin_log")
+ * @ORM\Entity(repositoryClass="BackBee\Logging\Repository\AdminLogRepository")
+ * @ORM\Table(name="admin_log")
  */
 class AdminLog
 {
     /**
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
     /**
      * @var Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
-     * @Column(type="string", name="owner")
+     * @ORM\Column(type="string", name="owner")
      */
     protected $_owner;
 
     /**
      * @var string
-     * @Column(type="string", name="controller")
+     * @ORM\Column(type="string", name="controller")
      */
     protected $_controller;
 
     /**
      * @var string
-     * @Column(type="string", name="action")
+     * @ORM\Column(type="string", name="action")
      */
     protected $_action;
 
     /**
      * @var string
-     * @Column(type="string", name="entity", nullable=true)
+     * @ORM\Column(type="string", name="entity", nullable=true)
      */
     protected $_entity;
 
     /**
      * @var string
-     * @Column(type="datetime", name="created_at")
+     * @ORM\Column(type="datetime", name="created_at")
      */
     protected $_created_at;
 

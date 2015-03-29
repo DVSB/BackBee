@@ -24,10 +24,11 @@
 namespace BackBee\Site\Fixture;
 
 use Faker\Factory;
+use BackBee\Installer\Annotation as BB;
 use BackBee\Site\Site;
 
 /**
- * @fixture
+ * @BB\Fixture
  */
 class SiteFixture extends Site
 {

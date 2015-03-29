@@ -23,6 +23,8 @@
 
 namespace BackBee\Cache\DAO;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Entity for DAO stored cache data.
  *
@@ -30,8 +32,10 @@ namespace BackBee\Cache\DAO;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity
- * @Table(name="cache",indexes={@index(name="IDX_EXPIRE", columns={"expire"}), @index(name="IDX_TAG", columns={"tag"})})
+ * @ORM\Entity
+ * @ORM\Table(name="cache",indexes={
+ *     @ORM\Index(name="IDX_EXPIRE", columns={"expire"}),
+ *     @ORM\Index(name="IDX_TAG", columns={"tag"})})
  */
 class Entity
 {
@@ -39,7 +43,8 @@ class Entity
      * The cache id.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
@@ -47,15 +52,15 @@ class Entity
      * A tag associated to the cache.
      *
      * @var string
-     * @Column(type="string", name="tag", nullable=true)
+     * @ORM\Column(type="string", name="tag", nullable=true)
      */
     protected $_tag;
 
     /**
      * The data stored.
      *
-     * @string
-     * @Column(type="text", name="data")
+     * @var string
+     * @ORM\Column(type="text", name="data")
      */
     protected $_data;
 
@@ -63,7 +68,7 @@ class Entity
      * The expire date time for the stored data.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="expire", nullable=true)
+     * @ORM\Column(type="datetime", name="expire", nullable=true)
      */
     protected $_expire;
 
@@ -71,7 +76,7 @@ class Entity
      * The creation date time.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created")
+     * @ORM\Column(type="datetime", name="created")
      */
     protected $_created;
 

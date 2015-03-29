@@ -31,6 +31,8 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\Security\Token\BBUserToken;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Revision of a content in BackBee.
  *
@@ -50,9 +52,9 @@ use BackBee\Security\Token\BBUserToken;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\RevisionRepository")
- * @Table(name="revision", indexes={@index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @index(name="IDX_DRAFT", columns={"owner", "state"})})
- * @HasLifecycleCallbacks
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\RevisionRepository")
+ * @ORM\Table(name="revision", indexes={@ORM\Index(name="IDX_CONTENT", columns={"content_uid"}), @ORM\Index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @ORM\Index(name="IDX_DRAFT", columns={"owner", "state"})})
+ * @ORM\HasLifecycleCallbacks
  */
 class Revision extends AContent implements \Iterator, \Countable
 {
@@ -102,8 +104,8 @@ class Revision extends AContent implements \Iterator, \Countable
      * The attached revisionned content.
      *
      * @var \BackBee\ClassContent\AClassContent
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="content_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     private $_content;
 
@@ -111,7 +113,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * The entity target content classname.
      *
      * @var string
-     * @Column(type="string", name="classname")
+     * @ORM\Column(type="string", name="classname")
      */
     private $_classname;
 
@@ -119,7 +121,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * The owner of this revision.
      *
      * @var \Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
-     * @Column(type="string", name="owner")
+     * @ORM\Column(type="string", name="owner")
      */
     private $_owner;
 
@@ -127,7 +129,7 @@ class Revision extends AContent implements \Iterator, \Countable
      * The comment associated to this revision.
      *
      * @var string
-     * @Column(type="string", name="comment", nullable=true)
+     * @ORM\Column(type="string", name="comment", nullable=true)
      */
     private $_comment;
 

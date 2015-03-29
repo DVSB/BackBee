@@ -23,6 +23,8 @@
 
 namespace BackBee\Util\Sequence\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Sequence Entity.
  *
@@ -30,8 +32,8 @@ namespace BackBee\Util\Sequence\Entity;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Util\Sequence\Sequencer")
- * @Table(name="sequence")
+ * @ORM\Entity(repositoryClass="BackBee\Util\Sequence\Sequencer")
+ * @ORM\Table(name="sequence")
  */
 class Sequence
 {
@@ -39,7 +41,8 @@ class Sequence
      * Name of the sequence.
      *
      * @var string
-     * @Id @Column(name="name", type="string", nullable=false)
+     * @ORM\Id
+     * @ORM\Column(name="name", type="string", nullable=false)
      */
     private $_name;
 
@@ -47,7 +50,7 @@ class Sequence
      * Sequence.
      *
      * @var string
-     * @Column(name="value", type="integer", nullable=false)
+     * @ORM\Column(name="value", type="integer", nullable=false)
      */
     private $_value;
 

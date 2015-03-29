@@ -24,6 +24,7 @@
 namespace BackBee\Validator\Tests\Mock;
 
 use BackBee\Tests\Mock\IMock;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Mock entity.
@@ -32,8 +33,8 @@ use BackBee\Tests\Mock\IMock;
  *
  * @copyright   Lp digital system
  * @author      f.kroockmann
- * @Table(name="mock_entity")
- * @Entity()
+ * @ORM\Table(name="mock_entity")
+ * @ORM\Entity
  */
 class MockEntity implements IMock
 {
@@ -41,9 +42,9 @@ class MockEntity implements IMock
      * Identifier.
      *
      * @var int
-     * @Column(name="id", type="integer")
-     * @Id
-     * @GeneratedValue(strategy="AUTO")
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
@@ -51,7 +52,7 @@ class MockEntity implements IMock
      * Numeric code.
      *
      * @var int
-     * @Column(name="numeric_code", type="integer", unique=true)
+     * @ORM\Column(name="numeric_code", type="integer", unique=true)
      */
     private $numeric_code;
 
@@ -59,7 +60,7 @@ class MockEntity implements IMock
      * English's name.
      *
      * @var string
-     * @Column(name="name", type="string", length=100)
+     * @ORM\Column(name="name", type="string", length=100)
      */
     private $name;
 

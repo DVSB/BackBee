@@ -24,6 +24,7 @@
 namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use BackBee\Exception\InvalidArgumentException;
@@ -44,7 +45,7 @@ use BackBee\Utils\Numeric;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @MappedSuperclass
+ * @ORM\MappedSuperclass
  * @Serializer\ExclusionPolicy("all")
  */
 abstract class ANestedNode extends AObjectIdentifiable
@@ -53,7 +54,8 @@ abstract class ANestedNode extends AObjectIdentifiable
      * Unique identifier of the node.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Type("string")
      */
@@ -78,7 +80,7 @@ abstract class ANestedNode extends AObjectIdentifiable
      * The nested node left position.
      *
      * @var int
-     * @Column(type="integer", name="leftnode", nullable=false)
+     * @ORM\Column(type="integer", name="leftnode", nullable=false)
      */
     protected $_leftnode;
 
@@ -86,7 +88,7 @@ abstract class ANestedNode extends AObjectIdentifiable
      * The nested node right position.
      *
      * @var int
-     * @Column(type="integer", name="rightnode", nullable=false)
+     * @ORM\Column(type="integer", name="rightnode", nullable=false)
      */
     protected $_rightnode;
 
@@ -94,7 +96,7 @@ abstract class ANestedNode extends AObjectIdentifiable
      * The nested node level in the tree.
      *
      * @var int
-     * @Column(type="integer", name="level", nullable=false)
+     * @ORM\Column(type="integer", name="level", nullable=false)
      */
     protected $_level;
 
@@ -102,7 +104,7 @@ abstract class ANestedNode extends AObjectIdentifiable
      * The creation datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="created", nullable=false)
+     * @ORM\Column(type="datetime", name="created", nullable=false)
      */
     protected $_created;
 
@@ -110,7 +112,7 @@ abstract class ANestedNode extends AObjectIdentifiable
      * The last modification datetime.
      *
      * @var \DateTime
-     * @Column(type="datetime", name="modified", nullable=false)
+     * @ORM\Column(type="datetime", name="modified", nullable=false)
      */
     protected $_modified;
 

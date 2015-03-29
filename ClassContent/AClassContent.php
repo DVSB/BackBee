@@ -29,6 +29,8 @@ use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\NestedNode\Page;
 use BackBee\Utils\Collection\Collection;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Abstract class for content object in BackBee.
  *
@@ -45,20 +47,20 @@ use BackBee\Utils\Collection\Collection;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
- * @Table(
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
+ * @ORM\Table(
  *   name="content",
  *   indexes={
- *     @index(name="IDX_MODIFIED", columns={"modified"}),
- *     @index(name="IDX_STATE", columns={"state"}),
- *     @index(name="IDX_NODEUID", columns={"node_uid"}),
- *     @index(name="IDX_CLASSNAME", columns={"classname"})
+ *     @ORM\Index(name="IDX_MODIFIED", columns={"modified"}),
+ *     @ORM\Index(name="IDX_STATE", columns={"state"}),
+ *     @ORM\Index(name="IDX_NODEUID", columns={"node_uid"}),
+ *     @ORM\Index(name="IDX_CLASSNAME", columns={"classname"})
  *   }
  * )
- * @HasLifecycleCallbacks
- * @InheritanceType("SINGLE_TABLE")
- * @DiscriminatorColumn(name="classname", type="string")
- * @DiscriminatorMap({"BackBee\ClassContent\ContentSet" = "BackBee\ClassContent\ContentSet"})
+ * @ORM\HasLifecycleCallbacks
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="classname", type="string")
+ * @ORM\DiscriminatorMap({"BackBee\ClassContent\ContentSet" = "BackBee\ClassContent\ContentSet"})
  */
 abstract class AClassContent extends AContent
 {
@@ -87,10 +89,10 @@ abstract class AClassContent extends AContent
      * The many to many association between this content and its subcontent.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh"}, fetch="EXTRA_LAZY")
-     * @JoinTable(name="content_has_subcontent",
-     *     joinColumns={@JoinColumn(name="parent_uid", referencedColumnName="uid")},
-     *     inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}
+     * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_parentcontent", cascade={"persist", "detach", "merge", "refresh"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(name="content_has_subcontent",
+     *     joinColumns={@ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="content_uid", referencedColumnName="uid")}
      * )
      */
     public $_subcontent;
@@ -99,8 +101,8 @@ abstract class AClassContent extends AContent
      * The main nested node (page).
      *
      * @var \BackBee\NestedNode\Page
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="node_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Page", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="node_uid", referencedColumnName="uid")
      */
     protected $_mainnode;
 
@@ -108,7 +110,7 @@ abstract class AClassContent extends AContent
      * The many to many association between this content and its parent content.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", mappedBy="_subcontent", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", mappedBy="_subcontent", fetch="EXTRA_LAZY")
      */
     protected $_parentcontent;
 
@@ -116,8 +118,8 @@ abstract class AClassContent extends AContent
      * The revisions of the content.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\ClassContent\Revision", mappedBy="_content", fetch="EXTRA_LAZY")
-     * @OrderBy({"_revision" = "DESC"})
+     * @ORM\OneToMany(targetEntity="BackBee\ClassContent\Revision", mappedBy="_content", fetch="EXTRA_LAZY")
+     * @ORM\OrderBy({"_revision" = "DESC"})
      */
     protected $_revisions;
 
@@ -125,7 +127,7 @@ abstract class AClassContent extends AContent
      * The indexed values of elements.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\ClassContent\Indexation", mappedBy="_content", cascade={"all"}, fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\ClassContent\Indexation", mappedBy="_content", cascade={"all"}, fetch="EXTRA_LAZY")
      */
     protected $_indexation;
 

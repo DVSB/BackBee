@@ -132,6 +132,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
         $this->_initAnnotationReader();
         $this->_initContainer();
+
+
         if ($this->isDebugMode()) {
             Debug::enable();
         }
@@ -1093,10 +1095,12 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [_initAnnotationReader description].
+     * register all annotations and init the AnnotationReader
      */
     private function _initAnnotationReader()
     {
+        AnnotationRegistry::registerFile($this->getVendorDir().'/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php');
+
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/validator/',
@@ -1110,27 +1114,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
             return false;
         });
-
-        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
-        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
-        AnnotationReader::addGlobalIgnoredName('Entity');
-        AnnotationReader::addGlobalIgnoredName('Column');
-        AnnotationReader::addGlobalIgnoredName('Table');
-        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
-        AnnotationReader::addGlobalIgnoredName('Index');
-        AnnotationReader::addGlobalIgnoredName('Id');
-        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
-        AnnotationReader::addGlobalIgnoredName('ManyToMany');
-        AnnotationReader::addGlobalIgnoredName('JoinTable');
-        AnnotationReader::addGlobalIgnoredName('JoinColumn');
-        AnnotationReader::addGlobalIgnoredName('ManyToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToMany');
-        AnnotationReader::addGlobalIgnoredName('PreUpdate');
-        AnnotationReader::addGlobalIgnoredName('index');
-        AnnotationReader::addGlobalIgnoredName('fixtures');
-        AnnotationReader::addGlobalIgnoredName('fixture');
-        AnnotationReader::addGlobalIgnoredName('column');
     }
 
     /**

@@ -120,7 +120,7 @@ class EntityManagerCreator
     {
         $config = new Configuration();
 
-        $driverImpl = $config->newDefaultAnnotationDriver();
+        $driverImpl = $config->newDefaultAnnotationDriver([], false);
 
         $config->setMetadataDriverImpl($driverImpl);
 

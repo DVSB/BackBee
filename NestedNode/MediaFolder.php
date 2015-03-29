@@ -24,6 +24,7 @@
 namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Media folder object in BackBee.
@@ -34,8 +35,12 @@ use Doctrine\Common\Collections\ArrayCollection;
  *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\MediaFolderRepository")
- * @Table(name="media_folder",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})})
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\MediaFolderRepository")
+ * @ORM\Table(name="media_folder",indexes={
+ *     @ORM\Index(name="IDX_ROOT", columns={"root_uid"}),
+ *     @ORM\Index(name="IDX_PARENT", columns={"parent_uid"}),
+ *     @ORM\Index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})
+ * })
  */
 class MediaFolder extends ANestedNode implements \JsonSerializable
 {
@@ -43,7 +48,8 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * Unique identifier of the content.
      *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
@@ -51,8 +57,8 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * The root node, cannot be NULL.
      *
      * @var \BackBee\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
@@ -60,8 +66,8 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * The parent node.
      *
      * @var \BackBee\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 
@@ -69,7 +75,7 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * The title of this media folder.
      *
      * @var string
-     * @Column(type="string", name="title")
+     * @ORM\Column(type="string", name="title")
      */
     protected $_title;
 
@@ -77,7 +83,7 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * The URI of this media folder.
      *
      * @var string
-     * @Column(type="string", name="url")
+     * @ORM\Column(type="string", name="url")
      */
     protected $_url;
 
@@ -85,7 +91,7 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * Descendants nodes.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_root", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
@@ -93,7 +99,7 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * Direct children nodes.
      *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_parent", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
@@ -101,7 +107,7 @@ class MediaFolder extends ANestedNode implements \JsonSerializable
      * A collection of medi stored in the folder.
      *
      * @var \BackBee\NestedNode\Media
-     * @OneToMany(targetEntity="BackBee\NestedNode\Media", mappedBy="_media_folder", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\Media", mappedBy="_media_folder", fetch="EXTRA_LAZY")
      */
     protected $_medias;
 
