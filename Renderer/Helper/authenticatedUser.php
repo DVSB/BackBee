@@ -29,7 +29,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class authenticatedUser extends AHelper
+class authenticatedUser extends AbstractHelper
 {
     public function __invoke($userClassname = null)
     {

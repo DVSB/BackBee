@@ -29,7 +29,7 @@ namespace BackBee\Theme;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class ThemeEntity extends AThemeEntity
+class ThemeEntity extends AbstractThemeEntity
 {
     /**
      * object constructor.

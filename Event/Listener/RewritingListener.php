@@ -24,10 +24,10 @@
 namespace BackBee\Event\Listener;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
-use BackBee\Rewriting\IUrlGenerator;
+use BackBee\Rewriting\UrlGeneratorInterface;
 
 /**
  * Listener to rewriting events.
@@ -47,7 +47,7 @@ class RewritingListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (false === ($content instanceof AClassContent)) {
+        if (false === ($content instanceof AbstractClassContent)) {
             return;
         }
 
@@ -74,7 +74,7 @@ class RewritingListener
         }
 
         $maincontent = $event->getEventArgs();
-        if (false === ($maincontent instanceof AClassContent)) {
+        if (false === ($maincontent instanceof AbstractClassContent)) {
             $maincontent = null;
         }
 
@@ -89,22 +89,22 @@ class RewritingListener
     }
 
     /**
-     * Update URL for a page and its descendants according to the application IUrlGenerator.
+     * Update URL for a page and its descendants according to the application UrlGeneratorInterface.
      *
      * @param \BackBee\BBApplication              $application
      * @param \BackBee\NestedNode\Page            $page
-     * @param \BackBee\ClassContent\AClassContent $maincontent
+     * @param \BackBee\ClassContent\AbstractClassContent $maincontent
      */
-    private static function _updateUrl(BBApplication $application, Page $page, AClassContent $maincontent = null)
+    private static function _updateUrl(BBApplication $application, Page $page, AbstractClassContent $maincontent = null)
     {
         $url_generator = $application->getUrlGenerator();
-        if (false === ($url_generator instanceof IUrlGenerator)) {
+        if (false === ($url_generator instanceof UrlGeneratorInterface)) {
             return;
         }
 
         $em = $application->getEntityManager();
         if (null === $maincontent && 0 < count($url_generator->getDiscriminators())) {
-            $maincontent = $em->getRepository('BackBee\ClassContent\AClassContent')
+            $maincontent = $em->getRepository('BackBee\ClassContent\AbstractClassContent')
                 ->getLastByMainnode($page, $url_generator->getDiscriminators())
             ;
         }

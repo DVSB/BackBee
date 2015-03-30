@@ -28,7 +28,7 @@ use Doctrine\ORM\EntityManager;
 use BackBee\BBApplication;
 use BackBee\Exception\BBException;
 use BackBee\Importer\Connector\DataBase\PDOResult;
-use BackBee\Importer\IImporterConnector;
+use BackBee\Importer\ImporterConnectorInterface;
 
 /**
  * @category    BackBee
@@ -36,7 +36,7 @@ use BackBee\Importer\IImporterConnector;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class DataBase implements IImporterConnector
+class DataBase implements ImporterConnectorInterface
 {
     private $_config;
 

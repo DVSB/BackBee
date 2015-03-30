@@ -29,7 +29,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class currentpage extends AHelper
+class currentpage extends AbstractHelper
 {
     protected $_currentPage;
 

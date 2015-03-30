@@ -26,7 +26,8 @@ namespace BackBee\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use BackBee\Console\ACommand;
+
+use BackBee\Console\AbstractCommand;
 use BackBee\Job\NestedNodeLRCalculateJob;
 
 /**
@@ -37,7 +38,7 @@ use BackBee\Job\NestedNodeLRCalculateJob;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class NestedNodeLRCalculateCommand extends ACommand
+class NestedNodeLRCalculateCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

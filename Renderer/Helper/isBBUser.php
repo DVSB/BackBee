@@ -29,7 +29,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class isBBUser extends AHelper
+class isBBUser extends AbstractHelper
 {
     public function __invoke()
     {

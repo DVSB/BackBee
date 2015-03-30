@@ -27,7 +27,8 @@ use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Psr\Log\LoggerInterface;
 use BackBee\BBApplication;
-use BackBee\Logging\Appender\IAppender;
+use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\Logging\Appender\AppenderInterface;
 use BackBee\Logging\Exception\LoggingException;
 
 /**
@@ -69,7 +70,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         $this->log($priority, $args[0], 0 < count($args) ? $args[1] : array());
     }
 
-    public function __construct(BBApplication $application = null, IAppender $appender = null)
+    public function __construct(BBApplication $application = null, AppenderInterface $appender = null)
     {
         if (null !== $application) {
             $this->_application = $application;
@@ -121,12 +122,11 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
-     *
-     * @param \BackBee\Logging\Appender\IAppender $appender
+     * @param  \BackBee\Logging\Appender\AppenderInterface $appender
      *
      * @return \BackBee\Logging\Logger
      */
-    public function addAppender(IAppender $appender)
+    public function addAppender(AppenderInterface $appender)
     {
         $this->_appenders[] = $appender;
 

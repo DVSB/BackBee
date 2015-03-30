@@ -23,7 +23,7 @@
 
 namespace BackBee\Tests\Mock;
 
-use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\AbstractRenderer;
 
 /**
  * @category    BackBee
@@ -31,7 +31,7 @@ use BackBee\Renderer\ARenderer;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-class MockRenderer extends ARenderer
+class MockRenderer extends AbstractRenderer
 {
     public $_scriptdir = array();
     public $_layoutdir = array();

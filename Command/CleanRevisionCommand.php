@@ -26,7 +26,8 @@ namespace BackBee\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use BackBee\Console\ACommand;
+
+use BackBee\Console\AbstractCommand;
 
 /**
  * This command allow us to clean revision table depending on provided criterias.
@@ -36,7 +37,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class CleanRevisionCommand extends ACommand
+class CleanRevisionCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

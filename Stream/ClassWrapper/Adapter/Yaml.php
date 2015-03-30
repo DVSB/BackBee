@@ -26,20 +26,20 @@ namespace BackBee\Stream\ClassWrapper\Adapter;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as parserYaml;
 use BackBee\Exception\BBException;
-use BackBee\Stream\ClassWrapper\AClassWrapper;
+use BackBee\Stream\ClassWrapper\AbstractClassWrapper;
 use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 use BackBee\Utils\File\File;
 
 /**
- * Stream wrapper to interprate yaml file as class content description
- * Extends AClassWrapper.
+ * Stream wrapper to interprete yaml file as class content description
+ * Extends AbstractClassWrapper
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Yaml extends AClassWrapper
+class Yaml extends AbstractClassWrapper
 {
     /**
      * Current BackBee application.
@@ -91,17 +91,17 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * Extract and format datas from parser.
+     * Extract and format data from parser.
      *
-     * @param array $datas
+     * @param array $data
      *
-     * @return array The extracted datas
+     * @return array The extracted data
      */
-    protected function _extractDatas($datas)
+    protected function _extractData($data)
     {
-        $extractedDatas = array();
+        $extractedData = array();
 
-        foreach ($datas as $key => $value) {
+        foreach ($data as $key => $value) {
             $type = 'scalar';
             $options = array();
 
@@ -139,29 +139,29 @@ class Yaml extends AClassWrapper
                 }
             }
 
-            $extractedDatas[$key] = array('type' => $type, 'options' => $options);
+            $extractedData[$key] = array('type' => $type, 'options' => $options);
         }
 
-        return $extractedDatas;
+        return $extractedData;
     }
 
     /**
      * Checks the validity of the extracted data from yaml file.
      *
-     * @param array $yamlDatas The yaml datas
+     * @param array $yamlData The yaml data
      *
-     * @return Boolean Returns TRUE if datas are valid, FALSE if not
+     * @return Boolean Returns TRUE if data are valid, FALSE if not
      *
-     * @throws ClassWrapperException Occurs when datas are not valid
+     * @throws ClassWrapperException Occurs when data are not valid
      */
-    private function _checkDatas($yamlDatas)
+    private function _checkDatas($yamlData)
     {
         try {
-            if ($yamlDatas === false || !is_array($yamlDatas) || count($yamlDatas) > 1) {
+            if ($yamlData === false || !is_array($yamlData) || count($yamlData) > 1) {
                 throw new ClassWrapperException('Malformed class content description');
             }
 
-            foreach ($yamlDatas as $classname => $contentDesc) {
+            foreach ($yamlData as $classname => $contentDesc) {
                 if ($this->classname != $this->_normalizeVar($this->classname)) {
                     throw new ClassWrapperException("Class Name don't match with the filename");
                 }
@@ -170,10 +170,10 @@ class Yaml extends AClassWrapper
                     throw new ClassWrapperException('None class content description found');
                 }
 
-                foreach ($contentDesc as $key => $datas) {
+                foreach ($contentDesc as $key => $data) {
                     switch ($key) {
                         case 'extends':
-                            $this->extends = $this->_normalizeVar($datas, true);
+                            $this->extends = $this->_normalizeVar($data, true);
                             if (substr($this->extends, 0, 1) != NAMESPACE_SEPARATOR) {
                                 $this->extends = NAMESPACE_SEPARATOR.$this->namespace.
                                     NAMESPACE_SEPARATOR.$this->extends;
@@ -181,10 +181,10 @@ class Yaml extends AClassWrapper
 
                             break;
                         case 'interfaces':
-                            $datas = false === is_array($datas) ? array($datas) : $datas;
+                            $data = false === is_array($data) ? array($data) : $data;
                             $this->interfaces = array();
 
-                            foreach ($datas as $i) {
+                            foreach ($data as $i) {
                                 $interface = $i;
                                 if (NAMESPACE_SEPARATOR !== substr($i, 0, 1)) {
                                     $interface = NAMESPACE_SEPARATOR.$i;
@@ -206,15 +206,15 @@ class Yaml extends AClassWrapper
 
                             break;
                         case 'repository':
-                            if (class_exists($datas)) {
-                                $this->repository = $datas;
+                            if (class_exists($data)) {
+                                $this->repository = $data;
                             }
                             break;
                         case 'traits':
-                            $datas = false === is_array($datas) ? array($datas) : $datas;
+                            $data = false === is_array($data) ? array($data) : $data;
                             $this->traits = array();
 
-                            foreach ($datas as $t) {
+                            foreach ($data as $t) {
                                 $trait = $t;
                                 if (NAMESPACE_SEPARATOR !== substr($t, 0, 1)) {
                                     $trait = NAMESPACE_SEPARATOR.$t;
@@ -239,8 +239,8 @@ class Yaml extends AClassWrapper
                         case 'parameters':
                         case 'properties':
                             $values = array();
-                            $datas = (array) $datas;
-                            foreach ($datas as $var => $value) {
+                            $data = (array) $data;
+                            foreach ($data as $var => $value) {
                                 $values[strtolower($this->_normalizeVar($var))] = $value;
                             }
 
@@ -279,7 +279,7 @@ class Yaml extends AClassWrapper
     }
 
     /**
-     * @see IClassWrapper::glob()
+     * @see ClassWrapperInterface::glob()
      */
     public function glob($pattern)
     {
@@ -367,7 +367,7 @@ class Yaml extends AClassWrapper
     /**
      * Retrieve information about a yaml file.
      *
-     * @see BackBee\Stream\ClassWrapper.AClassWrapper::url_stat()
+     * @see BackBee\Stream\ClassWrapper.AbstractClassWrapper::url_stat()
      */
     public function url_stat($path, $flag)
     {

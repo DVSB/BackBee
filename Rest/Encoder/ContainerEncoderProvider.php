@@ -33,7 +33,7 @@ use Symfony\Component\DependencyInjection\ContainerAware;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ContainerEncoderProvider extends ContainerAware implements IEncoderProvider
+class ContainerEncoderProvider extends ContainerAware implements EncoderProviderInterface
 {
     /**
      * @var array

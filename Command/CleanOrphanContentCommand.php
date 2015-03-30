@@ -26,7 +26,7 @@ namespace BackBee\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
-use BackBee\Console\ACommand;
+use BackBee\Console\AbstractCommand;
 
 /**
  * This command allows us to clean every orphans contents and its subcontents.
@@ -36,7 +36,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class CleanOrphanContentCommand extends ACommand
+class CleanOrphanContentCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

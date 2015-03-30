@@ -25,8 +25,9 @@ namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
-use BackBee\ClassContent\AClassContent;
-use BackBee\Renderer\IRenderable;
+
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\Renderer\RenderableInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -47,7 +48,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class KeyWord extends ANestedNode implements IRenderable
+class KeyWord extends AbstractNestedNode implements RenderableInterface
 {
     /**
      * Unique identifier of the content.
@@ -112,7 +113,7 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * A collection of AClassContent indexed by this keyword.
      *
-     * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(name="keywords_contents",
      *      joinColumns={
      *          @ORM\JoinColumn(name="keyword_uid", referencedColumnName="uid")},
@@ -145,7 +146,7 @@ class KeyWord extends ANestedNode implements IRenderable
     }
 
     /**
-     * Returns a collection of indexed AClassContent.
+     * Returns a collection of indexed AbstractClassContent.
      *
      * @return Doctrine\Common\Collections\Collection
      * @codeCoverageIgnore
@@ -172,11 +173,10 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * Adds a content to the collection.
      *
-     * @param BackBee\ClassContent\AClassContent $content
-     *
+     * @param  BackBee\ClassContent\AbstractClassContent $content
      * @return \BackBee\NestedNode\KeyWord
      */
-    public function addContent(AClassContent $content)
+    public function addContent(AbstractClassContent $content)
     {
         $this->_content->add($content);
 
@@ -186,9 +186,9 @@ class KeyWord extends ANestedNode implements IRenderable
     /**
      * Removes a content from the collection.
      *
-     * @param \BackBee\ClassContent\AClassContent $content
+     * @param \BackBee\ClassContent\AbstractClassContent $content
      */
-    public function removeContent(AClassContent $content)
+    public function removeContent(AbstractClassContent $content)
     {
         $this->_content->removeElement($content);
     }

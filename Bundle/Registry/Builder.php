@@ -192,7 +192,7 @@ class Builder
     public function isRegistryEntity($class = null)
     {
         if (!is_null($class)) {
-            $this->is_registry_entity = ($class instanceof IRegistryEntity);
+            $this->is_registry_entity = ($class instanceof RegistryEntityInterface);
         }
 
         return $this->is_registry_entity;

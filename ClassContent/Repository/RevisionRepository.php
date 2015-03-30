@@ -26,7 +26,8 @@ namespace BackBee\ClassContent\Repository;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use BackBee\ClassContent\AClassContent;
+
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Revision;
@@ -42,7 +43,7 @@ use BackBee\Security\Token\BBUserToken;
  */
 class RevisionRepository extends EntityRepository
 {
-    public function checkout(AClassContent $content, BBUserToken $token)
+    public function checkout(AbstractClassContent $content, BBUserToken $token)
     {
         $revision = new Revision();
         $revision->setAccept($content->getAccept());
@@ -114,7 +115,7 @@ class RevisionRepository extends EntityRepository
         $content = $revision->getContent();
         if ($content instanceof ContentSet) {
             while ($subcontent = $revision->next()) {
-                if (!($subcontent instanceof AClassContent)) {
+                if (!($subcontent instanceof AbstractClassContent)) {
                     continue;
                 }
 
@@ -128,7 +129,7 @@ class RevisionRepository extends EntityRepository
             foreach ($revision->getData() as $key => $value) {
                 if (is_array($value)) {
                     foreach ($value as &$val) {
-                        if ($val instanceof AClassContent) {
+                        if ($val instanceof AbstractClassContent) {
                             if (null !== $entity = $this->_em->find(get_class($val), $val->getUid())) {
                                 $val = $entity;
                             }
@@ -136,7 +137,7 @@ class RevisionRepository extends EntityRepository
                     }
 
                     unset($val);
-                } elseif ($value instanceof AClassContent) {
+                } elseif ($value instanceof AbstractClassContent) {
                     if (null !== $entity = $this->_em->find(get_class($value), $value->getUid())) {
                         $value = $entity;
                     }
@@ -152,13 +153,13 @@ class RevisionRepository extends EntityRepository
     /**
      * Return the user's draft of a content, optionally checks out a new one if not exists.
      *
-     * @param AClassContent $content
-     * @param BBUserToken   $token
-     * @param boolean       $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  AbstractClassContent $content
+     * @param  BBUserToken   $token
+     * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
      *
      * @return Revision|null
      */
-    public function getDraft(AClassContent $content, BBUserToken $token, $checkoutOnMissing = false)
+    public function getDraft(AbstractClassContent $content, BBUserToken $token, $checkoutOnMissing = false)
     {
         if (null === $revision = $content->getDraft()) {
             try {
@@ -210,7 +211,7 @@ class RevisionRepository extends EntityRepository
         ]);
     }
 
-    public function getRevisions(AClassContent $content)
+    public function getRevisions(AbstractClassContent $content)
     {
         return $this->_em->getRepository('BackBee\ClassContent\Revision')->findBy(['_content' => $content]);
     }
@@ -220,15 +221,14 @@ class RevisionRepository extends EntityRepository
      *
      * @param Revision $revision
      *
-     * @return AClassContent the valid content according to revision state
-     *
+     * @return AbstractClassContent  the valid content according to revision state
      * @throws ClassContentException Occurs when the revision is orphan
      */
     private function checkContent(Revision $revision)
     {
         $content = $revision->getContent();
 
-        if (null === $content || !($content instanceof AClassContent)) {
+        if (null === $content || !($content instanceof AbstractClassContent)) {
             $this->_em->remove($revision);
             throw new ClassContentException('Orphan revision, deleted', ClassContentException::REVISION_ORPHAN);
         }

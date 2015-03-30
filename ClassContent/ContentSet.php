@@ -40,7 +40,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="content")
  * @ORM\HasLifecycleCallbacks
  */
-class ContentSet extends AClassContent implements \Iterator, \Countable
+class ContentSet extends AbstractClassContent implements \Iterator, \Countable
 {
     /**
      * Internal position in iterator.
@@ -173,7 +173,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Return the first subcontent of the set.
      *
-     * @return AClassContent the first element
+     * @return AbstractClassContent the first element
      * @codeCoverageIgnore
      */
     public function first()
@@ -193,7 +193,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      */
     public function indexOf($element, $useIntIndex = false)
     {
-        if ($element instanceof AClassContent) {
+        if ($element instanceof AbstractClassContent) {
             $useIntIndex = (is_bool($useIntIndex)) ? $useIntIndex : false;
             if (false !== $key = $this->_subcontent->indexOf($element)) {
                 foreach ($this->_data as $key => $data) {
@@ -213,11 +213,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     public function indexOfByUid($element, $useIntIndex = false)
     {
-        if ($element instanceof AClassContent) {
+        if ($element instanceof AbstractClassContent) {
             /* find content */
             $index = 0;
             foreach ($this->getData() as $key => $content) {
-                if ($content instanceof AClassContent && $element->getUid() === $content->getUid()) {
+                if ($content instanceof AbstractClassContent && $element->getUid() === $content->getUid()) {
                     $index = ($useIntIndex) ? $key : $index;
 
                     return $index;
@@ -233,9 +233,9 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
     /**
      * @param int                                 $index
-     * @param \BackBee\ClassContent\AClassContent $contentSet
+     * @param \BackBee\ClassContent\AbstractClassContent $contentSet
      */
-    public function replaceChildAtBy($index, AClassContent $contentSet)
+    public function replaceChildAtBy($index, AbstractClassContent $contentSet)
     {
         $index = (isset($index) && is_int($index)) ? $index : false;
         if (is_bool($index)) {
@@ -250,7 +250,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
 
         $this->clear();
         foreach ($newContentsetArr as $key => $content) {
-            if ($content instanceof AClassContent) {
+            if ($content instanceof AbstractClassContent) {
                 $this->push($content);
             }
         }
@@ -259,11 +259,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     }
 
     /**
-     * @param \BackBee\ClassContent\AClassContent $prevContentSet
-     * @param \BackBee\ClassContent\AClassContent $nextContentSet
+     * @param \BackBee\ClassContent\AbstractClassContent $prevContentSet
+     * @param \BackBee\ClassContent\AbstractClassContent $nextContentSet
      *                                                            Replace prevContentSet by nextContentSet
      */
-    public function replaceChildBy(AClassContent $prevContentSet, AClassContent $nextContentSet)
+    public function replaceChildBy(AbstractClassContent $prevContentSet, AbstractClassContent $nextContentSet)
     {
         $index = $this->indexOfByUid($prevContentSet, true);
         if (is_bool($index)) {
@@ -305,7 +305,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Return the last subcontent of the set.
      *
-     * @return AClassContent the last element
+     * @return AbstractClassContent the last element
      * @codeCoverageIgnore
      */
     public function last()
@@ -325,7 +325,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Pop the content off the end of the set and return it.
      *
-     * @return AClassContent Returns the last content or NULL if set is empty
+     * @return AbstractClassContent Returns the last content or NULL if set is empty
      */
     public function pop()
     {
@@ -355,11 +355,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Push one element onto the end of the set.
      *
-     * @param AClassContent $var The pushed values
+     * @param AbstractClassContent $var The pushed values
      *
-     * @return ContentSet The current content set
+     * @return ContentSet    The current content set
      */
-    public function push(AClassContent $var)
+    public function push(AbstractClassContent $var)
     {
         if (null !== $this->getDraft()) {
             return $this->getDraft()->push($var);
@@ -396,7 +396,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Shift the content off the beginning of the set and return it.
      *
-     * @return AClassContent Returns the shifted content or NULL if set is empty
+     * @return AbstractClassContent Returns the shifted content or NULL if set is empty
      */
     public function shift()
     {
@@ -425,11 +425,11 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
     /**
      * Prepend one to the beginning of the set.
      *
-     * @param AClassContent $var The prepended values
+     * @param  AbstractClassContent $var The prepended values
      *
-     * @return ContentSet The current content set
+     * @return ContentSet    The current content set
      */
-    public function unshift(AClassContent $var)
+    public function unshift(AbstractClassContent $var)
     {
         if (null !== $this->getDraft()) {
             return $this->getDraft()->unshift($var);
@@ -468,8 +468,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @param $var string The element to be return, if NULL, all datas are returned
      * @param $forceArray Boolean Force the return as array
      *
-     * @return mixed Could be either NULL or one or array of scalar, array, AClassContent instance
-     *
+     * @return mixed Could be either NULL or one or array of scalar, array, AbstractClassContent instance
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
      */
     public function getData($var = null, $forceArray = false)
@@ -566,7 +565,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @param array   $options      Initial options for the content (see this constructor)
      * @param Boolean $updateAccept dynamically accept or not the type for the new element
      *
-     * @return \BackBee\ClassContent\AClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractClassContent The current instance
      *
      * @deprecated since version 1.0
      */
@@ -612,7 +611,7 @@ class ContentSet extends AClassContent implements \Iterator, \Countable
      * @param string $type the type to accept
      * @param string $var  the element
      *
-     * @return \BackBee\ClassContent\AClassContent The current instance
+     * @return \BackBee\ClassContent\AbstractClassContent The current instance
      */
     protected function _addAcceptedType($type, $var = null)
     {

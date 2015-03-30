@@ -30,7 +30,8 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
 use Symfony\Component\Security\Acl\Permission\PermissionMapInterface;
 use Symfony\Component\Security\Core\SecurityContextInterface;
-use BackBee\Security\Acl\Domain\IObjectIdentifiable;
+
+use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
 use BackBee\Security\Acl\Permission\InvalidPermissionException;
 use BackBee\Security\Acl\Permission\MaskBuilder;
 
@@ -57,8 +58,7 @@ class AclManager
     /**
      * Get ACL for the given domain object.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
-     *
+     * @param  \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @return \Symfony\Component\Security\Acl\Domain\Acl
      */
     public function getAcl($objectIdentity)
@@ -77,7 +77,7 @@ class AclManager
     /**
      * Updates an existing object ACE.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      * @param int                                                                                                            $mask
      * @param type                                                                                                           $strategy
@@ -109,7 +109,7 @@ class AclManager
     /**
      * Updates an existing object ACE.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      * @param int                                                                                                            $mask
      * @param string|null                                                                                                    $strategy
@@ -141,7 +141,7 @@ class AclManager
     /**
      * Updates an existing Object ACE, Inserts if it doesnt exist.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      * @param int                                                                                                            $mask
      * @param string|null                                                                                                    $strategy
@@ -175,7 +175,7 @@ class AclManager
     /**
      * Updates an existing Class ACE, Inserts if it doesnt exist.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      * @param int                                                                                                            $mask
      * @param string|null                                                                                                    $strategy
@@ -210,7 +210,7 @@ class AclManager
     /**
      * Deletes a class-scope ACE.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      */
     public function deleteClassAce($objectIdentity, $sid)
@@ -240,7 +240,7 @@ class AclManager
     /**
      * Deletes an object-scope ACE.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      */
     public function deleteObjectAce($objectIdentity, $sid)
@@ -270,7 +270,7 @@ class AclManager
     /**
      * Get a class-scope ACE.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      */
     public function getClassAce($objectIdentity, $sid)
@@ -294,7 +294,7 @@ class AclManager
     /**
      * Get an object-scope ACE.
      *
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
+     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
      */
     public function getObjectAce($objectIdentity, $sid)
@@ -363,18 +363,17 @@ class AclManager
     }
 
     /**
-     * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AObjectIdentifiable $objectIdentity
-     *
+     * @param  \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @throws \InvalidArgumentException
      */
     private function enforceObjectIdentity(&$objectIdentity)
     {
         if (
-            ($objectIdentity instanceof IObjectIdentifiable)
+            ($objectIdentity instanceof ObjectIdentifiableInterface)
         ) {
             $objectIdentity = new ObjectIdentity($objectIdentity->getObjectIdentifier(), get_class($objectIdentity));
         } elseif (! ($objectIdentity instanceof ObjectIdentityInterface)) {
-            throw new \InvalidArgumentException('Object must implement IObjectIdentifiable');
+            throw new \InvalidArgumentException('Object must implement ObjectIdentifiableInterface');
         }
     }
 
@@ -390,7 +389,7 @@ class AclManager
         ) {
             $sid = new UserSecurityIdentity($sid->getObjectIdentifier(), get_class($sid));
         } elseif (! ($sid instanceof SecurityIdentityInterface)) {
-            throw new \InvalidArgumentException('Object must implement IObjectIdentifiable');
+            throw new \InvalidArgumentException('Object must implement ObjectIdentifiableInterface');
         }
     }
 

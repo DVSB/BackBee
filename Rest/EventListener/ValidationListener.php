@@ -32,7 +32,8 @@ use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator;
-use BackBee\Event\Listener\APathEnabledListener;
+
+use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\Rest\Exception\ValidationException;
 
 /**
@@ -43,7 +44,7 @@ use BackBee\Rest\Exception\ValidationException;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ValidationListener extends APathEnabledListener
+class ValidationListener extends AbstractPathEnabledListener
 {
     /**
      * @var ContainerInterface

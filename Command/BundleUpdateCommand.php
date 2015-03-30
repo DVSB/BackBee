@@ -27,7 +27,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use BackBee\Console\ACommand;
+
+use BackBee\Console\AbstractCommand;
 
 /**
  * Update bundle command.
@@ -37,7 +38,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleUpdateCommand extends ACommand
+class BundleUpdateCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}
@@ -70,7 +71,7 @@ EOF
         $bbapp = $this->getContainer()->get('bbapp');
 
         $bundle = $bbapp->getBundle($name);
-        /* @var $bundle \BackBee\Bundle\ABundle */
+        /* @var $bundle \BackBee\Bundle\AbstractBundle */
 
         if (null === $bundle) {
             throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));

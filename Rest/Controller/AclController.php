@@ -41,7 +41,7 @@ use BackBee\Rest\Exception\ValidationException;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class AclController extends ARestController
+class AclController extends AbstractRestController
 {
     /**
      * Get all records.

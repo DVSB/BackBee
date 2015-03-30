@@ -24,37 +24,37 @@
 namespace BackBee\Renderer\Helper;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
-use BackBee\Renderer\ARenderer;
+
+use BackBee\ApplicationInterface;
+use BackBee\Renderer\AbstractRenderer;
 
 class HelperManager
 {
     /**
-     * [$renderer description].
+     * The current AbstractRenderer.
      *
-     * @var [type]
+     * @var AbstractRenderer
      */
     private $renderer;
 
     /**
-     * [$bbapp description].
+     * the current BackBee application.
      *
-     * @var [type]
+     * @var ApplicationInterface
      */
     private $bbapp;
 
     /**
-     * [$helpers description].
+     * the current Renderer helpers.
      *
-     * @var [type]
+     * @var array
      */
     private $helpers;
 
     /**
-     * [__construct description].
-     *
-     * @param ARenderer $renderer [description]
+     * @param AbstractRenderer $renderer [description]
      */
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         $this->renderer = $renderer;
         $this->bbapp = $this->renderer->getApplication();
@@ -97,13 +97,10 @@ class HelperManager
     }
 
     /**
-     * [updateRenderer description].
-     *
-     * @param ARenderer $renderer [description]
-     *
-     * @return [type] [description]
+     * @param  AbstractRenderer $renderer [description]
+     * @return
      */
-    public function updateRenderer(ARenderer $renderer)
+    public function updateRenderer(AbstractRenderer $renderer)
     {
         $this->renderer = $renderer;
         foreach ($this->helpers->all() as $h) {

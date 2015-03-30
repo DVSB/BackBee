@@ -23,7 +23,10 @@
 
 namespace BackBee\Event\Listener;
 
-use BackBee\ClassContent\AClassContent;
+use Symfony\Component\Security\Core\Util\ClassUtils;
+
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Revision;
@@ -61,7 +64,7 @@ class ClassContentListener
             foreach (class_parents($discriminatorValue) as $classname) {
                 $em->getClassMetadata($classname)->addDiscriminatorMapClass($discriminatorValue, $discriminatorValue);
 
-                if ('BackBee\ClassContent\AClassContent' === $classname) {
+                if ('BackBee\ClassContent\AbstractClassContent' === $classname) {
                     break;
                 }
             }
@@ -71,7 +74,7 @@ class ClassContentListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             return;
         }
 
@@ -90,7 +93,7 @@ class ClassContentListener
 
                     if (null !== $value) {
                         $value = $value->getData($element);
-                        if ($value instanceof AClassContent && false == $em->contains($value)) {
+                        if ($value instanceof AbstractClassContent && false == $em->contains($value)) {
                             $value = $em->find(get_class($value), $value->getUid());
                         }
                     }
@@ -104,23 +107,10 @@ class ClassContentListener
             }
 
             $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
-//
-//            if (null !== $page = $content->getMainNode()) {
-//                if (AClassContent::STATE_NORMAL === $content->getState()) {
-//                    $page->setModified(new \DateTime());
-//                    $method = 'computeChangeSet';
-//                    if (true === $uow->isEntityScheduled($page)) {
-//                        $method = 'recomputeSingleEntityChangeSet';
-//                    }
-//
-//                    $uow->$method($em->getClassMetadata('BackBee\NestedNode\Page'), $page);
-//                }
-//            }
-            //self::HandleContentMainnode($content,$application);
         }
     }
 
-    public static function handleContentMainnode(AClassContent $content, $application)
+    public static function handleContentMainnode(AbstractClassContent $content, $application)
     {
         if (!isset($content) && $content->isElementContent()) {
             return;
@@ -149,7 +139,7 @@ class ClassContentListener
     public static function onUpdate(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             throw new BBException('Enable to update object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBee\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
         }
 

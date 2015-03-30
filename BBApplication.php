@@ -45,7 +45,7 @@ use BackBee\Theme\Theme;
 use BackBee\Utils\File\File;
 
 /**
- * The main BackBee5 application.
+ * The main BackBee application.
  *
  * @category    BackBee
  *
@@ -261,7 +261,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * @param type $name
      *
-     * @return ABundle
+     * @return AbstractBundle
      */
     public function getBundle($name)
     {
@@ -469,7 +469,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\Cache\ACache
+     * @return \BackBee\Cache\AbstractCache
      */
     public function getBootstrapCache()
     {
@@ -577,7 +577,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return Renderer\ARenderer
+     * @return Renderer\AbstractRenderer
      */
     public function getRenderer()
     {
@@ -931,7 +931,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBee\\Console\\ACommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBee\\Console\\AbstractCommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
                     $console->add($r->newInstance());
                 }
             }
@@ -951,7 +951,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBee\\Console\\ACommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
+                if ($r->isSubclassOf('BackBee\\Console\\AbstractCommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
                     $console->add($instance);

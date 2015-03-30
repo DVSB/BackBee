@@ -85,7 +85,7 @@ class PageRevision
     protected $_page;
 
     /**
-     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;

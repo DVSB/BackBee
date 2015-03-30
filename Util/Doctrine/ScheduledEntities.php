@@ -25,7 +25,8 @@ namespace BackBee\Util\Doctrine;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-use BackBee\ClassContent\AClassContent;
+
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Revision;
 
 /**
@@ -122,7 +123,7 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for insertions.
+     * Returns an array of AbstractClassContent scheduled for insertions.
      *
      * @param \Doctrine\ORM\EntityManager $em
      * @param boolean                     $with_revision Includes AClassContent which has scheduled revision
@@ -142,7 +143,7 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for updates.
+     * Returns an array of AbstractClassContent scheduled for updates.
      *
      * @param \Doctrine\ORM\EntityManager $em
      * @param boolean                     $with_revision Includes AClassContent which has scheduled revision
@@ -163,7 +164,7 @@ class ScheduledEntities
 
     private static function getScheduledEntity($entity, $with_revision, $exclude_base_element)
     {
-        if ($entity instanceof AClassContent &&
+        if ($entity instanceof AbstractClassContent &&
             (!$exclude_base_element || !$entity->isElementContent())) {
             return $entity;
         } elseif (true === $with_revision && $entity instanceof Revision) {
@@ -176,7 +177,7 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for deletions.
+     * Returns an array of AbstractClassContent scheduled for deletions.
      *
      * @param \Doctrine\ORM\EntityManager $em
      *
@@ -186,7 +187,7 @@ class ScheduledEntities
     {
         $entities = array();
         foreach ($em->getUnitOfWork()->getScheduledEntityDeletions() as $entity) {
-            if ($entity instanceof AClassContent &&
+            if ($entity instanceof AbstractClassContent &&
                 (!$exclude_base_element || !$entity->isElementContent())) {
                 $entities[] = $entity;
             }
@@ -196,7 +197,7 @@ class ScheduledEntities
     }
 
     /**
-     * Returns an array of AClassContent scheduled for insertions or updates.
+     * Returns an array of AbstractClassContent scheduled for insertions or updates.
      *
      * @param \Doctrine\ORM\EntityManager $em
      * @param boolean                     $with_revision Includes AClassContent which has scheduled revision

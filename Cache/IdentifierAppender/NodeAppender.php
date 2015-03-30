@@ -25,8 +25,9 @@ namespace BackBee\Cache\IdentifierAppender;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-use BackBee\ClassContent\AClassContent;
-use BackBee\Renderer\IRenderer;
+
+use BackBee\ClassContent\AbstractClassContent;
+use BackBee\Renderer\RendererInterface;
 
 /**
  * NodeAppender will looking for class content cache node parameter and define if it should append node uid
@@ -75,11 +76,11 @@ class NodeAppender implements IdentifierAppenderInterface
     /**
      * @see BackBee\Cache\IdentifierAppender\IdentifierAppenderInterface::computeIdentifier
      */
-    public function computeIdentifier($identifier, IRenderer $renderer = null)
+    public function computeIdentifier($identifier, RendererInterface $renderer = null)
     {
         if (
             null !== $renderer
-            && true === ($renderer->getObject() instanceof AClassContent)
+            && true === ($renderer->getObject() instanceof AbstractClassContent)
             && null !== $renderer->getCurrentPage()
         ) {
             switch ((string) $this->getClassContentCacheNodeParameter($renderer->getObject())) {
@@ -115,11 +116,11 @@ class NodeAppender implements IdentifierAppenderInterface
     /**
      * Try to extract cache node parameter from class content yaml files.
      *
-     * @param AClassContent $content the content which we want to extract cache node parameter
+     * @param AbstractClassContent $content the content which we want to extract cache node parameter
      *
      * @return null|string return the cache node parameter if it exists, else null
      */
-    private function getClassContentCacheNodeParameter(AClassContent $content)
+    private function getClassContentCacheNodeParameter(AbstractClassContent $content)
     {
         $classnames = array(ClassUtils::getRealClass($content));
 
@@ -130,7 +131,7 @@ class NodeAppender implements IdentifierAppenderInterface
         if (0 < count($content_uids)) {
             $classnames = array_merge(
                 $classnames,
-                $this->em->getRepository('\BackBee\ClassContent\AClassContent')->getClassnames($content_uids)
+                $this->em->getRepository('\BackBee\ClassContent\AbstractClassContent')->getClassnames($content_uids)
             );
         }
 

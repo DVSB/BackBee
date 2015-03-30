@@ -29,7 +29,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class breadcrumb extends AHelper
+class breadcrumb extends AbstractHelper
 {
     public function __invoke()
     {

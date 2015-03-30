@@ -52,10 +52,10 @@ class Importer
      * Class constructor.
      *
      * @param \BackBee\BBApplication               $application
-     * @param \BackBee\Importer\IImporterConnector $connector
+     * @param \BackBee\Importer\ImporterConnectorInterface $connector
      * @param \BackBee\Config\Config               $config
      */
-    public function __construct(BBApplication $application, IImporterConnector $connector, Config $config)
+    public function __construct(BBApplication $application, ImporterConnectorInterface $connector, Config $config)
     {
         $this->_application = $application;
         $this->_connector = $connector;
@@ -200,7 +200,7 @@ class Importer
     /**
      * @param array $config
      *
-     * @return \BackBee\Importer\IConverter
+     * @return \BackBee\Importer\ConverterInterface
      */
     final protected function initConvertion(array $config)
     {
@@ -247,7 +247,7 @@ class Importer
      * @param string $classname
      * @param string $uid
      *
-     * @return \BaclBuilder\ClassContent\AClassContent
+     * @return \BaclBuilder\ClassContent\AbstractClassContent
      */
     public function getBBEntity($classname, $uid)
     {
@@ -337,7 +337,7 @@ class Importer
     }
 
     /**
-     * @return \BackBee\Importer\IImporterConnector
+     * @return \BackBee\Importer\ImporterConnectorInterface
      */
     public function getConnector()
     {

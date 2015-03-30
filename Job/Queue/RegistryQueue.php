@@ -26,7 +26,7 @@ namespace BackBee\Job\Queue;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\Yaml\Yaml;
 use BackBee\Bundle\Registry;
-use BackBee\Job\AJob;
+use BackBee\Job\AbstractJob;
 
 /**
  * A Registry based queue for jobs.
@@ -36,7 +36,7 @@ use BackBee\Job\AJob;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class RegistryQueue extends AQueue
+class RegistryQueue extends AbstractQueue
 {
     /**
      * @var array
@@ -46,7 +46,7 @@ class RegistryQueue extends AQueue
     private $em;
 
     /**
-     * @return AJob[]
+     * @return AbstractJob[]
      */
     public function getJobs($status = null)
     {
@@ -78,7 +78,7 @@ class RegistryQueue extends AQueue
     //public function set
 
     /**
-     * @return AJob[]
+     * @return AbstractJob[]
      */
     public function getManagedJobs()
     {
@@ -86,9 +86,9 @@ class RegistryQueue extends AQueue
     }
 
     /**
-     * @param \BackBee\Job\AJob $job
+     * @param \BackBee\Job\AbstractJob $job
      */
-    public function enqueue(AJob $job)
+    public function enqueue(AbstractJob $job)
     {
         $registry = $this->convertJobToRegistry($job);
 
@@ -120,7 +120,7 @@ class RegistryQueue extends AQueue
         return $job;
     }
 
-    protected function convertJobToRegistry(AJob $job)
+    protected function convertJobToRegistry(AbstractJob $job)
     {
         if (isset($job->args['registry'])) {
             $registry = $job->args['registry'];
@@ -164,11 +164,11 @@ class RegistryQueue extends AQueue
 
     public function startAllJobs()
     {
-        $jobs = $this->getJobs(AQueue::JOB_STATUS_NEW);
+        $jobs = $this->getJobs(AbstractQueue::JOB_STATUS_NEW);
 
         foreach ($jobs as $job) {
             // update the job status  in Registry table
-            $job->status = AQueue::JOB_STATUS_RUNNING;
+            $job->status = AbstractQueue::JOB_STATUS_RUNNING;
 
             $registry = $this->convertJobToRegistry($job);
             $this->em->persist($registry);

@@ -40,7 +40,7 @@ use BackBee\Security\Token\BBUserToken;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class SecurityController extends ARestController
+class SecurityController extends AbstractRestController
 {
     /**
      * @Rest\RequestParam(name="username", requirements={@Assert\NotBlank})

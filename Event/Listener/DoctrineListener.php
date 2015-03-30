@@ -210,7 +210,7 @@ class DoctrineListener
             $this->_triggerEvent(Events::postLoad, $eventArgs->getEntity(), $eventArgs);
         }
 
-        if (is_a($eventArgs->getEntity(), 'BackBee\ClassContent\AClassContent')) {
+        if (is_a($eventArgs->getEntity(), 'BackBee\ClassContent\AbstractClassContent')) {
             $eventArgs->getEntity()->postLoad();
         }
     }

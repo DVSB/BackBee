@@ -33,7 +33,7 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class headers extends AHelper
+class headers extends AbstractHelper
 {
     /**
      * Return the current request parameter bag.

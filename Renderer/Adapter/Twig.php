@@ -23,8 +23,8 @@
 
 namespace BackBee\Renderer\Adapter;
 
-use BackBee\Renderer\ARenderer;
-use BackBee\Renderer\ARendererAdapter;
+use BackBee\Renderer\AbstractRenderer;
+use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 
 /**
@@ -35,7 +35,7 @@ use BackBee\Renderer\Exception\RendererException;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Twig extends ARendererAdapter
+class Twig extends AbstractRendererAdapter
 {
     /**
      * @var BackBee\Renderer\Adapter\TwigLoaderFilesystem
@@ -61,9 +61,9 @@ class Twig extends ARendererAdapter
     /**
      * Twig adapter constructor.
      *
-     * @param ARenderer $renderer
+     * @param AbstractRenderer $renderer
      */
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         parent::__construct($renderer);
 
@@ -84,9 +84,9 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * [addExtension description].
+     * Add Twig extension.
      *
-     * @param [type] $extension [description]
+     * @param \Twig_ExtensionInterface $extension
      */
     public function addExtension(\Twig_ExtensionInterface $extension)
     {
@@ -94,25 +94,25 @@ class Twig extends ARendererAdapter
     }
 
     /**
-     * [setTwigCache description].
+     * Set Twig cache directory.
      *
-     * @param [type] $cache_directory [description]
+     * @param string $cacheDirectory
      */
-    public function setTwigCache($cache_directory)
+    public function setTwigCache($cacheDirectory)
     {
         if (
-            false === is_dir($cache_directory)
-            && (false === is_writable(dirname($cache_directory)) || false === @mkdir($cache_directory, 0755))
+            false === is_dir($cacheDirectory)
+            && (false === is_writable(dirname($cacheDirectory)) || false === @mkdir($cacheDirectory, 0755))
         ) {
             throw new RendererException(
-                sprintf('Unable to create twig cache "%s"', $cache_directory),
+                sprintf('Unable to create twig cache "%s"', $cacheDirectory),
                 RendererException::RENDERING_ERROR
             );
         }
 
-        if (false === is_writable($cache_directory)) {
+        if (false === is_writable($cacheDirectory)) {
             throw new RendererException(
-                sprintf('Twig cache "%s" is not writable', $cache_directory),
+                sprintf('Twig cache "%s" is not writable', $cacheDirectory),
                 RendererException::RENDERING_ERROR
             );
         }
@@ -120,7 +120,7 @@ class Twig extends ARendererAdapter
         $this->twig->setCache($cache_directory);
     }
     /**
-     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\RendererAdapterInterface::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -130,7 +130,7 @@ class Twig extends ARendererAdapter
     /**
      * Check if $filename exists in directories provided by $templateDir.
      *
-     * @param [type] $filename
+     * @param string $filename
      * @param array  $templateDir
      *
      * @return boolean true if the file was found and is readable
@@ -158,9 +158,7 @@ class Twig extends ARendererAdapter
             $this->loader->removeAllPaths();
             try {
                 $this->loader->setPaths($templateDir);
-            } catch (\Twig_Error_Loader $e) {
-                //@Todo what to do when one of path does not exist
-            }
+            } catch (\Twig_Error_Loader $e) {}
         }
     }
 

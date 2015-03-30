@@ -27,12 +27,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
-use BackBee\ClassContent\AClassContent;
+
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Installer\Annotation as BB;
 use BackBee\MetaData\MetaDataBag;
-use BackBee\Renderer\IRenderable;
+use BackBee\Renderer\RenderableInterface;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Workflow\State;
@@ -71,7 +72,7 @@ use BackBee\Workflow\State;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Page extends ANestedNode implements IRenderable, DomainObjectInterface
+class Page extends AbstractNestedNode implements RenderableInterface, DomainObjectInterface
 {
     /**
      * State off-line: the page can not be displayed on the website.
@@ -783,10 +784,8 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the main contentset associated to the node.
-     *
-     * @param \BackBee\ClassContent\ContentSet $contentset
-     *
-     * @return \BackBee\NestedNode\ANestedNode
+     * @param  \BackBee\ClassContent\ContentSet $contentset
+     * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function setContentset(ContentSet $contentset)
     {
@@ -811,21 +810,20 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
 
     /**
      * Sets the layout for the page.
-     * Adds as much ContentSet to the page main ContentSet than defined zones in layout.
+     * Adds as much ContentSet to the page main ContentSet than defined zones in layout
      *
-     * @param \BackBee\Site\Layout                $layout
-     * @param \BackBee\ClassContent\AClassContent $toPushInMainZone
-     *
+     * @param  \BackBee\Site\Layout                $layout
+     * @param  \BackBee\ClassContent\AbstractClassContent $toPushInMainZone
      * @return \BackBee\NestedNode\Page
      */
-    public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
+    public function setLayout(Layout $layout, AbstractClassContent $toPushInMainZone = null)
     {
         $this->_layout = $layout;
 
         $count = count($layout->getZones());
         // Add as much ContentSet to the page main ContentSet than defined zones in layout
         for ($i = $this->getContentSet()->count(); $i < $count; $i++) {
-            // Do this case really exist ?
+            // Do this case really exists ?
             if (null === $zone = $layout->getZone($i)) {
                 $this->getContentSet()->push(new ContentSet());
                 continue;
@@ -1009,7 +1007,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      *
      * @param \BackBee\ClassContent\ContentSet $contentSet
      *
-     * @return \StdClass|NULL The inherited zone if found
+     * @return \StdClass|null The inherited zone if found
      */
     public function getInheritedContensetZoneParams(ContentSet $contentSet)
     {
@@ -1037,11 +1035,11 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the index of the provided ContentSet in the main ContentSetif found, FALSE otherwise.
+     * Returns the index of the provided ContentSet in the main ContentSetif found, false otherwise.
      *
      * @param \BackBee\ClassContent\ContentSet $contentSet
      *
-     * @return int|FALSE
+     * @return int|bool
      */
     public function getRootContentSetPosition(ContentSet $contentSet)
     {
@@ -1049,11 +1047,9 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
     }
 
     /**
-     * Returns the parent ContentSet in the same zone, FALSE if it is not found.
-     *
-     * @param \BackBee\ClassContent\ContentSet $contentSet
-     *
-     * @return \BackBeeClassContent\ContentSet|FALSE
+     * Returns the parent ContentSet in the same zone, false if it is not found.
+     * @param  \BackBee\ClassContent\ContentSet      $contentSet
+     * @return \BackBee\ClassContent\ContentSet|false
      */
     public function getParentZoneAtSamePositionIfExists(ContentSet $contentSet)
     {
@@ -1210,8 +1206,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      *
      * @param mixed $serialized The string representation of the object.
      *
-     * @return \BackBee\NestedNode\ANestedNode
-     *
+     * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                     with strict mode, if a property does not exists
      */
@@ -1535,11 +1530,10 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * Returns the inherited content from parent, $default if not found.
      *
      * @param int                                 $index
-     * @param \BackBee\ClassContent\AClassContent $default
-     *
-     * @return \BackBee\ClassContent\AClassContent
+     * @param  \BackBee\ClassContent\AbstractClassContent $default
+     * @return \BackBee\ClassContent\AbstractClassContent
      */
-    private function getInheritedContent($index, AClassContent $default)
+    private function getInheritedContent($index, AbstractClassContent $default)
     {
         if (
                 null !== $this->getParent() &&
@@ -1558,7 +1552,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
      * @param string  $classname
      * @param boolean $mainzone
      *
-     * @return \BackBee\ClassContent\AClassContent
+     * @return \BackBee\ClassContent\AbstractClassContent
      */
     private function createNewDefaultContent($classname, $mainzone = false)
     {
@@ -1575,9 +1569,7 @@ class Page extends ANestedNode implements IRenderable, DomainObjectInterface
                 }
 
                 $label->$property = $this->getTitle();
-            } catch (\Exception $e) {
-                // Nothing to do
-            }
+            } catch (\Exception $e) {}
         }
 
         if (true === $mainzone) {

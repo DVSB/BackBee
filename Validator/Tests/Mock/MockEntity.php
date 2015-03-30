@@ -23,7 +23,7 @@
 
 namespace BackBee\Validator\Tests\Mock;
 
-use BackBee\Tests\Mock\IMock;
+use BackBee\Tests\Mock\MockInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -36,7 +36,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="mock_entity")
  * @ORM\Entity
  */
-class MockEntity implements IMock
+class MockEntity implements MockInterface
 {
     /**
      * Identifier.
@@ -99,7 +99,7 @@ class MockEntity implements IMock
      *
      * @param int $numeric_code
      *
-     * @return \BackBee\Validator\Tests\Mock\MockEntity
+     * @return \BackBee\Validator\Tests\Mock\MockInterface
      */
     public function setNumericCode($numeric_code)
     {
@@ -113,7 +113,7 @@ class MockEntity implements IMock
      *
      * @param type $name
      *
-     * @return \BackBee\Validator\Tests\Mock\MockEntity
+     * @return \BackBee\Validator\Tests\Mock\MockInterface
      */
     public function setName($name)
     {

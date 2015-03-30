@@ -48,7 +48,7 @@ use BackBee\Security\User;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class UserController extends ARestController
+class UserController extends AbstractRestController
 {
     /**
      * Get all records.

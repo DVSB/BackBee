@@ -42,7 +42,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     @ORM\Index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})
  * })
  */
-class MediaFolder extends ANestedNode implements \JsonSerializable
+class MediaFolder extends AbstractNestedNode implements \JsonSerializable
 {
     /**
      * Unique identifier of the content.

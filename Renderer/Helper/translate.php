@@ -29,7 +29,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class translate extends AHelper
+class translate extends AbstractHelper
 {
     public function __invoke($string)
     {

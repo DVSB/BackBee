@@ -31,7 +31,7 @@ use BackBee\Site\Layout as EmptyLayout;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class layout extends AHelper
+class layout extends AbstractHelper
 {
     protected $_layout;
 

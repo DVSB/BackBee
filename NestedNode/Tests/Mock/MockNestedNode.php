@@ -23,8 +23,8 @@
 
 namespace BackBee\NestedNode\Tests\Mock;
 
-use BackBee\NestedNode\ANestedNode;
-use BackBee\Tests\Mock\IMock;
+use BackBee\NestedNode\AbstractNestedNode;
+use BackBee\Tests\Mock\MockInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
@@ -40,7 +40,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MockNestedNode extends ANestedNode implements IMock
+class MockNestedNode extends AbstractNestedNode implements MockInterface
 {
     /**
      * Unique identifier of the node.

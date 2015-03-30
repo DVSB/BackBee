@@ -23,10 +23,10 @@
 
 namespace BackBee\ClassContent\Tests\Mock;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\Text;
-use BackBee\Tests\Mock\IMock;
+use BackBee\Tests\Mock\MockInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -41,7 +41,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class MockContent extends AClassContent implements IMock
+class MockContent extends AbstractClassContent implements MockInterface
 {
     public function __construct($uid = null, $options = null)
     {

@@ -343,7 +343,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
                 $classpath = substr($classpath, 1);
             }
 
-            if (null !== $this->getEventDispatcher() && is_subclass_of($classpath, 'BackBee\ClassContent\AClassContent')) {
+            if (null !== $this->getEventDispatcher() && is_subclass_of($classpath, 'BackBee\ClassContent\AbstractClassContent')) {
                 $this->getEventDispatcher()->triggerEvent('include', new $classpath());
             }
 
@@ -407,6 +407,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      *
      * @param string $pattern The pattern to test
      *
+     * @param  string      $pattern The pattern to test
      * @return array|FALSE An array of classnames matching the pattern of FALSE if none found
      */
     public function glob($pattern)

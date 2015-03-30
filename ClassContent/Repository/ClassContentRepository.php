@@ -24,7 +24,7 @@
 namespace BackBee\ClassContent\Repository;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
@@ -35,7 +35,7 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
- * AClassContent repository.
+ * AbstractClassContent repository
  *
  * @category    BackBee
  *
@@ -66,11 +66,11 @@ class ClassContentRepository extends EntityRepository
     /**
      * Get all content uids owning the provided content.
      *
-     * @param \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      *
      * @return array
      */
-    public function getParentContentUid(AClassContent $content)
+    public function getParentContentUid(AbstractClassContent $content)
     {
         return $this->getParentContentUidByUid($content->getUid());
     }
@@ -242,7 +242,7 @@ class ClassContentRepository extends EntityRepository
 
                     if (true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
                         $orderby[] = 'p.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } elseif (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+                    } elseif (true === property_exists('BackBee\ClassContent\AbstractClassContent', '_'.$selector['orderby'][0])) {
                         $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
                     } else {
                         $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
@@ -254,7 +254,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (0 === count($orderby)) {
-            if (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+            if (true === property_exists('BackBee\ClassContent\AbstractClassContent', '_'.$selector['orderby'][0])) {
                 $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
             } else {
                 $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
@@ -297,7 +297,7 @@ class ClassContentRepository extends EntityRepository
         if (true === $has_page_joined && true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-        } elseif (true === property_exists('BackBee\ClassContent\AClassContent', '_'.$selector['orderby'][0])) {
+        } elseif (true === property_exists('BackBee\ClassContent\AbstractClassContent', '_'.$selector['orderby'][0])) {
             $q->orderBy('c._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         } else {
             $q->leftJoin('c._indexation', 'isort')
@@ -350,13 +350,10 @@ class ClassContentRepository extends EntityRepository
         $stmt = $db->executeQuery("SELECT * FROM `content` WHERE `classname` IN (?) order by modified desc limit ?,?", array($classnameArr, $start, $limit), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1)
         );
 
-        /* $stmt->bindValue(1,$classnameArr,\Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
-          $stmt->bindValue(2,$start,\PDO::PARAM_INT);
-          $stmt->bindValue(3,$limit,\PDO::PARAM_INT); */
         $items = $stmt->fetchAll();
         if ($items) {
             foreach ($items as $item) {
-                $content = $this->_em->find($item["classname"], $item["uid"]); //@fixme ->use ResultSetMapping
+                $content = $this->_em->find($item["classname"], $item["uid"]);
                 if ($content) {
                     $result[] = $content;
                 }
@@ -423,7 +420,7 @@ class ClassContentRepository extends EntityRepository
      *
      * @param array $uids
      *
-     * @return array An array of AClassContent
+     * @return array An array of AbstractClassContent
      */
     public function findContentsByUids(array $uids)
     {
@@ -576,7 +573,6 @@ class ClassContentRepository extends EntityRepository
             $qb->addSiteFilter($cond['site_uid']);
         }
 
-        /* @fixme handle keywords here using join */
         if (array_key_exists('keywords', $cond) && is_array($cond['keywords']) && !empty($cond['keywords'])) {
             $qb->addKeywordsFilter($cond['keywords']);
         }
@@ -595,7 +591,7 @@ class ClassContentRepository extends EntityRepository
         /* handle order info */
         if (is_array($orderInfos) && array_key_exists('column', $orderInfos)) {
             $orderInfos['column'] = ('_' === $orderInfos['column'][0] ? '' : '_').$orderInfos['column'];
-            if (property_exists('BackBee\ClassContent\AClassContent', $orderInfos['column'])) {
+            if (property_exists('BackBee\ClassContent\AbstractClassContent', $orderInfos['column'])) {
                 $qb->orderBy('cc.'.$orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
             } else {
                 $qb->orderByIndex($orderInfos['column'], array_key_exists('direction', $orderInfos) ? $orderInfos['direction'] : 'ASC');
@@ -686,17 +682,17 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Do stuf removing content from the content editing form.
+     * Do removing content from the content editing form.
      *
-     * @param \BackBee\ClassContent\AClassContent $content
-     * @param type                                $value
-     * @param \BackBee\ClassContent\AClassContent $parent
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
+     * @param  type                                       $value
+     * @param  \BackBee\ClassContent\AbstractClassContent $parent
      *
      * @return type
      *
      * @throws ClassContentException
      */
-    public function removeFromPost(AClassContent $content, $value = null, AClassContent $parent = null)
+    public function removeFromPost(AbstractClassContent $content, $value = null, AbstractClassContent $parent = null)
     {
         if (null !== $draft = $content->getDraft()) {
             $draft->setState(\BackBee\ClassContent\Revision::STATE_TO_DELETE);
@@ -756,13 +752,12 @@ class ClassContentRepository extends EntityRepository
     /**
      * Load content if need, the user's revision is also set.
      *
-     * @param AClassContent $content
-     * @param BBUserToken   $token
-     * @param boolean       $checkoutOnMissing If true, checks out a new revision if none was found
-     *
-     * @return AClassContent
+     * @param  AbstractClassContent $content
+     * @param  BBUserToken   $token
+     * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
+     * @return AbstractClassContent
      */
-    public function load(AClassContent $content, BBUserToken $token = null, $checkoutOnMissing = false)
+    public function load(AbstractClassContent $content, BBUserToken $token = null, $checkoutOnMissing = false)
     {
         $revision = null;
         if (null !== $token) {
@@ -788,11 +783,10 @@ class ClassContentRepository extends EntityRepository
     /**
      * Returns the unordered children uids for $content.
      *
-     * @param \BackBee\ClassContent\AClassContent $content
-     *
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return array
      */
-    public function getUnorderedChildrenUids(AClassContent $content)
+    public function getUnorderedChildrenUids(AbstractClassContent $content)
     {
         return $this->getEntityManager()
                         ->getConnection()
@@ -801,13 +795,14 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * @param \BackBee\ClassContent\AClassContent $content
+     * Find pages by Class content
+     *
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      *
      * @return Collection<Page>
      */
     public function findPagesByContent($content)
     {
-        /* Remoter � la racine pour trouver sur quelle page se trouve le contenu */
         $rootContents = array();
         $this->getRootContentParents($content, $rootContents);
         $qb = $this->_em->createQueryBuilder("p");
@@ -868,11 +863,14 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * @param \BackBee\ClassContent\AClassContent $content
+     * Delete a Class Content
+     *
+     * @param \BackBee\ClassContent\AbstractClassContent $content
+     * @param bool $mainContent if it's a main content, delete recursively under contents
      *
      * @return
      */
-    public function deleteContent(AClassContent $content, $mainContent = true)
+    public function deleteContent(AbstractClassContent $content, $mainContent = true)
     {
         $parents = $content->getParentContent();
         $media = $this->_em->getRepository('BackBee\NestedNode\Media')->findOneBy(array(
@@ -881,7 +879,7 @@ class ClassContentRepository extends EntityRepository
 
         if (($parents->count() <= 1 && null === $media) || true === $mainContent) {
             foreach ($content->getData() as $element) {
-                if ($element instanceof AClassContent) {
+                if ($element instanceof AbstractClassContent) {
                     $this->deleteContent($element, false);
                 }
             }
@@ -929,12 +927,12 @@ class ClassContentRepository extends EntityRepository
      *                     (full: BackBee\ClassContent\Block\paragraph => short: Block/paragraph)
      * @param string $uid
      *
-     * @return AClassContent
+     * @return AbstractClassContent
      */
     public function findOneByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = AClassContent::getClassnameByContentType($type);
+        $classname = AbstractClassContent::getClassnameByContentType($type);
 
         if (null === $content = $this->findOneBy(['_uid' => $uid])) {
             throw new \InvalidArgumentException("No `$classname` exists with uid `$uid`.");

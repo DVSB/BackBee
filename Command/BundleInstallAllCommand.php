@@ -26,7 +26,8 @@ namespace BackBee\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use BackBee\Console\ACommand;
+
+use BackBee\Console\AbstractCommand;
 
 /**
  * Install all bundles command.
@@ -36,7 +37,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleInstallAllCommand extends ACommand
+class BundleInstallAllCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

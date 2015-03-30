@@ -31,7 +31,7 @@ use BackBee\AutoLoader\AutoLoader;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-class MockAutoloader extends AutoLoader implements IMock
+class MockInterfaceAutoloader extends AutoLoader implements MockInterface
 {
     private $_fakespaces = array();
 

@@ -42,7 +42,7 @@ class Indexation
      *
      * @var string
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
@@ -60,7 +60,7 @@ class Indexation
      * The owner content of the indexed field.
      *
      * @var AClassContent
-     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AClassContent", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="owner_uid", referencedColumnName="uid")
      */
     protected $_owner;
@@ -84,9 +84,9 @@ class Indexation
     /**
      * Class constructor.
      *
-     * @param AClassContent $content_uid The unique identifier of the indexed content
+     * @param AbstractClassContent $content_uid The unique identifier of the indexed content
      * @param string        $field       The indexed field of the indexed content
-     * @param AClassContent $owner_uid   The unique identifier of the owner content of the field
+     * @param AbstractClassContent $owner_uid   The unique identifier of the owner content of the field
      * @param string        $value       The value of the indexed field
      * @param string        $callback    The optional callback to apply while indexing the value
      */

@@ -33,7 +33,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="BackBee\Theme\Repository\ThemeRepository")
  * @ORM\Table(name="theme", indexes={@ORM\Index(name="site_idx", columns={"site_uid"})})
  */
-class PersonalThemeEntity extends AThemeEntity
+class PersonalThemeEntity extends AbstractThemeEntity
 {
     /**
      * Unique identifier of the object.

@@ -104,7 +104,7 @@ class CategoryManager
 
         $classnames = [];
         foreach ($category->getBlocks() as $block) {
-            $classnames[] = AClassContent::getClassnameByContentType($block->type);
+            $classnames[] = AbstractClassContent::getClassnameByContentType($block->type);
         }
 
         return $classnames;
@@ -124,7 +124,7 @@ class CategoryManager
                     return str_replace(
                         [DIRECTORY_SEPARATOR, '\\\\'],
                         [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
-                        AContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
+                        AbstractContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
                     );
                 },
                 File::getFilesRecursivelyByExtension($directory, 'yml')
@@ -146,9 +146,9 @@ class CategoryManager
     /**
      * Build and/or hydrate Category object with provided classcontent.
      *
-     * @param AClassContent $content
+     * @param AbstractClassContent $content
      */
-    private function buildCategoryFromClassContent(AClassContent $content)
+    private function buildCategoryFromClassContent(AbstractClassContent $content)
     {
         foreach ((array) $content->getProperty('category') as $category) {
             $visible = true;

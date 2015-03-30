@@ -26,7 +26,8 @@ namespace BackBee\Rest\EventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use BackBee\Event\Listener\APathEnabledListener;
+
+use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\Security\Exception\SecurityException;
 
@@ -38,7 +39,7 @@ use BackBee\Security\Exception\SecurityException;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class ExceptionListener extends APathEnabledListener
+class ExceptionListener extends AbstractPathEnabledListener
 {
     /**
      * @var array

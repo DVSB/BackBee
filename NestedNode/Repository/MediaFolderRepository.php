@@ -22,6 +22,7 @@
  */
 
 namespace BackBee\NestedNode\Repository;
+use BackBee\ClassContent\AbstractClassContent;
 
 /**
  * Media folder repository.
@@ -88,11 +89,11 @@ class MediaFolderRepository extends NestedNodeRepository
             $token = $bbapp->getBBUserToken();
             $content = $media->getContent();
 
-            if ($content instanceof AClassContent) {
+            if ($content instanceof AbstractClassContent) {
                 foreach ($content->getData() as $element => $value) {
                     $subcontent = $content->$element;
 
-                    if (!($subcontent instanceof AClassContent)) {
+                    if (!($subcontent instanceof AbstractClassContent)) {
                         continue;
                     }
 

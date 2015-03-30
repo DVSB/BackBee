@@ -155,9 +155,7 @@ class Database
             $classes = $this->_getBundleSchema($bundle);
             $schemaTool->updateSchema($classes, true);
             unset($schemaTool);
-        } catch (\Exception $e) {
-            //echo $e->getMessage()."\n";
-        }
+        } catch (\Exception $e) {}
     }
 
     /**
@@ -188,8 +186,7 @@ class Database
     }
 
     /**
-     * @param \BackBee\Bundle\ABundle $bundle
-     *
+     * @param  \BackBee\Bundle\AbstractBundle $bundle
      * @return array
      */
     private function _getBundleSchema($bundle)

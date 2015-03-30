@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class ResourceController extends ARestController
+class ResourceController extends AbstractRestController
 {
     /**
      * Upload file action

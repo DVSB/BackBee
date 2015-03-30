@@ -46,7 +46,7 @@ class elementListener
                 return;
             }
             $keywordloaded = $event->getTarget();
-            if (!is_a($renderer, 'BackBee\Renderer\ARenderer')) {
+            if (!is_a($renderer, 'BackBee\Renderer\AbstractRenderer')) {
                 return;
             }
             $keyWord = $application->getEntityManager()->find('BackBee\NestedNode\KeyWord', $keywordloaded->value);

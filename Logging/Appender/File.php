@@ -24,7 +24,7 @@
 namespace BackBee\Logging\Appender;
 
 use BackBee\Logging\Exception\LoggingException;
-use BackBee\Logging\Formatter\IFormatter;
+use BackBee\Logging\Formatter\FormatterInterface;
 use BackBee\Logging\Formatter\Simple;
 
 /**
@@ -33,7 +33,7 @@ use BackBee\Logging\Formatter\Simple;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class File implements IAppender
+class File implements AppenderInterface
 {
     private $_fhandler = null;
     private $_formatter = null;
@@ -66,7 +66,7 @@ class File implements IAppender
         }
     }
 
-    public function setFormatter(IFormatter $formatter)
+    public function setFormatter(FormatterInterface $formatter)
     {
         $this->_formatter = $formatter;
 

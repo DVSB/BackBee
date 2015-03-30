@@ -31,7 +31,7 @@ namespace BackBee\Validator;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class ArrayValidator extends AValidator
+class ArrayValidator extends AbstractValidator
 {
     const DELIMITER = '__';
 

@@ -23,7 +23,7 @@
 
 namespace BackBee\Cache\NoCache;
 
-use BackBee\Cache\ACache;
+use BackBee\Cache\AbstractCache;
 
 /**
  * Filesystem cache adapter.
@@ -35,7 +35,7 @@ use BackBee\Cache\ACache;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Cache extends ACache
+class Cache extends AbstractCache
 {
     /**
      * Returns the available cache for the given id if found returns FALSE else.

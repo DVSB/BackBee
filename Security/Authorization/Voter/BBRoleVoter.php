@@ -25,7 +25,8 @@ namespace BackBee\Security\Authorization\Voter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
-use BackBee\Security\Authorization\Adaptator\IRoleReaderAdaptator;
+
+use BackBee\Security\Authorization\Adaptator\RoleReaderAdaptatorInterface;
 
 /**
  * @category    BackBee
@@ -47,7 +48,7 @@ class BBRoleVoter implements VoterInterface
      *
      * @param string $prefix The role prefix
      */
-    public function __construct(IRoleReaderAdaptator $adaptator, $prefix = 'BB_')
+    public function __construct(RoleReaderAdaptatorInterface $adaptator, $prefix = 'BB_')
     {
         $this->_prefix = $prefix;
         $this->_adaptator = $adaptator;

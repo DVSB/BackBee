@@ -25,7 +25,8 @@ namespace BackBee\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use BackBee\Console\ACommand;
+
+use BackBee\Console\AbstractCommand;
 use BackBee\Utils\File\Dir;
 
 /**
@@ -36,7 +37,7 @@ use BackBee\Utils\File\Dir;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class CacheClearCommand extends ACommand
+class CacheClearCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

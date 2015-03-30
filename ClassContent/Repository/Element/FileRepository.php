@@ -24,7 +24,7 @@
 namespace BackBee\ClassContent\Repository\Element;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
@@ -98,15 +98,14 @@ class FileRepository extends ClassContentRepository
     /**
      * Move an uploaded file to the temporary directory and update file content.
      *
-     * @param \BackBee\ClassContent\AClassContent $file
-     * @param string                              $newfilename
-     * @param string                              $originalname
+     * @param  \BackBee\ClassContent\AbstractClassContent            $file
+     * @param  string                                                $newfilename
+     * @param  string                                                $originalname
      *
      * @return boolean|string
-     *
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function updateFile(AClassContent $file, $newfilename, $originalname = null, $src = null)
+    public function updateFile(AbstractClassContent $file, $newfilename, $originalname = null, $src = null)
     {
         if (false === ($file instanceof ElementFile)) {
             throw new ClassContentException('Invalid content type');
@@ -145,9 +144,6 @@ class FileRepository extends ClassContentRepository
             return false;
         }
 
-        //$stat = stat($moveto);
-        //$file->setParam('stat', $stat, 'array');
-
         return $moveto;
     }
 
@@ -177,17 +173,16 @@ class FileRepository extends ClassContentRepository
     }
 
     /**
-     * Do stuf on update by post of the content editing form.
+     * Do update by post of the content editing form.
      *
-     * @param \BackBee\ClassContent\AClassContent $content
-     * @param stdClass                            $value
-     * @param \BackBee\ClassContent\AClassContent $parent
+     * @param  \BackBee\ClassContent\AbstractClassContent            $content
+     * @param  stdClass                                              $value
+     * @param  \BackBee\ClassContent\AbstractClassContent            $parent
      *
      * @return \BackBee\ClassContent\Element\File
-     *
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
-    public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
+    public function getValueFromPost(AbstractClassContent $content, $value, AbstractClassContent $parent = null)
     {
         if (false === ($content instanceof ElementFile)) {
             throw new ClassContentException('Invalid content type');
@@ -226,13 +221,13 @@ class FileRepository extends ClassContentRepository
     /**
      * Set the temporary directory.
      *
-     * @param type $temporary_dir
+     * @param type $tempDirectory
      *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setTemporaryDir($temporary_dir = null)
+    public function setTemporaryDir($tempDirectory = null)
     {
-        $this->_temporarydir = $temporary_dir;
+        $this->_temporarydir = $tempDirectory;
 
         return $this;
     }
@@ -240,13 +235,13 @@ class FileRepository extends ClassContentRepository
     /**
      * Set the storage directory.
      *
-     * @param type $storage_dir
+     * @param type $storageDirectory
      *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setStorageDir($storage_dir = null)
+    public function setStorageDir($storageDirectory = null)
     {
-        $this->_storagedir = $storage_dir;
+        $this->_storagedir = $storageDirectory;
 
         return $this;
     }
@@ -254,13 +249,13 @@ class FileRepository extends ClassContentRepository
     /**
      * Set the media library directory.
      *
-     * @param type $media_dir
+     * @param type $mediaDirectory
      *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setMediaDir($media_dir = null)
+    public function setMediaDir($mediaDirectory = null)
     {
-        $this->_mediadir = $media_dir;
+        $this->_mediadir = $mediaDirectory;
 
         return $this;
     }

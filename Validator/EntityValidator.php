@@ -33,7 +33,7 @@ use Doctrine\ORM\EntityManager;
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
-class EntityValidator extends AValidator
+class EntityValidator extends AbstractValidator
 {
     const CONFIG_PARAMETER_ENTITY = 'entity';
     const PASSWORD_VALIDATOR = 'password';
