@@ -23,7 +23,9 @@
 
 namespace BackBee\Renderer;
 
+use BackBee\NestedNode\Page;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\BBApplication;
 use BackBee\NestedNode\AbstractNestedNode;
@@ -33,6 +35,7 @@ use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Utils\File\File;
 use BackBee\Utils\String;
+use BackBee\ClassContent\AbstractClassContent;
 
 /**
  * Abstract class for a renderer
@@ -406,11 +409,11 @@ abstract class AbstractRenderer implements RendererInterface
 
         if (is_array($var)) {
             foreach ($var as $key => $value) {
-                if ($value instanceof \BackBee\ClassContent\AbstractClassContent) {
+                if ($value instanceof AbstractClassContent) {
                     // trying to load subcontent
                     $subcontent = $this->getApplication()
                             ->getEntityManager()
-                            ->getRepository(\Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($value))
+                            ->getRepository(ClassUtils::getRealClass($value))
                             ->load($value, $this->getApplication()->getBBUserToken());
                     if (null !== $subcontent) {
                         $value = $subcontent;
@@ -700,11 +703,11 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Set the current page
-     * @param  BackBee\NestedNode\Page $page
-     * @return AbstractRenderer               The current renderer
+     * @param  Page $page
+     *
+     * @return AbstractRenderer
      */
-    public function setCurrentPage(\BackBee\NestedNode\Page $page = null)
+    public function setCurrentPage(Page $page = null)
     {
         $this->_currentpage = $page;
 

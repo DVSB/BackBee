@@ -440,7 +440,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
 
     /*     * **************************************************************** */
     /*                                                                        */
-    /*                   Implementation of RenderableInterface                        */
+    /*                   Implementation of RenderableInterface                */
     /*                                                                        */
     /*     * **************************************************************** */
 
