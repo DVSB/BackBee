@@ -25,8 +25,8 @@ namespace BackBee\Renderer\Adapter;
 
 use Exception;
 
-use BackBee\Renderer\ARenderer;
-use BackBee\Renderer\ARendererAdapter;
+use BackBee\Renderer\AbstractRenderer;
+use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
 use BackBee\Utils\File\File;
@@ -41,7 +41,7 @@ use BackBee\Utils\File\File;
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
  */
-class phtml extends ARendererAdapter
+class phtml extends AbstractRendererAdapter
 {
     /**
      * Extensions to include searching file
@@ -61,9 +61,9 @@ class phtml extends ARendererAdapter
 
     /**
      * [__construct description]
-     * @param ARenderer $renderer [description]
+     * @param AbstractRenderer $renderer [description]
      */
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         parent::__construct($renderer);
 
@@ -97,7 +97,7 @@ class phtml extends ARendererAdapter
      * @codeCoverageIgnore
      * @param  string    $var   the name of the variable
      * @param  mixed     $value the value of the variable
-     * @return ARenderer the current renderer
+     * @return AbstractRenderer the current renderer
      */
     public function __set($var, $value = null)
     {
@@ -157,7 +157,7 @@ class phtml extends ARendererAdapter
      * Assign one or more variables
      * @param  mixed     $var   A variable name or an array of variables to set
      * @param  mixed     $value The variable value to set
-     * @return ARenderer The current renderer
+     * @return AbstractRenderer The current renderer
      */
     public function assign($var, $value = null)
     {
@@ -273,7 +273,7 @@ class phtml extends ARendererAdapter
     /**
      * @see BackBee\Renderer\IRendererAdapter::onRestorePreviousRenderer()
      */
-    public function onRestorePreviousRenderer(ARenderer $renderer)
+    public function onRestorePreviousRenderer(AbstractRenderer $renderer)
     {
         parent::onRestorePreviousRenderer($renderer);
 

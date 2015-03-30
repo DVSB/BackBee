@@ -27,7 +27,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use BackBee\Console\ACommand;
+use BackBee\Console\AbstractCommand;
 
 /**
  * Update BBApp database
@@ -37,7 +37,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class NestedNodeProcessJobsCommand extends ACommand
+class NestedNodeProcessJobsCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

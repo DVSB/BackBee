@@ -23,7 +23,7 @@
 
 namespace BackBee\Event\Listener;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Element\Image as ElementImage;
@@ -48,7 +48,7 @@ class RevisionListener
     public static function onRemoveContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             return;
         }
 
@@ -74,7 +74,7 @@ class RevisionListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             return;
         }
 
@@ -99,7 +99,7 @@ class RevisionListener
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        if ($uow->isScheduledForInsert($content) && AClassContent::STATE_NEW == $content->getState()) {
+        if ($uow->isScheduledForInsert($content) && AbstractClassContent::STATE_NEW == $content->getState()) {
             $revision = $em->getRepository('BackBee\ClassContent\Revision')->checkout($content, $token);
             $em->persist($revision);
             $uow->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $revision);
@@ -193,12 +193,12 @@ class RevisionListener
         }
 
         $renderer = $event->getEventArgs();
-        if (!is_a($renderer, 'BackBee\Renderer\ARenderer')) {
+        if (!is_a($renderer, 'BackBee\Renderer\AbstractRenderer')) {
             return;
         }
 
         $content = $renderer->getObject();
-        if (!is_a($content, 'BackBee\ClassContent\AClassContent')) {
+        if (!is_a($content, 'BackBee\ClassContent\AbstractClassContent')) {
             return;
         }
 

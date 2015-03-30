@@ -33,7 +33,7 @@ use BackBee\Site\Site;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-class MockSite extends Site implements IMock
+class MockInterfaceSite extends Site implements MockInterface
 {
     public function __construct()
     {

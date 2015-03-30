@@ -35,7 +35,7 @@ use BackBee\Site\Layout;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class LayoutController extends ARestController
+class LayoutController extends AbstractRestController
 {
     /**
      * Returns every workflow states associated to provided layout

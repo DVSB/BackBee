@@ -35,7 +35,7 @@ use BackBee\Security\Role\Role;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class Yml implements IRoleReaderAdaptator
+class Yml implements RoleReaderAdaptatorInterface
 {
     private $_roles;
 

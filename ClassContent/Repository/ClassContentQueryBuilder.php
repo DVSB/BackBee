@@ -32,7 +32,7 @@ use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
 
 /**
- * AClassContent repository
+ * AbstractClassContent repository
  *
  * @category    BackBee
  * @package     BackBee\ClassContent
@@ -51,7 +51,7 @@ class ClassContentQueryBuilder extends QueryBuilder
      */
     private $classmap = array(
         'IdxSiteContent' => 'BackBee\ClassContent\Indexes\IdxSiteContent',
-        'AClassContent' => 'BackBee\ClassContent\AClassContent',
+        'AbstractClassContent' => 'BackBee\ClassContent\AbstractClassContent',
     );
 
     /**
@@ -65,7 +65,7 @@ class ClassContentQueryBuilder extends QueryBuilder
         $this->_em = $em;
         parent::__construct($em);
         $select = is_null($select) ? 'cc' : $select;
-        $this->select($select)->distinct()->from($this->getClass('AClassContent'), 'cc');
+        $this->select($select)->distinct()->from($this->getClass('AbstractClassContent'), 'cc');
     }
 
     /**

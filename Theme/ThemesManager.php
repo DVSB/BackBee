@@ -31,7 +31,7 @@ use BackBee\Theme\Exception\ThemeException;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class ThemesManager extends AThemesManager
+class ThemesManager extends AbstractThemesManager
 {
     /**
      * create theme folder architecture.

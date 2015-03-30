@@ -21,7 +21,7 @@ use BackBee\Rest\Controller\Annotations as Rest;
  *
  * @author h.baptiste
  */
-class MediaController extends ARestController
+class MediaController extends AbstractRestController
 {
 
     /**

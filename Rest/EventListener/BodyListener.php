@@ -28,8 +28,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 
-use BackBee\Event\Listener\APathEnabledListener;
-use BackBee\Rest\Encoder\IEncoderProvider;
+use BackBee\Event\Listener\AbstractPathEnabledListener;
+use BackBee\Rest\Encoder\EncoderProviderInterface;
 
 /**
  * Body listener/encoder
@@ -39,10 +39,10 @@ use BackBee\Rest\Encoder\IEncoderProvider;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BodyListener extends APathEnabledListener
+class BodyListener extends AbstractPathEnabledListener
 {
     /**
-     * @var IEncoderProvider
+     * @var EncoderProviderInterface
      */
     private $encoderProvider;
 
@@ -54,11 +54,11 @@ class BodyListener extends APathEnabledListener
     /**
      * Constructor.
      *
-     * @param IEncoderProvider $encoderProvider                        Provider for encoders
+     * @param EncoderProviderInterface $encoderProvider                        Provider for encoders
      * @param boolean          $throwExceptionOnUnsupportedContentType
      * @param string           $path
      */
-    public function __construct(IEncoderProvider $encoderProvider, $throwExceptionOnUnsupportedContentType = false)
+    public function __construct(EncoderProviderInterface $encoderProvider, $throwExceptionOnUnsupportedContentType = false)
     {
         $this->encoderProvider = $encoderProvider;
         $this->throwExceptionOnUnsupportedContentType = $throwExceptionOnUnsupportedContentType;

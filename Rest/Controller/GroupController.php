@@ -41,7 +41,7 @@ use BackBee\Security\Group;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class GroupController extends ARestController
+class GroupController extends AbstractRestController
 {
     /**
      * Get all records

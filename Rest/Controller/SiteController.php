@@ -34,7 +34,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class SiteController extends ARestController
+class SiteController extends AbstractRestController
 {
     /**
      * Get site layouts

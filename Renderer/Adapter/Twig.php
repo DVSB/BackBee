@@ -42,8 +42,8 @@ namespace BackBee\Renderer\Adapter;
  * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use BackBee\Renderer\ARenderer;
-use BackBee\Renderer\ARendererAdapter;
+use BackBee\Renderer\AbstractRenderer;
+use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 
 /**
@@ -54,7 +54,7 @@ use BackBee\Renderer\Exception\RendererException;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Twig extends ARendererAdapter
+class Twig extends AbstractRendererAdapter
 {
     /**
      * @var BackBee\Renderer\Adapter\TwigLoaderFilesystem
@@ -79,9 +79,9 @@ class Twig extends ARendererAdapter
     /**
      * Twig adapter constructor
      *
-     * @param ARenderer $renderer
+     * @param AbstractRenderer $renderer
      */
-    public function __construct(ARenderer $renderer)
+    public function __construct(AbstractRenderer $renderer)
     {
         parent::__construct($renderer);
 

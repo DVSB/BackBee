@@ -48,7 +48,7 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Validator;
 
-use BackBee\Event\Listener\APathEnabledListener;
+use BackBee\Event\Listener\AbstractPathEnabledListener;
 
 /**
  * Pagination listener
@@ -58,7 +58,7 @@ use BackBee\Event\Listener\APathEnabledListener;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class ParamConverterListener extends APathEnabledListener
+class ParamConverterListener extends AbstractPathEnabledListener
 {
     /**
      * @var Metadata\MetadataFactory

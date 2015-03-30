@@ -24,7 +24,7 @@
 namespace BackBee\Site;
 
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Utils\Numeric;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
@@ -42,8 +42,8 @@ use JMS\Serializer\Annotation as Serializer;
  *   templateLayouts: [      // Array of final dropable zones
  *     zone1: {
  *       id:                 // unique identifier of the zone
- *       defaultContainer:   // default AClassContent drop at creation
- *       target:             // array of accepted AClassContent dropable
+ *       defaultContainer:   // default AbstractClassContent drop at creation
+ *       target:             // array of accepted AbstractClassContent dropable
  *       gridClassPrefix:    // prefix of responsive CSS classes
  *       gridSize:           // size of this zone for responsive CSS
  *     },
@@ -61,7 +61,7 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class Layout extends AObjectIdentifiable
+class Layout extends AbstractObjectIdentifiable
 {
     /**
      * The unique identifier.

@@ -23,7 +23,7 @@
 
 namespace BackBee\Event\Listener;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 
@@ -47,7 +47,7 @@ class MetaDataListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             return;
         }
 

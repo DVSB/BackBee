@@ -25,7 +25,7 @@ namespace BackBee\Cache\File;
 
 use Psr\Log\LoggerInterface;
 
-use BackBee\Cache\ACache;
+use BackBee\Cache\AbstractCache;
 use BackBee\Cache\Exception\CacheException;
 use BackBee\Utils\String;
 
@@ -40,7 +40,7 @@ use BackBee\Utils\String;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Cache extends ACache
+class Cache extends AbstractCache
 {
     /**
      * The cache directory

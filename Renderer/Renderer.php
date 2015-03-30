@@ -26,7 +26,7 @@ namespace BackBee\Renderer;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 use BackBee\BBApplication;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
@@ -45,7 +45,7 @@ use BackBee\Utils\String;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class Renderer extends ARenderer implements DumpableServiceInterface, DumpableServiceProxyInterface
+class Renderer extends AbstractRenderer implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
     /**
      * constants used to manage external resources
@@ -55,13 +55,13 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     const FOOTER_JS = 'js_footer';
 
     /**
-     * contains every IRendererAdapter added by user
+     * contains every RendererAdapterInterface added by user
      * @var ParameterBag
      */
     private $renderer_adapters;
 
     /**
-     * contains every extensions that Renderer can manage thanks to registered IRendererAdapter
+     * contains every extensions that Renderer can manage thanks to registered RendererAdapterInterface
      * @var ParameterBag
      */
     private $manageable_ext;
@@ -116,7 +116,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * Update every helpers and every registered renderer adapters with the right AbstractRenderer;
      * this method is called everytime we clone a renderer
      */
     public function updatesAfterClone()
@@ -133,9 +133,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * Register a renderer adapter ($rendererAdapter); this method also set
      * current $rendererAdapter as default adapter if it is not set
      *
-     * @param IRendererAdapter $rendererAdapter
+     * @param RendererAdapterInterface $rendererAdapter
      */
-    public function addRendererAdapter(IRendererAdapter $rendererAdapter)
+    public function addRendererAdapter(RendererAdapterInterface $rendererAdapter)
     {
         $key = $this->getRendererAdapterKey($rendererAdapter);
         if (false === $this->renderer_adapters->has($key)) {
@@ -151,7 +151,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      *
      * @param  string           $ext
-     * @return IRendererAdapter
+     * @return RendererAdapterInterface
      */
     public function getAdapterByExt($ext)
     {
@@ -194,7 +194,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Getters of renderer adapter by $key
      *
-     * @return BackBee\Renderer\IRendererAdapter
+     * @return BackBee\Renderer\RendererAdapterInterface
      */
     public function getAdapter($key)
     {
@@ -204,7 +204,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Getters of renderer adapters
      *
-     * @return array<BackBee\Renderer\IRendererAdapter>
+     * @return array<BackBee\Renderer\RendererAdapterInterface>
      */
     public function getAdapters()
     {
@@ -212,9 +212,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBee\Renderer\IRenderer::render()
+     * @see BackBee\Renderer\RendererInterface::render()
      */
-    public function render(IRenderable $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
+    public function render(RenderableInterface $obj = null, $mode = null, $params = null, $template = null, $ignoreModeIfNotSet = false)
     {
         if (null === $obj) {
             return;
@@ -265,7 +265,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         return $render;
     }
 
-    public function tryResolveParentObject(AClassContent $parent, AClassContent $element)
+    public function tryResolveParentObject(AbstractClassContent $parent, AbstractClassContent $element)
     {
         foreach ($parent->getData() as $key => $values) {
             if (false === is_array($values)) {
@@ -273,7 +273,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
             }
 
             foreach ($values as $value) {
-                if ($value instanceof AClassContent) {
+                if ($value instanceof AbstractClassContent) {
                     if (false === $value->isLoaded()) {
                         // try to load subcontent
                         if (null !== $subcontent = $this->getApplication()
@@ -305,7 +305,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBee\Renderer\IRenderer::partial()
+     * @see BackBee\Renderer\RendererInterface::partial()
      */
     public function partial($template = null, $params = null)
     {
@@ -329,7 +329,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBee\Renderer\IRenderer::error()
+     * @see BackBee\Renderer\RendererInterface::error()
      */
     public function error($errorCode, $title = null, $message = null, $trace = null)
     {
@@ -447,10 +447,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Returns the list of available render mode for the provided object
      *
-     * @param  \BackBee\Renderer\IRenderable $object
+     * @param  \BackBee\Renderer\RenderableInterface $object
      * @return array
      */
-    public function getAvailableRenderMode(IRenderable $object)
+    public function getAvailableRenderMode(RenderableInterface $object)
     {
         $modes = parent::getAvailableRenderMode($object);
         foreach ($modes as &$mode) {
@@ -461,7 +461,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * @see BackBee\Renderer\IRenderer::updateLayout()
+     * @see BackBee\Renderer\RendererInterface::updateLayout()
      */
     public function updateLayout(Layout $layout)
     {
@@ -613,7 +613,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     }
 
     /**
-     * Update every helpers and every registered renderer adapters with the right ARenderer;
+     * Update every helpers and every registered renderer adapters with the right AbstractRenderer;
      * this method is called everytime we unset a renderer
      */
     protected function updatesAfterUnset()
@@ -711,10 +711,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Compute a key for renderer adapter ($rendererAdapter)
      *
-     * @param  IRendererAdapter $rendererAdapter
+     * @param  RendererAdapterInterface $rendererAdapter
      * @return string
      */
-    private function getRendererAdapterKey(IRendererAdapter $rendererAdapter)
+    private function getRendererAdapterKey(RendererAdapterInterface $rendererAdapter)
     {
         $key = explode(NAMESPACE_SEPARATOR, get_class($rendererAdapter));
 
@@ -724,9 +724,9 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Extract managed extensions from rendererAdapter and store it
      *
-     * @param IRendererAdapter $rendererAdapter
+     * @param RendererAdapterInterface $rendererAdapter
      */
-    private function addManagedExtensions(IRendererAdapter $rendererAdapter)
+    private function addManagedExtensions(RendererAdapterInterface $rendererAdapter)
     {
         $key = $this->getRendererAdapterKey($rendererAdapter);
         foreach ($rendererAdapter->getManagedFileExtensions() as $ext) {
@@ -744,8 +744,8 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * Returns an adapter containing in $adapeters; it will returns in prior
      * the defaultAdpater if it is in $adapters or the first adapter found
      *
-     * @param  array            $adapters contains object of type IRendererAdapter
-     * @return IRendererAdapter
+     * @param  array            $adapters contains object of type RendererAdapterInterface
+     * @return RendererAdapterInterface
      */
     private function getRightAdapter(array $adapters)
     {
@@ -762,7 +762,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Returns the right adapter to use according to the filename extension
      *
-     * @return IRendererAdapter
+     * @return RendererAdapterInterface
      */
     private function determineWhichAdapterToUse($filename = null)
     {
@@ -878,7 +878,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
                     $subcontents = (array) $subcontents;
 
                     foreach ($subcontents as $sc) {
-                        if (true === is_a($sc, 'BackBee\Renderer\IRenderable')) {
+                        if (true === is_a($sc, 'BackBee\Renderer\RenderableInterface')) {
                             $scRender = $this->render(
                                 $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
                             );
@@ -900,7 +900,7 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
         // Assign vars and parameters
         if (null !== $this->_object) {
             $draft = $this->_object->getDraft();
-            $aClassContentClassname = 'BackBee\ClassContent\AClassContent';
+            $aClassContentClassname = 'BackBee\ClassContent\AbstractClassContent';
             if (true === is_a($this->_object, $aClassContentClassname) && false === $this->_object->isLoaded()) {
                 // trying to refresh unloaded content
                 $em = $application->getEntityManager();
@@ -932,10 +932,10 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
     /**
      * Set parameters to a renderer object in parameter
      *
-     * @param ARenderer $render
+     * @param AbstractRenderer $render
      * @param array     $params
      */
-    private function setRenderParams(ARenderer $render, $params)
+    private function setRenderParams(AbstractRenderer $render, $params)
     {
         if (null !== $params) {
             $params = (array) $params;
@@ -950,11 +950,11 @@ class Renderer extends ARenderer implements DumpableServiceInterface, DumpableSe
      * 		- on success return string which is the right filename with its extension
      * 		- on fail return false
      *
-     * @param  IRenderable    $object
+     * @param  RenderableInterface    $object
      * @param  [type]         $mode
      * @return string|boolean string if successfully found a valid file name, else false
      */
-    private function getTemplateFile(IRenderable $object, $mode = null)
+    private function getTemplateFile(RenderableInterface $object, $mode = null)
     {
         $tmpStorage = $this->template_file;
         $template = $this->getTemplatePath($object);

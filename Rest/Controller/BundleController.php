@@ -45,7 +45,7 @@ use BackBee\Rest\Patcher\RightManager;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class BundleController extends ARestController
+class BundleController extends AbstractRestController
 {
     /**
      * Returns a collection of declared bundles

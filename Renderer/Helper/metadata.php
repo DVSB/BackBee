@@ -35,7 +35,7 @@ use BackBee\MetaData\MetaDataBag;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class metadata extends AHelper
+class metadata extends AbstractHelper
 {
     public function __invoke()
     {

@@ -23,7 +23,7 @@
 
 namespace BackBee\ClassContent\Tests;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Tests\Mock\MockContent;
@@ -49,7 +49,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test getProperty
      *
-     * @coverage \BackBee\ClassContent\AClassContent::getProperty
+     * @coverage \BackBee\ClassContent\AbstractClassContent::getProperty
      */
     public function testGetProperty()
     {
@@ -61,7 +61,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test setProperty
      *
-     * @coverage \BackBee\ClassContent\AClassContent::setProperty
+     * @coverage \BackBee\ClassContent\AbstractClassContent::setProperty
      */
     public function testSetProperty()
     {
@@ -72,7 +72,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
     /**
      * test createClone
      *
-     * @coverage \BackBee\ClassContent\AClassContent::createClone
+     * @coverage \BackBee\ClassContent\AbstractClassContent::createClone
      */
     public function testCreateClone()
     {
@@ -257,7 +257,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonSerializeDefinitionFormat()
     {
-        $data = $this->content->JsonSerialize(AClassContent::JSON_DEFINITION_FORMAT);
+        $data = $this->content->JsonSerialize(AbstractClassContent::JSON_DEFINITION_FORMAT);
 
         $this->assertTrue(isset($data['label']));
         $this->assertTrue(isset($data['type']));
@@ -280,7 +280,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonSerializeConciseFormat()
     {
-        $data = $this->content->JsonSerialize(AClassContent::JSON_CONCISE_FORMAT);
+        $data = $this->content->JsonSerialize(AbstractClassContent::JSON_CONCISE_FORMAT);
 
         $this->assertTrue(isset($data['uid']));
         $this->assertTrue(isset($data['type']));
@@ -303,7 +303,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonSerializeInfoFormat()
     {
-        $data = $this->content->JsonSerialize(AClassContent::JSON_INFO_FORMAT);
+        $data = $this->content->JsonSerialize(AbstractClassContent::JSON_INFO_FORMAT);
 
         $this->assertTrue(isset($data['uid']));
         $this->assertTrue(isset($data['type']));

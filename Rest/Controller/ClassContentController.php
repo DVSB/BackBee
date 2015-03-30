@@ -32,7 +32,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Routing\RouteCollection;
 use BackBee\Rest\Patcher\EntityPatcher;
@@ -50,7 +50,7 @@ use BackBee\Utils\File\File;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class ClassContentController extends ARestController
+class ClassContentController extends AbstractRestController
 {
     /**
      * @var BackBee\ClassContent\ClassContentManager
@@ -102,7 +102,7 @@ class ClassContentController extends ARestController
         $response = $this->createJsonResponse();
         $categoryName = $request->query->get('category', null);
 
-        if (AClassContent::JSON_DEFINITION_FORMAT === $format) {
+        if (AbstractClassContent::JSON_DEFINITION_FORMAT === $format) {
             $response->setData($contents = $this->getClassContentDefinitionsByCategory($categoryName));
             $start = 0;
         } else {
@@ -130,7 +130,7 @@ class ClassContentController extends ARestController
      */
     public function getCollectionByTypeAction($type, $start, $count)
     {
-        $classname = AClassContent::getClassnameByContentType($type);
+        $classname = AbstractClassContent::getClassnameByContentType($type);
         $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
         $response = $this->createJsonResponse($this->getClassContentManager()->jsonEncodeCollection(
             $contents,
@@ -185,7 +185,7 @@ class ClassContentController extends ARestController
      */
     public function postAction($type, Request $request)
     {
-        $classname = AClassContent::getClassnameByContentType($type);
+        $classname = AbstractClassContent::getClassnameByContentType($type);
         $content = new $classname();
 
         $this->getEntityManager()->persist($content);
@@ -278,7 +278,7 @@ class ClassContentController extends ARestController
         $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
 
         try {
-            $this->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')->deleteContent($content);
+            $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($content);
         } catch (\Exception $e) {
             throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
@@ -419,7 +419,7 @@ class ClassContentController extends ARestController
             foreach ($draft->getContent()->getData() as $key => $element) {
                 if (
                     is_object($element)
-                    && $element instanceof AClassContent
+                    && $element instanceof AbstractClassContent
                     && in_array($element->getUid(), array_keys($sortedDrafts))
                 ) {
                     $elementUid = $element->getUid();
@@ -457,7 +457,7 @@ class ClassContentController extends ARestController
      * @param  string $type
      * @param  string $uid
      * @param  array $data
-     * @return AClassContent
+     * @return AbstractClassContent
      */
     private function updateClassContent($type, $uid, $data)
     {
@@ -474,7 +474,7 @@ class ClassContentController extends ARestController
      * @param  string $type
      * @param  string $uid
      * @param  array  $data
-     * @return AClassContent
+     * @return AbstractClassContent
      */
     private function updateClassContentDraft($type, $uid, $data)
     {
@@ -495,12 +495,12 @@ class ClassContentController extends ARestController
      *
      * @param string $type
      * @param string $uid
-     * @return AClassContent
+     * @return AbstractClassContent
      */
     private function getClassContentByTypeAndUid($type, $uid)
     {
         $content = null;
-        $classname = AClassContent::getClassnameByContentType($type);
+        $classname = AbstractClassContent::getClassnameByContentType($type);
 
         try {
             $content = $this->getEntityManager()->find($classname, $uid);
@@ -544,7 +544,7 @@ class ClassContentController extends ARestController
              AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname'
         )->execute([
             'pageUid'              => $pageUid,
-            'contentset_classname' => AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet',
+            'contentset_classname' => AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet',
         ]);
 
         $classnames = [];
@@ -571,7 +571,7 @@ class ClassContentController extends ARestController
     }
 
     /**
-     * Returns classcontent data with definition format (AContent::JSON_DEFAULT_FORMAT). If category name
+     * Returns classcontent data with definition format (AbstractContent::JSON_DEFAULT_FORMAT). If category name
      * is provided it will returns every classcontent definition that belongs to this category, else it
      * will returns all classcontents definitions.
      *
@@ -591,7 +591,7 @@ class ClassContentController extends ARestController
         foreach ($classnames as $classname) {
             $definitions[] = $this->getClassContentManager()->jsonEncode(
                 (new $classname),
-                AClassContent::JSON_DEFINITION_FORMAT
+                AbstractClassContent::JSON_DEFINITION_FORMAT
             );
         }
 
@@ -627,28 +627,28 @@ class ClassContentController extends ARestController
         unset($criterias['order_direction']);
 
         return $this->getEntityManager()
-            ->getRepository('BackBee\ClassContent\AClassContent')
+            ->getRepository('BackBee\ClassContent\AbstractClassContent')
             ->findContentsBySearch($classnames, $order_infos, $pagination, $criterias)
         ;
     }
 
     /**
-     * Returns AContent valid json format by looking at request query parameter and if no format found,
-     * it fallback to AContent::JSON_DEFAULT_FORMAT.
+     * Returns AbstractContent valid json format by looking at request query parameter and if no format found,
+     * it fallback to AbstractContent::JSON_DEFAULT_FORMAT.
      *
-     * @return integer One of AContent::$jsonFormats:
+     * @return integer One of AbstractContent::$jsonFormats:
      *                 JSON_DEFAULT_FORMAT | JSON_DEFINITION_FORMAT | JSON_CONCISE_FORMAT | JSON_INFO_FORMAT
      */
     private function getFormatParam()
     {
-        $validFormats = array_keys(AClassContent::$jsonFormats);
+        $validFormats = array_keys(AbstractClassContent::$jsonFormats);
         $queryParamsKey = array_keys($this->getRequest()->query->all());
         $format = ($collection = array_intersect($validFormats, $queryParamsKey))
             ? array_shift($collection)
-            : $validFormats[AClassContent::JSON_DEFAULT_FORMAT]
+            : $validFormats[AbstractClassContent::JSON_DEFAULT_FORMAT]
         ;
 
-        return AClassContent::$jsonFormats[$format];
+        return AbstractClassContent::$jsonFormats[$format];
     }
 
     /**

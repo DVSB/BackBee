@@ -31,7 +31,7 @@ use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
@@ -52,7 +52,7 @@ use BackBee\Workflow\State;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class PageController extends ARestController
+class PageController extends AbstractRestController
 {
     /**
      * Returns page entity available status
@@ -467,7 +467,7 @@ class PageController extends ARestController
     private function doGetCollectionByContent($content_type, $content_uid)
     {
         $content = null;
-        $classname = AClassContent::getClassnameByContentType($content_type);
+        $classname = AbstractClassContent::getClassnameByContentType($content_type);
         $em = $this->getApplication()->getEntityManager();
 
         try {
@@ -480,7 +480,7 @@ class PageController extends ARestController
             throw new NotFoundHttpException("No `$classname` exists with uid `$content_uid`");
         }
 
-        $pages = $em->getRepository("BackBee\ClassContent\AClassContent")->findPagesByContent($content);
+        $pages = $em->getRepository("BackBee\ClassContent\AbstractClassContent")->findPagesByContent($content);
 
         $response = $this->createResponse($this->formatCollection($pages));
         if (0 < count($pages)) {

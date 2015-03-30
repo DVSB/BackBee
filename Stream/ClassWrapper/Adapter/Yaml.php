@@ -27,13 +27,13 @@ use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as parserYaml;
 
 use BackBee\Exception\BBException;
-use BackBee\Stream\ClassWrapper\AClassWrapper;
+use BackBee\Stream\ClassWrapper\AbstractClassWrapper;
 use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 use BackBee\Utils\File\File;
 
 /**
  * Stream wrapper to interprate yaml file as class content description
- * Extends AClassWrapper
+ * Extends AbstractClassWrapper
  *
  * @category    BackBee
  * @package     BackBee\Stream\ClassWrapper
@@ -41,7 +41,7 @@ use BackBee\Utils\File\File;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Yaml extends AClassWrapper
+class Yaml extends AbstractClassWrapper
 {
     /**
      * Current BackBee application
@@ -355,7 +355,7 @@ class Yaml extends AClassWrapper
 
     /**
      * Retrieve information about a yaml file
-     * @see BackBee\Stream\ClassWrapper.AClassWrapper::url_stat()
+     * @see BackBee\Stream\ClassWrapper.AbstractClassWrapper::url_stat()
      */
     public function url_stat($path, $flag)
     {

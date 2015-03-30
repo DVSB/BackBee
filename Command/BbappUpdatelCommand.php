@@ -29,7 +29,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use BackBee\Console\ACommand;
+use BackBee\Console\AbstractCommand;
 
 /**
  * Update BBApp database
@@ -39,7 +39,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BbappUpdatelCommand extends ACommand
+class BbappUpdatelCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

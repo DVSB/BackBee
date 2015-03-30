@@ -200,7 +200,7 @@ class Repository extends EntityRepository
 
     public function persist($entity)
     {
-        if ($entity instanceof DomainObjectInterface && $entity instanceof IRegistryEntity && null === $entity->getObjectIdentifier()) {
+        if ($entity instanceof DomainObjectInterface && $entity instanceof RegistryEntityInterface && null === $entity->getObjectIdentifier()) {
             if (!$this->last_inserted_id) {
                 $this->last_inserted_id = $this->getLastInsertedId();
             }

@@ -26,7 +26,7 @@ namespace BackBee\Cache;
 use BackBee\Cache\IdentifierAppender\IdentifierAppenderInterface;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Renderer\IRenderer;
+use BackBee\Renderer\RendererInterface;
 
 /**
  * CacheIdentifierGenerator allows you to easily customize cache identifier by adding appenders
@@ -81,11 +81,11 @@ class CacheIdentifierGenerator
      *
      * @param string    $group_name the group name of appenders to apply
      * @param string    $identifier identifier we want to update
-     * @param IRenderer $renderer   the current renderer, can be null
+     * @param RendererInterface $renderer   the current renderer, can be null
      *
      * @return string the identifier new computed with appenders of group name
      */
-    public function compute($group_name, $identifier, IRenderer $renderer = null)
+    public function compute($group_name, $identifier, RendererInterface $renderer = null)
     {
         if (false === $this->isValidGroup($group_name)) {
             throw new InvalidArgumentException("$group_name is not a valid cache identifier appender group.");

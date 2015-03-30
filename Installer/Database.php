@@ -189,7 +189,7 @@ class Database
     }
 
     /**
-     * @param  \BackBee\Bundle\ABundle $bundle
+     * @param  \BackBee\Bundle\AbstractBundle $bundle
      * @return array
      */
     private function _getBundleSchema($bundle)

@@ -44,10 +44,10 @@ use BackBee\Util\Transport\Exception\MisconfigurationException;
 class TransportFactory
 {
     /**
-     * Creates a new ATransport instance
+     * Creates a new AbstractTransport instance
      * @param  array                              $config An array containing the key 'transport' with the classname to use
      *                                                    and optional options depending on the transport to start
-     * @return \BackBee\Util\Transport\ATransport
+     * @return \BackBee\Util\Transport\AbstractTransport
      * @throws MisconfigurationException          occures if $config is not valid
      */
     public static function create(array $config)

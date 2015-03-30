@@ -27,14 +27,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\ApplicationInterface;
-use BackBee\Cache\AExtendedCache;
+use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Cache\CacheIdentifierGenerator;
 use BackBee\Cache\CacheValidator;
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
-use BackBee\Renderer\ARenderer;
+use BackBee\Renderer\AbstractRenderer;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Util\Doctrine\ScheduledEntities;
 
@@ -73,21 +73,21 @@ class CacheListener implements EventSubscriberInterface
     /**
      * The page cache system
      *
-     * @var \BackBee\Cache\AExtendedCache
+     * @var \BackBee\Cache\AbstractExtendedCache
      */
     private $cache_page;
 
     /**
      * The content cache system
      *
-     * @var \BackBee\Cache\AExtendedCache
+     * @var \BackBee\Cache\AbstractExtendedCache
      */
     private $cache_content;
 
     /**
      * The object to be rendered
      *
-     * @var \BackBee\Renderer\IRenderable
+     * @var \BackBee\Renderer\RenderableInterface
      */
     private $object;
 
@@ -137,14 +137,14 @@ class CacheListener implements EventSubscriberInterface
 
         if (true === $this->application->getContainer()->has('cache.control')) {
             $cache_content = $this->application->getContainer()->get('cache.control');
-            if (true === ($cache_content instanceof AExtendedCache)) {
+            if (true === ($cache_content instanceof AbstractExtendedCache)) {
                 $this->cache_content = $cache_content;
             }
         }
 
         if (true === $this->application->getContainer()->has('cache.page')) {
             $cache_page = $this->application->getContainer()->get('cache.page');
-            if (true === ($cache_page instanceof AExtendedCache)) {
+            if (true === ($cache_page instanceof AbstractExtendedCache)) {
                 $this->cache_page = $cache_page;
             }
         }
@@ -159,7 +159,7 @@ class CacheListener implements EventSubscriberInterface
         // Checks if content caching is available
         $this->object = $event->getTarget();
 
-        if (false === ($this->object instanceof AClassContent) || false === $this->checkCacheContentEvent()) {
+        if (false === ($this->object instanceof AbstractClassContent) || false === $this->checkCacheContentEvent()) {
             return;
         }
 
@@ -189,7 +189,7 @@ class CacheListener implements EventSubscriberInterface
     {
         // Checks if content caching is available
         $this->object = $event->getTarget();
-        if (false === ($this->object instanceof AClassContent) || false === $this->checkCacheContentEvent()) {
+        if (false === ($this->object instanceof AbstractClassContent) || false === $this->checkCacheContentEvent()) {
             return;
         }
 
@@ -231,7 +231,7 @@ class CacheListener implements EventSubscriberInterface
     {
         // Checks if page caching is available
         $this->object = $event->getTarget();
-        if (false === ($this->object instanceof AClassContent) || false === $this->checkCacheContentEvent(false)) {
+        if (false === ($this->object instanceof AbstractClassContent) || false === $this->checkCacheContentEvent(false)) {
             return;
         }
 
@@ -258,7 +258,7 @@ class CacheListener implements EventSubscriberInterface
         }
 
         $cache_page = $this->application->getContainer()->get('cache.page');
-        if (true === ($cache_page instanceof AExtendedCache)) {
+        if (true === ($cache_page instanceof AbstractExtendedCache)) {
             $node_uids = $this->application->getEntityManager()
                 ->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
                 ->getNodeUids($content_uids)
@@ -318,7 +318,7 @@ class CacheListener implements EventSubscriberInterface
 
         $column_uids = array();
         foreach ($this->object->getContentSet() as $column) {
-            if ($column instanceof AClassContent) {
+            if ($column instanceof AbstractClassContent) {
                 $column_uids[] = $column->getUid();
             }
         }
@@ -420,7 +420,7 @@ class CacheListener implements EventSubscriberInterface
      * Return the cache id for the current rendered content
      * @return string|FALSE
      */
-    private function getContentCacheId(ARenderer $renderer)
+    private function getContentCacheId(AbstractRenderer $renderer)
     {
         $cache_id = $this->identifier_generator->compute(
             'content', $this->object->getUid().'-'.$renderer->getMode(),

@@ -23,7 +23,7 @@
 
 namespace BackBee\Bundle;
 
-use BackBee\Security\Acl\Domain\IObjectIdentifiable;
+use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
 
 /**
  * BundleInterface which define somes methods to implements for BackBee bundles; it also define some constants
@@ -33,7 +33,7 @@ use BackBee\Security\Acl\Domain\IObjectIdentifiable;
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-interface BundleInterface extends IObjectIdentifiable, \JsonSerializable
+interface BundleInterface extends ObjectIdentifiableInterface, \JsonSerializable
 {
     /**
      * service id pattern (for bundle and bundle's config)

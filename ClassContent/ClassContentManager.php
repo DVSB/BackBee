@@ -72,12 +72,12 @@ class ClassContentManager
     /**
      * Updates the content which provided data.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  array         $data    array of data that must contains parameters and/or elements key
-     * @return AClassContent
+     * @return AbstractClassContent
      * @throws \InvalidArgumentException if provided data doesn't have parameters and elements key
      */
-    public function update(AClassContent $content, array $data)
+    public function update(AbstractClassContent $content, array $data)
     {
         if (!isset($data['parameters']) && !isset($data['elements'])) {
             throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::update.');
@@ -97,13 +97,13 @@ class ClassContentManager
     /**
      * Calls ::jsonSerialize of the content and build valid url for image
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  integer       $format
      * @return array
      */
-    public function jsonEncode(AClassContent $content, $format = AClassContent::JSON_DEFAULT_FORMAT)
+    public function jsonEncode(AbstractClassContent $content, $format = AbstractClassContent::JSON_DEFAULT_FORMAT)
     {
-        if (AClassContent::JSON_DEFINITION_FORMAT === $format) {
+        if (AbstractClassContent::JSON_DEFINITION_FORMAT === $format) {
             $classname = get_class($content);
             $content = new $classname;
         }
@@ -120,7 +120,7 @@ class ClassContentManager
      * @return array
      * @throws \InvalidArgumentException if provided collection is not supported type
      */
-    public function jsonEncodeCollection($collection, $format = AClassContent::JSON_DEFAULT_FORMAT)
+    public function jsonEncodeCollection($collection, $format = AbstractClassContent::JSON_DEFAULT_FORMAT)
     {
         if (
             !is_array($collection)
@@ -133,7 +133,7 @@ class ClassContentManager
         }
 
         $contents = [];
-        if (AClassContent::JSON_DEFINITION_FORMAT === $format) {
+        if (AbstractClassContent::JSON_DEFINITION_FORMAT === $format) {
             if (is_object($collection) && $collection instanceof Paginator) {
                 $contents[] = $this->jsonEncode($collection->getIterator()->current(), $format);
             } elseif (is_array($collection)) {
@@ -158,7 +158,7 @@ class ClassContentManager
         $classnames = [];
         foreach ($this->categoryManager->getCategories() as $category) {
             foreach ($category->getBlocks() as $block) {
-                $classnames[] = AClassContent::getClassnameByContentType($block->type);
+                $classnames[] = AbstractClassContent::getClassnameByContentType($block->type);
             }
         }
 
@@ -179,13 +179,13 @@ class ClassContentManager
                 return str_replace(
                     [DIRECTORY_SEPARATOR, '\\\\'],
                     [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
-                    AClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
+                    AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
                 );
             },
             File::getFilesRecursivelyByExtension($directory, 'yml')
         );
 
-        $classnames[] = AClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet';
+        $classnames[] = AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet';
 
         return $classnames;
     }
@@ -193,10 +193,10 @@ class ClassContentManager
         /**
      * Returns current revision for the given $content
      *
-     * @param AClassContent $content content we want to get the latest revision
+     * @param AbstractClassContent $content content we want to get the latest revision
      * @return null|BackBee\ClassContent\Revision
      */
-    public function getDraft(AClassContent $content, $checkoutOnMissing = false)
+    public function getDraft(AbstractClassContent $content, $checkoutOnMissing = false)
     {
         return $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft(
             $content,
@@ -208,11 +208,11 @@ class ClassContentManager
     /**
      * Computes provided data to define what to commit from given content.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  array         $data
      * @return self
      */
-    public function commit(AClassContent $content, array $data)
+    public function commit(AbstractClassContent $content, array $data)
     {
         if (!isset($data['parameters']) && !isset($data['elements'])) {
             throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::commit.');
@@ -237,11 +237,11 @@ class ClassContentManager
     /**
      * Computes provided data to define what to revert from given content.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  array         $data
      * @return self
      */
-    public function revert(AClassContent $content, array $data)
+    public function revert(AbstractClassContent $content, array $data)
     {
         if (!isset($data['parameters']) && !isset($data['elements'])) {
             throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::revert.');
@@ -269,11 +269,11 @@ class ClassContentManager
      * @param  string  $uid
      * @param  boolean $hydrateDraft      if true and BBUserToken is setted, will try to get and set draft to content
      * @param  boolean $checkoutOnMissing this parameter is used only if hydrateDraft is true
-     * @return AClassContent
+     * @return AbstractClassContent
      */
     public function findOneByTypeAndUid($type, $uid, $hydrateDraft = false, $checkoutOnMissing = false)
     {
-        $classname = AClassContent::getClassnameByContentType($type);
+        $classname = AbstractClassContent::getClassnameByContentType($type);
         $content = $this->em->getRepository($classname)->findOneBy(['_uid' => $uid]);
 
         if (true === $hydrateDraft && null !== $this->token) {
@@ -346,11 +346,11 @@ class ClassContentManager
     /**
      * Updates provided content's elements with data
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  array         $elementsData
      * @return self
      */
-    private function updateElements(AClassContent $content, array $elementsData)
+    private function updateElements(AbstractClassContent $content, array $elementsData)
     {
         if ($content instanceof ContentSet) {
             $content->clear();
@@ -388,11 +388,11 @@ class ClassContentManager
     /**
      * Updates provided content's parameters.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  array         $paramsData
      * @return self
      */
-    private function updateParameters(AClassContent $content, array $paramsData)
+    private function updateParameters(AbstractClassContent $content, array $paramsData)
     {
         foreach ($paramsData as $key => $param) {
             $content->setParam($key, $param);
@@ -404,12 +404,12 @@ class ClassContentManager
     /**
      * Prepares draft for commit.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  Revision      $draft
      * @param  array         $data
      * @return self
      */
-    private function prepareDraftForCommit(AClassContent $content, Revision $draft, array $data)
+    private function prepareDraftForCommit(AbstractClassContent $content, Revision $draft, array $data)
     {
         if ($content instanceof ContentSet) {
             if (!isset($data['elements']) || false === $data['elements']) {
@@ -444,16 +444,16 @@ class ClassContentManager
     /**
      * Executes commit action on content and its draft.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  Revision      $draft
      * @return self
      */
-    private function executeCommit(AClassContent $content, Revision $draft)
+    private function executeCommit(AbstractClassContent $content, Revision $draft)
     {
         if ($content instanceof ContentSet) {
             $content->clear();
             while ($subcontent = $draft->next()) {
-                if ($subcontent instanceof AClassContent) {
+                if ($subcontent instanceof AbstractClassContent) {
                     $subcontent = $this->em->getRepository(ClassUtils::getRealClass($subcontent))->load($subcontent);
                     if (null !== $subcontent) {
                         $content->push($subcontent);
@@ -464,7 +464,7 @@ class ClassContentManager
             foreach ($draft->getData() as $key => $values) {
                 $values = is_array($values) ? $values : [$values];
                 foreach ($values as &$subcontent) {
-                    if ($subcontent instanceof AClassContent) {
+                    if ($subcontent instanceof AbstractClassContent) {
                         $subcontent = $this->em->getRepository(ClassUtils::getRealClass($subcontent))
                             ->load($subcontent)
                         ;
@@ -489,7 +489,7 @@ class ClassContentManager
         }
 
         $content->setRevision($draft->getRevision())
-            ->setState(AClassContent::STATE_NORMAL)
+            ->setState(AbstractClassContent::STATE_NORMAL)
             ->addRevision($draft)
         ;
 
@@ -499,11 +499,11 @@ class ClassContentManager
     /**
      * Runs process of post commit.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  Revision      $draft
      * @return self
      */
-    private function commitPostProcess(AClassContent $content, Revision $draft)
+    private function commitPostProcess(AbstractClassContent $content, Revision $draft)
     {
         $data = $draft->jsonSerialize();
         if (0 !== count($data['parameters']) && 0 !== count($data['elements'])) {
@@ -516,12 +516,12 @@ class ClassContentManager
     /**
      * Executes revert action on content and its draft.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  Revision      $draft
      * @param  array         $data
      * @return self
      */
-    private function executeRevert(AClassContent $content, Revision $draft, array $data)
+    private function executeRevert(AbstractClassContent $content, Revision $draft, array $data)
     {
         if ($content instanceof ContentSet) {
             if (isset($data['elements']) && true === $data['elements']) {
@@ -552,17 +552,17 @@ class ClassContentManager
     /**
      * Runs revert post action on content and its draft.
      *
-     * @param  AClassContent $content
+     * @param  AbstractClassContent $content
      * @param  Revision      $draft
      * @return self
      */
-    private function revertPostProcess(AClassContent $content, Revision $draft)
+    private function revertPostProcess(AbstractClassContent $content, Revision $draft)
     {
         $data = $draft->jsonSerialize();
         if (0 === count($data['parameters']) && 0 === count($data['elements'])) {
             $this->em->remove($draft);
 
-            if (AClassContent::STATE_NEW === $content->getState()) {
+            if (AbstractClassContent::STATE_NEW === $content->getState()) {
                 $this->em->remove($content);
             }
         }

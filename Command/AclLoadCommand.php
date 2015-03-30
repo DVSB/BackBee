@@ -28,7 +28,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use BackBee\Console\ACommand;
+use BackBee\Console\AbstractCommand;
 
 /**
  * Install BBApp assets
@@ -38,7 +38,7 @@ use BackBee\Console\ACommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class AclLoadCommand extends ACommand
+class AclLoadCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}

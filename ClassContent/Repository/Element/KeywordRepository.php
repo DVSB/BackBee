@@ -23,7 +23,7 @@
 
 namespace BackBee\ClassContent\Repository\Element;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Keyword;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
@@ -40,13 +40,14 @@ class KeywordRepository extends ClassContentRepository
 {
     /**
      * Do stuf on update by post of the content editing form
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  stdClass                            $value
-     * @param  \BackBee\ClassContent\AClassContent $parent
+     * @param  \BackBee\ClassContent\AbstractClassContent $parent
+     *
      * @return \BackBee\ClassContent\Element\File
      * @throws ClassContentException               Occures on invalid content type provided
      */
-    public function getValueFromPost(AClassContent $content, $value, AClassContent $parent = null)
+    public function getValueFromPost(AbstractClassContent $content, $value, AbstractClassContent $parent = null)
     {
         if (false === ($content instanceof Keyword)) {
             throw new ClassContentException('Invalid content type');
@@ -71,13 +72,13 @@ class KeywordRepository extends ClassContentRepository
 
     /**
      * Do stuf removing content from the content editing form
-     * @param  \BackBee\ClassContent\AClassContent $content
+     * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  type                                $value
-     * @param  \BackBee\ClassContent\AClassContent $parent
+     * @param  \BackBee\ClassContent\AbstractClassContent $parent
      * @return type
      * @throws ClassContentException
      */
-    public function removeFromPost(AClassContent $content, $value = null, AClassContent $parent = null)
+    public function removeFromPost(AbstractClassContent $content, $value = null, AbstractClassContent $parent = null)
     {
         if (false === ($content instanceof Keyword)) {
             throw new ClassContentException('Invalid content type');

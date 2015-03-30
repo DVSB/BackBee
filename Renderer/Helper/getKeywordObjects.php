@@ -30,7 +30,7 @@ namespace BackBee\Renderer\Helper;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class getKeywordObjects extends AHelper
+class getKeywordObjects extends AbstractHelper
 {
     public function __invoke($keywords)
     {

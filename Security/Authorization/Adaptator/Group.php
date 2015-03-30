@@ -34,7 +34,7 @@ use BackBee\BBApplication;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
-class Group implements IRoleReaderAdaptator
+class Group implements RoleReaderAdaptatorInterface
 {
     /**
      * {@inheritdoc}

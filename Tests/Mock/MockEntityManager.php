@@ -31,7 +31,7 @@ use Faker\Factory;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-class MockEntityManager extends \PHPUnit_Framework_TestCase implements IMock
+class MockInterfaceEntityManager extends \PHPUnit_Framework_TestCase implements MockInterface
 {
     private $faker;
 

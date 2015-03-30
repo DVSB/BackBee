@@ -31,6 +31,6 @@ use BackBee\FrontController\FrontController;
  * @copyright   Lp system
  * @author      n.dufreche
  */
-class MockController extends FrontController implements IMock
+class MockInterfaceController extends FrontController implements MockInterface
 {
 }

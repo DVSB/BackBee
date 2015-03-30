@@ -25,7 +25,7 @@ namespace BackBee\NestedNode\Builder;
 
 use Doctrine\ORM\EntityManager;
 
-use BackBee\ClassContent\AClassContent;
+use BackBee\ClassContent\AbstractClassContent;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
@@ -95,12 +95,12 @@ class PageBuilder
     private $layout;
 
     /**
-     * @var BackBee\ClassContent\AClassContent
+     * @var BackBee\ClassContent\AbstractClassContent
      */
     private $itemToPushInMainZone;
 
     /**
-     * @var array of BackBee\ClassContent\AClassContent
+     * @var array of BackBee\ClassContent\AbstractClassContent
      */
     private $elements;
 
@@ -364,7 +364,7 @@ class PageBuilder
      * [getPage description]
      * @return [type] [description]
      */
-    public function setLayout(Layout $layout, AClassContent $toPushInMainZone = null)
+    public function setLayout(Layout $layout, AbstractClassContent $toPushInMainZone = null)
     {
         $this->layout = $layout;
         $this->itemToPushInMainZone = $toPushInMainZone;
@@ -414,7 +414,7 @@ class PageBuilder
      * [getPage description]
      * @return [type] [description]
      */
-    public function pushElement(AClassContent $element, $setMainNode = false, $contentSetPos = 0)
+    public function pushElement(AbstractClassContent $element, $setMainNode = false, $contentSetPos = 0)
     {
         $this->elements[] = array(
             'content'               => $element,
@@ -429,7 +429,7 @@ class PageBuilder
      * [getPage description]
      * @return [type] [description]
      */
-    public function addElement(AClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
+    public function addElement(AbstractClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
     {
         if (null !== $index) {
             $index = intval($index);
@@ -478,7 +478,7 @@ class PageBuilder
         return $this;
     }
 
-    private function updateContentRevision(AClassContent $content, $revision = 1, $state = AClassContent::STATE_NORMAL)
+    private function updateContentRevision(AbstractClassContent $content, $revision = 1, $state = AbstractClassContent::STATE_NORMAL)
     {
         $content->setRevision($revision);
         $content->setState($state);

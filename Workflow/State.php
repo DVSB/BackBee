@@ -26,7 +26,7 @@ namespace BackBee\Workflow;
 use JMS\Serializer\Annotation as Serializer;
 
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Security\Acl\Domain\AObjectIdentifiable;
+use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Site\Layout;
 use BackBee\Utils\Numeric;
 
@@ -47,7 +47,7 @@ use BackBee\Utils\Numeric;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class State extends AObjectIdentifiable implements \JsonSerializable
+class State extends AbstractObjectIdentifiable implements \JsonSerializable
 {
     /**
      * The unique identifier of the state
