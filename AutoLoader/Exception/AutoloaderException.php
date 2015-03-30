@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,7 @@ namespace BackBee\AutoLoader\Exception;
 use BackBee\Exception\BBException;
 
 /**
- * Autoloader exception thrown if a class can not be load
+ * Autoloader exception thrown if a class can not be load.
  *
  * Error codes defined are :
  *
@@ -37,40 +37,43 @@ use BackBee\Exception\BBException;
  * * UNREGISTERED_NAMESPACE : the namespace is not registered
  *
  * @category    BackBee
- * @package     BackBee\AutoLoader
- * @subpackage  Exception
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class AutoloaderException extends BBException
 {
     /**
-     * None file or wrapper found for the given class name
+     * None file or wrapper found for the given class name.
+     *
      * @var int
      */
-
     const CLASS_NOTFOUND = 2001;
 
     /**
-     * The included file or wrapper contains invalid code
+     * The included file or wrapper contains invalid code.
+     *
      * @var int
      */
     const INVALID_OPCODE = 2002;
 
     /**
-     * The syntax of the given namespace is invalid
+     * The syntax of the given namespace is invalid.
+     *
      * @var int
      */
     const INVALID_NAMESPACE = 2003;
 
     /**
-     * The syntax of the given class name is invalid
+     * The syntax of the given class name is invalid.
+     *
      * @var int
      */
     const INVALID_CLASSNAME = 2004;
 
     /**
-     * The given namespace is not registered
+     * The given namespace is not registered.
+     *
      * @var int
      */
     const UNREGISTERED_NAMESPACE = 2005;

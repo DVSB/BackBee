@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,50 +25,52 @@ namespace BackBee\Stream\ClassWrapper\Adapter;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as parserYaml;
-
 use BackBee\Exception\BBException;
 use BackBee\Stream\ClassWrapper\AbstractClassWrapper;
 use BackBee\Stream\ClassWrapper\Exception\ClassWrapperException;
 use BackBee\Utils\File\File;
 
 /**
- * Stream wrapper to interprate yaml file as class content description
+ * Stream wrapper to interprete yaml file as class content description
  * Extends AbstractClassWrapper
  *
  * @category    BackBee
- * @package     BackBee\Stream\ClassWrapper
- * @subpackage  Adapter
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Yaml extends AbstractClassWrapper
 {
     /**
-     * Current BackBee application
+     * Current BackBee application.
+     *
      * @var BackBee\BBApplication
      */
     private $_application;
 
     /**
-     * Extensions to include searching file
+     * Extensions to include searching file.
+     *
      * @var array
      */
     private $_includeExtensions = array('.yml', '.yaml');
 
     /**
-     * Path to the yaml file
+     * Path to the yaml file.
+     *
      * @var string
      */
     private $_path;
 
     /**
-     * Ordered directories file path to look for yaml file
+     * Ordered directories file path to look for yaml file.
+     *
      * @var array
      */
     private $_classcontentdir;
 
     /**
-     * Class constructor
+     * Class constructor.
      */
     public function __construct()
     {
@@ -89,15 +91,17 @@ class Yaml extends AbstractClassWrapper
     }
 
     /**
-     * Extract and format datas from parser
-     * @param  array $datas
-     * @return array The extracted datas
+     * Extract and format data from parser.
+     *
+     * @param array $data
+     *
+     * @return array The extracted data
      */
-    protected function _extractDatas($datas)
+    protected function _extractData($data)
     {
-        $extractedDatas = array();
+        $extractedData = array();
 
-        foreach ($datas as $key => $value) {
+        foreach ($data as $key => $value) {
             $type = 'scalar';
             $options = array();
 
@@ -135,26 +139,29 @@ class Yaml extends AbstractClassWrapper
                 }
             }
 
-            $extractedDatas[$key] = array('type' => $type, 'options' => $options);
+            $extractedData[$key] = array('type' => $type, 'options' => $options);
         }
 
-        return $extractedDatas;
+        return $extractedData;
     }
 
     /**
-     * Checks the validity of the extracted data from yaml file
-     * @param  array                 $yamlDatas The yaml datas
-     * @return Boolean               Returns TRUE if datas are valid, FALSE if not
-     * @throws ClassWrapperException Occurs when datas are not valid
+     * Checks the validity of the extracted data from yaml file.
+     *
+     * @param array $yamlData The yaml data
+     *
+     * @return Boolean Returns TRUE if data are valid, FALSE if not
+     *
+     * @throws ClassWrapperException Occurs when data are not valid
      */
-    private function _checkDatas($yamlDatas)
+    private function _checkDatas($yamlData)
     {
         try {
-            if ($yamlDatas === false || !is_array($yamlDatas) || count($yamlDatas) > 1) {
+            if ($yamlData === false || !is_array($yamlData) || count($yamlData) > 1) {
                 throw new ClassWrapperException('Malformed class content description');
             }
 
-            foreach ($yamlDatas as $classname => $contentDesc) {
+            foreach ($yamlData as $classname => $contentDesc) {
                 if ($this->classname != $this->_normalizeVar($this->classname)) {
                     throw new ClassWrapperException("Class Name don't match with the filename");
                 }
@@ -163,10 +170,10 @@ class Yaml extends AbstractClassWrapper
                     throw new ClassWrapperException('None class content description found');
                 }
 
-                foreach ($contentDesc as $key => $datas) {
+                foreach ($contentDesc as $key => $data) {
                     switch ($key) {
                         case 'extends':
-                            $this->extends = $this->_normalizeVar($datas, true);
+                            $this->extends = $this->_normalizeVar($data, true);
                             if (substr($this->extends, 0, 1) != NAMESPACE_SEPARATOR) {
                                 $this->extends = NAMESPACE_SEPARATOR.$this->namespace.
                                     NAMESPACE_SEPARATOR.$this->extends;
@@ -174,10 +181,10 @@ class Yaml extends AbstractClassWrapper
 
                             break;
                         case 'interfaces':
-                            $datas = false === is_array($datas) ? array($datas) : $datas;
+                            $data = false === is_array($data) ? array($data) : $data;
                             $this->interfaces = array();
 
-                            foreach ($datas as $i) {
+                            foreach ($data as $i) {
                                 $interface = $i;
                                 if (NAMESPACE_SEPARATOR !== substr($i, 0, 1)) {
                                     $interface = NAMESPACE_SEPARATOR.$i;
@@ -199,15 +206,15 @@ class Yaml extends AbstractClassWrapper
 
                             break;
                         case 'repository':
-                            if (class_exists($datas)) {
-                                $this->repository = $datas;
+                            if (class_exists($data)) {
+                                $this->repository = $data;
                             }
                             break;
                         case 'traits':
-                            $datas = false === is_array($datas) ? array($datas) : $datas;
+                            $data = false === is_array($data) ? array($data) : $data;
                             $this->traits = array();
 
-                            foreach ($datas as $t) {
+                            foreach ($data as $t) {
                                 $trait = $t;
                                 if (NAMESPACE_SEPARATOR !== substr($t, 0, 1)) {
                                     $trait = NAMESPACE_SEPARATOR.$t;
@@ -232,8 +239,8 @@ class Yaml extends AbstractClassWrapper
                         case 'parameters':
                         case 'properties':
                             $values = array();
-                            $datas = (array) $datas;
-                            foreach ($datas as $var => $value) {
+                            $data = (array) $data;
+                            foreach ($data as $var => $value) {
                                 $values[strtolower($this->_normalizeVar($var))] = $value;
                             }
 
@@ -250,8 +257,10 @@ class Yaml extends AbstractClassWrapper
     }
 
     /**
-     * Return the real yaml file path of the loading class
-     * @param  string $path
+     * Return the real yaml file path of the loading class.
+     *
+     * @param string $path
+     *
      * @return string The real path if found
      */
     private function _resolveFilePath($path)
@@ -270,7 +279,7 @@ class Yaml extends AbstractClassWrapper
     }
 
     /**
-     * @see IClassWrapper::glob()
+     * @see ClassWrapperInterface::glob()
      */
     public function glob($pattern)
     {
@@ -302,8 +311,10 @@ class Yaml extends AbstractClassWrapper
     }
 
     /**
-     * Opens a stream content for a yaml file
+     * Opens a stream content for a yaml file.
+     *
      * @see BackBee\Stream\ClassWrapper.IClassWrapper::stream_open()
+     *
      * @throws BBException           Occurs when none yamel files were found
      * @throws ClassWrapperException Occurs when yaml file is not a valid class content description
      */
@@ -354,7 +365,8 @@ class Yaml extends AbstractClassWrapper
     }
 
     /**
-     * Retrieve information about a yaml file
+     * Retrieve information about a yaml file.
+     *
      * @see BackBee\Stream\ClassWrapper.AbstractClassWrapper::url_stat()
      */
     public function url_stat($path, $flag)

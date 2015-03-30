@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\Rest\Tests\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-
 use BackBee\Rest\Controller\LayoutController;
 use BackBee\Rest\Test\RestTestCase;
 use BackBee\Security\User;
@@ -33,10 +32,10 @@ use BackBee\Site\Site;
 use BackBee\Workflow\State;
 
 /**
- * Test for SecurityController class
+ * Test for SecurityController class.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -100,7 +99,6 @@ class LayoutControllerTest extends RestTestCase
     }
 
     /**
-     *
      * @return \BackBee\Security\Tests\Controller\LayoutController
      */
     protected function getController()
@@ -113,7 +111,6 @@ class LayoutControllerTest extends RestTestCase
 
     /**
      * @covers ::getCollectionAction
-     *
      */
     public function test_getCollectionAction_global()
     {
@@ -132,7 +129,6 @@ class LayoutControllerTest extends RestTestCase
 
     /**
      * @covers ::getCollectionAction
-     *
      */
     public function test_getCollectionAction_site()
     {

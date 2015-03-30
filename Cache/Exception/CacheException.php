@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,25 +26,25 @@ namespace BackBee\Cache\Exception;
 use BackBee\Exception\BBException;
 
 /**
- * Cache exception thrown if a cache adapter can not be initialized
+ * Cache exception thrown if a cache adapter can not be initialized.
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  Exception
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class CacheException extends BBException
 {
     /**
-     * Cache adapter can not be intialized
+     * Cache adapter can not be intialized.
+     *
      * @var int
      */
-
     const CACHE_ERROR = 3001;
 
     /**
-     * The default error code
+     * The default error code.
+     *
      * @var int
      */
     protected $_code = self::CACHE_ERROR;

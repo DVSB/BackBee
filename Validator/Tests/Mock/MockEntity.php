@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,44 +24,49 @@
 namespace BackBee\Validator\Tests\Mock;
 
 use BackBee\Tests\Mock\MockInterface;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Mock entity
+ * Mock entity.
  *
  * @category    BackBee
- * @package     BackBee\Validator\Tests\Mock
+ *
  * @copyright   Lp digital system
  * @author      f.kroockmann
- * @Table(name="mock_entity")
- * @Entity()
+ * @ORM\Table(name="mock_entity")
+ * @ORM\Entity
  */
 class MockEntity implements MockInterface
 {
     /**
-     * Identifier
-     * @var int $id
-     * @Column(name="id", type="integer")
-     * @Id
-     * @GeneratedValue(strategy="AUTO")
+     * Identifier.
+     *
+     * @var int
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
-     * Numeric code
+     * Numeric code.
+     *
      * @var int
-     * @Column(name="numeric_code", type="integer", unique=true)
+     * @ORM\Column(name="numeric_code", type="integer", unique=true)
      */
     private $numeric_code;
 
     /**
-     * English's name
-     * @var string $name
-     * @Column(name="name", type="string", length=100)
+     * English's name.
+     *
+     * @var string
+     * @ORM\Column(name="name", type="string", length=100)
      */
     private $name;
 
     /**
-     * get id
+     * get id.
+     *
      * @return int
      */
     public function getId()
@@ -70,7 +75,8 @@ class MockEntity implements MockInterface
     }
 
     /**
-     * get numeric code
+     * get numeric code.
+     *
      * @return int
      */
     public function getNumericCode()
@@ -79,7 +85,8 @@ class MockEntity implements MockInterface
     }
 
     /**
-     * get name
+     * get name.
+     *
      * @return string
      */
     public function getName()
@@ -88,8 +95,10 @@ class MockEntity implements MockInterface
     }
 
     /**
-     * Set numeric code
-     * @param  int                                      $numeric_code
+     * Set numeric code.
+     *
+     * @param int $numeric_code
+     *
      * @return \BackBee\Validator\Tests\Mock\MockInterface
      */
     public function setNumericCode($numeric_code)
@@ -100,8 +109,10 @@ class MockEntity implements MockInterface
     }
 
     /**
-     *  set name
-     * @param  type                                     $name
+     *  set name.
+     *
+     * @param type $name
+     *
      * @return \BackBee\Validator\Tests\Mock\MockInterface
      */
     public function setName($name)

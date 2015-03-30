@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,45 +27,52 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * UserPreferences object in BackBee 5
+ * UserPreferences object in BackBee.
  *
  * User preferences persistence
  *
  * @category    BackBee
- * @package     BackBee\Site
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Site\Repository\UserPreferencesRepository")
- * @Table(name="user_preferences",indexes={@index(name="IDX_OWNER", columns={"owner"})})
+ * @ORM\Entity(repositoryClass="BackBee\Site\Repository\UserPreferencesRepository")
+ * @ORM\Table(name="user_preferences",indexes={
+ *     @ORM\Index(name="IDX_OWNER", columns={"owner"})})
  */
 class UserPreferences
 {
     /**
-     * Unique identifier of the revision
+     * Unique identifier of the revision.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     private $_uid;
 
     /**
-     * The owner of this revision
+     * The owner of this revision.
+     *
      * @var Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      *
-     * @Column(type="string", name="owner")
+     * @ORM\Column(type="string", name="owner")
      */
     private $_owner;
 
     /**
-     * The owner of this revision
+     * The owner of this revision.
+     *
      * @var text
      *
-     * @Column(type="text", name="preferences")
+     * @ORM\Column(type="text", name="preferences")
      */
     private $_preferences;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @param string         $uid   The unique identifier of the revision
      * @param TokenInterface $token The current auth token
@@ -80,8 +87,10 @@ class UserPreferences
     }
 
     /**
-     * Return the uid user preferences
+     * Return the uid user preferences.
+     *
      * @codeCoverageIgnore
+     *
      * @return String
      */
     public function getUid()
@@ -90,8 +99,10 @@ class UserPreferences
     }
 
     /**
-     * Return the owner of the user preferences
+     * Return the owner of the user preferences.
+     *
      * @codeCoverageIgnore
+     *
      * @return Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      */
     public function getOwner()
@@ -100,8 +111,10 @@ class UserPreferences
     }
 
     /**
-     * Return a json encoded string of user preferences
+     * Return a json encoded string of user preferences.
+     *
      * @codeCoverageIgnore
+     *
      * @return text
      */
     public function getPreferences()
@@ -110,9 +123,12 @@ class UserPreferences
     }
 
     /**
-     * Set the user preferences UID
+     * Set the user preferences UID.
+     *
      * @codeCoverageIgnore
-     * @param  string                        $uid
+     *
+     * @param string $uid
+     *
      * @return \BackBee\Site\UserPreferences
      */
     public function setUid($uid)
@@ -123,9 +139,12 @@ class UserPreferences
     }
 
     /**
-     * Set the owner of the user preferences
+     * Set the owner of the user preferences.
+     *
      * @codeCoverageIgnore
-     * @param  \Symfony\Component\Security\Core\User\UserInterface $user
+     *
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     *
      * @return \BackBee\Site\UserPreferences
      */
     public function setOwner(UserInterface $user)
@@ -136,9 +155,10 @@ class UserPreferences
     }
 
     /**
-     * Set the preferences of the user
+     * Set the preferences of the user.
      *
-     * @param  mixed                         $preferences
+     * @param mixed $preferences
+     *
      * @return \BackBee\Site\UserPreferences
      */
     public function setPreferences($preferences)

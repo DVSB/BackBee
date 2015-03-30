@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,7 +30,7 @@ use BackBee\Rewriting\Exception\RewritingException;
 use BackBee\Utils\String;
 
 /**
- * Utility class to generate page URL according config rules
+ * Utility class to generate page URL according config rules.
  *
  * Available options are:
  *    * preserve-online  : if true, forbid the URL updating for online page
@@ -52,44 +52,50 @@ use BackBee\Utils\String;
  *    * $ancestor[x]: the ancestor of level x url
  *
  * @category    BackBee
- * @package     BackBee\Rewriting
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class UrlGenerator implements UrlGeneratorInterface
 {
     /**
-     * Current BackBee application
+     * Current BackBee application.
+     *
      * @var BackBee\BBApplication
      */
     private $application;
 
     /**
-     * if true, forbid the URL updating for online page
+     * if true, forbid the URL updating for online page.
+     *
      * @var boolean
      */
     private $preserveOnline = true;
 
     /**
-     * if true, check for unique computed URL
+     * if true, check for unique computed URL.
+     *
      * @var boolean
      */
     private $preserveUnicity = true;
 
     /**
-     * Available rewriting schemes
+     * Available rewriting schemes.
+     *
      * @var array
      */
     private $schemes = array();
 
     /**
-     * Array of class content used by one of the schemes
+     * Array of class content used by one of the schemes.
+     *
      * @var array
      */
     private $descriminators;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \BackBee\BBApplication $application
      */
     public function __construct(BBApplication $application)
@@ -113,7 +119,8 @@ class UrlGenerator implements UrlGeneratorInterface
 
     /**
      * Returns the list of class content names used by one of schemes
-     * Dynamically add a listener on descrimator.onflush event to RewritingListener
+     * Dynamically add a listener on descrimator.onflush event to RewritingListener.
+     *
      * @return array
      */
     public function getDiscriminators()
@@ -139,8 +146,9 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Returns the URL of the page
-     * @param  \BackBee\NestedNode\Page            $page    The page
+     * Returns the URL of the page.
+     *
+     * @param \BackBee\NestedNode\Page            $page    The page
      * @param  \BackBee\ClassContent\AbstractClassContent $content The optionnal main content of the page
      * @return string                              The URL                                  The generated URL
      */
@@ -189,9 +197,10 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Computes the URL of a page according to a scheme
-     * @param  array         $scheme  The scheme to apply
-     * @param  Page          $page    The page
+     * Computes the URL of a page according to a scheme.
+     *
+     * @param array         $scheme  The scheme to apply
+     * @param Page          $page    The page
      * @param  AbstractClassContent $content The optionnal main content of the page
      * @return string        The generated URL
      */
@@ -244,7 +253,8 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Checks for the uniqueness of the URL and postfixe it if need
+     * Checks for the uniqueness of the URL and postfixe it if need.
+     *
      * @param \BackBee\NestedNode\Page $page The page
      * @param string                   &$url The reference of the generated URL
      */

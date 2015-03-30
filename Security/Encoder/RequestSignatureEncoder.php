@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,22 +24,20 @@
 namespace BackBee\Security\Encoder;
 
 use Symfony\Component\Security\Core\Util\StringUtils;
-
 use BackBee\Security\Token\BBUserToken;
 
 /**
- * Request signature encoder
+ * Request signature encoder.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Encoder
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class RequestSignatureEncoder
 {
-    /**
-    * Checks if the presented signature is valid or not according to token
+   /**
+    * Checks if the presented signature is valid or not according to token.
     *
     * @param BBUserToken $token
     * @param string      $signaturePresented signature we want to check if it's correct
@@ -52,7 +50,7 @@ class RequestSignatureEncoder
    }
 
    /**
-    * Create a signature for a given user
+    * Create a signature for a given user.
     *
     * @param BackBee\Security\Token\BBUserToken the token we want to generate API signature key
     *

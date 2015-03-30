@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,19 +24,18 @@
 namespace BackBee\Rest\Controller\Annotations;
 
 /**
- * Abstract class for an api controller
+ * Abstract class for an api controller.
  *
  * @Annotation
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 abstract class Param
 {
     /**
-     *
      * @var string
      */
     public $name;
@@ -47,18 +46,15 @@ abstract class Param
     public $key = null;
 
     /**
-     *
      * @var mixed
      */
     public $default = null;
     /**
-     *
      * @var string
      */
     public $description = null;
 
     /**
-     *
      * @var mixed
      */
     public $requirements = null;

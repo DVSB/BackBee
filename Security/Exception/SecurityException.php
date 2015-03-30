@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,7 @@ namespace BackBee\Security\Exception;
 use BackBee\Exception\BBException;
 
 /**
- * Security Exception
+ * Security Exception.
  *
  * Error codes defined are :
  *
@@ -39,52 +39,57 @@ use BackBee\Exception\BBException;
  * * FORBIDDEN_ACCESS : user does not have enough privileges
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Exception
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class SecurityException extends BBException
 {
     /**
-     * The provided token is not supported
+     * The provided token is not supported.
+     *
      * @var int
      */
-
     const UNSUPPORTED_TOKEN = 9001;
 
     /**
-     * The provided username does not match a UserInterface instance
+     * The provided username does not match a UserInterface instance.
+     *
      * @var int
      */
     const UNKNOWN_USER = 9002;
 
     /**
-     * The provided credentials do not match
+     * The provided credentials do not match.
+     *
      * @var int
      */
     const INVALID_CREDENTIALS = 9003;
 
     /**
-     * The provided key does not match the firewall key
+     * The provided key does not match the firewall key.
+     *
      * @var int
      */
     const INVALID_KEY = 9004;
 
     /**
-     * Authentication expired
+     * Authentication expired.
+     *
      * @var int
      */
     const EXPIRED_AUTH = 9005;
 
     /**
-     * Token expired
+     * Token expired.
+     *
      * @var int
      */
     const EXPIRED_TOKEN = 9006;
 
     /**
-     * User does not have enough privileges
+     * User does not have enough privileges.
+     *
      * @var int
      */
     const FORBIDDEN_ACCESS = 9007;

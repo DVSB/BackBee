@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,27 +27,27 @@ use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 
 /**
  * EntityPatcher helps you to apply patch operations on your entity/object according to
- * a list of rights
+ * a list of rights.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class EntityPatcher implements PatcherInterface
 {
     /**
-     * the right manager which decide if a patch operation is valid or not
+     * the right manager which decide if a patch operation is valid or not.
      *
      * @var BackBee\Rest\Patcher\RightManager
      */
     private $rightManager;
 
     /**
-     * EntityPatcher's constructor
+     * EntityPatcher's constructor.
      *
      * @param BackBee\Rest\Patcher\RightManager $rightManager the right manager which decide if it's a valid
-     *                                                         patch operation or not
+     *                                                        patch operation or not
      */
     public function __construct(RightManager $manager)
     {
@@ -83,7 +83,7 @@ class EntityPatcher implements PatcherInterface
     }
 
     /**
-     * [applyPatch description]
+     * [applyPatch description].
      *
      * @param [type] $entity    [description]
      * @param array  $operation [description]
@@ -101,7 +101,7 @@ class EntityPatcher implements PatcherInterface
     }
 
     /**
-     * [buildMethodName description]
+     * [buildMethodName description].
      *
      * @param [type] $path   [description]
      * @param [type] $prefix [description]

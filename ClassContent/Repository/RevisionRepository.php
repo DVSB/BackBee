@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -34,11 +34,10 @@ use BackBee\ClassContent\Revision;
 use BackBee\Security\Token\BBUserToken;
 
 /**
- * Revision repository
+ * Revision repository.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Repository
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -71,8 +70,10 @@ class RevisionRepository extends EntityRepository
     }
 
     /**
-     * Update user revision
-     * @param  Revision              $revision
+     * Update user revision.
+     *
+     * @param Revision $revision
+     *
      * @throws ClassContentException Occurs on illegal revision state
      */
     public function update(Revision $revision)
@@ -150,10 +151,12 @@ class RevisionRepository extends EntityRepository
     }
 
     /**
-     * Return the user's draft of a content, optionally checks out a new one if not exists
+     * Return the user's draft of a content, optionally checks out a new one if not exists.
+     *
      * @param  AbstractClassContent $content
      * @param  BBUserToken   $token
      * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
+     *
      * @return Revision|null
      */
     public function getDraft(AbstractClassContent $content, BBUserToken $token, $checkoutOnMissing = false)
@@ -196,7 +199,8 @@ class RevisionRepository extends EntityRepository
     }
 
     /**
-     * Returns all current drafts for authenticated user
+     * Returns all current drafts for authenticated user.
+     *
      * @param TokenInterface $token
      */
     public function getAllDrafts(TokenInterface $token)
@@ -213,8 +217,10 @@ class RevisionRepository extends EntityRepository
     }
 
     /**
-     * Checks the content state of a revision
-     * @param  Revision              $revision
+     * Checks the content state of a revision.
+     *
+     * @param Revision $revision
+     *
      * @return AbstractClassContent  the valid content according to revision state
      * @throws ClassContentException Occurs when the revision is orphan
      */

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,10 +27,10 @@ use BackBee\Config\Config;
 use BackBee\DependencyInjection\Container;
 
 /**
- * Set of tests for BackBee\Config\Config
+ * Set of tests for BackBee\Config\Config.
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -39,14 +39,14 @@ use BackBee\DependencyInjection\Container;
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * the directory which contains every resources required for running this test class
+     * the directory which contains every resources required for running this test class.
      *
      * @var string
      */
     private $test_base_dir;
 
     /**
-     * initialize the main directory to looking for ConfigTest resources
+     * initialize the main directory to looking for ConfigTest resources.
      */
     public function setUp()
     {
@@ -54,7 +54,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test the Config constructor
+     * test the Config constructor.
      *
      * @covers ::extend
      * @covers ::loadFromBaseDir
@@ -79,7 +79,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test extend() with environment or not and override or not
+     * test extend() with environment or not and override or not.
      *
      * @covers ::extend
      * @covers ::setEnvironment
@@ -152,7 +152,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test config with container
+     * Test config with container.
      *
      * @covers ::setContainer
      * @covers ::getRawSection
@@ -180,7 +180,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test Config class proxy and dump
+     * Test Config class proxy and dump.
      *
      * @covers ::getClassProxy
      * @covers ::dump

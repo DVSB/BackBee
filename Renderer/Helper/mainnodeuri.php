@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,17 +26,18 @@ namespace BackBee\Renderer\Helper;
 use BackBee\ClassContent\AbstractClassContent;
 
 /**
- * Helper to get the main node uri from a content
+ * Helper to get the main node uri from a content.
+ *
  * @category    BackBee
- * @package     BackBee\Renderer
- * @subpackage  Helper
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class mainnodeuri extends AbstractHelper
 {
     /**
-     * Returns the main node uri form content if found '#' otherwise
+     * Returns the main node uri form content if found '#' otherwise.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return string
      */

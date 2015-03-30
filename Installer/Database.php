@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,12 +25,11 @@ namespace BackBee\Installer;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
-
 use BackBee\BBApplication;
 
 /**
  * @category    BackBee
- * @package     BackBee\Installer
+ *
  * @copyright   Lp system
  * @author      nicolas dufreche <n.dufreche@lp-digital.fr>
  */
@@ -77,7 +76,7 @@ class Database
     }
 
     /**
-     * Create the BackBee schema
+     * Create the BackBee schema.
      */
     public function createBackBeeSchema()
     {
@@ -101,7 +100,7 @@ class Database
     }
 
     /**
-     * Create the bundle schema specified in param
+     * Create the bundle schema specified in param.
      *
      * @param string $bundleName
      */
@@ -141,7 +140,7 @@ class Database
     }
 
     /**
-     * update the bundle schema specified in param
+     * update the bundle schema specified in param.
      *
      * @param string $bundleName
      */
@@ -156,9 +155,7 @@ class Database
             $classes = $this->_getBundleSchema($bundle);
             $schemaTool->updateSchema($classes, true);
             unset($schemaTool);
-        } catch (\Exception $e) {
-            //echo $e->getMessage()."\n";
-        }
+        } catch (\Exception $e) {}
     }
 
     /**

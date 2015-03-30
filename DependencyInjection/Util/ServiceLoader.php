@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,22 +26,21 @@ namespace BackBee\DependencyInjection\Util;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\ContainerBuilder;
 
 /**
- * Allows to easily load services into container from yml or xml file
+ * Allows to easily load services into container from yml or xml file.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class ServiceLoader
 {
     /**
-     * Load services from yaml file into your container
+     * Load services from yaml file into your container.
      *
      * @param Container    $container        the container we want to load services into
      * @param string|array $dir              directory (or directories) in where we can find services files
@@ -58,7 +57,7 @@ class ServiceLoader
     }
 
     /**
-     * Load services from xml file into your container
+     * Load services from xml file into your container.
      *
      * @param Container    $container        the container we want to load services into
      * @param string|array $dir              directory (or directories) in where we can find services files

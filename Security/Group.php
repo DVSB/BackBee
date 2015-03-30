@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,23 +29,27 @@ use JMS\Serializer\Annotation as Serializer;
 
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
- * @Entity()
- * @Table(name="`group`", uniqueConstraints={@UniqueConstraint(name="UNI_IDENTIFIER",columns={"id"})})
+ * @ORM\Entity
+ * @ORM\Table(name="`group`", uniqueConstraints={@ORM\UniqueConstraint(name="UNI_IDENTIFIER",columns={"id"})})
  *
  * @Serializer\ExclusionPolicy("all")
  */
 class Group implements DomainObjectInterface
 {
     /**
-     * Unique identifier of the group
+     * Unique identifier of the group.
+     *
      * @var integer
-     * @Id @Column(type="integer", name="id")
-     * @GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      *
      * @Serializer\Expose
      * @Serializer\ReadOnly
@@ -53,9 +57,10 @@ class Group implements DomainObjectInterface
     protected $_id;
 
     /**
-     * Group name
+     * Group name.
+     *
      * @var string
-     * @Column(type="string", name="name")
+     * @ORM\Column(type="string", name="name")
      *
      * @Serializer\Expose
      */
@@ -63,26 +68,30 @@ class Group implements DomainObjectInterface
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @ManyToMany(targetEntity="BackBee\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
-     * @JoinTable(
-     *      name="user_group",
-     *      joinColumns={@JoinColumn(name="group_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")}
-     * )
      *
      * @Serializer\Expose
      * @Serializer\MaxDepth(2)
      * @Serializer\SerializedName("users")
      * @Serializer\ReadOnly
+     * @ORM\ManyToMany(targetEntity="BackBee\Security\User", inversedBy="_groups", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(
+     *     name="user_group",
+     *     joinColumns={
+     *         @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     *     },
+     *     inverseJoinColumns={
+     *         @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     *     }
+     * )
      */
     protected $_users;
 
     /**
      * Optional site.
-     * @var \BackBee\Site\Site
-     * @ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="site_uid", referencedColumnName="uid")
      *
+     * @var \BackBee\Site\Site
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Site", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="site_uid", referencedColumnName="uid")
      */
     protected $_site;
 
@@ -96,6 +105,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return integer
      */
     public function getId()
@@ -105,7 +115,9 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  integer                 $id
+     *
+     * @param integer $id
+     *
      * @return \BackBee\Security\Group
      */
     public function setId($id)
@@ -117,6 +129,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getName()
@@ -126,7 +139,9 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  string                  $name
+     *
+     * @param string $name
+     *
      * @return \BackBee\Security\Group
      */
     public function setName($name)
@@ -138,6 +153,7 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getUsers()
@@ -147,7 +163,9 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  \Doctrine\Common\Collections\ArrayCollection $users
+     *
+     * @param \Doctrine\Common\Collections\ArrayCollection $users
+     *
      * @return \BackBee\Security\Group
      */
     public function setUsers(ArrayCollection $users)
@@ -159,7 +177,9 @@ class Group implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  \BackBee\Security\User  $user
+     *
+     * @param \BackBee\Security\User $user
+     *
      * @return \BackBee\Security\Group
      */
     public function addUser(User $user)
@@ -170,7 +190,8 @@ class Group implements DomainObjectInterface
     }
 
     /**
-     * Returns the optional site
+     * Returns the optional site.
+     *
      * @return \BackBee\Site\Site|NULL
      * @codeCoverageIgnore
      */
@@ -180,8 +201,10 @@ class Group implements DomainObjectInterface
     }
 
     /**
-     * Sets the optional site
-     * @param  \BackBee\Site\Site      $site
+     * Sets the optional site.
+     *
+     * @param \BackBee\Site\Site $site
+     *
      * @return \BackBee\Security\Group
      * @codeCoverageIgnore
      */

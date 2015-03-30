@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\DependencyInjection\Tests;
 
 use org\bovigo\vfs\vfsStream;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
-
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\ContainerBuilder;
 use BackBee\DependencyInjection\ContainerProxy;
@@ -33,10 +32,10 @@ use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBee\Tests\Mock\ManualBBApplication;
 
 /**
- * Set of tests for BackBee\DependencyInjection\ContainerBuilder
+ * Set of tests for BackBee\DependencyInjection\ContainerBuilder.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -45,21 +44,21 @@ use BackBee\Tests\Mock\ManualBBApplication;
 class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * base application
+     * base application.
      *
      * @var BackBee\ApplicationInterface
      */
     private $application;
 
     /**
-     * this set of tests resources directory (absolute path)
+     * this set of tests resources directory (absolute path).
      *
      * @var string
      */
     private $resources_directory;
 
     /**
-     * setup base of test environment
+     * setup base of test environment.
      */
     public function setUp()
     {
@@ -108,7 +107,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test that the load of backbee core services and repository services are done is the right order
+     * test that the load of backbee core services and repository services are done is the right order.
      *
      * @depends testHydrateContainerWithBootstrapParameters
      *
@@ -200,7 +199,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * test if the ContainerAlreadyExistsException is raise when we call a second time the method
-     * ContainerBuilder::getContainer()
+     * ContainerBuilder::getContainer().
      *
      * @covers ::getContainer
      */
@@ -220,7 +219,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test to get a container for application which has a context and an environment; debug is setted to false
+     * Test to get a container for application which has a context and an environment; debug is setted to false.
      *
      * @covers ::getContainer()
      */
@@ -288,7 +287,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * setup a wrong bootstrap.yml to raise MissingBootstrapParametersException
+     * setup a wrong bootstrap.yml to raise MissingBootstrapParametersException.
      *
      * @covers ::hydrateContainerWithBootstrapParameters
      */

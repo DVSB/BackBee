@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,8 +31,7 @@ use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
  * Default logout success handler will redirect users to a configured path.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Logout
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -42,7 +41,8 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface
     protected $targetUrl;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param HttpUtils $httpUtils
      * @param string    $targetUrl
      */

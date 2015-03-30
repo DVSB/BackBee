@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,29 +24,31 @@
 namespace BackBee\ClassContent;
 
 /**
- * Category represents a classcontent category and contains every blocks which has current category name
+ * Category represents a classcontent category and contains every blocks which has current category name.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class Category implements \JsonSerializable
 {
     /**
-     * Category's name
+     * Category's name.
+     *
      * @var string
      */
     private $name;
 
     /**
-     * Contains many \stdClass which hold informations (label, description, type, visible) about blocks
+     * Contains many \stdClass which hold informations (label, description, type, visible) about blocks.
+     *
      * @var array
      */
     private $blocks = [];
 
     /**
-     * Category's contructor
+     * Category's contructor.
      *
      * @param string $name category's name
      */
@@ -56,7 +58,7 @@ class Category implements \JsonSerializable
     }
 
     /**
-     * Category's name getter
+     * Category's name getter.
      *
      * @return string
      */
@@ -67,7 +69,7 @@ class Category implements \JsonSerializable
 
     /**
      * This method allows us to build new block according to provided classcontent ($content) and
-     * add it into Category blocks attribute
+     * add it into Category blocks attribute.
      *
      * @param AbstractClassContent $content the class content to add to this category
      * @param boolean       $visible if this block is visible or not
@@ -92,7 +94,7 @@ class Category implements \JsonSerializable
     }
 
     /**
-     * Category's blocks getter
+     * Category's blocks getter.
      *
      * @return array
      */

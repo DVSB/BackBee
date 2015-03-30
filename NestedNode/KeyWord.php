@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,24 +29,33 @@ use JMS\Serializer\Annotation as Serializer;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Renderer\RenderableInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * A keywords entry of a tree in BackBee
+ * A keywords entry of a tree in BackBee.
  *
  * @category    BackBee
- * @package     BackBee\NestedNode
+ *
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\KeyWordRepository")
- * @Table(name="keyword",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}), @index(name="IDX_KEYWORD", columns={"keyword"})})
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\KeyWordRepository")
+ * @ORM\Table(name="keyword",indexes={
+ *     @ORM\Index(name="IDX_ROOT", columns={"root_uid"}),
+ *     @ORM\Index(name="IDX_PARENT", columns={"parent_uid"}),
+ *     @ORM\Index(name="IDX_SELECT_KEYWORD", columns={"root_uid", "leftnode", "rightnode"}),
+ *     @ORM\Index(name="IDX_KEYWORD", columns={"keyword"})
+ * })
  *
  * @Serializer\ExclusionPolicy("all")
  */
 class KeyWord extends AbstractNestedNode implements RenderableInterface
 {
     /**
-     * Unique identifier of the content
+     * Unique identifier of the content.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("id")
@@ -56,25 +65,28 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
 
     /**
      * The root node, cannot be NULL.
+     *
      * @var \BackBee\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid", onDelete="SET NULL")
      * @Serializer\Exclude
      */
     protected $_root;
 
     /**
      * The parent node.
+     *
      * @var \BackBee\NestedNode\KeyWord
-     * @ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\KeyWord", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 
     /**
-     * The keyword
+     * The keyword.
+     *
      * @var string
-     * @Column(type="string", name="keyword")
+     * @ORM\Column(type="string", name="keyword")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("keyword")
@@ -84,30 +96,36 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
 
     /**
      * Descendants nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\KeyWord", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
-     * A collection of AbstractClassContent indexed by this keyword
-     * @ManyToMany(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
-     * @JoinTable(name="keywords_contents",
-     *      joinColumns={@JoinColumn(name="keyword_uid", referencedColumnName="uid")},
-     *      inverseJoinColumns={@JoinColumn(name="content_uid", referencedColumnName="uid")}
+     * A collection of AClassContent indexed by this keyword.
+     *
+     * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(name="keywords_contents",
+     *      joinColumns={
+     *          @ORM\JoinColumn(name="keyword_uid", referencedColumnName="uid")},
+     *      inverseJoinColumns={
+     *          @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")}
      *      )
      */
     protected $_content;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $uid The unique identifier of the keyword
      */
     public function __construct($uid = null)
@@ -118,7 +136,8 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns the keyword
+     * Returns the keyword.
+     *
      * @return string
      */
     public function getKeyWord()
@@ -127,7 +146,8 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns a collection of indexed AbstractClassContent
+     * Returns a collection of indexed AbstractClassContent.
+     *
      * @return Doctrine\Common\Collections\Collection
      * @codeCoverageIgnore
      */
@@ -137,8 +157,10 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Sets the keyword
-     * @param  string                      $keyWord
+     * Sets the keyword.
+     *
+     * @param string $keyWord
+     *
      * @return \BackBee\NestedNode\KeyWord
      */
     public function setKeyWord($keyWord)
@@ -149,7 +171,8 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Adds a content to the collection
+     * Adds a content to the collection.
+     *
      * @param  BackBee\ClassContent\AbstractClassContent $content
      * @return \BackBee\NestedNode\KeyWord
      */
@@ -161,7 +184,8 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Removes a content from the collection
+     * Removes a content from the collection.
+     *
      * @param \BackBee\ClassContent\AbstractClassContent $content
      */
     public function removeContent(AbstractClassContent $content)
@@ -171,6 +195,7 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
 
     /**
      * Returns an array representation of the keyword.
+     *
      * @return array
      */
     public function toArray()
@@ -182,8 +207,10 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns data associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
+     * Returns data associated to $var for rendering assignation, all data if NULL provided.
+     *
+     * @param string $var
+     *
      * @return string|array|null
      */
     public function getData($var = null)
@@ -202,8 +229,10 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns parameters associated to $var for rendering assignation, all data if NULL provided
-     * @param  string            $var
+     * Returns parameters associated to $var for rendering assignation, all data if NULL provided.
+     *
+     * @param string $var
+     *
      * @return string|array|null
      */
     public function getParam($var = null)
@@ -227,6 +256,7 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
 
     /**
      * Returns TRUE if the page can be rendered.
+     *
      * @return Boolean
      * @codeCoverageIgnore
      */
@@ -236,7 +266,8 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns default template name
+     * Returns default template name.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -246,7 +277,8 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns a stdObj representation of the node
+     * Returns a stdObj representation of the node.
+     *
      * @return \stdClass
      */
     public function toStdObject()

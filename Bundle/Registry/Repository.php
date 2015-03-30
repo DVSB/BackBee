@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,7 +29,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -38,8 +38,10 @@ class Repository extends EntityRepository
     private $last_inserted_id;
 
     /**
-     * Saves the registry entry in DB, persist it if need
-     * @param  \BackBee\Bundle\Registry $registry
+     * Saves the registry entry in DB, persist it if need.
+     *
+     * @param \BackBee\Bundle\Registry $registry
+     *
      * @return \BackBee\Bundle\Registry
      */
     public function save(\BackBee\Bundle\Registry $registry)
@@ -54,8 +56,10 @@ class Repository extends EntityRepository
     }
 
     /**
-     * Removes the registry entry from DB
-     * @param  \BackBee\Bundle\Registry $registry
+     * Removes the registry entry from DB.
+     *
+     * @param \BackBee\Bundle\Registry $registry
+     *
      * @return \BackBee\Bundle\Registry
      */
     public function remove(\BackBee\Bundle\Registry $registry)
@@ -69,8 +73,10 @@ class Repository extends EntityRepository
     }
 
     /**
-     * Removes the registry entry from DB
-     * @param  \BackBee\Bundle\Registry $registry
+     * Removes the registry entry from DB.
+     *
+     * @param \BackBee\Bundle\Registry $registry
+     *
      * @return \BackBee\Bundle\Registry
      */
     public function removeEntity($entity)
@@ -102,7 +108,7 @@ class Repository extends EntityRepository
     }
 
     /**
-     * Find the entity by hes id
+     * Find the entity by hes id.
      *
      * @param $classname
      **/
@@ -119,7 +125,7 @@ class Repository extends EntityRepository
     }
 
     /**
-     * Find the entity by hes id
+     * Find the entity by hes id.
      *
      * @param $classname
      **/
@@ -129,7 +135,7 @@ class Repository extends EntityRepository
     }
 
     /**
-     * Find the entity by hes id
+     * Find the entity by hes id.
      *
      * @param $classname
      **/

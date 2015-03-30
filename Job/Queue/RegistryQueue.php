@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,22 +25,20 @@ namespace BackBee\Job\Queue;
 
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\Bundle\Registry;
 use BackBee\Job\AbstractJob;
 
 /**
- * A Registry based queue for jobs
+ * A Registry based queue for jobs.
  *
  * @category    BackBee
- * @package     BackBee\Job
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class RegistryQueue extends AbstractQueue
 {
     /**
-     *
      * @var array
      */
     private $jobs;
@@ -88,7 +86,6 @@ class RegistryQueue extends AbstractQueue
     }
 
     /**
-     *
      * @param \BackBee\Job\AbstractJob $job
      */
     public function enqueue(AbstractJob $job)
@@ -156,7 +153,7 @@ class RegistryQueue extends AbstractQueue
     }
 
     /**
-     * Runs all jobs
+     * Runs all jobs.
      *
      * @param \Symfony\Component\HttpKernel\Event\PostResponseEvent $event
      */

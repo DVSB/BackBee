@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,26 +24,22 @@
 namespace BackBee\Security\Token;
 
 use Symfony\Component\Security\Core\User\UserInterface;
-
 use BackBee\Security\User;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Token
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class PublicKeyToken extends BBUserToken
 {
     /**
-     *
      * @var string
      */
     private $publicKey;
 
     /**
-     *
      * @var string
      */
     private $signature;
@@ -62,6 +58,7 @@ class PublicKeyToken extends BBUserToken
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      *              todo Function added: problem with redirection - authentification lost.
      */
@@ -75,6 +72,7 @@ class PublicKeyToken extends BBUserToken
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getCredentials()
@@ -111,7 +109,7 @@ class PublicKeyToken extends BBUserToken
     }
 
     /**
-     * Public key attribute setter
+     * Public key attribute setter.
      *
      * @param string $signature new public key value
      *
@@ -125,7 +123,7 @@ class PublicKeyToken extends BBUserToken
     }
 
     /**
-     * Public key attribute getter
+     * Public key attribute getter.
      *
      * @return string the current token public key
      */
@@ -135,7 +133,7 @@ class PublicKeyToken extends BBUserToken
     }
 
     /**
-     * Signature attribute setter
+     * Signature attribute setter.
      *
      * @param string $signature new signature value
      *
@@ -149,7 +147,7 @@ class PublicKeyToken extends BBUserToken
     }
 
     /**
-     * Signature attribute getter
+     * Signature attribute getter.
      *
      * @return string the current token signature
      */

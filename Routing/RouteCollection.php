@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Routing;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
-
 use BackBee\BBApplication;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
@@ -40,7 +39,7 @@ use BackBee\Site\Site;
  * with a given name.
  *
  * @category    BackBee
- * @package     BackBee\Routing
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -52,7 +51,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     const RESOURCE_URL = 3;
 
     /**
-     * The current BBApplication
+     * The current BBApplication.
+     *
      * @var \BackBee\BBApplication
      */
     private $application;
@@ -73,7 +73,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     private $is_restored;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \BackBee\BBApplication $application
      */
     public function __construct(BBApplication $application = null)
@@ -99,8 +100,10 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * [pushRouteCollection description]
-     * @param  array  $routes [description]
+     * [pushRouteCollection description].
+     *
+     * @param array $routes [description]
+     *
      * @return [type] [description]
      */
     public function pushRouteCollection(array $routes)
@@ -118,8 +121,10 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * Return the path associated to a route
-     * @param  string   $id
+     * Return the path associated to a route.
+     *
+     * @param string $id
+     *
      * @return url|NULL
      */
     public function getRoutePath($id)
@@ -133,11 +138,13 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Return complete url which match with routeName and routeParams; you can also customize
-     * the base url; by default it use current site base url
-     * @param  string      $route_name
-     * @param  array|null  $route_params
-     * @param  string|null $base_url
-     * @param  boolean     $add_ext
+     * the base url; by default it use current site base url.
+     *
+     * @param string      $route_name
+     * @param array|null  $route_params
+     * @param string|null $base_url
+     * @param boolean     $add_ext
+     *
      * @return string
      */
     public function getUrlByRouteName(
@@ -173,10 +180,12 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
 
     /**
      * Returns $pathinfo with base url of current page
-     * If $site is provided, the url will be pointing on the associate domain
-     * @param  string             $pathinfo
-     * @param  string             $defaultExt
-     * @param  \BackBee\Site\Site $site
+     * If $site is provided, the url will be pointing on the associate domain.
+     *
+     * @param string             $pathinfo
+     * @param string             $defaultExt
+     * @param \BackBee\Site\Site $site
+     *
      * @return string
      */
     public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
@@ -262,7 +271,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * [addRoute description]
+     * [addRoute description].
+     *
      * @param [type] $name  [description]
      * @param array  $route [description]
      */
@@ -291,9 +301,11 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * Returns uri from pathinfo according to current request BaseUrl()
-     * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  string                                    $pathinfo
+     * Returns uri from pathinfo according to current request BaseUrl().
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param string                                    $pathinfo
+     *
      * @return string
      */
     private function getUriFromBaseUrl()
@@ -311,10 +323,12 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * Returns uri from pathinfo according to site to be reached
-     * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  string                                    $pathinfo
-     * @param  \BackBee\Site\Site                        $site
+     * Returns uri from pathinfo according to site to be reached.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param string                                    $pathinfo
+     * @param \BackBee\Site\Site                        $site
+     *
      * @return string
      */
     private function getUriForSite(Request $request, $pathinfo, Site $site)
@@ -323,8 +337,10 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * Returns the default extension for a site
-     * @param  \BackBee\Site\Site $site
+     * Returns the default extension for a site.
+     *
+     * @param \BackBee\Site\Site $site
+     *
      * @return string|null
      */
     private function getDefaultExtFromSite(Site $site = null)

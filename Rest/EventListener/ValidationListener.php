@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -37,10 +37,10 @@ use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\Rest\Exception\ValidationException;
 
 /**
- * Request validation listener
+ * Request validation listener.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -62,9 +62,10 @@ class ValidationListener extends AbstractPathEnabledListener
     }
 
     /**
-     * Core request handler
+     * Core request handler.
      *
-     * @param  GetResponseEvent                  $event The event
+     * @param GetResponseEvent $event The event
+     *
      * @throws BadRequestHttpException
      * @throws UnsupportedMediaTypeHttpException
      */
@@ -106,8 +107,8 @@ class ValidationListener extends AbstractPathEnabledListener
     }
 
     /**
+     * @param \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
      *
-     * @param  \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata $metadata
      * @return string|null
      */
     protected function getViolationsParameterName($metadata)
@@ -122,7 +123,7 @@ class ValidationListener extends AbstractPathEnabledListener
     }
 
     /**
-     * Set default values
+     * Set default values.
      *
      * @param array                                          $params
      * @param \Symfony\Component\HttpFoundation\ParameterBag $values
@@ -141,11 +142,12 @@ class ValidationListener extends AbstractPathEnabledListener
     }
 
     /**
-     * Validate params
+     * Validate params.
      *
-     * @param  \Symfony\Component\Validator\Validator               $validator
-     * @param  array                                                $params
-     * @param  \Symfony\Component\HttpFoundation\ParameterBag       $values
+     * @param \Symfony\Component\Validator\Validator         $validator
+     * @param array                                          $params
+     * @param \Symfony\Component\HttpFoundation\ParameterBag $values
+     *
      * @return \Symfony\Component\Validator\ConstraintViolationList
      */
     protected function validateParams(Validator $validator, array $params, ParameterBag $values)
@@ -181,8 +183,8 @@ class ValidationListener extends AbstractPathEnabledListener
     }
 
     /**
+     * @param mixed $controller
      *
-     * @param  mixed                                                             $controller
      * @return \Metadata\ClassHierarchyMetadata|\Metadata\MergeableClassMetadata
      */
     protected function getControllerActionMetadata($controller)

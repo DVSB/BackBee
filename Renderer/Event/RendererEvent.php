@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Renderer\Event;
 use BackBee\Event\Event;
 
 /**
- * A generic class of event in BB application
+ * A generic class of event in BB application.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -65,7 +65,7 @@ class RendererEvent extends Event
     }
 
     /**
-     * Getter of current event renderer object
+     * Getter of current event renderer object.
      *
      * @return BackBee\Renderer\Renderer
      */
@@ -75,7 +75,7 @@ class RendererEvent extends Event
     }
 
     /**
-     * Returns render string if it is setted, else null
+     * Returns render string if it is setted, else null.
      *
      * @return string|null
      */

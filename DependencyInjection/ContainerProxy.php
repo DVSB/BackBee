@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,37 +28,36 @@ use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class ContainerProxy extends Container
 {
     /**
-     * raw definitions provided by container dump array (key: services)
+     * raw definitions provided by container dump array (key: services).
      *
      * @var array
      */
     private $raw_definitions;
 
     /**
-     * raw definitions id provided by container dump array (keys of container dump array services)
+     * raw definitions id provided by container dump array (keys of container dump array services).
      *
      * @var array
      */
     private $raw_definitions_id;
 
     /**
-     * shows if the container has been compiled before being dump or not
+     * shows if the container has been compiled before being dump or not.
      *
      * @var boolean
      */
     private $already_compiled;
 
     /**
-     * ContainerProxy's constructor;
+     * ContainerProxy's constructor;.
      *
      * @param array $container_dump the container dump from where we can restore entirely the container
      */
@@ -92,7 +91,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Returns boolean that determine if container has been compiled before the dump or not
+     * Returns boolean that determine if container has been compiled before the dump or not.
      *
      * @return boolean true if the container has been compiled before the dump, otherwise false
      */
@@ -170,7 +169,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Try to load definition by looking for its raw definition with the provided $id
+     * Try to load definition by looking for its raw definition with the provided $id.
      *
      * @param string $id the id of the service we try to load its definition
      *
@@ -191,7 +190,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Load every raw definitions and convert them into definition object
+     * Load every raw definitions and convert them into definition object.
      */
     private function loadRawDefinitions()
     {
@@ -201,7 +200,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Build a definition from the definition's array provided as current method parameter
+     * Build a definition from the definition's array provided as current method parameter.
      *
      * @param array $array the raw definition's array
      *
@@ -234,7 +233,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition class into definition object if it exists
+     * Set the definition class into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -247,7 +246,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition arguments into definition object if it exists
+     * Set the definition arguments into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -262,7 +261,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition factory class into definition object if it exists
+     * Set the definition factory class into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -275,7 +274,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition factory service into definition object if it exists
+     * Set the definition factory service into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -288,7 +287,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition factory method into definition object if it exists
+     * Set the definition factory method into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -301,7 +300,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Converts a service string id into Reference if needed
+     * Converts a service string id into Reference if needed.
      *
      * @param mixed $argument the argument we may convert
      *
@@ -317,7 +316,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition tags into definition object if it exists
+     * Set the definition tags into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -356,7 +355,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition method calls into definition object if it exists
+     * Set the definition method calls into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -378,7 +377,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition configurator into definition object if it exists
+     * Set the definition configurator into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
@@ -396,7 +395,7 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition property (public/abstract/scope/file) into definition object if it exists
+     * Set the definition property (public/abstract/scope/file) into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas

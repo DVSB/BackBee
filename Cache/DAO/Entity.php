@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,56 +23,66 @@
 
 namespace BackBee\Cache\DAO;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * Entity for DAO stored cache data
+ * Entity for DAO stored cache data.
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  DAO
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity
- * @Table(name="cache",indexes={@index(name="IDX_EXPIRE", columns={"expire"}), @index(name="IDX_TAG", columns={"tag"})})
+ * @ORM\Entity
+ * @ORM\Table(name="cache",indexes={
+ *     @ORM\Index(name="IDX_EXPIRE", columns={"expire"}),
+ *     @ORM\Index(name="IDX_TAG", columns={"tag"})})
  */
 class Entity
 {
     /**
-     * The cache id
+     * The cache id.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
     /**
-     * A tag associated to the cache
+     * A tag associated to the cache.
+     *
      * @var string
-     * @Column(type="string", name="tag", nullable=true)
+     * @ORM\Column(type="string", name="tag", nullable=true)
      */
     protected $_tag;
 
     /**
-     * The data stored
-     * @string
-     * @Column(type="text", name="data")
+     * The data stored.
+     *
+     * @var string
+     * @ORM\Column(type="text", name="data")
      */
     protected $_data;
 
     /**
-     * The expire date time for the stored data
+     * The expire date time for the stored data.
+     *
      * @var \DateTime
-     * @Column(type="datetime", name="expire", nullable=true)
+     * @ORM\Column(type="datetime", name="expire", nullable=true)
      */
     protected $_expire;
 
     /**
-     * The creation date time
+     * The creation date time.
+     *
      * @var \DateTime
-     * @Column(type="datetime", name="created")
+     * @ORM\Column(type="datetime", name="created")
      */
     protected $_created;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $uid Optional, the cache id
      * @codeCoverageIgnore
      */
@@ -83,8 +93,10 @@ class Entity
     }
 
     /**
-     * Sets the cache id
-     * @param  string                    $uid
+     * Sets the cache id.
+     *
+     * @param string $uid
+     *
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -96,8 +108,10 @@ class Entity
     }
 
     /**
-     * Sets the data to store
-     * @param  string                    $data
+     * Sets the data to store.
+     *
+     * @param string $data
+     *
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -109,8 +123,10 @@ class Entity
     }
 
     /**
-     * Sets the expire date time
-     * @param  \DateTime                 $expire
+     * Sets the expire date time.
+     *
+     * @param \DateTime $expire
+     *
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -122,8 +138,10 @@ class Entity
     }
 
     /**
-     * Set the associated tag
-     * @param  string                    $tag
+     * Set the associated tag.
+     *
+     * @param string $tag
+     *
      * @return \BackBee\Cache\DAO\Entity
      * @codeCoverageIgnore
      */
@@ -135,7 +153,8 @@ class Entity
     }
 
     /**
-     * Returns the cache id
+     * Returns the cache id.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -145,7 +164,8 @@ class Entity
     }
 
     /**
-     * Returns the stored data
+     * Returns the stored data.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -155,7 +175,8 @@ class Entity
     }
 
     /**
-     * Returns the data time expiration
+     * Returns the data time expiration.
+     *
      * @return \DateTime
      * @codeCoverageIgnore
      */

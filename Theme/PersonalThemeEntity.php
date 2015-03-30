@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,74 +23,85 @@
 
 namespace BackBee\Theme;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Theme\Repository\ThemeRepository")
- * @Table(name="theme", indexes={@index(name="site_idx", columns={"site_uid"})})
+ * @ORM\Entity(repositoryClass="BackBee\Theme\Repository\ThemeRepository")
+ * @ORM\Table(name="theme", indexes={@ORM\Index(name="site_idx", columns={"site_uid"})})
  */
 class PersonalThemeEntity extends AbstractThemeEntity
 {
     /**
-     * Unique identifier of the object
+     * Unique identifier of the object.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
     /**
-     * Site identifier
+     * Site identifier.
+     *
      * @var string
-     * @Column(type="string", name="site_uid")
+     * @ORM\Column(type="string", name="site_uid")
      */
     protected $_site_uid;
 
     /**
-     * Name of the theme
+     * Name of the theme.
+     *
      * @var string
-     * @Column(type="string", name="name")
+     * @ORM\Column(type="string", name="name")
      */
     protected $_name;
 
     /**
-     * Name of the theme
+     * Name of the theme.
+     *
      * @var string
-     * @Column(type="string", name="description")
+     * @ORM\Column(type="string", name="description")
      */
     protected $_description;
 
     /**
-     * Graphic representation of the theme
+     * Graphic representation of the theme.
+     *
      * @var string
-     * @Column(type="string", name="screenshot")
+     * @ORM\Column(type="string", name="screenshot")
      */
     protected $_screenshot;
 
     /**
-     * Name of the folder theme
+     * Name of the folder theme.
+     *
      * @var string
-     * @column(type="string", name="folder")
+     * @ORM\Column(type="string", name="folder")
      */
     protected $_folder_name;
 
     /**
-     * Architecture of the folder theme
+     * Architecture of the folder theme.
+     *
      * @var string
-     * @column(type="string", name="architecture")
+     * @ORM\Column(type="string", name="architecture")
      */
     protected $_architecture;
 
     /**
-     * the personal theme dependency
+     * the personal theme dependency.
+     *
      * @var string
-     * @column(type="string", name="extend")
+     * @ORM\Column(type="string", name="extend")
      */
     private $_extend;
 
     /**
-     * object constructor
+     * object constructor.
      *
      * @param array $values
      */
@@ -104,7 +115,7 @@ class PersonalThemeEntity extends AbstractThemeEntity
     }
 
     /**
-     * transform the current object in array
+     * transform the current object in array.
      *
      * @return array
      */
@@ -123,9 +134,10 @@ class PersonalThemeEntity extends AbstractThemeEntity
     }
 
     /**
-     * return the theme who depend the personal theme
+     * return the theme who depend the personal theme.
      *
      * @codeCoverageIgnore
+     *
      * @return string Theme name
      */
     public function getDependency()
@@ -134,9 +146,10 @@ class PersonalThemeEntity extends AbstractThemeEntity
     }
 
     /**
-     * set the personal theme dependency
+     * set the personal theme dependency.
      *
      * @codeCoverageIgnore
+     *
      * @param string $depend Theme name
      */
     public function setDependency($depend)

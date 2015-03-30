@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,37 +23,17 @@
 
 namespace BackBee\DependencyInjection\Tests\Listener;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use org\bovigo\vfs\vfsStream;
-
 use BackBee\DependencyInjection\ContainerBuilder;
 use BackBee\DependencyInjection\Listener\ContainerListener;
 use BackBee\Event\Event;
 use BackBee\Tests\Mock\ManualBBApplication;
 
 /**
- * Set of tests for BackBee\DependencyInjection\Listener\ContainerListener
+ * Set of tests for BackBee\DependencyInjection\Listener\ContainerListener.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -62,7 +42,7 @@ use BackBee\Tests\Mock\ManualBBApplication;
 class ContainerListenerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * test every new and overrided method provided by BackBee\DependencyInjection\Container
+     * test every new and overrided method provided by BackBee\DependencyInjection\Container.
      *
      * @covers ::onApplicationInit
      */

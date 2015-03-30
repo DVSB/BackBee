@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,10 +30,10 @@ use BackBee\BBApplication;
  *   - application debug value must be false
  *   - AND application isClientSAPI() must return false
  *   - AND current user must be not BBUser
- *   - AND application must be started
+ *   - AND application must be started.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -45,14 +45,14 @@ class ApplicationCoreValidator implements ValidatorInterface
     private $application;
 
     /**
-     * list of group name this validator belong to
+     * list of group name this validator belong to.
      *
      * @var array
      */
     private $groups;
 
     /**
-     * constructor
+     * constructor.
      *
      * @param BBApplication $application the application from which we will checks core requirements
      * @param mixed         $groups      group(s) name(s) which this validator is associated with

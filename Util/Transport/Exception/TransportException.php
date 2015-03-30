@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,7 @@ namespace BackBee\Util\Transport\Exception;
 use BackBee\Exception\BBException;
 
 /**
- * Transport exception thrown on connection and authentication
+ * Transport exception thrown on connection and authentication.
  *
  * Error codes defined are :
  *
@@ -36,33 +36,36 @@ use BackBee\Exception\BBException;
  * * AUTHENTICATION_FAILED : unable to authenticate on the remote server
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Transport\Exception
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class TransportException extends BBException
 {
     /**
-     * Unregistered exception
+     * Unregistered exception.
+     *
      * @var int
      */
     const UNKNOWN_ERROR = 10000;
 
     /**
-     * Misconfiguration
+     * Misconfiguration.
+     *
      * @var int
      */
     const MISCONFIGURATION = 10001;
 
     /**
-     * Connection failed
+     * Connection failed.
+     *
      * @var int
      */
     const CONNECTION_FAILED = 10002;
 
     /**
-     * Authentication failed
+     * Authentication failed.
+     *
      * @var int
      */
     const AUTHENTICATION_FAILED = 10003;

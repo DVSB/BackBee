@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,23 +29,24 @@ use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
 
 /**
- * keyword repository
+ * keyword repository.
+ *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Repository\Element
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class KeywordRepository extends ClassContentRepository
 {
     /**
-     * Do stuf on update by post of the content editing form
+     * Do update by post of the content editing form.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  stdClass                            $value
      * @param  \BackBee\ClassContent\AbstractClassContent $parent
      *
      * @return \BackBee\ClassContent\Element\File
-     * @throws ClassContentException               Occures on invalid content type provided
+     * @throws ClassContentException Occures on invalid content type provided
      */
     public function getValueFromPost(AbstractClassContent $content, $value, AbstractClassContent $parent = null)
     {
@@ -71,11 +72,14 @@ class KeywordRepository extends ClassContentRepository
     }
 
     /**
-     * Do stuf removing content from the content editing form
+     * Do removing content from the content editing form.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  type                                $value
      * @param  \BackBee\ClassContent\AbstractClassContent $parent
+     *
      * @return type
+     *
      * @throws ClassContentException
      */
     public function removeFromPost(AbstractClassContent $content, $value = null, AbstractClassContent $parent = null)

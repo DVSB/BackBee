@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,25 +23,6 @@
 
 namespace BackBee\Event\Listener;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
@@ -49,18 +30,18 @@ use BackBee\NestedNode\Page;
 use BackBee\Rewriting\UrlGeneratorInterface;
 
 /**
- * Listener to rewriting events
+ * Listener to rewriting events.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class RewritingListener
 {
     /**
-     * Occur on classcontent.onflush events
+     * Occur on classcontent.onflush events.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushContent(Event $event)
@@ -81,7 +62,8 @@ class RewritingListener
     }
 
     /**
-     * Occur on nestednode.page.onflush events
+     * Occur on nestednode.page.onflush events.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushPage(Event $event)
@@ -107,7 +89,7 @@ class RewritingListener
     }
 
     /**
-     * Update URL for a page and its descendants according to the application UrlGeneratorInterface
+     * Update URL for a page and its descendants according to the application UrlGeneratorInterface.
      *
      * @param \BackBee\BBApplication              $application
      * @param \BackBee\NestedNode\Page            $page

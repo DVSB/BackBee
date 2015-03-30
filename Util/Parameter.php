@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,7 @@ namespace BackBee\Util;
 
 /**
  * @category    BackBee
- * @package     BackBee\Util
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -38,9 +38,11 @@ class Parameter
      * Mutable specify the value of the first array can be overloaded.
      *
      * @access public
-     * @param  array $array1
-     * @param  array $array2
-     * @param  array $mutableField = false
+     *
+     * @param array $array1
+     * @param array $array2
+     * @param array $mutableField = false
+     *
      * @return array the cleaned param
      */
     public static function paramsReplaceRecursive(array $array1, $array2, $mutableField = false)

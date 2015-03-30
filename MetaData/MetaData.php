@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,7 +31,7 @@ use BackBee\ClassContent\Element\Text;
 use BackBee\NestedNode\Page;
 
 /**
- * A metadata
+ * A metadata.
  *
  * Metadata instance is composed by a name and a set of key/value attributes
  * The attribute can be staticaly defined in yaml file or to be computed:
@@ -53,38 +53,43 @@ use BackBee\NestedNode\Page;
  * value of the element `chapo` of the first `content `actu` in the first column.
  *
  * @category    BackBee
- * @package     BackBee\MetaData
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 {
     /**
-     * The name of the metadata
+     * The name of the metadata.
+     *
      * @var string
      */
     private $name;
 
     /**
-     * An array of attributes
+     * An array of attributes.
+     *
      * @var array
      */
     private $attributes;
 
     /**
-     * The scheme to compute for dynamic attributes
+     * The scheme to compute for dynamic attributes.
+     *
      * @var array
      */
     private $scheme;
 
     /**
-     * The attributes to be computed
+     * The attributes to be computed.
+     *
      * @var array
      */
     private $is_computed;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $name
      */
     public function __construct($name = null)
@@ -99,7 +104,8 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Retuns the name of the metadata
+     * Retuns the name of the metadata.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -109,9 +115,12 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Sets the name of the metadata
-     * @param  string                         $name
+     * Sets the name of the metadata.
+     *
+     * @param string $name
+     *
      * @return \BackBee\MetaData\MetaData
+     *
      * @throws \BackBee\Exception\BBException Occurs if $name if not a valid string
      */
     public function setName($name)
@@ -126,8 +135,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Checks if the provided attribute exists for this metadata
-     * @param  string  $attribute The attribute looked for
+     * Checks if the provided attribute exists for this metadata.
+     *
+     * @param string $attribute The attribute looked for
+     *
      * @return Boolean Returns TRUE if the attribute is defined for the metadata, FALSE otherwise
      * @codeCoverageIgnore
      */
@@ -137,9 +148,11 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Returns the value of the attribute
-     * @param  string $attribute The attribute looked for
-     * @param  string $default   Optional, the default value return if attribute does not exist
+     * Returns the value of the attribute.
+     *
+     * @param string $attribute The attribute looked for
+     * @param string $default   Optional, the default value return if attribute does not exist
+     *
      * @return string
      */
     public function getAttribute($attribute, $default = '')
@@ -148,9 +161,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Sets the value of the attribute
-     * @param  string                              $attribute
-     * @param  string                              $value
+     * Sets the value of the attribute.
+     *
+     * @param string                              $attribute
+     * @param string                              $value
      * @param  \BackBee\ClassContent\AbstractClassContent $content   Optional, if the attribute is computed
      *                                                        the content on which apply the scheme
      * @return \BackBee\MetaData\MetaData
@@ -178,9 +192,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Updates the scheme of the attribute
-     * @param  string                              $attribute
-     * @param  string                              $scheme
+     * Updates the scheme of the attribute.
+     *
+     * @param string                              $attribute
+     * @param string                              $scheme
      * @param  \BackBee\ClassContent\AbstractClassContent $content   Optional, if the attribute is computed
      *                                                        the content on which apply the scheme
      * @return \BackBee\MetaData\MetaData
@@ -202,9 +217,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Compute values of attributes according to the AbstractClassContent provided
+     * Compute values of attributes according to the AClassContent provided.
      *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
+     *
      * @return \BackBee\MetaData\MetaData
      */
     public function computeAttributes(AbstractClassContent $content, Page $page = null)
@@ -303,9 +319,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
                             $this->attributes[$attribute] = call_user_func_array($functionName, $parts);
                         }
                     }
-                } catch (\Exception $e) {
-                    // Nothing to do
-                }
+                } catch (\Exception $e) {}
             } elseif (preg_match('/^\#([a-z]+)$/i', $value, $matches)) {
                 switch (strtolower($matches[1])) {
                     case 'url':
@@ -322,9 +336,10 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Returns a array representation of this metadata
+     * Returns a array representation of this metadata.
      *
      * @return array
+     *
      * @deprecated since version 1.0
      */
     public function toArray()
@@ -344,6 +359,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns the number of attributes.
+     *
      * @return int
      */
     public function count()
@@ -353,6 +369,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
 
     /**
      * Returns an iterator for attributes.
+     *
      * @return \ArrayIterator
      */
     public function getIterator()

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,10 +28,10 @@ use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\Utils\File\File;
 
 /**
- * CategoryManager provides every classcontent categories of the current application
+ * CategoryManager provides every classcontent categories of the current application.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -39,19 +39,21 @@ class CategoryManager
 {
     /**
      * Contains every class content categories (type: BackBee\ClassContent\Category)
-     * of current application and its bundles
+     * of current application and its bundles.
+     *
      * @var array
      */
     private $categories;
 
     /**
-     * Categories common options (thumbnail_url_pattern, etc.)
+     * Categories common options (thumbnail_url_pattern, etc.).
+     *
      * @var array
      */
     private $options;
 
     /**
-     * CategoryManager's constructor
+     * CategoryManager's constructor.
      *
      * @param ApplicationInterface $application application from where we will extract classcontent's categories
      */
@@ -70,7 +72,7 @@ class CategoryManager
     }
 
     /**
-     * Returns category by name or id
+     * Returns category by name or id.
      *
      * @param string $v category name or id
      *
@@ -84,7 +86,7 @@ class CategoryManager
     }
 
     /**
-     * Categories attribute getter
+     * Categories attribute getter.
      *
      * @return array
      */
@@ -109,7 +111,7 @@ class CategoryManager
     }
 
     /**
-     * Parse classcontent directories and hydrate categories attribute
+     * Parse classcontent directories and hydrate categories attribute.
      *
      * @param array $directories classcontent directories
      */
@@ -142,7 +144,7 @@ class CategoryManager
     }
 
     /**
-     * Build and/or hydrate Category object with provided classcontent
+     * Build and/or hydrate Category object with provided classcontent.
      *
      * @param AbstractClassContent $content
      */
@@ -166,7 +168,7 @@ class CategoryManager
     }
 
     /**
-     * Build id for category by sluggify its name
+     * Build id for category by sluggify its name.
      *
      * @param string $name category's name
      *

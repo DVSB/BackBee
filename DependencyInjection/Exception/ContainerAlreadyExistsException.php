@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,21 +27,21 @@ use BackBee\DependencyInjection\Container;
 
 /**
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class ContainerAlreadyExistsException extends \BackBee\Exception\BBException
 {
     /**
-     * container created by container builder which raise this exception
+     * container created by container builder which raise this exception.
      *
      * @var BackBee\DependencyInjection\Container
      */
     private $container;
 
     /**
-     * ContainerAlreadyExistsException's constructor
+     * ContainerAlreadyExistsException's constructor.
      *
      * @param BackBee\DependencyInjection\Container $container the container created by the container builder
      *                                                         which raise this exception
@@ -54,7 +54,7 @@ class ContainerAlreadyExistsException extends \BackBee\Exception\BBException
     }
 
     /**
-     * Getter of the container created by container builder which raise current exception
+     * Getter of the container created by container builder which raise current exception.
      *
      * @return BackBee\DependencyInjection\Container
      */

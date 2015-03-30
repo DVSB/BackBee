@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -32,10 +32,10 @@ use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\Rest\Encoder\EncoderProviderInterface;
 
 /**
- * Body listener/encoder
+ * Body listener/encoder.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -65,9 +65,10 @@ class BodyListener extends AbstractPathEnabledListener
     }
 
     /**
-     * Core request handler
+     * Core request handler.
      *
-     * @param  GetResponseEvent                  $event The event
+     * @param GetResponseEvent $event The event
+     *
      * @throws BadRequestHttpException
      * @throws UnsupportedMediaTypeHttpException
      */

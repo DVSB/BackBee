@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,8 +28,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Token
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -39,6 +38,7 @@ class UsernamePasswordToken extends AbstractToken
 
     /**
      * Constructor.
+     *
      * @param array $roles An array of roles
      */
     public function __construct($user, $credentials, array $roles = array())
@@ -53,6 +53,7 @@ class UsernamePasswordToken extends AbstractToken
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      *              todo Function added: problem with redirection - authentification lost.
      */
@@ -63,6 +64,7 @@ class UsernamePasswordToken extends AbstractToken
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getCredentials()

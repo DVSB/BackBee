@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,15 +30,14 @@ use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Logout
+ *
  * @copyright   Lp digital system
  * @author      n.bremont <nicolas.bremont@lp-digital.fr>
  */
 class SessionLogoutHandler implements LogoutHandlerInterface
 {
     /**
-     * Invalidate the current session
+     * Invalidate the current session.
      *
      * @param Request        $request
      * @param Response       $response

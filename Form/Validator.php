@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * @category    BackBee
- * @package     BackBee\Form
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -69,7 +69,8 @@ class Validator
     }
 
     /**
-     * @param  string                                  $key
+     * @param string $key
+     *
      * @return \Symfony\Component\Validator\Constraint
      */
     public function getConstraint($key, $options)
@@ -80,7 +81,8 @@ class Validator
     }
 
     /**
-     * @param  string                                           $key
+     * @param string $key
+     *
      * @return \Symfony\Component\Validator\ConstraintValidator
      */
     public function getValidator($key)
@@ -95,8 +97,6 @@ class Validator
     }
 
     /**
-     *
-     *
      * @param string $type    Validation type
      * @param string $content Content to validate
      * @param array  $options Constraint options

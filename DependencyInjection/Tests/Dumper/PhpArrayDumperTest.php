@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,38 +23,18 @@
 
 namespace BackBee\DependencyInjection\Tests\Dumper;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBee\DependencyInjection\Util\ServiceLoader;
 
 /**
- * Test for PhpArrayDumper
+ * Test for PhpArrayDumper.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -63,35 +43,35 @@ use BackBee\DependencyInjection\Util\ServiceLoader;
 class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * The dumper we want to test here
+     * The dumper we want to test here.
      *
      * @var BackBee\DependencyInjection\Dump\PhpArrayDumper
      */
     private $dumper;
 
     /**
-     * container used for test
+     * container used for test.
      *
      * @var \BackBee\DependencyInjection\Container
      */
     private $container;
 
     /**
-     * container dump generate by PhpArrayDumper::dump() (the result is unserialized)
+     * container dump generate by PhpArrayDumper::dump() (the result is unserialized).
      *
      * @var array
      */
     private $dump;
 
     /**
-     * array that contains the parse of test context services.yml
+     * array that contains the parse of test context services.yml.
      *
      * @var array
      */
     private $raw_services;
 
     /**
-     * setup the environment for test
+     * setup the environment for test.
      */
     public function setUp()
     {

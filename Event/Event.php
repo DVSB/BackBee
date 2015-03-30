@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,29 +26,32 @@ namespace BackBee\Event;
 use Symfony\Component\EventDispatcher\Event as sfEvent;
 
 /**
- * A generic class of event in BB application
+ * A generic class of event in BB application.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Event extends sfEvent
 {
     /**
-     * The target entity of the event
+     * The target entity of the event.
+     *
      * @var mixed
      */
     protected $target;
 
     /**
-     * Optional arguments passed to the event
+     * Optional arguments passed to the event.
+     *
      * @var mixed
      */
     protected $args;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param mixed $target    The target of the event
      * @param mixed $eventArgs The optional arguments passed to the event
      */
@@ -59,11 +62,14 @@ class Event extends sfEvent
     }
 
     /**
-     * Returns the target of the event, optionally checks the class of the target
-     * @param  type                      $classname The optional class name to checks
+     * Returns the target of the event, optionally checks the class of the target.
+     *
+     * @param type $classname The optional class name to checks
+     *
      * @return mixed
+     *
      * @throws \InvalidArgumentException Occures on invalid type of target
-     *                                             according to the waited class name
+     *                                   according to the waited class name
      */
     public function getTarget($classname = null)
     {
@@ -79,10 +85,12 @@ class Event extends sfEvent
     }
 
     /**
-     * Checks if the target is of this class or has this class as one of its parents
-     * @param  string $classname The class name
-     * @return bool   TRUE if the object is of this class or has this class as one of
-     *                          its parents, FALSE otherwise
+     * Checks if the target is of this class or has this class as one of its parents.
+     *
+     * @param string $classname The class name
+     *
+     * @return bool TRUE if the object is of this class or has this class as one of
+     *              its parents, FALSE otherwise
      */
     public function isTargetInstanceOf($classname)
     {
@@ -91,9 +99,11 @@ class Event extends sfEvent
 
     /**
      * Get argument by key.
-     * @param  string $key     Key.
-     * @param  mixed  $default default value to return
-     * @return mixed  Contents of array key.
+     *
+     * @param string $key     Key.
+     * @param mixed  $default default value to return
+     *
+     * @return mixed Contents of array key.
      */
     public function getArgument($key, $default = null)
     {
@@ -106,8 +116,10 @@ class Event extends sfEvent
 
     /**
      * Add argument to event.
-     * @param  string       $key   Argument name.
-     * @param  mixed        $value Value.
+     *
+     * @param string $key   Argument name.
+     * @param mixed  $value Value.
+     *
      * @return GenericEvent
      */
     public function setArgument($key, $value)
@@ -119,7 +131,9 @@ class Event extends sfEvent
 
     /**
      * Has argument.
-     * @param  string  $key Key of arguments array.
+     *
+     * @param string $key Key of arguments array.
+     *
      * @return boolean
      */
     public function hasArgument($key)
@@ -128,7 +142,8 @@ class Event extends sfEvent
     }
 
     /**
-     * Return the arguments passed to the event
+     * Return the arguments passed to the event.
+     *
      * @return mixed|null
      */
     public function getEventArgs()
@@ -137,8 +152,10 @@ class Event extends sfEvent
     }
 
     /**
-     * Returns the current BackBee application
+     * Returns the current BackBee application.
+     *
      * @return \BackBee\BBApplication
+     *
      * @throws \BadMethodCallException Occures if the event dispatcher is not a
      *                                 BackBee dispatcher
      */

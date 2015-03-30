@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,48 +26,46 @@ namespace BackBee\Importer\Reader;
 use SplFileObject;
 
 /**
- *
- * CSV file reader
+ * CSV file reader.
  *
  *
  * @category    BackBee
- * @package     BackBee\Importer
- * @subpackage  Reader
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class CsvReader implements \Countable, \SeekableIterator
 {
     /**
-     * CSV file object
+     * CSV file object.
      *
      * @var SplFileObject
      */
     protected $file;
 
     /**
-     * Count of non-empty rows
+     * Count of non-empty rows.
      *
      * @var int
      */
     protected $count;
 
     /**
-     * CSV column headers
+     * CSV column headers.
      *
      * @var array
      */
     protected $headers;
 
     /**
-     * Count of column headers
+     * Count of column headers.
      *
      * @var int
      */
     protected $headersCount;
 
     /**
-     * The position of the row containing column headers
+     * The position of the row containing column headers.
      *
      * @var int|null
      */
@@ -83,7 +81,7 @@ class CsvReader implements \Countable, \SeekableIterator
     protected $valueMappings = array();
 
     /**
-     * True $valueMappings contains any data
+     * True $valueMappings contains any data.
      *
      * Cache value for performance
      *
@@ -92,7 +90,6 @@ class CsvReader implements \Countable, \SeekableIterator
     protected $hasValueMappings = false;
 
     /**
-     *
      * @param string $file
      * @param string $delimiter
      * @param string $enclosure
@@ -120,8 +117,8 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
+     * @param array $headers
      *
-     * @param  array $headers
      * @return self
      */
     public function setHeaders(array $headers)
@@ -133,7 +130,7 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
-     * Get headers
+     * Get headers.
      *
      * @return array
      */
@@ -143,7 +140,6 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
-     *
      * @param int $headersRowPosition
      */
     public function setHeadersRowPosition($headersRowPosition)
@@ -158,7 +154,7 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
-     * Count rows
+     * Count rows.
      *
      * @return int
      */
@@ -176,7 +172,7 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
-     * Return the current row converted to an associate array
+     * Return the current row converted to an associate array.
      *
      * @return String[]
      */
@@ -213,7 +209,7 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
-     * Rewind the file pointer
+     * Rewind the file pointer.
      *
      * If $headersRowPosition is set, rewinds to $headersRowPosition + 1
      */
@@ -259,7 +255,6 @@ class CsvReader implements \Countable, \SeekableIterator
     }
 
     /**
-     *
      * @param array $valueMappings Eg: array('NULL' => null, 'false' => false, , 'TRUE' => true)
      */
     public function setValueMappings(array $valueMappings)

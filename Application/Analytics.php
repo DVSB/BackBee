@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,33 +24,29 @@
 namespace BackBee\Application;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
-
 use BackBee\BBApplication;
 
 /**
- * Application Analytics service
+ * Application Analytics service.
  *
  * @category    BackBee
- * @package     BackBee\Application
+ *
  * @copyright   Lp digital system
  * @author      ken.golovin
  */
 class Analytics
 {
     /**
-     *
      * @var ParameterBag
      */
     protected $params;
 
     /**
-     *
      * @var bool
      */
     protected $initialised = false;
 
     /**
-     *
      * @var BBApplication
      */
     protected $bbapp;
@@ -62,7 +58,6 @@ class Analytics
     }
 
     /**
-     *
      * @return BBApplication
      */
     public function getApplication()
@@ -71,7 +66,6 @@ class Analytics
     }
 
     /**
-     *
      * @see ParameterBag::get
      */
     public function get($path, $default = null)
@@ -84,7 +78,6 @@ class Analytics
     }
 
     /**
-     *
      * @return ParameterBag
      */
     public function getParams()
@@ -97,7 +90,6 @@ class Analytics
     }
 
     /**
-     *
      * @see ParameterBag::set
      */
     public function set($key, $value)

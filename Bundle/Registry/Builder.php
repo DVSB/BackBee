@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,14 +23,12 @@
 
 namespace BackBee\Bundle\Registry;
 
-use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
-
 use BackBee\Bundle\Registry;
 
 /**
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -54,7 +52,7 @@ class Builder
     private $registries;
 
     /**
-     * build the entity from the registry
+     * build the entity from the registry.
      */
     private function buildEntity()
     {
@@ -69,9 +67,10 @@ class Builder
     }
 
     /**
-     * Set the entity
+     * Set the entity.
      *
-     * @param  mixed $entity
+     * @param mixed $entity
+     *
      * @return self
      */
     public function setEntity($entity)
@@ -85,7 +84,7 @@ class Builder
     }
 
     /**
-     * return the entity
+     * return the entity.
      *
      * @return mixed
      */
@@ -99,9 +98,10 @@ class Builder
     }
 
     /**
-     * Add registries elements
+     * Add registries elements.
      *
-     * @param  array $registries
+     * @param array $registries
+     *
      * @return self
      */
     public function setRegistries(array $registries, $classname)
@@ -113,7 +113,7 @@ class Builder
     }
 
     /**
-     * return the registries elements as array
+     * return the registries elements as array.
      *
      * @return array
      */
@@ -127,7 +127,7 @@ class Builder
     }
 
     /**
-     * Automatique entity builder from the registries elements
+     * Automatique entity builder from the registries elements.
      */
     private function buildEntityClass()
     {
@@ -141,7 +141,7 @@ class Builder
     }
 
     /**
-     * Automatique stdClass builder from the registries elements
+     * Automatique stdClass builder from the registries elements.
      */
     private function buildStdClass()
     {
@@ -151,7 +151,7 @@ class Builder
     }
 
     /**
-     * Automatique registry builder from the current entity
+     * Automatique registry builder from the current entity.
      */
     private function buildRegistries()
     {
@@ -166,7 +166,7 @@ class Builder
     }
 
     /**
-     * Automatique registry builder from the current entity object
+     * Automatique registry builder from the current entity object.
      */
     private function buildRegistryFromObject()
     {
@@ -185,7 +185,7 @@ class Builder
     }
 
     /**
-     * Identify if the current element is IEntityRegistry
+     * Identify if the current element is IEntityRegistry.
      *
      * @return boolean
      */

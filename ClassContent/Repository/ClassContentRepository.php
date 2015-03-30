@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -38,16 +38,17 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  * AbstractClassContent repository
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Repository\Element
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class ClassContentRepository extends EntityRepository
 {
     /**
-     * Get all content uids owning the provided content
+     * Get all content uids owning the provided content.
+     *
      * @param string content uid
+     *
      * @return array
      */
     public function getParentContentUidByUid($content_uid)
@@ -63,8 +64,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Get all content uids owning the provided content
+     * Get all content uids owning the provided content.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
+     *
      * @return array
      */
     public function getParentContentUid(AbstractClassContent $content)
@@ -73,7 +76,8 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Replace root contentset for a page and its descendants
+     * Replace root contentset for a page and its descendants.
+     *
      * @param \BackBee\NestedNode\Page            $page
      * @param \BackBee\ClassContent\ContentSet    $oldContentSet
      * @param \BackBee\ClassContent\ContentSet    $newContentSet
@@ -117,17 +121,18 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Get a selection of ClassContent
+     * Get a selection of ClassContent.
      *
-     * @param  array           $selector
-     * @param  boolean         $multipage
-     * @param  boolean         $recursive
-     * @param  int             $start
-     * @param  int             $limit
-     * @param  boolean         $limitToOnline
-     * @param  boolean         $excludedFromSelection
-     * @param  array           $classnameArr
-     * @param  int             $delta
+     * @param array   $selector
+     * @param boolean $multipage
+     * @param boolean $recursive
+     * @param int     $start
+     * @param int     $limit
+     * @param boolean $limitToOnline
+     * @param boolean $excludedFromSelection
+     * @param array   $classnameArr
+     * @param int     $delta
+     *
      * @return array|Paginator
      */
     public function getSelection($selector, $multipage = false, $recursive = true, $start = 0, $limit = null, $limitToOnline = true, $excludedFromSelection = false, $classnameArr = array(), $delta = 0)
@@ -323,10 +328,12 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Returns a set of content by classname
-     * @param  array $classnameArr
-     * @param  array $orderInfos
-     * @param  array $limitInfos
+     * Returns a set of content by classname.
+     *
+     * @param array $classnameArr
+     * @param array $orderInfos
+     * @param array $limitInfos
+     *
      * @return array
      */
     public function findContentsByClassname($classnameArr = array(), $orderInfos = array(), $limitInfos = array())
@@ -343,13 +350,10 @@ class ClassContentRepository extends EntityRepository
         $stmt = $db->executeQuery("SELECT * FROM `content` WHERE `classname` IN (?) order by modified desc limit ?,?", array($classnameArr, $start, $limit), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1)
         );
 
-        /* $stmt->bindValue(1,$classnameArr,\Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
-          $stmt->bindValue(2,$start,\PDO::PARAM_INT);
-          $stmt->bindValue(3,$limit,\PDO::PARAM_INT); */
         $items = $stmt->fetchAll();
         if ($items) {
             foreach ($items as $item) {
-                $content = $this->_em->find($item["classname"], $item["uid"]); //@fixme ->use ResultSetMapping
+                $content = $this->_em->find($item["classname"], $item["uid"]);
                 if ($content) {
                     $result[] = $content;
                 }
@@ -360,8 +364,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Returns the hydrated content by its uid
-     * @param  string     $uid
+     * Returns the hydrated content by its uid.
+     *
+     * @param string $uid
+     *
      * @return array|null the content if found
      */
     public function findContentByUid($uid)
@@ -375,8 +381,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Return the classnames from content uids
-     * @param  array $uids An array of content uids
+     * Return the classnames from content uids.
+     *
+     * @param array $uids An array of content uids
+     *
      * @return array An array of the classnames
      */
     private function _getDistinctClassnamesFromUids(array $uids)
@@ -408,8 +416,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Returns the hydrated contents from their uids
-     * @param  array $uids
+     * Returns the hydrated contents from their uids.
+     *
+     * @param array $uids
+     *
      * @return array An array of AbstractClassContent
      */
     public function findContentsByUids(array $uids)
@@ -438,10 +448,12 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Add SQL filter to content search
-     * @param  \Doctrine\ORM\Query $query
-     * @param  string              $name
-     * @param  array               $classesArray
+     * Add SQL filter to content search.
+     *
+     * @param \Doctrine\ORM\Query $query
+     * @param string              $name
+     * @param array               $classesArray
+     *
      * @return string
      */
     private function addInstanceFilters(Query $query, $name = null, $classesArray = array())
@@ -496,7 +508,7 @@ class ClassContentRepository extends EntityRepository
      * sql query example: select c.label, c.classname  FROM content c LEFT JOIN content_has_subcontent cs ON c.uid = cs.content_uid
      * where cs.parent_uid in (select cs.content_uid from page p LEFT JOIN content_has_subcontent cs ON p.contentset = cs.parent_uid
      *       where p.uid = '0007579e1888f8c2a7a0b74c615aa501'
-     * );
+     * );.
      *
      *
      * SELECT c.uid, c.label, c.classname
@@ -508,10 +520,11 @@ class ClassContentRepository extends EntityRepository
      *
      * select content where parent_uid
      *
-     * @param  array $classnames
-     * @param  array $orderInfos
-     * @param  array $paging
-     * @param  array $cond
+     * @param array $classnames
+     * @param array $orderInfos
+     * @param array $paging
+     * @param array $cond
+     *
      * @return array
      */
     public function findContentsBySearch($classnames = array(), $orderInfos = array(), $paging = array(), $cond = array())
@@ -560,7 +573,6 @@ class ClassContentRepository extends EntityRepository
             $qb->addSiteFilter($cond['site_uid']);
         }
 
-        /* @fixme handle keywords here using join */
         if (array_key_exists('keywords', $cond) && is_array($cond['keywords']) && !empty($cond['keywords'])) {
             $qb->addKeywordsFilter($cond['keywords']);
         }
@@ -670,12 +682,14 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Do stuf removing content from the content editing form
+     * Do removing content from the content editing form.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  type                                       $value
      * @param  \BackBee\ClassContent\AbstractClassContent $parent
      *
      * @return type
+     *
      * @throws ClassContentException
      */
     public function removeFromPost(AbstractClassContent $content, $value = null, AbstractClassContent $parent = null)
@@ -688,8 +702,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Set the storage directories define by the BB5 application
-     * @param  \BackBee\BBApplication                                  $application
+     * Set the storage directories define by the BB5 application.
+     *
+     * @param \BackBee\BBApplication $application
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setDirectories(BBApplication $application = null)
@@ -698,8 +714,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Set the temporary directory
-     * @param  type                                                    $temporary_dir
+     * Set the temporary directory.
+     *
+     * @param type $temporary_dir
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setTemporaryDir($temporary_dir = null)
@@ -708,8 +726,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Set the storage directory
-     * @param  type                                                    $storage_dir
+     * Set the storage directory.
+     *
+     * @param type $storage_dir
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setStorageDir($storage_dir = null)
@@ -718,8 +738,10 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Set the media library directory
-     * @param  type                                                    $media_dir
+     * Set the media library directory.
+     *
+     * @param type $media_dir
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setMediaDir($media_dir = null)
@@ -728,7 +750,8 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Load content if need, the user's revision is also set
+     * Load content if need, the user's revision is also set.
+     *
      * @param  AbstractClassContent $content
      * @param  BBUserToken   $token
      * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
@@ -758,7 +781,8 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Returns the unordered children uids for $content
+     * Returns the unordered children uids for $content.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @return array
      */
@@ -771,12 +795,14 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
+     * Find pages by Class content
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
+     *
      * @return Collection<Page>
      */
     public function findPagesByContent($content)
     {
-        /* Remoter � la racine pour trouver sur quelle page se trouve le contenu */
         $rootContents = array();
         $this->getRootContentParents($content, $rootContents);
         $qb = $this->_em->createQueryBuilder("p");
@@ -804,9 +830,11 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Returns an uid if parent with this classname found, false otherwise
-     * @param  string       $child_uid
-     * @param  string       $class_name
+     * Returns an uid if parent with this classname found, false otherwise.
+     *
+     * @param string $child_uid
+     * @param string $class_name
+     *
      * @return string|false
      */
     public function getParentByClassName($child_uid, $class_name)
@@ -835,7 +863,11 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
+     * Delete a Class Content
+     *
      * @param \BackBee\ClassContent\AbstractClassContent $content
+     * @param bool $mainContent if it's a main content, delete recursively under contents
+     *
      * @return
      */
     public function deleteContent(AbstractClassContent $content, $mainContent = true)
@@ -889,7 +921,7 @@ class ClassContentRepository extends EntityRepository
     }
 
     /**
-     * Returns classcontent if couple (type;uid) is valid
+     * Returns classcontent if couple (type;uid) is valid.
      *
      * @param string $type short namespace of a classcontent
      *                     (full: BackBee\ClassContent\Block\paragraph => short: Block/paragraph)

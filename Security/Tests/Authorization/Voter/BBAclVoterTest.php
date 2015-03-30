@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,7 +28,6 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy;
 use Symfony\Component\Security\Acl\Domain\PermissionGrantingStrategy;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-
 use BackBee\Security\Acl\Domain\SecurityIdentityRetrievalStrategy;
 use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Security\Acl\Permission\PermissionMap;
@@ -42,8 +41,7 @@ use BackBee\Tests\TestCase;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Authorization\Voter
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -73,7 +71,7 @@ class BBAclVoterTest extends TestCase
                 'entry_table_name'         => 'acl_entries',
                 'oid_table_name'           => 'acl_object_identities',
                 'oid_ancestors_table_name' => 'acl_object_identity_ancestors',
-                'sid_table_name'           => 'acl_security_identities'
+                'sid_table_name'           => 'acl_security_identities',
             ]
         );
 

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,43 +23,46 @@
 
 namespace BackBee\Site\Metadata;
 
+use BackBee\Installer\Annotation as BB;
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * A metadata entity
+ * A metadata entity.
  *
  * @category    BackBee
- * @package     BackBee\Site
- * @subpackage  Metadata
+ *
  * @copyright   Lp digital system
  * @author      Nicolas BREMONT <nicolas.bremont@lp-digital.fr>
- * @Entity
- * @Table(name="metadata")
- * @fixtures(qty=20)
+ * @ORM\Entity
+ * @ORM\Table(name="metadata")
+ * @BB\Fixtures(qty=20)
  */
 class Metadata
 {
     /**
-     * The unique identifier
-     * @Id
-     * @Column(type="string")
-     * @fixture(type="md5")
+     * The unique identifier.
+     *
+     * @ORM\Id
+     * @ORM\Column(type="string")
+     * @BB\Fixture(type="md5")
      */
     private $uid;
 
     /**
-     * @Column(type="string")
-     * @fixture(type="word")
+     * @ORM\Column(type="string")
+     * @BB\Fixture(type="word")
      */
     private $attribute;
 
     /**
-     * @Column(type="string", name="attr_value")
-     * @fixture(type="word")
+     * @ORM\Column(type="string", name="attr_value")
+     * @BB\Fixture(type="word")
      */
     private $attrValue;
 
     /**
-     * @Column(type="string")
-     * @fixture(type="sentence", value=6)
+     * @ORM\Column(type="string")
+     * @BB\Fixture(type="sentence", value=6)
      */
     private $content;
 
@@ -73,6 +76,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getUid()
@@ -82,7 +86,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $uid
+     *
+     * @param type $uid
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setUid($uid)
@@ -94,6 +100,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getAttribute()
@@ -103,7 +110,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $attribute
+     *
+     * @param type $attribute
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setAttribute($attribute)
@@ -115,6 +124,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getAttrValue()
@@ -124,7 +134,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  type                            $attrValue
+     *
+     * @param type $attrValue
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setAttrValue($attrValue)
@@ -136,6 +148,7 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getContent()
@@ -145,7 +158,9 @@ class Metadata
 
     /**
      * @codeCoverageIgnore
-     * @param  string                          $content
+     *
+     * @param string $content
+     *
      * @return \BackBee\Site\Metadata\Metadata
      */
     public function setContent($content)

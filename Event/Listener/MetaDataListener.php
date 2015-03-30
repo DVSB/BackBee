@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,11 +28,10 @@ use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
 
 /**
- * Listener to metadata events
+ * Listener to metadata events.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -41,7 +40,8 @@ class MetaDataListener
     private static $onFlushPageAlreadyCalled = false;
 
     /**
-     * Occur on classcontent.onflush events
+     * Occur on classcontent.onflush events.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushContent(Event $event)
@@ -80,7 +80,8 @@ class MetaDataListener
     }
 
     /**
-     * Occur on nestednode.page.onflush events
+     * Occur on nestednode.page.onflush events.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushPage(Event $event)

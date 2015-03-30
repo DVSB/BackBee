@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,51 +23,53 @@
 
 namespace BackBee\Bundle;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author e.chau <eric.chau@lp-digital.fr>
  *
- * @Table(name="registry", indexes={@index(name="IDX_KEY_SCOPE", columns={"`key`", "`scope`"})})
- * @Entity(repositoryClass="BackBee\Bundle\Registry\Repository")
+ * @ORM\Table(name="registry", indexes={@ORM\Index(name="IDX_KEY_SCOPE", columns={"`key`", "`scope`"})})
+ * @ORM\Entity(repositoryClass="BackBee\Bundle\Registry\Repository")
  */
 class Registry
 {
     /**
      * @var integer
      *
-     * @Id
-     * @Column(type="integer")
-     * @GeneratedValue
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue
      */
     protected $id;
 
     /**
      * @var string
      *
-     * @Column(name="`type`", type="string", length=255, nullable=true)
+     * @ORM\Column(name="`type`", type="string", length=255, nullable=true)
      */
     protected $type;
 
     /**
      * @var string
      *
-     * @Column(name="`key`", type="string", length=255, nullable=true)
+     * @ORM\Column(name="`key`", type="string", length=255, nullable=true)
      */
     protected $key;
 
     /**
      * @var string
      *
-     * @Column(name="`value`", type="text", nullable=true)
+     * @ORM\Column(name="`value`", type="text", nullable=true)
      */
     protected $value;
 
     /**
      * @var string
      *
-     * @Column(name="`scope`", type="string", length=255, nullable=true)
+     * @ORM\Column(name="`scope`", type="string", length=255, nullable=true)
      */
     protected $scope;
 

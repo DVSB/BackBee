@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,22 +26,28 @@ namespace BackBee\NestedNode\Tests\Mock;
 use BackBee\NestedNode\AbstractNestedNode;
 use BackBee\Tests\Mock\MockInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
+
 /**
- * NestedNode mock
+ * NestedNode mock.
  *
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\NestedNodeRepository")
- * @Table(name="nestednode")
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\NestedNodeRepository")
+ * @ORM\Table(name="nestednode")
+ *
  * @category    BackBee
- * @package     BackBee\NestedNode\Tests\Mock
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class MockNestedNode extends AbstractNestedNode implements MockInterface
 {
     /**
-     * Unique identifier of the node
+     * Unique identifier of the node.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Type("string")
      */
@@ -49,52 +55,59 @@ class MockNestedNode extends AbstractNestedNode implements MockInterface
 
     /**
      * The nested node left position.
+     *
      * @var int
-     * @Column(type="integer", name="leftnode", nullable=false)
+     * @ORM\Column(type="integer", name="leftnode", nullable=false)
      */
     protected $_leftnode;
 
     /**
      * The nested node right position.
+     *
      * @var int
-     * @Column(type="integer", name="rightnode", nullable=false)
+     * @ORM\Column(type="integer", name="rightnode", nullable=false)
      */
     protected $_rightnode;
 
     /**
      * The nested node level in the tree.
+     *
      * @var int
-     * @Column(type="integer", name="level", nullable=false)
+     * @ORM\Column(type="integer", name="level", nullable=false)
      */
     protected $_level;
 
     /**
-     * The creation datetime
+     * The creation datetime.
+     *
      * @var \DateTime
-     * @Column(type="datetime", name="created", nullable=false)
+     * @ORM\Column(type="datetime", name="created", nullable=false)
      */
     protected $_created;
 
     /**
-     * The last modification datetime
+     * The last modification datetime.
+     *
      * @var \DateTime
-     * @Column(type="datetime", name="modified", nullable=false)
+     * @ORM\Column(type="datetime", name="modified", nullable=false)
      */
     protected $_modified;
 
     /**
      * The root node, cannot be NULL.
+     *
      * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
     /**
      * The parent node.
+     *
      * @var \BackBee\NestdNode\Tests\Mock\MockNestedNode
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_children", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Tests\Mock\MockNestedNode", inversedBy="_children", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 }

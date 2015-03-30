@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,6 @@ namespace BackBee\Rest\Tests\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
-
 use BackBee\Rest\Controller\UserController;
 use BackBee\Rest\Test\RestTestCase;
 use BackBee\Security\Acl\Permission\MaskBuilder;
@@ -35,10 +34,10 @@ use BackBee\Security\Token\UsernamePasswordToken;
 use BackBee\Security\User;
 
 /**
- * Test for UserController class
+ * Test for UserController class.
  *
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  *
@@ -128,7 +127,7 @@ class UserControllerTest extends RestTestCase
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(
         ), array(
             '_action' => 'getCollectionAction',
-            '_controller' => 'BackBee\Rest\Controller\UserController',), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
+            '_controller' => 'BackBee\Rest\Controller\UserController', ), array(), array(), array('REQUEST_URI' => '/rest/1/test/')));
 
         $res = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $res);
@@ -221,7 +220,7 @@ class UserControllerTest extends RestTestCase
             'firstname' => 'updated_first_name',
             'lastname' => 'updated_last_name',
             'activated' => false,
-            'password' => 'trucmuch'
+            'password' => 'trucmuch',
         );
 
         $response = $controller->putAction($user->getId(), new Request(array(), $data));
@@ -401,11 +400,11 @@ class UserControllerTest extends RestTestCase
     }
 
     /**
+     * @param type  $uri
+     * @param array $data
+     * @param type  $contentType
+     * @param array $headers
      *
-     * @param  type                                      $uri
-     * @param  array                                     $data
-     * @param  type                                      $contentType
-     * @param  array                                     $headers
      * @return \Symfony\Component\HttpFoundation\Request
      */
     protected static function requestPost($uri, array $data = [], $contentType = 'application/json', $sign = false)
@@ -420,9 +419,9 @@ class UserControllerTest extends RestTestCase
     }
 
     /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param BackBee\Security\User                     $user
      *
-     * @param  \Symfony\Component\HttpFoundation\Request $request
-     * @param  BackBee\Security\User                     $user
      * @return self
      */
     protected static function signRequest(Request $request, User $user = null)

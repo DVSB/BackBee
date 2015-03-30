@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,14 +24,13 @@
 namespace BackBee\DependencyInjection;
 
 use Symfony\Component\Yaml\Yaml;
-
 use BackBee\BBApplication;
 use BackBee\DependencyInjection\Exception\BootstrapFileNotFoundException;
 use BackBee\Util\Resolver\BootstrapDirectory;
 
 /**
  * This resolver allow us to find the right bootstrap.yml file with a base directory, a context
- * and a environment. Resolver will follow this path, from the most specific to the most global:
+ * and a environment. Resolver will follow this path, from the most specific to the most global:.
  *
  *     BASE_DIRECTORY
  *         |_ Config
@@ -46,7 +45,7 @@ use BackBee\Util\Resolver\BootstrapDirectory;
  *
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -55,29 +54,28 @@ class BootstrapResolver
     const BOOTSTRAP_FILENAME = 'bootstrap.yml';
 
     /**
-     * base directory from where we define in which directory to look into
+     * base directory from where we define in which directory to look into.
      *
      * @var string
      */
     private $base_dir;
 
     /**
-     * application's context
+     * application's context.
      *
      * @var string
      */
-
     private $context;
 
     /**
-     * application's environment
+     * application's environment.
      *
      * @var string
      */
     private $environment;
 
     /**
-     * BootstrapResolver's constructor
+     * BootstrapResolver's constructor.
      *
      * @param string $base_dir    base directory from where we define in which directory to look into
      * @param string $context     application's context
@@ -92,7 +90,7 @@ class BootstrapResolver
 
     /**
      * Returns an array which contains every parameters in bootstrap.yml file (use application context
-     * and environment to find the right one)
+     * and environment to find the right one).
      *
      * @return array of parameters coming from the bootstrap.yml file
      *

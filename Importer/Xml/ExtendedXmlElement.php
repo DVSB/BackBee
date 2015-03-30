@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,17 +25,18 @@ namespace BackBee\Importer\Xml;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class ExtendedXmlElement extends \SimpleXMLElement
 {
     /**
+     * @param type $xpath
+     * @param type $convertTo
      *
-     * @param  type                    $xpath
-     * @param  type                    $convertTo
      * @return string|SimpleXMLElement
+     *
      * @throws \Exception
      */
     public function xpathFirstResult($xpath, $convertTo = null)

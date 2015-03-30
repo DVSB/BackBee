@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,24 +27,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Security\Group;
 
-
 /**
- * User Controller
+ * User Controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class GroupController extends AbstractRestController
 {
     /**
-     * Get all records
+     * Get all records.
      */
     public function getCollectionAction(Request $request)
     {
@@ -61,7 +59,7 @@ class GroupController extends AbstractRestController
     }
 
     /**
-     * GET Group
+     * GET Group.
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
      */
@@ -71,7 +69,7 @@ class GroupController extends AbstractRestController
     }
 
     /**
-     * DELETE
+     * DELETE.
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
      */
@@ -84,7 +82,7 @@ class GroupController extends AbstractRestController
     }
 
     /**
-     * UPDATE
+     * UPDATE.
      *
      * @Rest\RequestParam(name = "name", requirements = {
      *   @Assert\NotBlank(message="Name is required"),
@@ -92,7 +90,6 @@ class GroupController extends AbstractRestController
      * })
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
-     *
      */
     public function putAction(Group $group, Request $request)
     {
@@ -105,13 +102,12 @@ class GroupController extends AbstractRestController
     }
 
     /**
-     * Create
+     * Create.
      *
      * @Rest\RequestParam(name = "name", requirements = {
      *  @Assert\NotBlank(message="Name is required"),
      *  @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
      * })
-     *
      */
     public function postAction(Request $request)
     {
@@ -127,7 +123,7 @@ class GroupController extends AbstractRestController
 
         $duplicate = $this->getEntityManager()->getRepository('BackBee\Security\Group')->findOneBy([
             '_name' => $request->request->get('name'),
-            '_site' => $site
+            '_site' => $site,
         ]);
 
         if ($duplicate !== null) {

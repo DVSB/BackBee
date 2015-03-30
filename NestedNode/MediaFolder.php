@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,81 +24,96 @@
 namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Media folder object in BackBee
+ * Media folder object in BackBee.
  *
  * A media folder is...
  *
  * @category    BackBee
- * @package     BackBee\NestedNode
+ *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\MediaFolderRepository")
- * @Table(name="media_folder",indexes={@index(name="IDX_ROOT", columns={"root_uid"}), @index(name="IDX_PARENT", columns={"parent_uid"}), @index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})})
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\MediaFolderRepository")
+ * @ORM\Table(name="media_folder",indexes={
+ *     @ORM\Index(name="IDX_ROOT", columns={"root_uid"}),
+ *     @ORM\Index(name="IDX_PARENT", columns={"parent_uid"}),
+ *     @ORM\Index(name="IDX_SELECT_MEDIAFOLDER", columns={"root_uid", "leftnode", "rightnode"})
+ * })
  */
 class MediaFolder extends AbstractNestedNode implements \JsonSerializable
 {
     /**
-     * Unique identifier of the content
+     * Unique identifier of the content.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 
     /**
      * The root node, cannot be NULL.
+     *
      * @var \BackBee\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_descendants", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="root_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_descendants", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="root_uid", referencedColumnName="uid")
      */
     protected $_root;
 
     /**
      * The parent node.
+     *
      * @var \BackBee\NestedNode\MediaFolder
-     * @ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="parent_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\MediaFolder", inversedBy="_children", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="parent_uid", referencedColumnName="uid")
      */
     protected $_parent;
 
     /**
-     * The title of this media folder
+     * The title of this media folder.
+     *
      * @var string
-     * @Column(type="string", name="title")
+     * @ORM\Column(type="string", name="title")
      */
     protected $_title;
 
     /**
-     * The URI of this media folder
+     * The URI of this media folder.
+     *
      * @var string
-     * @Column(type="string", name="url")
+     * @ORM\Column(type="string", name="url")
      */
     protected $_url;
 
     /**
      * Descendants nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_root", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_root", fetch="EXTRA_LAZY")
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
-     * @OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_parent", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\MediaFolder", mappedBy="_parent", fetch="EXTRA_LAZY")
      */
     protected $_children;
 
     /**
-     * A collection of medi stored in the folder
+     * A collection of medi stored in the folder.
+     *
      * @var \BackBee\NestedNode\Media
-     * @OneToMany(targetEntity="BackBee\NestedNode\Media", mappedBy="_media_folder", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\Media", mappedBy="_media_folder", fetch="EXTRA_LAZY")
      */
     protected $_medias;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $uid
      * @param string $title
      * @param string $url
@@ -114,7 +129,8 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
     }
 
     /**
-     * Returns the title
+     * Returns the title.
+     *
      * @return string
      */
     public function getTitle()
@@ -123,7 +139,8 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
     }
 
     /**
-     * Returns the URL of the media folder
+     * Returns the URL of the media folder.
+     *
      * @return string
      */
     public function getUrl()
@@ -132,7 +149,8 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
     }
 
     /**
-     * Returns a collection of media
+     * Returns a collection of media.
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      * @codeCoverageIgnore
      */
@@ -143,6 +161,7 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
 
     /**
      * Returns an array representation of the media folder.
+     *
      * @return array
      */
     public function toArray()
@@ -167,7 +186,9 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
     }
     /**
      * Sets the title.
-     * @param  string                          $title
+     *
+     * @param string $title
+     *
      * @return \BackBee\NestedNode\MediaFolder
      */
     public function setTitle($title)
@@ -178,8 +199,10 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
     }
 
     /**
-     * Sets the URL
-     * @param  type                            $url
+     * Sets the URL.
+     *
+     * @param type $url
+     *
      * @return \BackBee\NestedNode\MediaFolder
      */
     public function setUrl($url)

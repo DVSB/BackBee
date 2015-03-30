@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,7 +30,7 @@ use BackBee\Util\Buffer;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>, n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -49,7 +49,7 @@ class Importer
     private $_failedItemsCount = 0;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @param \BackBee\BBApplication               $application
      * @param \BackBee\Importer\ImporterConnectorInterface $connector
@@ -65,8 +65,9 @@ class Importer
     }
 
     /**
-     * @param  type    $flush_every    if you don't need flush put 0
-     * @param  boolean $check_existing
+     * @param type    $flush_every    if you don't need flush put 0
+     * @param boolean $check_existing
+     *
      * @return boolean
      */
     public function run($class, $config, $flush_every, $check_existing)
@@ -112,11 +113,11 @@ class Importer
     }
 
     /**
+     * @param array|\Traversable $rows
+     * @param int                $flush_every
+     * @param bool               $check_existing
+     * @param int|null           $limit
      *
-     * @param  array|\Traversable $rows
-     * @param  int                $flush_every
-     * @param  bool               $check_existing
-     * @param  int|null           $limit
      * @throws ImporterException
      */
     private function _doImport($rows, $flush_every, $check_existing, $limit = null)
@@ -197,8 +198,8 @@ class Importer
     }
 
     /**
+     * @param array $config
      *
-     * @param  array                        $config
      * @return \BackBee\Importer\ConverterInterface
      */
     final protected function initConvertion(array $config)
@@ -241,9 +242,11 @@ class Importer
     }
 
     /**
-     * Return an existing class content or a new one if unfound
-     * @param  string                                  $classname
-     * @param  string                                  $uid
+     * Return an existing class content or a new one if unfound.
+     *
+     * @param string $classname
+     * @param string $uid
+     *
      * @return \BaclBuilder\ClassContent\AbstractClassContent
      */
     public function getBBEntity($classname, $uid)
@@ -258,7 +261,7 @@ class Importer
     }
 
     /**
-     * Save Entities
+     * Save Entities.
      *
      * @param array $entities
      */
@@ -334,7 +337,6 @@ class Importer
     }
 
     /**
-     *
      * @return \BackBee\Importer\ImporterConnectorInterface
      */
     public function getConnector()

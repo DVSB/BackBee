@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,24 +29,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Routing\RouteCollection;
-use BackBee\Rest\Patcher\EntityPatcher;
-use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
-use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
-use BackBee\Rest\Patcher\OperationSyntaxValidator;
-use BackBee\Rest\Patcher\RightManager;
 use BackBee\Utils\File\File;
 
 /**
- * ClassContent API Controller
+ * ClassContent API Controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -58,9 +50,10 @@ class ClassContentController extends AbstractRestController
     private $manager;
 
     /**
-     * Returns category's datas if $id is valid
+     * Returns category's datas if $id is valid.
      *
      * @param string $id category's id
+     *
      * @return Response
      */
     public function getCategoryAction($id)
@@ -74,7 +67,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns every availables categories datas
+     * Returns every availables categories datas.
      *
      * @return Response
      */
@@ -89,7 +82,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns collection of classcontent associated to category and according to provided criterias
+     * Returns collection of classcontent associated to category and according to provided criterias.
      *
      * @return Symfony\Component\HttpFoundation\Response
      *
@@ -121,9 +114,10 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns collection of classcontent associated to $type and according to provided criterias
+     * Returns collection of classcontent associated to $type and according to provided criterias.
      *
      * @param string $type
+     *
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\Pagination(default_count=25, max_count=100)
@@ -141,10 +135,11 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Get classcontent
+     * Get classcontent.
      *
      * @param string $type type of the class content (ex: Element/text)
      * @param string $uid  identifier of the class content
+     *
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\QueryParam(name="mode", description="The render mode to use")
@@ -177,10 +172,11 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Creates classcontent according to provided type
+     * Creates classcontent according to provided type.
      *
      * @param string  $type
      * @param Request $request
+     *
      * @return Symfony\Component\HttpFoundation\Response
      */
     public function postAction($type, Request $request)
@@ -199,7 +195,7 @@ class ClassContentController extends AbstractRestController
                 [
                     'version' => $request->attributes->get('version'),
                     'type'    => $type,
-                    'uid'     => $content->getUid()
+                    'uid'     => $content->getUid(),
                 ],
                 '',
                 false
@@ -208,10 +204,11 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Updates classcontent's elements and parameters
+     * Updates classcontent's elements and parameters.
      *
-     * @param  string $type type of the class content (ex: Element/text)
-     * @param  string $uid  identifier of the class content
+     * @param string $type type of the class content (ex: Element/text)
+     * @param string $uid  identifier of the class content
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function putAction($type, $uid, Request $request)
@@ -223,9 +220,10 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Updates collection of classcontent elements and parameters
+     * Updates collection of classcontent elements and parameters.
      *
-     * @param  Request $request
+     * @param Request $request
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function putCollectionAction(Request $request)
@@ -267,10 +265,11 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * delete a classcontent
+     * delete a classcontent.
      *
      * @param string $type type of the class content (ex: Element/text)
      * @param string $uid  identifier of the class content
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function deleteAction($type, $uid)
@@ -287,10 +286,11 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * ClassContent's draft getter
+     * ClassContent's draft getter.
      *
-     * @param  string $type type of the class content (ex: Element/text)
-     * @param  string $uid  identifier of the class content
+     * @param string $type type of the class content (ex: Element/text)
+     * @param string $uid  identifier of the class content
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function getDraftAction($type, $uid)
@@ -301,7 +301,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns all drafts of current user
+     * Returns all drafts of current user.
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
@@ -320,8 +320,9 @@ class ClassContentController extends AbstractRestController
     /**
      * Updates a classcontent's draft.
      *
-     * @param  string $type type of the class content (ex: Element/text)
-     * @param  string $uid  identifier of the class content
+     * @param string $type type of the class content (ex: Element/text)
+     * @param string $uid  identifier of the class content
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function putDraftAction($type, $uid, Request $request)
@@ -335,7 +336,8 @@ class ClassContentController extends AbstractRestController
     /**
      * Updates collection of classcontents' drafts.
      *
-     * @param  Request $request
+     * @param Request $request
+     *
      * @return Symfony\Component\HttpFoundation\JsonResponse
      */
     public function putDraftCollectionAction(Request $request)
@@ -377,7 +379,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Getter of classcontent category manager
+     * Getter of classcontent category manager.
      *
      * @return BackBee\ClassContent\CategoryManager
      */
@@ -387,7 +389,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns ClassContentManager
+     * Returns ClassContentManager.
      *
      * @return BackBee\ClassContent\ClassContentManager
      */
@@ -405,7 +407,8 @@ class ClassContentController extends AbstractRestController
     /**
      * Sorts the provided array that contains current logged user's drafts.
      *
-     * @param  array  $drafts
+     * @param array $drafts
+     *
      * @return array
      */
     private function sortDraftCollection(array $drafts)
@@ -491,7 +494,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns classcontent datas if couple (type;uid) is valid
+     * Returns classcontent datas if couple (type;uid) is valid.
      *
      * @param string $type
      * @param string $uid
@@ -516,11 +519,12 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns classcontent by category
+     * Returns classcontent by category.
      *
-     * @param  string  $name  category's name
-     * @param  integer $start
-     * @param  integer $count
+     * @param string  $name  category's name
+     * @param integer $start
+     * @param integer $count
+     *
      * @return null|Paginator
      */
     private function getClassContentByCategory($name, $start, $count)
@@ -529,7 +533,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns all classcontents classnames containing by the given page
+     * Returns all classcontents classnames containing by the given page.
      *
      * @param string $pageUid The unique identifier of the page we want to get all classcontents
      *
@@ -556,9 +560,10 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns all classcontents classnames that belong to provided category
+     * Returns all classcontents classnames that belong to provided category.
      *
-     * @param  string $name The category name
+     * @param string $name The category name
+     *
      * @return array
      */
     private function getClassContentClassnamesByCategory($name)
@@ -575,7 +580,8 @@ class ClassContentController extends AbstractRestController
      * is provided it will returns every classcontent definition that belongs to this category, else it
      * will returns all classcontents definitions.
      *
-     * @param  string|null $name the category's name or null
+     * @param string|null $name the category's name or null
+     *
      * @return array
      */
     private function getClassContentDefinitionsByCategory($name = null)
@@ -599,7 +605,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Find classcontents by provided classnames, criterias from request, provided start and count
+     * Find classcontents by provided classnames, criterias from request, provided start and count.
      *
      * @param array   $classnames
      * @param integer $start
@@ -652,7 +658,7 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Add 'Content-Range' parameters to $response headers
+     * Add 'Content-Range' parameters to $response headers.
      *
      * @param Response $response   the response object
      * @param mixed    $collection collection from where we extract Content-Range data

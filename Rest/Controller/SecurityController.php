@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,24 +28,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Security\Token\AnonymousToken;
 use BackBee\Security\Token\BBUserToken;
 
 /**
- * Auth Controller
+ * Auth Controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class SecurityController extends AbstractRestController
 {
     /**
-     *
-     *
      * @Rest\RequestParam(name="username", requirements={@Assert\NotBlank})
      * @Rest\RequestParam(name="password", requirements={@Assert\NotBlank})
      */
@@ -71,7 +68,7 @@ class SecurityController extends AbstractRestController
     }
 
     /**
-     * Authenticate against a specific firewall
+     * Authenticate against a specific firewall.
      *
      * Note: request attributes as well as the request format depend on the
      * specific implementation of the firewall and its provider
@@ -80,7 +77,6 @@ class SecurityController extends AbstractRestController
      * @Rest\RequestParam(name = "firewall", description="Firewall to authenticate against", requirements = {
      *  @Assert\Choice(choices = {"bb_area"}, message="The requested firewall is invalid"),
      * })
-     *
      */
     public function firewallAuthenticateAction($firewall, Request $request)
     {
@@ -132,7 +128,6 @@ class SecurityController extends AbstractRestController
     }
 
     /**
-     *
      * @Rest\Security(expression="is_fully_authenticated()")
      */
     public function deleteSessionAction(Request $request)
@@ -148,8 +143,8 @@ class SecurityController extends AbstractRestController
     }
 
     /**
+     * @param type $firewall
      *
-     * @param  type  $firewall
      * @return array
      */
     private function getSecurityContextConfig($firewall)

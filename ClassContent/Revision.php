@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,9 +28,10 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\Security\Token\BBUserToken;
+
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Revision of a content in BackBee.
@@ -48,82 +49,93 @@ use BackBee\Security\Token\BBUserToken;
  * it overloads all getters and setters of its content except getUid() and setUid().
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\RevisionRepository")
- * @Table(name="revision", indexes={@index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @index(name="IDX_DRAFT", columns={"owner", "state"})})
- * @HasLifecycleCallbacks
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\RevisionRepository")
+ * @ORM\Table(name="revision", indexes={@ORM\Index(name="IDX_CONTENT", columns={"content_uid"}), @ORM\Index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @ORM\Index(name="IDX_DRAFT", columns={"owner", "state"})})
+ * @ORM\HasLifecycleCallbacks
  */
 class Revision extends AbstractContent implements \Iterator, \Countable
 {
     /**
-     * Committed revision of a content
+     * Committed revision of a content.
+     *
      * @var int;
      */
     const STATE_COMMITTED = 1000;
 
     /**
-     * New content, revision number to 0
+     * New content, revision number to 0.
+     *
      * @var int
      */
     const STATE_ADDED = 1001;
 
     /**
-     * New draft of an already revisionned content
+     * New draft of an already revisionned content.
+     *
      * @var int
      */
     const STATE_MODIFIED = 1002;
 
     /**
-     * Revision conflicted with current committed version
+     * Revision conflicted with current committed version.
+     *
      * @var int
      */
     const STATE_CONFLICTED = 1003;
 
     /**
-     * Revision of an deleted content
+     * Revision of an deleted content.
+     *
      * @var int
      */
     const STATE_DELETED = 1004;
 
     /**
-     * Revision to delete
+     * Revision to delete.
+     *
      * @var int
      */
     const STATE_TO_DELETE = 1005;
 
     /**
-     * The attached revisionned content
-     * @var \BackBee\ClassContent\AbstractClassContent
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="content_uid", referencedColumnName="uid")
+     * The attached revisionned content.
+     *
+     * @var \BackBee\ClassContent\AClassContent
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     private $_content;
 
     /**
-     * The entity target content classname
+     * The entity target content classname.
+     *
      * @var string
-     * @Column(type="string", name="classname")
+     * @ORM\Column(type="string", name="classname")
      */
     private $_classname;
 
     /**
-     * The owner of this revision
+     * The owner of this revision.
+     *
      * @var \Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
-     * @Column(type="string", name="owner")
+     * @ORM\Column(type="string", name="owner")
      */
     private $_owner;
 
     /**
-     * The comment associated to this revision
+     * The comment associated to this revision.
+     *
      * @var string
-     * @Column(type="string", name="comment", nullable=true)
+     * @ORM\Column(type="string", name="comment", nullable=true)
      */
     private $_comment;
 
     /**
-     * Internal position in iterator
+     * Internal position in iterator.
+     *
      * @var int
      */
     private $_index = 0;
@@ -140,6 +152,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * Class constructor.
+     *
      * @param string         $uid   The unique identifier of the revision
      * @param TokenInterface $token The current auth token
      */
@@ -159,8 +172,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the current entity manager to dynamicaly load subrevisions
-     * @param  \Doctrine\ORM\EntityManager    $em
+     * Sets the current entity manager to dynamicaly load subrevisions.
+     *
+     * @param \Doctrine\ORM\EntityManager $em
+     *
      * @return \BackBee\ClassContent\Revision
      */
     public function setEntityManager(EntityManager $em = null)
@@ -171,8 +186,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the current BB user's token to dynamically load subrevisions
-     * @param  \BackBee\Security\Token\BBUserToken $token
+     * Sets the current BB user's token to dynamically load subrevisions.
+     *
+     * @param \BackBee\Security\Token\BBUserToken $token
+     *
      * @return \BackBee\ClassContent\Revision
      */
     public function setToken(BBUserToken $token = null)
@@ -183,7 +200,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Returns the revisionned content
+     * Returns the revisionned content.
+     *
      * @return \BackBee\ClassContent\AbstractClassContent
      * @codeCoverageIgnore
      */
@@ -193,7 +211,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Returns the entity target content classname
+     * Returns the entity target content classname.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -203,7 +222,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Returns the owner of the revision
+     * Returns the owner of the revision.
+     *
      * @return \Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
      * @codeCoverageIgnore
      */
@@ -213,7 +233,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Returns the comment
+     * Returns the comment.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -223,8 +244,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the whole datas of the revision
-     * @param  array                               $data
+     * Sets the whole datas of the revision.
+     *
+     * @param array $data
+     *
      * @return \BackBee\ClassContent\AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
@@ -236,8 +259,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the attached revisionned content
-     * @param  \BackBee\ClassContent\AbstractClassContent $content
+     * Sets the attached revisionned content.
+     *
+     * @param \BackBee\ClassContent\AClassContent $content
+     *
      * @return \BackBee\ClassContent\AbstractClassContent the current instance content
      */
     public function setContent(AbstractClassContent $content = null)
@@ -252,8 +277,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the entity target content classname
-     * @param  string                              $classname
+     * Sets the entity target content classname.
+     *
+     * @param string $classname
+     *
      * @return \BackBee\ClassContent\AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
@@ -265,8 +292,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the owner of the revision
-     * @param  \Symfony\Component\Security\Core\User\UserInterface $user
+     * Sets the owner of the revision.
+     *
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     *
      * @return \BackBee\ClassContent\AbstractClassContent                 the current instance content
      * @codeCoverageIgnore
      */
@@ -278,8 +307,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets the comment associated to the revision
-     * @param  string                              $comment
+     * Sets the comment associated to the revision.
+     *
+     * @param string $comment
+     *
      * @return \BackBee\ClassContent\AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
@@ -291,7 +322,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Empty the current set of contents
+     * Empty the current set of contents.
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function clear()
@@ -306,6 +338,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Countable::count()
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function count()
@@ -319,6 +352,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::current()
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function current()
@@ -331,7 +365,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Return the first subcontent of the set
+     * Return the first subcontent of the set.
+     *
      * @return AbstractClassContent the first element
      */
     public function first()
@@ -340,9 +375,12 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Return the item at index
-     * @param  int                   $index
-     * @return the                   item or NULL if $index is out of bounds
+     * Return the item at index.
+     *
+     * @param int $index
+     *
+     * @return the item or NULL if $index is out of bounds
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function item($index)
@@ -360,6 +398,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::key()
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function key()
@@ -372,7 +411,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Return the last subcontent of the set
+     * Return the last subcontent of the set.
+     *
      * @return AbstractClassContent the last element
      */
     public function last()
@@ -382,6 +422,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::next()
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function next()
@@ -394,7 +435,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Pop the content off the end of the set and return it
+     * Pop the content off the end of the set and return it.
+     *
      * @return AbstractClassContent Returns the last content or NULL if set is empty
      */
     public function pop()
@@ -412,7 +454,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Push one element onto the end of the set
+     * Push one element onto the end of the set.
      *
      * @param  AbstractClassContent         $var The pushed values
      *
@@ -434,6 +476,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::rewind()
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function rewind()
@@ -446,7 +489,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Shift the content off the beginning of the set and return it
+     * Shift the content off the beginning of the set and return it.
+     *
      * @return AbstractClassContent Returns the shifted content or NULL if set is empty
      */
     public function shift()
@@ -464,7 +508,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Prepend one to the beginning of the set
+     * Prepend one to the beginning of the set.
+     *
      * @param  AbstractClassContent $var The prepended values
      * @return ContentSet    The current content set
      */
@@ -481,6 +526,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::valid()
+     *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function valid()
@@ -548,7 +594,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Returns the revision content
+     * Returns the revision content.
+     *
      * @return \BackBee\ClassContent\AbstractClassContent
      * @codeCoverageIgnore
      */
@@ -558,8 +605,11 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Sets options at the construction of a new revision
-     * @param  mixed                          $options
+     * Sets options at the construction of a new revision.
+     *
+     * @param mixed $options
+     *
+     * @return \BackBee\ClassContent\AContent
      * @return \BackBee\ClassContent\AbstractClassContent
      */
     protected function setOptions($options = null)
@@ -572,10 +622,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     }
 
     /**
-     * Return a subcontent instance by its type and value, FALSE if not found
+     * Return a subcontent instance by its type and value, FALSE if not found.
      *
-     * @param  string $type  The classname of the subcontent
-     * @param  string $value The value of the subcontent (uid)
+     * @param string $type  The classname of the subcontent
+     * @param string $value The value of the subcontent (uid)
      *
      *@return AbstractClassContent
      */
@@ -593,8 +643,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Computes and returns elements data.
      *
-     * @param  array $sourceElements
-     * @param  array $draftElements
+     * @param array $sourceElements
+     * @param array $draftElements
+     *
      * @return array
      */
     private function computeElements(array $sourceElements, array $draftElements)

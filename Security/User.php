@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,32 +23,37 @@
 
 namespace BackBee\Security;
 
+use BackBee\Installer\Annotation as BB;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * User object in BackBee5
+ * User object in BackBee5.
  *
  * @category    BackBee
- * @package     BackBee\Security
+ *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
- * @Table(name="user", uniqueConstraints={@UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
- * @fixtures(qty=20)
  *
  * @Serializer\ExclusionPolicy("all")
+ * @ORM\Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
+ * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
+ * @BB\Fixtures(qty=20)
  */
 class User implements UserInterface
 {
     const PASSWORD_NOT_PICKED = 0;
     const PASSWORD_PICKED = 0;
     /**
-     * Unique identifier of the user
+     * Unique identifier of the user.
+     *
      * @var integer
-     * @Id @Column(type="integer", name="id")
-     * @GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      *
      * @Serializer\Expose
      * @Serializer\Type("integer")
@@ -57,10 +62,11 @@ class User implements UserInterface
     protected $_id;
 
     /**
-     * The login of this user
+     * The login of this user.
+     *
      * @var string
-     * @Column(type="string", name="login")
-     * @fixture(type="word")
+     * @ORM\Column(type="string", name="login")
+     * @BB\Fixtures(type="word")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -68,10 +74,11 @@ class User implements UserInterface
     protected $_login;
 
     /**
-     * The login of this user
+     * The login of this user.
+     *
      * @var string
-     * @Column(type="string", name="email")
-     * @fixture(type="email")
+     * @ORM\Column(type="string", name="email")
+     * @BB\Fixtures(type="email")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")
@@ -79,70 +86,76 @@ class User implements UserInterface
     protected $_email;
 
     /**
-     * The raw password of this user
+     * The raw password of this user.
+     *
      * @var string
      */
     protected $_raw_password;
 
     /**
-     * The password of this user
+     * The password of this user.
+     *
      * @var string
-     * @Column(type="string", name="password")
-     * @fixture(type="word")
+     * @ORM\Column(type="string", name="password")
+     * @BB\Fixtures(type="word")
+     *
+     * @Serializer\Exclude()
      */
     protected $_password;
 
     /**
-     * The User state
+     * The User state.
+     *
      * @var Integer
-     * @Column(type="integer", name="state", length=2, options={"default": \BackBee\Security\User::PASSWORD_NOT_PICKED})
      *
      * @Serializer\Expose
+     * @ORM\Column(type="integer", name="state", length=2, options={"default": \BackBee\Security\User::PASSWORD_NOT_PICKED})
      * @Serializer\Type("integer")
      */
     protected $_state = self::PASSWORD_NOT_PICKED;
 
     /**
-     * The access state
-     * @var Boolean
-     * @Column(type="boolean", name="activated")
-     * @fixture(type="boolean")
+     * The access state.
      *
+     * @var Boolean
      * @Serializer\Expose
+     * @ORM\Column(type="boolean", name="activated")
+     * @BB\Fixtures(type="boolean")
      * @Serializer\Type("boolean")
      */
     protected $_activated = false;
 
     /**
-     * The firstame of this user
-     * @var string
-     * @Column(type="string", name="firstname", nullable=true)
-     * @fixture(type="firstName")
+     * The firstame of this user.
      *
+     * @var string
      * @Serializer\Expose
+     * @ORM\Column(type="string", name="firstname", nullable=true)
+     * @BB\Fixtures(type="firstName")
      * @Serializer\Type("string")
      */
     protected $_firstname;
 
     /**
-     * The lastname of this user
-     * @var string
-     * @Column(type="string", name="lastname", nullable=true)
-     * @fixture(type="lastName")
+     * The lastname of this user.
      *
+     * @var string
      * @Serializer\Expose
+     * @ORM\Column(type="string", name="lastname", nullable=true)
+     * @BB\Fixtures(type="lastName")
      * @Serializer\Type("string")
      */
     protected $_lastname;
 
     /**
      * @var BackBee\NestedNode\PageRevision
-     * @OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="BackBee\NestedNode\PageRevision", mappedBy="_user", fetch="EXTRA_LAZY")
+     * @Serializer\Exclude()
      */
     protected $_revisions;
 
     /**
-     * @ManyToMany(targetEntity="BackBee\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="BackBee\Security\Group", mappedBy="_users", fetch="EXTRA_LAZY")
      *
      * @Serializer\Expose
      * @Serializer\MaxDepth(2)
@@ -152,57 +165,60 @@ class User implements UserInterface
     protected $_groups;
 
     /**
-     * User's public api key
-     * @var String
-     * @Column(type="string", name="api_key_public", nullable=true)
-     * @fixture(type="string")
+     * User's public api key.
      *
+     * @var String
      * @Serializer\Expose
+     * @ORM\Column(type="string", name="api_key_public", nullable=true)
+     * @BB\Fixtures(type="string")
      * @Serializer\Type("string")
      */
     protected $_api_key_public;
 
     /**
-     * User's private api key
+     * User's private api key.
+     *
      * @var String
-     * @Column(type="string", name="api_key_private", nullable=true)
-     * @fixture(type="string")
+     * @ORM\Column(type="string", name="api_key_private", nullable=true)
+     * @BB\Fixtures(type="string")
+     * @Serializer\Exclude()
+     * @Serializer\Type("string")
      */
     protected $_api_key_private;
 
     /**
-     * Whether the api key is enabled (default false)
-     * @var Boolean
-     * @Column(type="boolean", name="api_key_enabled", options={"default": false})
+     * Whether the api key is enabled (default false).
      *
+     * @var Boolean
      * @Serializer\Expose
-     * @fixture(type="boolean")
+     * @ORM\Column(type="boolean", name="api_key_enabled", options={"default": false})
+     * @BB\Fixtures(type="boolean")
      * @Serializer\Type("boolean")
      */
     protected $_api_key_enabled = false;
 
     /**
-     * The creation datetime
-     * @var \DateTime
-     * @Column(type="datetime", name="created")
+     * The creation datetime.
      *
+     * @var \DateTime
      * @Serializer\Expose
+     * @ORM\Column(type="datetime", name="created")
      * @Serializer\Type("DateTime")
      */
     protected $_created;
 
     /**
-     * The last modification datetime
-     * @var \DateTime
-     * @Column(type="datetime", name="modified")
+     * The last modification datetime.
      *
+     * @var \DateTime
      * @Serializer\Expose
+     * @ORM\Column(type="datetime", name="modified")
      * @Serializer\Type("DateTime")
      */
     protected $_modified;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @param string $login
      * @param string $password
@@ -223,7 +239,7 @@ class User implements UserInterface
     }
 
     /**
-     * Stringify the user object
+     * Stringify the user object.
      *
      * @return string
      * @codeCoverageIgnore
@@ -234,7 +250,7 @@ class User implements UserInterface
     }
 
     /**
-     * Serialize the user object
+     * Serialize the user object.
      *
      * @return Json_object
      */
@@ -248,8 +264,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param boolean $bool
      *
-     * @param  boolean                $bool
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -263,8 +279,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $login
      *
-     * @param  string                 $login
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -276,8 +292,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $email
      *
-     * @param  string                 $email
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -289,8 +305,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $password
      *
-     * @param  string                 $password
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -302,8 +318,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $password
      *
-     * @param  string                 $password
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -315,8 +331,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $firstname
      *
-     * @param  string                 $firstname
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -328,8 +344,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $lastname
      *
-     * @param  string                 $lastname
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -341,7 +357,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -351,7 +366,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -361,7 +375,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -371,7 +384,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -381,7 +393,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -391,7 +402,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -429,6 +439,7 @@ class User implements UserInterface
 
     /**
      * @param ArrayCollection
+     *
      * @return User
      * @codeCoverageIgnore
      */
@@ -440,7 +451,8 @@ class User implements UserInterface
     }
 
     /**
-     * @param  Group $group
+     * @param Group $group
+     *
      * @return User
      * @codeCoverageIgnore
      */
@@ -470,7 +482,6 @@ class User implements UserInterface
     }
 
     /**
-     * @return null
      * @codeCoverageIgnore
      */
     public function getSalt()
@@ -495,7 +506,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -505,8 +515,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $api_key_public
      *
-     * @param  string                 $api_key_public
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -518,7 +528,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -528,8 +537,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param string $api_key_private
      *
-     * @param  string                 $api_key_private
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -541,7 +550,6 @@ class User implements UserInterface
     }
 
     /**
-     *
      * @return bool
      * @codeCoverageIgnore
      */
@@ -551,8 +559,8 @@ class User implements UserInterface
     }
 
     /**
+     * @param bool $api_key_enabled
      *
-     * @param  bool                   $api_key_enabled
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -575,7 +583,7 @@ class User implements UserInterface
 
     /**
      *
-     * @param  bool                   $api_key_enabled
+     * @param  bool $api_key_enabled
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */

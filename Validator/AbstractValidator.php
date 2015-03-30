@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,10 +24,10 @@
 namespace BackBee\Validator;
 
 /**
- * Validator
+ * Validator.
  *
  * @category    BackBee
- * @package     BackBee\Validator
+ *
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
  */
@@ -40,7 +40,7 @@ abstract class AbstractValidator
     const CONFIG_PARAMETER_MANDATORY = 'mandatory';
 
     /**
-     * Validate all data with config
+     * Validate all data with config.
      *
      * @param mixed  $owner
      * @param array  $data
@@ -51,9 +51,11 @@ abstract class AbstractValidator
     abstract public function validate($owner, array $data = array(), array &$errors = array(), array $config = array(), $prefix = '');
 
     /**
-     * Delete element without prefix
-     * @param  array  $data
-     * @param  string $prefix
+     * Delete element without prefix.
+     *
+     * @param array  $data
+     * @param string $prefix
+     *
      * @return array
      */
     public function deleteElementWhenPrefix($data, $prefix = '')
@@ -70,7 +72,7 @@ abstract class AbstractValidator
     }
 
     /**
-     * Do general validator
+     * Do general validator.
      *
      * @param array   $data
      * @param string  $key

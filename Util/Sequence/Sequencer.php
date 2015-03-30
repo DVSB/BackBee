@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,42 +26,44 @@ namespace BackBee\Util\Sequence;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
-
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Utils\Numeric;
 
 /**
  * Sequence repository
- * Utility class providing db stored sequences
+ * Utility class providing db stored sequences.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Sequence
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Sequencer extends EntityRepository
 {
     /**
-     * The table name
+     * The table name.
+     *
      * @var string
      */
     private $table;
 
     /**
-     * The fieldname of _name
+     * The fieldname of _name.
+     *
      * @var string
      */
     private $name;
 
     /**
-     * The fieldname of _value
+     * The fieldname of _value.
+     *
      * @var string
      */
     private $value;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param type          $em
      * @param ClassMetadata $class
      */
@@ -75,9 +77,11 @@ class Sequencer extends EntityRepository
     }
 
     /**
-     * Get the next sequence value
-     * @param  string $name
-     * @param  int    $default
+     * Get the next sequence value.
+     *
+     * @param string $name
+     * @param int    $default
+     *
      * @return int
      */
     public function getValue($name, $default = 0)
@@ -88,10 +92,13 @@ class Sequencer extends EntityRepository
     }
 
     /**
-     * Initiate a new sequence with name $name
-     * @param  string                   $name
-     * @param  int                      $first
+     * Initiate a new sequence with name $name.
+     *
+     * @param string $name
+     * @param int    $first
+     *
      * @return int
+     *
      * @throws InvalidArgumentException Occures if sequence $name already exists or $first is not a positive integer
      */
     private function init($name, $first = 0)
@@ -119,12 +126,15 @@ class Sequencer extends EntityRepository
     }
 
     /**
-     * Update a sequence with name $name
-     * @param  string                   $name
-     * @param  int                      $first
+     * Update a sequence with name $name.
+     *
+     * @param string $name
+     * @param int    $first
+     *
      * @return int
+     *
      * @throws InvalidArgumentException Occures if sequence $name doesn't exist
-     *                                        or $value is not a positive integer
+     *                                  or $value is not a positive integer
      */
     private function update($name, $value = 0)
     {
@@ -151,9 +161,11 @@ class Sequencer extends EntityRepository
     }
 
     /**
-     * Read a sequence with name $name, create it if doesn't exist
-     * @param  string $name
-     * @param  int    $default
+     * Read a sequence with name $name, create it if doesn't exist.
+     *
+     * @param string $name
+     * @param int    $default
+     *
      * @return int
      */
     private function read($name, $default = 0)
@@ -166,10 +178,13 @@ class Sequencer extends EntityRepository
     }
 
     /**
-     * Update a sequence to $value only if greater than its current value
-     * @param  string                   $name
-     * @param  int                      $value
+     * Update a sequence to $value only if greater than its current value.
+     *
+     * @param string $name
+     * @param int    $value
+     *
      * @return int
+     *
      * @throws InvalidArgumentException Occures if $value is not a positive integer
      */
     public function increaseTo($name, $value)

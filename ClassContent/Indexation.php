@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,59 +23,67 @@
 
 namespace BackBee\ClassContent;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * Indexation entry for content
+ * Indexation entry for content.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @Table(name="indexation",indexes={@index(name="IDX_OWNER", columns={"owner_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"}), @index(name="IDX_VALUE", columns={"value"}), @index(name="IDX_SEARCH", columns={"field", "value"})})
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
+ * @ORM\Table(name="indexation",indexes={@ORM\Index(name="IDX_OWNER", columns={"owner_uid"}), @ORM\Index(name="IDX_CONTENT", columns={"content_uid"}), @ORM\Index(name="IDX_VALUE", columns={"value"}), @ORM\Index(name="IDX_SEARCH", columns={"field", "value"})})
  */
 class Indexation
 {
     /**
-     * The indexed content
+     * The indexed content.
+     *
      * @var string
-     * @Id
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="content_uid", referencedColumnName="uid")
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
 
     /**
-     * The indexed field of the content
+     * The indexed field of the content.
+     *
      * @var string
-     * @Id
-     * @Column(type="string", name="field")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="field")
      */
     protected $_field;
 
     /**
-     * The owner content of the indexed field
-     * @var AbstractClassContent
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="owner_uid", referencedColumnName="uid")
+     * The owner content of the indexed field.
+     *
+     * @var AClassContent
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="owner_uid", referencedColumnName="uid")
      */
     protected $_owner;
 
     /**
-     * The value of the indexed field
+     * The value of the indexed field.
+     *
      * @var string
-     * @Column(type="string", name="value")
+     * @ORM\Column(type="string", name="value")
      */
     protected $_value;
 
     /**
-     * The optional callback to apply while indexing
+     * The optional callback to apply while indexing.
+     *
      * @var string
-     * @Column(type="string", name="callback", nullable=true)
+     * @ORM\Column(type="string", name="callback", nullable=true)
      */
     protected $_callback;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param AbstractClassContent $content_uid The unique identifier of the indexed content
      * @param string        $field       The indexed field of the indexed content
      * @param AbstractClassContent $owner_uid   The unique identifier of the owner content of the field
@@ -93,6 +101,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getField()
@@ -102,6 +111,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
+     *
      * @return function
      */
     public function getCallback()
@@ -111,6 +121,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getValue()
@@ -120,6 +131,7 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getContent()
@@ -129,7 +141,9 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  string                           $content
+     *
+     * @param string $content
+     *
      * @return \BackBee\ClassContent\Indexation
      */
     public function setContent($content)
@@ -141,7 +155,9 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  string                           $field
+     *
+     * @param string $field
+     *
      * @return \BackBee\ClassContent\Indexation
      */
     public function setField($field)
@@ -153,7 +169,9 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $owner
+     *
+     * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $owner
+     *
      * @return \BackBee\ClassContent\Indexation
      */
     public function setOwner($owner)
@@ -165,7 +183,9 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  string                           $value
+     *
+     * @param string $value
+     *
      * @return \BackBee\ClassContent\Indexation
      */
     public function setValue($value)
@@ -177,7 +197,9 @@ class Indexation
 
     /**
      * @codeCoverageIgnore
-     * @param  function                         $callback
+     *
+     * @param function $callback
+     *
      * @return \BackBee\ClassContent\Indexation
      */
     public function setCallback($callback)

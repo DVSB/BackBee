@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,8 +26,6 @@ namespace BackBee\Logging;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
-
 use BackBee\BBApplication;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\Logging\Appender\AppenderInterface;
@@ -35,7 +33,7 @@ use BackBee\Logging\Exception\LoggingException;
 
 /**
  * @category    BackBee
- * @package     BackBee/Logging
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -125,6 +123,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     /**
      * @codeCoverageIgnore
      * @param  \BackBee\Logging\Appender\AppenderInterface $appender
+     *
      * @return \BackBee\Logging\Logger
      */
     public function addAppender(AppenderInterface $appender)
@@ -209,6 +208,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -219,6 +219,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -234,6 +235,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -244,6 +246,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -254,6 +257,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -264,6 +268,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -274,6 +279,7 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
 
     /**
      * @codeCoverageIgnore
+     *
      * @param type  $message
      * @param array $context
      */
@@ -317,9 +323,10 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     }
 
     /**
-     * Get priority name by its code
+     * Get priority name by its code.
      *
-     * @param  int         $code
+     * @param int $code
+     *
      * @return string|null
      */
     protected function getPriorityName($code)

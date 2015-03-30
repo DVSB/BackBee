@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -34,10 +34,10 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\Yaml\Dumper;
 
 /**
- * Doctrine data collector
+ * Doctrine data collector.
  *
  * @category    BackBee
- * @package     BackBee\Profiler
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -54,7 +54,6 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
     }
 
     /**
-     *
      * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
      */
     public function setContainer(ContainerInterface $container = null)
@@ -172,7 +171,6 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
     }
 
     /**
-     *
      * @inheritDoc
      */
     private function sanitizeQuery($connectionName, $query)
@@ -248,10 +246,11 @@ class DoctrineDataCollector extends DataCollector implements ContainerAwareInter
     }
 
     /**
-     * Interpolate sql query tokens
+     * Interpolate sql query tokens.
      *
-     * @param  string $query
-     * @param  array  $params
+     * @param string $query
+     * @param array  $params
+     *
      * @return string
      */
     private function interpolateQuery($query, array $params)

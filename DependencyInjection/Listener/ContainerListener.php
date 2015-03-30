@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\DependencyInjection\Listener;
 
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
-
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\ContainerProxy;
 use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
@@ -33,18 +32,18 @@ use BackBee\DependencyInjection\Exception\ContainerDirectoryNotWritableException
 use BackBee\Event\Event;
 
 /**
- *
- *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class ContainerListener
 {
     /**
-     * [onApplicationInit description]
-     * @param  Event  $event [description]
+     * [onApplicationInit description].
+     *
+     * @param Event $event [description]
+     *
      * @return [type] [description]
      */
     public static function onApplicationInit(Event $event)
@@ -85,7 +84,7 @@ class ContainerListener
         }
     }
 
-/**
+/*
  * [loadExternalBundleServices description]
  * @param  Container $container [description]
  * @param  [type]    $config    [description]

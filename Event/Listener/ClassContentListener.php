@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -38,11 +38,10 @@ use BackBee\Utils\File\File;
 /**
  * Listener to ClassContent events :
  *    - classcontent.onflush: occurs when a classcontent entity is mentioned for current flush
- *    - classcontent.include: occurs when autoloader include a classcontent definition
+ *    - classcontent.include: occurs when autoloader include a classcontent definition.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -50,8 +49,10 @@ class ClassContentListener
 {
     /**
      * Add discriminator values to class MetaData when a content class is loaded
-     * Occur on classcontent.include events
+     * Occur on classcontent.include events.
+     *
      * @access public
+     *
      * @param Event $event
      */
     public static function onInclude(Event $event)
@@ -106,19 +107,6 @@ class ClassContentListener
             }
 
             $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
-//
-//            if (null !== $page = $content->getMainNode()) {
-//                if (AbstractClassContent::STATE_NORMAL === $content->getState()) {
-//                    $page->setModified(new \DateTime());
-//                    $method = 'computeChangeSet';
-//                    if (true === $uow->isEntityScheduled($page)) {
-//                        $method = 'recomputeSingleEntityChangeSet';
-//                    }
-//
-//                    $uow->$method($em->getClassMetadata('BackBee\NestedNode\Page'), $page);
-//                }
-//            }
-            //self::HandleContentMainnode($content,$application);
         }
     }
 
@@ -130,8 +118,10 @@ class ClassContentListener
     }
 
     /**
-     * Occur on clascontent.preremove event
-     * @param  \BackBee\Event\Event $event
+     * Occur on clascontent.preremove event.
+     *
+     * @param \BackBee\Event\Event $event
+     *
      * @return type
      */
     public static function onPreRemove(Event $event)
@@ -140,8 +130,10 @@ class ClassContentListener
     }
 
     /**
-     * Occurs on classcontent.update event
-     * @param  Event       $event
+     * Occurs on classcontent.update event.
+     *
+     * @param Event $event
+     *
      * @throws BBException Occurs on illegal targeted object or missing BackBee Application
      */
     public static function onUpdate(Event $event)
@@ -207,7 +199,8 @@ class ClassContentListener
     }
 
     /**
-     * Occure on services.local.classcontent.postcall
+     * Occure on services.local.classcontent.postcall.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onServicePostCall(Event $event)
@@ -221,7 +214,8 @@ class ClassContentListener
     }
 
     /**
-     * Dynamically add render modes options to the class
+     * Dynamically add render modes options to the class.
+     *
      * @param \BackBee\Event\Event $event
      */
     private static function setRendermodeParameter(Event $event)

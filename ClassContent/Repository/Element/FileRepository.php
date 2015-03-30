@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -32,42 +32,48 @@ use BackBee\Util\Media;
 use BackBee\Utils\File\File;
 
 /**
- * file repository
+ * file repository.
+ *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Repository\Element
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class FileRepository extends ClassContentRepository
 {
     /**
-     * The temporary directory
+     * The temporary directory.
+     *
      * @var string
      */
     protected $_temporarydir;
 
     /**
-     * The sotrage directory
+     * The sotrage directory.
+     *
      * @var string
      */
     protected $_storagedir;
 
     /**
-     * The media library directory
+     * The media library directory.
+     *
      * @var string
      */
     protected $_mediadir;
 
     /**
-     * The current application
+     * The current application.
+     *
      * @var \BackBee\BBApplication
      */
     private $_application;
 
     /**
-     * Move an temporary uploaded file to either media library or storage directory
-     * @param  \BackBee\ClassContent\Element\File $file
+     * Move an temporary uploaded file to either media library or storage directory.
+     *
+     * @param \BackBee\ClassContent\Element\File $file
+     *
      * @return boolean
      */
     public function commitFile(ElementFile $file)
@@ -90,10 +96,12 @@ class FileRepository extends ClassContentRepository
     }
 
     /**
-     * Move an uploaded file to the temporary directory and update file content
+     * Move an uploaded file to the temporary directory and update file content.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent            $file
      * @param  string                                                $newfilename
      * @param  string                                                $originalname
+     *
      * @return boolean|string
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
@@ -136,15 +144,14 @@ class FileRepository extends ClassContentRepository
             return false;
         }
 
-        //$stat = stat($moveto);
-        //$file->setParam('stat', $stat, 'array');
-
         return $moveto;
     }
 
     /**
-     * Return true if file is in media libray false otherwise
-     * @param  \BackBee\ClassContent\Element\File $file
+     * Return true if file is in media libray false otherwise.
+     *
+     * @param \BackBee\ClassContent\Element\File $file
+     *
      * @return boolean
      */
     public function isInMediaLibrary(ElementFile $file)
@@ -166,10 +173,12 @@ class FileRepository extends ClassContentRepository
     }
 
     /**
-     * Do stuf on update by post of the content editing form
+     * Do update by post of the content editing form.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent            $content
      * @param  stdClass                                              $value
      * @param  \BackBee\ClassContent\AbstractClassContent            $parent
+     *
      * @return \BackBee\ClassContent\Element\File
      * @throws \BackBee\ClassContent\Exception\ClassContentException Occures on invalid content type provided
      */
@@ -190,8 +199,10 @@ class FileRepository extends ClassContentRepository
     }
 
     /**
-     * Set the storage directories define by the BB5 application
-     * @param  \BackBee\BBApplication                                  $application
+     * Set the storage directories define by the BB5 application.
+     *
+     * @param \BackBee\BBApplication $application
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
     public function setDirectories(BBApplication $application = null)
@@ -208,43 +219,50 @@ class FileRepository extends ClassContentRepository
     }
 
     /**
-     * Set the temporary directory
-     * @param  type                                                    $temporary_dir
+     * Set the temporary directory.
+     *
+     * @param type $tempDirectory
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setTemporaryDir($temporary_dir = null)
+    public function setTemporaryDir($tempDirectory = null)
     {
-        $this->_temporarydir = $temporary_dir;
+        $this->_temporarydir = $tempDirectory;
 
         return $this;
     }
 
     /**
-     * Set the storage directory
-     * @param  type                                                    $storage_dir
+     * Set the storage directory.
+     *
+     * @param type $storageDirectory
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setStorageDir($storage_dir = null)
+    public function setStorageDir($storageDirectory = null)
     {
-        $this->_storagedir = $storage_dir;
+        $this->_storagedir = $storageDirectory;
 
         return $this;
     }
 
     /**
-     * Set the media library directory
-     * @param  type                                                    $media_dir
+     * Set the media library directory.
+     *
+     * @param type $mediaDirectory
+     *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setMediaDir($media_dir = null)
+    public function setMediaDir($mediaDirectory = null)
     {
-        $this->_mediadir = $media_dir;
+        $this->_mediadir = $mediaDirectory;
 
         return $this;
     }
 
     /**
-     * Dispatch postupload event
+     * Dispatch postupload event.
+     *
      * @param string $sourcefile
      * @param string $targetfile
      */

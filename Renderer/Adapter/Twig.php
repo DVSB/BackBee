@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,34 +23,15 @@
 
 namespace BackBee\Renderer\Adapter;
 
-/*
- * Copyright (c) 2011-2013 Lp digital system
- *
- * This file is part of BackBee5.
- *
- * BackBee5 is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * BackBee5 is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with BackBee5. If not, see <http://www.gnu.org/licenses/>.
- */
-
 use BackBee\Renderer\AbstractRenderer;
 use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 
 /**
- * twig renderer adapter for BackBee\Renderer\Renderer
+ * twig renderer adapter for BackBee\Renderer\Renderer.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -67,7 +48,8 @@ class Twig extends AbstractRendererAdapter
     private $twig;
 
     /**
-     * Extensions to include in searching file
+     * Extensions to include in searching file.
+     *
      * @var array
      */
     protected $extensions = array(
@@ -77,7 +59,7 @@ class Twig extends AbstractRendererAdapter
     );
 
     /**
-     * Twig adapter constructor
+     * Twig adapter constructor.
      *
      * @param AbstractRenderer $renderer
      */
@@ -102,9 +84,9 @@ class Twig extends AbstractRendererAdapter
     }
 
     /**
-     * [addExtension description]
+     * Add Twig extension.
      *
-     * @param [type] $extension [description]
+     * @param \Twig_ExtensionInterface $extension
      */
     public function addExtension(\Twig_ExtensionInterface $extension)
     {
@@ -112,25 +94,25 @@ class Twig extends AbstractRendererAdapter
     }
 
     /**
-     * [setTwigCache description]
+     * Set Twig cache directory.
      *
-     * @param [type] $cache_directory [description]
+     * @param string $cacheDirectory
      */
-    public function setTwigCache($cache_directory)
+    public function setTwigCache($cacheDirectory)
     {
         if (
-            false === is_dir($cache_directory)
-            && (false === is_writable(dirname($cache_directory)) || false === @mkdir($cache_directory, 0755))
+            false === is_dir($cacheDirectory)
+            && (false === is_writable(dirname($cacheDirectory)) || false === @mkdir($cacheDirectory, 0755))
         ) {
             throw new RendererException(
-                sprintf('Unable to create twig cache "%s"', $cache_directory),
+                sprintf('Unable to create twig cache "%s"', $cacheDirectory),
                 RendererException::RENDERING_ERROR
             );
         }
 
-        if (false === is_writable($cache_directory)) {
+        if (false === is_writable($cacheDirectory)) {
             throw new RendererException(
-                sprintf('Twig cache "%s" is not writable', $cache_directory),
+                sprintf('Twig cache "%s" is not writable', $cacheDirectory),
                 RendererException::RENDERING_ERROR
             );
         }
@@ -138,7 +120,7 @@ class Twig extends AbstractRendererAdapter
         $this->twig->setCache($cache_directory);
     }
     /**
-     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\RendererAdapterInterface::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -146,10 +128,11 @@ class Twig extends AbstractRendererAdapter
     }
 
     /**
-     * Check if $filename exists in directories provided by $templateDir
+     * Check if $filename exists in directories provided by $templateDir.
      *
-     * @param  [type]  $filename
-     * @param  array   $templateDir
+     * @param string $filename
+     * @param array  $templateDir
+     *
      * @return boolean true if the file was found and is readable
      */
     public function isValidTemplateFile($filename, array $templateDir)
@@ -164,7 +147,7 @@ class Twig extends AbstractRendererAdapter
     }
 
     /**
-     * Add dir path into loader only if it not already exists
+     * Add dir path into loader only if it not already exists.
      *
      * @param array $templateDir
      */
@@ -175,19 +158,18 @@ class Twig extends AbstractRendererAdapter
             $this->loader->removeAllPaths();
             try {
                 $this->loader->setPaths($templateDir);
-            } catch (\Twig_Error_Loader $e) {
-                //@Todo what to do when one of path does not exist
-            }
+            } catch (\Twig_Error_Loader $e) {}
         }
     }
 
     /**
-     * Generate the render of $filename template with $params and $vars
+     * Generate the render of $filename template with $params and $vars.
      *
-     * @param  string $filename
-     * @param  array  $templateDir
-     * @param  array  $params
-     * @param  array  $vars
+     * @param string $filename
+     * @param array  $templateDir
+     * @param array  $params
+     * @param array  $vars
+     *
      * @return string
      */
     public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
@@ -210,8 +192,8 @@ class Twig extends AbstractRendererAdapter
     }
 
     /**
+     * @param string $filename
      *
-     * @param  string                  $filename
      * @return \Twig_TemplateInterface
      */
     public function loadTemplate($filename)

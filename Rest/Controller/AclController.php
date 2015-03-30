@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,22 +30,21 @@ use Symfony\Component\Security\Acl\Domain\UserSecurityIdentity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\ValidationException;
 
 /**
- * User Controller
+ * User Controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class AclController extends AbstractRestController
 {
     /**
-     * Get all records
+     * Get all records.
      *
      * @Rest\QueryParam(name = "group_id", description="Security Group ID", requirements = {
      *  @Assert\NotBlank(message="Group ID cannot be empty")
@@ -112,7 +111,6 @@ class AclController extends AbstractRestController
     }
 
     /**
-     *
      * @Rest\RequestParam(name = "group_id", description="Security Group ID", requirements = {
      *  @Assert\NotBlank(message="Group ID cannot be empty")
      * })
@@ -160,7 +158,6 @@ class AclController extends AbstractRestController
     }
 
     /**
-     *
      * @Rest\RequestParam(name = "group_id", description="Security Group ID", requirements = {
      *  @Assert\NotBlank(message="Group ID cannot be empty")
      * })
@@ -213,7 +210,7 @@ class AclController extends AbstractRestController
     }
 
     /**
-     * Bulk permissions create/update
+     * Bulk permissions create/update.
      *
      *
      * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")

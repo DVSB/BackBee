@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,28 +23,31 @@
 
 namespace BackBee\ClassContent\Indexes;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * Entity class for Content-Content join table
+ * Entity class for Content-Content join table.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Indexes
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @Table(name="idx_content_content",indexes={@index(name="IDX_SUBCONTENT", columns={"subcontent_uid"}), @index(name="IDX_CONTENT", columns={"content_uid"})})
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
+ * @ORM\Table(name="idx_content_content",indexes={@ORM\Index(name="IDX_SUBCONTENT", columns={"subcontent_uid"}), @ORM\Index(name="IDX_CONTENT", columns={"content_uid"})})
  */
 class IdxContentContent
 {
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @ORM\Id
+     * @ORM\Column(type="string", length=32)
      */
     private $content_uid;
 
     /**
      * @var string
-     * @Id @Column(type="string", length=32)
+     * @ORM\Id
+     * @ORM\Column(type="string", length=32)
      */
     private $subcontent_uid;
 }

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,33 +27,33 @@ use Metadata\Cache\CacheInterface;
 use Metadata\ClassMetadata;
 
 /**
- * Metadata file cache
+ * Metadata file cache.
  *
  * @Annotation
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class FileCache implements CacheInterface
 {
     /**
-     * the absolute path to directory where to put file cache
+     * the absolute path to directory where to put file cache.
      *
      * @var string
      */
     private $dir;
 
     /**
-     * the application debug value
+     * the application debug value.
      *
      * @var boolean
      */
     private $debug;
 
     /**
-     * FileCache constructor
+     * FileCache constructor.
      *
      * @param string  $dir
      * @param boolean $debug

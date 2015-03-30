@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,21 +26,19 @@ namespace BackBee\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-
 use BackBee\NestedNode\Page;
 
 /**
- * Page Filter Event
+ * Page Filter Event.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class PageFilterEvent extends KernelEvent
 {
     /**
-     *
      * @var Page
      */
     private $page;
@@ -52,7 +50,6 @@ class PageFilterEvent extends KernelEvent
     }
 
     /**
-     *
      * @return Page
      */
     public function getPage()

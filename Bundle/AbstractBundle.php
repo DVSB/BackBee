@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,51 +24,50 @@
 namespace BackBee\Bundle;
 
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ApplicationInterface;
 use BackBee\Routing\RouteCollection;
 use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
 
 /**
- * Abstract class for BackBee's bundle
+ * Abstract class for BackBee's bundle.
  *
  * @category    BackBee
- * @package     BackBee\Bundle
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 abstract class AbstractBundle implements BundleInterface
 {
     /**
-     * Application this bundle belongs to
+     * Application this bundle belongs to.
      *
      * @var BackBee\ApplicationInterface
      */
     private $application;
 
     /**
-     * Bundle base directory
+     * Bundle base directory.
      *
      * @var string
      */
     private $baseDir;
 
     /**
-     * Bundle identifier
+     * Bundle identifier.
      *
      * @var string
      */
     private $id;
 
     /**
-     * Define if this bundle is already started or not
+     * Define if this bundle is already started or not.
      *
      * @var boolean
      */
     private $started;
 
     /**
-     * Formatted list of this bundle exposed actions
+     * Formatted list of this bundle exposed actions.
      *
      * @var array
      */
@@ -76,14 +75,14 @@ abstract class AbstractBundle implements BundleInterface
 
     /**
      * Indexed by a unique name (controller name + action name), it contains every (controller; action)
-     * callbacks
+     * callbacks.
      *
      * @var array
      */
     private $exposedActionsCallbacks;
 
     /**
-     * AbstractBaseBundle's constructor
+     * AbstractBaseBundle's constructor.
      *
      * @param ApplicationInterface $application application to link current bundle with
      */
@@ -150,7 +149,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * Bundle's config service id getter
+     * Bundle's config service id getter.
      *
      * @return string
      */
@@ -164,7 +163,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * Bundle base directory getter
+     * Bundle base directory getter.
      *
      * @return string
      */
@@ -230,7 +229,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * enable property setter
+     * enable property setter.
      *
      * @param boolean $enable
      *
@@ -246,7 +245,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * category property setter
+     * category property setter.
      *
      * @param string|array $category
      *
@@ -262,7 +261,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * config_per_site property setter
+     * config_per_site property setter.
      *
      * @param boolean $v
      *
@@ -316,6 +315,7 @@ abstract class AbstractBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @see Symfony\Component\Security\Acl\Model\DomainObjectInterface::getObjectIdentifier
      */
     public function getObjectIdentifier()
@@ -325,6 +325,7 @@ abstract class AbstractBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::getIdentifier
      */
     public function getIdentifier()
@@ -334,6 +335,7 @@ abstract class AbstractBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::getType
      */
     public function getType()
@@ -343,6 +345,7 @@ abstract class AbstractBundle implements BundleInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @see BackBee\Security\Acl\Domain\IObjectIdentifiable::equals
      */
     public function equals(ObjectIdentifiableInterface $identity)
@@ -366,7 +369,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * Bundle's exposed actions getter
+     * Bundle's exposed actions getter.
      *
      * @return array
      */
@@ -376,7 +379,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * Returns the associated callback if "controller name/action name" couple is valid
+     * Returns the associated callback if "controller name/action name" couple is valid.
      *
      * @param string $controllerName the controller name (ex.: BackBee\FrontController\FrontController => front)
      * @param string $actionName     the action name (ex.: FrontController::defaultAction => default)
@@ -394,7 +397,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * Initialize bundle exposed actions by building exposed_actions array and exposed_actions_callback array
+     * Initialize bundle exposed actions by building exposed_actions array and exposed_actions_callback array.
      */
     private function initBundleExposedActions()
     {
@@ -414,7 +417,7 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
-     * Format a valid map between controller and actions and hydrate
+     * Format a valid map between controller and actions and hydrate.
      *
      * @param BundleExposedControllerInterface $controller
      * @param array                            $actions

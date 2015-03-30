@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,12 +23,12 @@
 
 namespace BackBee\NestedNode\Builder;
 
-use Doctrine\ORM\EntityManager;
-
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
+
+use Doctrine\ORM\EntityManager;
 
 /**
  * @author e.chau <eric.chau@lp-digital.fr>
@@ -85,7 +85,7 @@ class PageBuilder
     private $root;
 
     /**
-     * BackBee\NestedNode\Page
+     * BackBee\NestedNode\Page.
      */
     private $parent;
 
@@ -130,7 +130,10 @@ class PageBuilder
     private $persist;
 
     /**
-     * [__construct description]
+     * PageBuilder constructor.
+     *
+     * @param EntityManager $em the entity manager
+     * @return PageBuilder instance
      */
     public function __construct(EntityManager $em)
     {
@@ -140,8 +143,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * return Page instance.
+     *
+     * @return Page return a Page instance object
      */
     public function getPage()
     {
@@ -237,8 +241,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set an unique identifier for the Page.
+     *
+     * @return PageBuilder the Page builder instance
      */
     public function setUid($uid)
     {
@@ -248,8 +253,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the uid.
+     *
+     * @return int
      */
     public function getUid()
     {
@@ -257,8 +263,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set the title.
+     *
+     * @return PageBuilder Returns the instance of PageBuilder
      */
     public function setTitle($title)
     {
@@ -268,8 +275,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the title.
+     *
+     * @return string
      */
     public function getTitle()
     {
@@ -277,8 +285,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set the Page Builder url.
+     *
+     * @return PageBuilder Returns PageBuilder instance
      */
     public function setUrl($url)
     {
@@ -288,8 +297,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the url.
+     *
+     * @return string
      */
     public function getUrl()
     {
@@ -297,8 +307,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set the Site.
+     *
+     * @return PageBuilder Returns PageBuilder instance
      */
     public function setSite(Site $site)
     {
@@ -308,8 +319,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the Site.
+     *
+     * @return Site
      */
     public function getSite()
     {
@@ -317,8 +329,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set the Root Page.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function setRoot(Page $root, $isRoot = false)
     {
@@ -332,8 +345,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the Root Page.
+     *
+     * @return Page the root Page of a Site
      */
     public function getRoot()
     {
@@ -341,7 +355,8 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
+     * [getPage description].
+     *
      * @return [type] [description]
      */
     public function setParent(Page $parent)
@@ -352,8 +367,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the Parent Page.
+     *
+     * @return Page
      */
     public function getParent()
     {
@@ -361,8 +377,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set a Layout instance.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function setLayout(Layout $layout, AbstractClassContent $toPushInMainZone = null)
     {
@@ -373,8 +390,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the Layout instance.
+     *
+     * @return Layout
      */
     public function getLayout()
     {
@@ -382,8 +400,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set the state of a Site.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function setState($state)
     {
@@ -393,8 +412,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set a Page online and visible.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function putOnlineAndVisible()
     {
@@ -402,8 +422,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Set a Page online and hidden.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function putOnlineAndHidden()
     {
@@ -411,8 +432,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Push a Class Content into a Page.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function pushElement(AbstractClassContent $element, $setMainNode = false, $contentSetPos = 0)
     {
@@ -426,8 +448,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Add a Class Content into a Page.
+     *
+     * @return PageBuilder Returns a PageBuilder instance
      */
     public function addElement(AbstractClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
     {
@@ -450,8 +473,10 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get a Class Content from a Page.
+     *
+     * @param int $index the index in elements array of a Page
+     * @return ClassContent|null the selected content if found, else null 
      */
     public function getElement($index)
     {
@@ -459,8 +484,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Get the Class Contents.
+     *
+     * @return array<ClassContent>
      */
     public function elements()
     {
@@ -468,8 +494,9 @@ class PageBuilder
     }
 
     /**
-     * [getPage description]
-     * @return [type] [description]
+     * Empty the array.
+     *
+     * @return PageBuilder Returns the PageBuilder instance
      */
     public function clearElements()
     {
@@ -509,7 +536,7 @@ class PageBuilder
     }
 
     /**
-     * Alias of publishedAt
+     * Alias of publishedAt.
      *
      * @see self::publishedAt
      */
@@ -641,7 +668,7 @@ class PageBuilder
     /**
      * Sets the persist mode;
      * /!\ if you set a valid persist mode (SELF::INSERT_AS_FIRST_CHILD or SELF::INSERT_AS_LAST_CHILD),
-     * this page will be persist for you, it also modified the left and right node of the tree
+     * this page will be persist for you, it also modified the left and right node of the tree.
      *
      * @param integer $mode
      */
@@ -651,8 +678,10 @@ class PageBuilder
     }
 
     /**
-     * Call
-     * @param  Page   $page [description]
+     * Call.
+     *
+     * @param Page $page [description]
+     *
      * @return [type] [description]
      */
     private function doPersistIfValid(Page $page)

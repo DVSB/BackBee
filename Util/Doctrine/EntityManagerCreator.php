@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,35 +31,36 @@ use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Psr\Log\LoggerInterface;
-
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Utils\Collection\Collection;
 
 /**
- * Utility class to create a new Doctrine entity manager
+ * Utility class to create a new Doctrine entity manager.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Doctrine
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class EntityManagerCreator
 {
     /**
-     * Creates a new Doctrine entity manager
-     * @param  array                                       $options Options provided to get an entity manager, keys should be :
-     *                                                              - entity_manager \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
-     *                                                              - connection     \Doctrine\DBAL\Connection    Optional, an already initialized database connection
-     *                                                              - proxy_dir      string                       The proxy directory
-     *                                                              - proxy_ns       string                       The namespace for Doctrine proxy
-     *                                                              - charset        string                       Optional, the charset to use
-     *                                                              - collation      string                       Optional, the collation to use
-     *                                                              - ...            mixed                        All the required parameter to open a new connection
-     * @param  \Psr\Log\LoggerInterface                    $logger  Optional logger
-     * @param  \Doctrine\Common\EventManager               $evm     Optional event manager
+     * Creates a new Doctrine entity manager.
+     *
+     * @param array                         $options Options provided to get an entity manager, keys should be :
+     *                                               - entity_manager \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
+     *                                               - connection     \Doctrine\DBAL\Connection    Optional, an already initialized database connection
+     *                                               - proxy_dir      string                       The proxy directory
+     *                                               - proxy_ns       string                       The namespace for Doctrine proxy
+     *                                               - charset        string                       Optional, the charset to use
+     *                                               - collation      string                       Optional, the collation to use
+     *                                               - ...            mixed                        All the required parameter to open a new connection
+     * @param \Psr\Log\LoggerInterface      $logger  Optional logger
+     * @param \Doctrine\Common\EventManager $evm     Optional event manager
+     *
      * @return \Doctrine\ORM\EntityManager
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be returned
      */
     public static function create(array $options = array(), LoggerInterface $logger = null, EventManager $evm = null, ContainerInterface $container = null)
@@ -90,7 +91,7 @@ class EntityManagerCreator
     }
 
     /**
-     * Custom SQLite logic
+     * Custom SQLite logic.
      *
      * @param \Doctrine\DBAL\Connection $connection
      */
@@ -108,8 +109,10 @@ class EntityManagerCreator
     }
 
     /**
-     * Returns a new ORM Configuration
-     * @param  array                       $options Optional, the options to create the new Configuration
+     * Returns a new ORM Configuration.
+     *
+     * @param array $options Optional, the options to create the new Configuration
+     *
      * @return \Doctrine\ORM\Configuration
      * @codeCoverageIgnore
      */
@@ -117,7 +120,7 @@ class EntityManagerCreator
     {
         $config = new Configuration();
 
-        $driverImpl = $config->newDefaultAnnotationDriver();
+        $driverImpl = $config->newDefaultAnnotationDriver([], false);
 
         $config->setMetadataDriverImpl($driverImpl);
 
@@ -228,9 +231,11 @@ class EntityManagerCreator
     }
 
     /**
-     * Adds userdefined functions
-     * @param  \Doctrine\ORM\Configuration $config
-     * @param  array                       $options
+     * Adds userdefined functions.
+     *
+     * @param \Doctrine\ORM\Configuration $config
+     * @param array                       $options
+     *
      * @return \Doctrine\ORM\Configuration
      */
     private static function _addCustomFunctions(Configuration $config, array $options = array())
@@ -263,10 +268,13 @@ class EntityManagerCreator
     }
 
     /**
-     * Returns the EntityManager provided
-     * @param  \Doctrine\ORM\EntityManager                 $entity_manager
-     * @param  \Doctrine\Common\EventManager               $evm            Optional event manager
+     * Returns the EntityManager provided.
+     *
+     * @param \Doctrine\ORM\EntityManager   $entity_manager
+     * @param \Doctrine\Common\EventManager $evm            Optional event manager
+     *
      * @return \Doctrine\ORM\EntityManager
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager is not an EntityManager
      */
     private static function _getEntityManagerWithEntityManager($entity_manager)
@@ -279,11 +287,14 @@ class EntityManagerCreator
     }
 
     /**
-     * Returns a new EntityManager with the provided connection
-     * @param  \Doctrine\DBAL\Connection                   $connection
-     * @param  \Doctrine\ORM\Configuration                 $config
-     * @param  \Doctrine\Common\EventManager               $evm        Optional event manager
+     * Returns a new EntityManager with the provided connection.
+     *
+     * @param \Doctrine\DBAL\Connection     $connection
+     * @param \Doctrine\ORM\Configuration   $config
+     * @param \Doctrine\Common\EventManager $evm        Optional event manager
+     *
      * @return \Doctrine\ORM\EntityManager
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
     private static function _createEntityManagerWithConnection($connection, Configuration $config, EventManager $evm = null)
@@ -300,10 +311,13 @@ class EntityManagerCreator
     }
 
     /**
-     * Returns a new EntityManager with the provided parameters
-     * @param  array                                       $options
-     * @param  \Doctrine\ORM\Configuration                 $config
+     * Returns a new EntityManager with the provided parameters.
+     *
+     * @param array                       $options
+     * @param \Doctrine\ORM\Configuration $config
+     *
      * @return \Doctrine\ORM\EntityManager
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if $entity_manager can not be created
      */
     private static function _createEntityManagerWithParameters(array $options, Configuration $config, EventManager $evm = null)
@@ -316,9 +330,11 @@ class EntityManagerCreator
     }
 
     /**
-     * Sets the character set for the provided connection
-     * @param  \Doctrine\DBAL\Connection                   $connection
-     * @param  array                                       $options
+     * Sets the character set for the provided connection.
+     *
+     * @param \Doctrine\DBAL\Connection $connection
+     * @param array                     $options
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if charset is invalid
      */
     private static function _setConnectionCharset(Connection $connection, array $options = array())
@@ -337,9 +353,11 @@ class EntityManagerCreator
     }
 
     /**
-     * Sets the collation for the provided connection
-     * @param  \Doctrine\DBAL\Connection                   $connection
-     * @param  array                                       $options
+     * Sets the collation for the provided connection.
+     *
+     * @param \Doctrine\DBAL\Connection $connection
+     * @param array                     $options
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if collation is invalid
      */
     private static function _setConnectionCollation(Connection $connection, array $options = array())

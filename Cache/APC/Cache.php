@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,39 +30,42 @@ use BackBee\Cache\Exception\CacheException;
 
 /**
  * APC cache adapter
- * It supports tag and expire features
+ * It supports tag and expire features.
+ *
  * @category    BackBee
- * @package     BackBee\Cache\APC
+ *
  * @copyright   Lp digital system
  * @author      Cédric Bouillot <cedric.bouillot@lp-digital.fr>
  */
 class Cache extends AbstractExtendedCache
 {
     /**
-     * Hashmap id prefix
+     * Hashmap id prefix.
      */
-
     const HASHMAP_PREFIX = 'HaShMaP';
 
     /**
-     * Hashmap ttl (default infinite)
+     * Hashmap ttl (default infinite).
      */
     const HASHMAP_TTL = 0;
 
     /**
-     * The hashmap id for current site
+     * The hashmap id for current site.
+     *
      * @var string
      */
     private $_hashmapId = null;
 
     /**
-     * The hashmap for current site
+     * The hashmap for current site.
+     *
      * @var mixed
      */
     private $_hashmap = array();
 
     /**
-     * hashmapId getter
+     * hashmapId getter.
+     *
      * @return string
      */
     public function getHashmapId()
@@ -71,7 +74,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * hashmap getter
+     * hashmap getter.
+     *
      * @return mixed
      */
     public function getHashmap()
@@ -80,10 +84,12 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Class constructor
-     * @param  array                                   $options Initial options for the cache adapter: none to be defined
-     * @param  string                                  $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
+     * Class constructor.
+     *
+     * @param array                    $options Initial options for the cache adapter: none to be defined
+     * @param string                   $context An optional cache context
+     * @param \Psr\Log\LoggerInterface $logger  An optional logger
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -99,10 +105,12 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Returns the available cache for the given id if found returns false else
-     * @param  string       $id          Cache id
-     * @param  boolean      $bypassCheck Allow to find cache without test it before
-     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
+     * Returns the available cache for the given id if found returns false else.
+     *
+     * @param string    $id          Cache id
+     * @param boolean   $bypassCheck Allow to find cache without test it before
+     * @param \DateTime $expire      Optionnal, the expiration time (now by default)
+     *
      * @return string|FALSE
      */
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
@@ -119,8 +127,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Tests if a cache is available or not for provided id
-     * @param  string    $id Cache id
+     * Tests if a cache is available or not for provided id.
+     *
+     * @param string $id Cache id
+     *
      * @return int|FALSE the last modified timestamp of the available cache record
      */
     public function test($id)
@@ -146,11 +156,13 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Store provided data into cache
-     * @param  string  $id       Cache id
-     * @param  mixed   $data     Datas to cache
-     * @param  int     $lifetime Optional, the specific lifetime for this record (by default null, infinite lifetime)
-     * @param  string  $tag      Optional, an associated tag to the stored data
+     * Store provided data into cache.
+     *
+     * @param string $id       Cache id
+     * @param mixed  $data     Datas to cache
+     * @param int    $lifetime Optional, the specific lifetime for this record (by default null, infinite lifetime)
+     * @param string $tag      Optional, an associated tag to the stored data
+     *
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null)
@@ -173,8 +185,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Removes a cache record
-     * @param  string  $id Cache id
+     * Removes a cache record.
+     *
+     * @param string $id Cache id
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function remove($id)
@@ -193,8 +207,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Removes all cache records associated to provided tag(s)
-     * @param  mixed   $tag
+     * Removes all cache records associated to provided tag(s).
+     *
+     * @param mixed $tag
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function removeByTag($tag)
@@ -215,8 +231,10 @@ class Cache extends AbstractExtendedCache
 
     /**
      * @todo
-     * @param  type $tag
-     * @param  type $lifetime
+     *
+     * @param type $tag
+     * @param type $lifetime
+     *
      * @return type
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
@@ -225,9 +243,11 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Updates TTL for all cache records associated to provided tag(s)
-     * @param  mixed   $tag
-     * @param  int     $lifetime
+     * Updates TTL for all cache records associated to provided tag(s).
+     *
+     * @param mixed $tag
+     * @param int   $lifetime
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function updateExpireByTag($tag, $lifetime = null)
@@ -247,7 +267,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Clears all cache records
+     * Clears all cache records.
+     *
      * @return boolean TRUE if cache is cleared FALSE otherwise
      */
     public function clear()
@@ -266,8 +287,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Removes all cache records associated to provided tag
-     * @param  string  $tag
+     * Removes all cache records associated to provided tag.
+     *
+     * @param string $tag
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     private function removeTag($tag)
@@ -292,9 +315,11 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Updates the TTL for all cache records associated to provided tag
-     * @param  string  $tag
-     * @param  int     $lifetime
+     * Updates the TTL for all cache records associated to provided tag.
+     *
+     * @param string $tag
+     * @param int    $lifetime
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     private function updateExpireTag($tag, $lifetime = null)
@@ -320,7 +345,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Remove provided id from hashmap
+     * Remove provided id from hashmap.
+     *
      * @return boolean
      */
     private function removeFromHashmapById($id)
@@ -345,7 +371,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Store hasmap for current hashmap id
+     * Store hasmap for current hashmap id.
+     *
      * @return boolean
      */
     private function saveHashmap()
@@ -360,7 +387,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Retrieve hasmap according current hashmap id
+     * Retrieve hasmap according current hashmap id.
+     *
      * @return boolean
      */
     public function loadHashmap()

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,50 +29,55 @@ use BackBee\Cache\AbstractExtendedCache;
 use BackBee\Cache\Exception\CacheException;
 
 /**
- * Memcache cache adapter
+ * Memcache cache adapter.
  *
  * It supports tag and expire features
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  MemCache
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 abstract class AbstractMemcache extends AbstractExtendedCache
 {
     /**
-     * Default Memcache host
+     * Default Memcache host.
+     *
      * @var string
      */
     const DEFAULT_HOST = '127.0.0.1';
 
     /**
-     * Default Memcache server port
+     * Default Memcache server port.
+     *
      * @var int
      */
     const DEFAULT_PORT = 11211;
 
     /**
-     * Default server weight
+     * Default server weight.
+     *
      * @var int
      */
     const DEFAULT_WEIGHT = 1;
 
     /**
-     * Tags hash prefix
+     * Tags hash prefix.
+     *
      * @var string
      */
     const TAGS_PREFIX = '__tag__';
 
     /**
-     * Expire hash prefix
+     * Expire hash prefix.
+     *
      * @var string
      */
     const EXPIRE_PREFIX = '__expire__';
 
     /**
-     * Memcache adapter options
+     * Memcache adapter options.
+     *
      * @var array
      */
     protected $_instance_options = array(
@@ -84,7 +89,8 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     );
 
     /**
-     * The Memcache object
+     * The Memcache object.
+     *
      * @var \Memcache
      */
     protected $_cache;
@@ -93,7 +99,8 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     protected $result = null;
 
     /**
-     * The default Memcache server connection information
+     * The default Memcache server connection information.
+     *
      * @var array
      */
     protected $_default_server = array(
@@ -103,7 +110,8 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     );
 
     /**
-     * Override some default Memcache instance options
+     * Override some default Memcache instance options.
+     *
      * @var array
      */
     protected $_cache_options = array(
@@ -117,10 +125,14 @@ abstract class AbstractMemcache extends AbstractExtendedCache
         parent::__construct($options, $context, $logger);
     }
     /**
-     * Adds a set of servers to the memcache instance pool
-     * @param  array                                   $servers
+     * Adds a set of servers to the memcache instance pool.
+     *
+     * @param array $servers
+     *
      * @return boolean
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if one of the server configurations is not an array
+     *
      * @link http://php.net/manual/en/Memcache.addservers.php
      */
     public function addServers(array $servers = array())
@@ -147,11 +159,14 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Adds a server to the server pool
-     * @param  string  $host   The hostname of the memcache server
-     * @param  int     $port   The port on which memcache is running, 11211 by default
-     * @param  int     $weight The weight of the server
+     * Adds a server to the server pool.
+     *
+     * @param string $host   The hostname of the memcache server
+     * @param int    $port   The port on which memcache is running, 11211 by default
+     * @param int    $weight The weight of the server
+     *
      * @return boolean TRUE on success or FALSE on failure.
+     *
      * @link http://php.net/manual/en/memcached.addserver.php
      */
     public function addServer($host, $port, $weight = 0)
@@ -168,10 +183,12 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Returns the available cache for the given id if found returns FALSE else
-     * @param  string       $id          Cache id
-     * @param  boolean      $bypassCheck Allow to find cache without test it before
-     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
+     * Returns the available cache for the given id if found returns FALSE else.
+     *
+     * @param string    $id          Cache id
+     * @param boolean   $bypassCheck Allow to find cache without test it before
+     * @param \DateTime $expire      Optionnal, the expiration time (now by default)
+     *
      * @return string|FALSE
      */
     public function load($id, $bypassCheck = true, \DateTime $expire = null)
@@ -198,8 +215,10 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Tests if a cache is available or not (for the given id)
-     * @param  string    $id Cache id
+     * Tests if a cache is available or not (for the given id).
+     *
+     * @param string $id Cache id
+     *
      * @return int|FALSE the last modified timestamp of the available cache record (0 infinite expiration date)
      */
     public function test($id)
@@ -212,12 +231,14 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Saves some string datas into a cache record
-     * @param  string  $id       Cache id
-     * @param  string  $data     Datas to cache
-     * @param  int     $lifetime Optional, the specific lifetime for this record
-     *                           (by default null, infinite lifetime)
-     * @param  string  $tag      Optional, an associated tag to the data stored
+     * Saves some string datas into a cache record.
+     *
+     * @param string $id       Cache id
+     * @param string $data     Datas to cache
+     * @param int    $lifetime Optional, the specific lifetime for this record
+     *                         (by default null, infinite lifetime)
+     * @param string $tag      Optional, an associated tag to the data stored
+     *
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
@@ -268,8 +289,10 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Removes a cache record
-     * @param  string  $id Cache id
+     * Removes a cache record.
+     *
+     * @param string $id Cache id
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function remove($id)
@@ -282,7 +305,8 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Clears all cache records
+     * Clears all cache records.
+     *
      * @return boolean TRUE if cache is cleared FALSE otherwise
      */
     public function clear()
@@ -295,9 +319,11 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Removes all cache records associated to one of the tags
-     * @param  string|array $tag
-     * @return boolean      TRUE if cache is removed FALSE otherwise
+     * Removes all cache records associated to one of the tags.
+     *
+     * @param string|array $tag
+     *
+     * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function removeByTag($tag)
     {
@@ -320,11 +346,13 @@ abstract class AbstractMemcache extends AbstractExtendedCache
 
     /**
      * Updates the expire date time for all cache records
-     * associated to one of the provided tags
-     * @param  string|array $tag
-     * @param  int          $lifetime Optional, the specific lifetime for this record
-     *                                (by default null, infinite lifetime)
-     * @return boolean      TRUE if cache is removed FALSE otherwise
+     * associated to one of the provided tags.
+     *
+     * @param string|array $tag
+     * @param int          $lifetime Optional, the specific lifetime for this record
+     *                               (by default null, infinite lifetime)
+     *
+     * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function updateExpireByTag($tag, $lifetime = null)
     {
@@ -333,10 +361,12 @@ abstract class AbstractMemcache extends AbstractExtendedCache
 
     /**
      * Returns the minimum expire date time for all cache records
-     * associated to one of the provided tags
-     * @param  string|array $tag
-     * @param  int          $lifetime Optional, the specific lifetime for this record
-     *                                (by default 0, infinite lifetime)
+     * associated to one of the provided tags.
+     *
+     * @param string|array $tag
+     * @param int          $lifetime Optional, the specific lifetime for this record
+     *                               (by default 0, infinite lifetime)
+     *
      * @return int
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
@@ -345,10 +375,13 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Returns TRUE if the server is already added to Memcached, FALSE otherwise
-     * @param  string                                  $host
-     * @param  int                                     $port
+     * Returns TRUE if the server is already added to Memcached, FALSE otherwise.
+     *
+     * @param string $host
+     * @param int    $port
+     *
      * @return boolean
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if none memcached object is not initialized
      * @codeCoverageIgnore
      */
@@ -365,8 +398,10 @@ abstract class AbstractMemcache extends AbstractExtendedCache
     }
 
     /**
-     * Logs error result code and message
-     * @param  string  $method
+     * Logs error result code and message.
+     *
+     * @param string $method
+     *
      * @return boolean
      * @codeCoverageIgnore
      */

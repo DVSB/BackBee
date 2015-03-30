@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,48 +31,53 @@ use BackBee\Event\Event;
 use BackBee\Util\Doctrine\ScheduledEntities;
 
 /**
- * Listener to indexation events
+ * Listener to indexation events.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class IndexationListener implements EventSubscriberInterface
 {
     /**
-     * The current application instance
+     * The current application instance.
+     *
      * @var \BackBee\BBApplication
      */
     private static $_application;
 
     /**
-     * The current entity manager
+     * The current entity manager.
+     *
      * @var \Doctrine\ORM\EntityManager
      */
     private static $_em;
 
     /**
-     * The content to be indexed
+     * The content to be indexed.
+     *
      * @var \BackBee\ClassContent\AbstractClassContent
      */
     private static $_content;
 
     /**
-     * Array of content uids already treated
+     * Array of content uids already treated.
+     *
      * @var type
      */
     private static $_content_content_done = array();
 
     /**
-     * Array of content uids already treated
+     * Array of content uids already treated.
+     *
      * @var type
      */
     private static $_site_content_done = array();
 
     /**
-     * Updates the site-content indexes for the scheduled AbstractClassContent
+     * Updates the site-content indexes for the scheduled AClassContent.
+     *
      * @param array $contents_inserted
      * @param array $contents_removed
      */
@@ -90,7 +95,8 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Updates the content-content indexes for the scheduled AbstractClassContent
+     * Updates the content-content indexes for the scheduled AClassContent.
+     *
      * @param array $contents_saved
      * @param array $contents_removed
      */
@@ -111,7 +117,8 @@ class IndexationListener implements EventSubscriberInterface
      * Subscriber to nestednode.page.onflush event
      *     - Replace page-content and site-content indexes if
      *       the Page target is inserted or updated
-     *     - Remove page-content and site-content if the Page target is deleted
+     *     - Remove page-content and site-content if the Page target is deleted.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushPage(Event $event)
@@ -119,8 +126,10 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Checks the event validity
-     * @param  \BackBee\Event\Event $event
+     * Checks the event validity.
+     *
+     * @param \BackBee\Event\Event $event
+     *
      * @return boolean
      */
     private static function _checkContentEvent(Event $event)
@@ -131,8 +140,10 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Returns the current application
-     * @param  \BackBee\Event\Event   $event
+     * Returns the current application.
+     *
+     * @param \BackBee\Event\Event $event
+     *
      * @return \BackBee\BBApplication
      */
     private static function _getApplication(Event $event)
@@ -147,8 +158,10 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Returns the current entity manager
-     * @param  \BackBee\Event\Event        $event
+     * Returns the current entity manager.
+     *
+     * @param \BackBee\Event\Event $event
+     *
      * @return \Doctrine\ORM\EntityManager
      */
     private static function _getEntityManager(Event $event)
@@ -163,7 +176,8 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Updates every indexed value assocatied to the contents flushed
+     * Updates every indexed value assocatied to the contents flushed.
+     *
      * @param \BackBee\Event\Event $event
      */
     public static function onFlushContent(Event $event)
@@ -290,6 +304,7 @@ class IndexationListener implements EventSubscriberInterface
 
     /**
      * Returns an array of event names this subscriber wants to listen to.
+     *
      * @return array The event names to listen to
      */
     public static function getSubscribedEvents()

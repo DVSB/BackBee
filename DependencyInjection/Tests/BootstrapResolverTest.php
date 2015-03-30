@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,24 +26,24 @@ namespace BackBee\DependencyInjection\Tests;
 use BackBee\DependencyInjection\BootstrapResolver;
 
 /**
- * Test for BootstrapResolver
+ * Test for BootstrapResolver.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * test resources base directory
+     * test resources base directory.
      *
      * @var string
      */
     private $resources_base_dir;
 
     /**
-     * define the test resources directory
+     * define the test resources directory.
      */
     public function setUp()
     {
@@ -52,7 +52,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Test BootstrapResolver::getBootstrapPotentialsDirectories(), the number and the order of
-     * directory this method returns
+     * directory this method returns.
      */
     /*public function testGetBootstrapPotentialsDirectories()
     {
@@ -99,7 +99,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
 
     /**
      * test raise of BootstrapFileNotFoundException by providing wrong base directory to BootstrapResolver's
-     * constructor
+     * constructor.
      */
     public function testRaiseBootstrapFileNotFoundException()
     {
@@ -115,7 +115,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Test BootstrapResolver::getBootstrapParameters() to check if we get the right parameters from
-     * bootstrap.yml depending on context and environment
+     * bootstrap.yml depending on context and environment.
      */
     public function testGetBootstrapParameters()
     {

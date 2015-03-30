@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,30 +25,33 @@ namespace BackBee\Renderer\Helper;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
+use BackBee\ApplicationInterface;
 use BackBee\Renderer\AbstractRenderer;
 
 class HelperManager
 {
     /**
-     * [$renderer description]
-     * @var [type]
+     * The current AbstractRenderer.
+     *
+     * @var AbstractRenderer
      */
     private $renderer;
 
     /**
-     * [$bbapp description]
-     * @var [type]
+     * the current BackBee application.
+     *
+     * @var ApplicationInterface
      */
     private $bbapp;
 
     /**
-     * [$helpers description]
-     * @var [type]
+     * the current Renderer helpers.
+     *
+     * @var array
      */
     private $helpers;
 
     /**
-     * [__construct description]
      * @param AbstractRenderer $renderer [description]
      */
     public function __construct(AbstractRenderer $renderer)
@@ -59,8 +62,10 @@ class HelperManager
     }
 
     /**
-     * [get description]
-     * @param  [type] $method [description]
+     * [get description].
+     *
+     * @param [type] $method [description]
+     *
      * @return [type] [description]
      */
     public function get($method)
@@ -74,9 +79,11 @@ class HelperManager
     }
 
     /**
-     * [create description]
-     * @param  [type] $method [description]
-     * @param  [type] $argv   [description]
+     * [create description].
+     *
+     * @param [type] $method [description]
+     * @param [type] $argv   [description]
+     *
      * @return [type] [description]
      */
     public function create($method, $argv)
@@ -90,9 +97,8 @@ class HelperManager
     }
 
     /**
-     * [updateRenderer description]
      * @param  AbstractRenderer $renderer [description]
-     * @return [type]    [description]
+     * @return
      */
     public function updateRenderer(AbstractRenderer $renderer)
     {

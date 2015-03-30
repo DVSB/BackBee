@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,7 +24,6 @@
 namespace BackBee\Config\Tests;
 
 use org\bovigo\vfs\vfsStream;
-
 use BackBee\Config\Config;
 use BackBee\Config\Configurator;
 use BackBee\Config\Persistor;
@@ -34,10 +33,10 @@ use BackBee\Site\Site;
 use BackBee\Tests\Mock\ManualBBApplication;
 
 /**
- * Set of tests for BackBee\Config\Persistor
+ * Set of tests for BackBee\Config\Persistor.
  *
  * @category    BackBee
- * @package     BackBee\Config
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -61,7 +60,7 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
     private $configurator;
 
     /**
-     * Create a persistor on which we will apply our tests
+     * Create a persistor on which we will apply our tests.
      */
     public function setUp()
     {

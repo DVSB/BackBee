@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -32,35 +32,37 @@ use Symfony\Component\Form\Forms;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validation;
-
 use BackBee\ApplicationInterface;
 
 /**
- * Base Controler
+ * Base Controler.
  *
  * @category    BackBee
- * @package     BackBee\Controller
+ *
  * @copyright   Lp system
  * @author      k.golovin
  */
 class Controller implements ContainerAwareInterface
 {
     /**
-     * Current application
+     * Current application.
+     *
      * @var \BackBee\ApplicationInterface
      */
     protected $application;
 
     /**
-     * Current application's DIC
+     * Current application's DIC.
+     *
      * @var BackBee\DependencyInjection\ContainerInterface
      */
     protected $container;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @access public
+     *
      * @param ApplicationInterface $application The current BBapplication
      */
     public function __construct(ApplicationInterface $application = null)
@@ -72,9 +74,10 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Returns current application
+     * Returns current application.
      *
      * @access public
+     *
      * @return \BackBee\ApplicationInterface
      */
     public function getApplication()
@@ -83,7 +86,7 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Application's dependency injection container setters
+     * Application's dependency injection container setters.
      *
      * @param ContainerInterface|null $container
      */
@@ -94,9 +97,10 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Returns the application's DIC
+     * Returns the application's DIC.
      *
      * @access public
+     *
      * @return ContainerInterface
      */
     public function getContainer()
@@ -105,9 +109,10 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Returns the current request
+     * Returns the current request.
      *
      * @access public
+     *
      * @return Request
      */
     public function getRequest()
@@ -116,7 +121,6 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     *
      * @return Doctrine\ORM\EntityManager
      */
     public function getEntityManager()
@@ -125,7 +129,6 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     *
      * @return FormBuilderInterface
      */
     public function createFormBuilder($data)
@@ -142,10 +145,10 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
+     * @param string                                     $view
+     * @param array                                      $parameters
+     * @param \Symfony\Component\HttpFoundation\Response $response
      *
-     * @param  string                                     $view
-     * @param  array                                      $parameters
-     * @param  \Symfony\Component\HttpFoundation\Response $response
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function render($view, array $parameters = array(), Response $response = null)
@@ -186,9 +189,10 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Returns the validator service
+     * Returns the validator service.
      *
      * @access public
+     *
      * @return \Symfony\Component\Validator\ValidatorInterface
      */
     public function getValidator()
@@ -197,11 +201,13 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Shortcut for Symfony\Component\Security\Core\SecurityContext::isGranted()
+     * Shortcut for Symfony\Component\Security\Core\SecurityContext::isGranted().
      *
      * @see \Symfony\Component\Security\Core\SecurityContext::isGranted()
-     * @param  string $permission
-     * @param  mixed  $object
+     *
+     * @param string $permission
+     * @param mixed  $object
+     *
      * @return bool
      */
     protected function isGranted($attributes, $object = null)
@@ -210,7 +216,7 @@ class Controller implements ContainerAwareInterface
     }
 
     /**
-     * Get a user from the Security Context
+     * Get a user from the Security Context.
      *
      * @return mixed
      *

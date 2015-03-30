@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,30 +24,30 @@
 namespace BackBee\Cache\MemCache;
 
 use Psr\Log\LoggerInterface;
-
 use BackBee\Cache\Exception\CacheException;
 
 /**
- * MemCached cache adapter
+ * MemCached cache adapter.
  *
  * It supports tag and expire features
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  MemCache
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Memcached extends AMemcache
 {
     /**
-     * Class constructor
-     * @param  array                                   $options Initial options for the cache adapter:
-     *                                                          - persistent_id string Optional persistent key
-     *                                                          - servers array The memcached servers to add
-     *                                                          - options array The memcached options to set
-     * @param  string                                  $context An optional cache context use as prefix key
-     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
+     * Class constructor.
+     *
+     * @param array                    $options Initial options for the cache adapter:
+     *                                          - persistent_id string Optional persistent key
+     *                                          - servers array The memcached servers to add
+     *                                          - options array The memcached options to set
+     * @param string                   $context An optional cache context use as prefix key
+     * @param \Psr\Log\LoggerInterface $logger  An optional logger
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if Memcached extension is not available.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -89,7 +89,8 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Closes all the memcached server connections if not persistent
+     * Closes all the memcached server connections if not persistent.
+     *
      * @codeCoverageIgnore
      */
     public function __destruct()
@@ -100,10 +101,13 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Sets memcached option
-     * @param  int     $option
-     * @param  mixed   $value
+     * Sets memcached option.
+     *
+     * @param int   $option
+     * @param mixed $value
+     *
      * @return boolean
+     *
      * @link http://php.net/manual/en/memcached.setoption.php
      */
     public function setOption($option, $value)
@@ -122,10 +126,13 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Gets memcached option
-     * @param  mixed   $option
-     * @param  mixed   $value
+     * Gets memcached option.
+     *
+     * @param mixed $option
+     * @param mixed $value
+     *
      * @return boolean
+     *
      * @link http://php.net/manual/en/memcached.getoption.php
      */
     public function getOption($option)
@@ -144,8 +151,10 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Returns the list of available memcached servers
+     * Returns the list of available memcached servers.
+     *
      * @return array
+     *
      * @link http://php.net/manual/en/memcached.getserverlist.php
      * @codeCoverageIgnore
      */
@@ -157,8 +166,10 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Returns the result code of the last operation
+     * Returns the result code of the last operation.
+     *
      * @return int Result code of the last Memcached operation.
+     *
      * @link http://php.net/manual/en/memcached.getresultcode.php
      * @codeCoverageIgnore
      */
@@ -168,8 +179,10 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Return the message describing the result of the last operation
+     * Return the message describing the result of the last operation.
+     *
      * @return string Message describing the result of the last Memcached operation.
+     *
      * @link http://php.net/manual/en/memcached.getresultmessage.php
      * @codeCoverageIgnore
      */
@@ -179,12 +192,14 @@ class Memcached extends AMemcache
     }
 
     /**
-     * Saves some string datas into a cache record
-     * @param  string  $id       Cache id
-     * @param  string  $data     Datas to cache
-     * @param  int     $lifetime Optional, the specific lifetime for this record
-     *                           (by default null, infinite lifetime)
-     * @param  string  $tag      Optional, an associated tag to the data stored
+     * Saves some string datas into a cache record.
+     *
+     * @param string $id       Cache id
+     * @param string $data     Datas to cache
+     * @param int    $lifetime Optional, the specific lifetime for this record
+     *                         (by default null, infinite lifetime)
+     * @param string $tag      Optional, an associated tag to the data stored
+     *
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)

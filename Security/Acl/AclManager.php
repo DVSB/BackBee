@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -38,18 +38,15 @@ use BackBee\Security\Acl\Permission\MaskBuilder;
 class AclManager
 {
     /**
-     *
      * @var \Symfony\Component\Security\Core\SecurityContextInterface
      */
     protected $securityContext;
 
     /**
-     *
      * @var Symfony\Component\Security\Acl\Permission\PermissionMapInterface
      */
     protected $permissionMap;
     /**
-     *
      * @param \Symfony\Component\Security\Core\SecurityContextInterface $securityContext
      */
     public function __construct(SecurityContextInterface $securityContext, PermissionMapInterface $permissionMap)
@@ -59,7 +56,7 @@ class AclManager
     }
 
     /**
-     * Get ACL for the given domain object
+     * Get ACL for the given domain object.
      *
      * @param  \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @return \Symfony\Component\Security\Acl\Domain\Acl
@@ -78,7 +75,7 @@ class AclManager
     }
 
     /**
-     * Updates an existing object ACE
+     * Updates an existing object ACE.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -110,7 +107,7 @@ class AclManager
     }
 
     /**
-     * Updates an existing object ACE
+     * Updates an existing object ACE.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -142,7 +139,7 @@ class AclManager
     }
 
     /**
-     * Updates an existing Object ACE, Inserts if it doesnt exist
+     * Updates an existing Object ACE, Inserts if it doesnt exist.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -176,7 +173,7 @@ class AclManager
     }
 
     /**
-     * Updates an existing Class ACE, Inserts if it doesnt exist
+     * Updates an existing Class ACE, Inserts if it doesnt exist.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -211,7 +208,7 @@ class AclManager
     }
 
     /**
-     * Deletes a class-scope ACE
+     * Deletes a class-scope ACE.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -241,7 +238,7 @@ class AclManager
     }
 
     /**
-     * Deletes an object-scope ACE
+     * Deletes an object-scope ACE.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -271,7 +268,7 @@ class AclManager
     }
 
     /**
-     * Get a class-scope ACE
+     * Get a class-scope ACE.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -295,7 +292,7 @@ class AclManager
     }
 
     /**
-     * Get an object-scope ACE
+     * Get an object-scope ACE.
      *
      * @param \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity     $sid
@@ -318,11 +315,12 @@ class AclManager
     }
 
     /**
-     * Calculate mask for a list of permissions
+     * Calculate mask for a list of permissions.
      *
      * ['view', 'edit'] => (int) 5
      *
-     * @param  array $permissions
+     * @param array $permissions
+     *
      * @return int
      */
     public function getMask(array $permissions)
@@ -341,7 +339,7 @@ class AclManager
     }
 
     /**
-     * Get a list of all available permission codes
+     * Get a list of all available permission codes.
      *
      * @return array
      */
@@ -365,7 +363,6 @@ class AclManager
     }
 
     /**
-     *
      * @param  \Symfony\Component\Security\Acl\Model\ObjectIdentityInterface|\BackBee\Security\Acl\Domain\AbstractObjectIdentifiable $objectIdentity
      * @throws \InvalidArgumentException
      */
@@ -381,8 +378,8 @@ class AclManager
     }
 
     /**
+     * @param \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity $sid
      *
-     * @param  \BackBee\Security\Acl\SecurityIdentityInterface|\Symfony\Component\Security\Acl\Model\UserSecurityIdentity $sid
      * @throws \InvalidArgumentException
      */
     private function enforceSecurityIdentity(&$sid)
@@ -397,9 +394,10 @@ class AclManager
     }
 
     /**
-     * Resolves any variation of masks/permissions to an integer
+     * Resolves any variation of masks/permissions to an integer.
      *
-     * @param  string|int|array $masks
+     * @param string|int|array $masks
+     *
      * @return type
      */
     private function resolveMask($masks, $object)

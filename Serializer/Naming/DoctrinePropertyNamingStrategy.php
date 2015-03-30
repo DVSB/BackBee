@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,23 +25,21 @@ namespace BackBee\Serializer\Naming;
 
 use JMS\Serializer\Metadata\PropertyMetadata;
 use JMS\Serializer\Naming\PropertyNamingStrategyInterface;
-
 use BackBee\Doctrine\Registry;
 
 /**
- * Doctrine property naming strategy
+ * Doctrine property naming strategy.
  *
  * Uses Doctrine's annotations
  *
  * @category    BackBee
- * @package     Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class DoctrinePropertyNamingStrategy implements PropertyNamingStrategyInterface
 {
     /**
-     *
      * @var BackBee\Doctrine\Registry
      */
     private $doctrine;

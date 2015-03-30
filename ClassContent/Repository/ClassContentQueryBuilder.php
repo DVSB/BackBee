@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,7 +27,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
 
@@ -35,8 +34,7 @@ use BackBee\Site\Site;
  * AbstractClassContent repository
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Repository\Element
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -55,7 +53,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     );
 
     /**
-     * ClassContentQueryBuilder constructor
+     * ClassContentQueryBuilder constructor.
      *
      * @param $em \Doctrine\ORM\EntityManager
      * @param $select \Doctrine\ORM\Query\Expr Use cc as identifier
@@ -69,7 +67,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add site filter to the query
+     * Add site filter to the query.
      *
      * @param $site mixed (BackBee/Site/Site|String)
      */
@@ -94,7 +92,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Add limite to onlinne filter
+     * Add limite to onlinne filter.
      */
     public function limitToOnline()
     {
@@ -106,7 +104,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Set a page to filter the query on a nested portion
+     * Set a page to filter the query on a nested portion.
      *
      * @param $page BackBee\NestedNode\Page
      */
@@ -126,7 +124,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Filter the query by keywords
+     * Filter the query by keywords.
      *
      * @param $keywords array
      */
@@ -140,7 +138,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Filter by rhe classname descriminator
+     * Filter by rhe classname descriminator.
      *
      * @param $classes array
      */
@@ -158,7 +156,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Order with the indexation table
+     * Order with the indexation table.
      *
      * @param $label string
      * @param $sort ('ASC'|'DESC')
@@ -172,7 +170,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     }
 
     /**
-     * Get Results paginated
+     * Get Results paginated.
      *
      * @param $start integer
      * @param $limit integer

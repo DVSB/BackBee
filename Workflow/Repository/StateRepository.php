@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,23 +24,23 @@
 namespace BackBee\Workflow\Repository;
 
 use Doctrine\ORM\EntityRepository;
-
 use BackBee\Site\Layout;
 
 /**
- * Workflow state repository
+ * Workflow state repository.
  *
  * @category    BackBee
- * @package     BackBee\Workflow
- * @subpackage  Repository
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class StateRepository extends EntityRepository
 {
     /**
-     * Returns an array of available workflow states for the provided layout
-     * @param  \BackBee\Site\Layout $layout
+     * Returns an array of available workflow states for the provided layout.
+     *
+     * @param \BackBee\Site\Layout $layout
+     *
      * @return array
      */
     public function getWorkflowStatesForLayout(Layout $layout)

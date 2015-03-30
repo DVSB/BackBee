@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,7 +28,7 @@ use BackBee\Utils\String;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -40,17 +40,19 @@ abstract class AbstractConverterInterface implements ConverterInterface
     protected $_bb_entity;
 
     /**
-     * The current importer running
+     * The current importer running.
+     *
      * @var \BackBee\Importer\Importer
      */
     protected $_importer;
 
     /**
-     * Every keys
+     * Every keys.
      */
     protected $_availableKeys = null;
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \BackBee\Importer\Importer $importer
      */
     public function __construct(Importer $importer = null)
@@ -59,7 +61,7 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * return the BackBee Entity Object
+     * return the BackBee Entity Object.
      *
      * @return Object
      */
@@ -69,7 +71,7 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * Set BackBee Entity Object
+     * Set BackBee Entity Object.
      *
      * @param  Object $entity
      * @return AbstractConverterInterface
@@ -103,7 +105,8 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * Update Status and revision value
+     * Update Status and revision value.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent $element
      *
      * @return AbstractConverterInterface
@@ -117,8 +120,10 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * Return a cleaned string
-     * @param  string $str
+     * Return a cleaned string.
+     *
+     * @param string $str
+     *
      * @return string
      */
     protected function _cleanText($str)
@@ -127,7 +132,7 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * Set the value of an scalar element
+     * Set the value of an scalar element.
      */
     protected function _setScalar(AbstractClassContent $element, $var, $value)
     {
@@ -137,7 +142,8 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * Set the value of an Element\Text
+     * Set the value of an Element\Text.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent                $element
      * @param  string                                             $value
      * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
@@ -150,11 +156,13 @@ abstract class AbstractConverterInterface implements ConverterInterface
     }
 
     /**
-     * Set the value of an Element\Date
+     * Set the value of an Element\Date.
+     *
      * @param  \BackBee\ClassContent\AbstractClassContent                $element
      * @param  string                                             $value
      * @param  \DateTimeZone                                      $timezone
      * @param  string                                             $format
+     *
      * @return \BackBee\Bundle\WKImporter\Converter\ActuConverter
      */
     protected function _setElementDate(AbstractClassContent $element, $value, \DateTimeZone $timezone = null, $format = 'Y-m-d H:i:s')

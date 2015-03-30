@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,8 +30,7 @@ use BackBee\Security\Authorization\Adaptator\RoleReaderAdaptatorInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Authorization\Voter
+ *
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */

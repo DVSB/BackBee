@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,20 +28,20 @@ use BackBee\Event\Event;
 /**
  * Listener to Layout events :
  *    - site.layout.beforesave: occurs before a layout entity is saved
- *    - site.layout.postremove: occurs after a layout entity has been removed
+ *    - site.layout.postremove: occurs after a layout entity has been removed.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class LayoutListener
 {
     /**
-     * Occur on site.layout.beforesave events
+     * Occur on site.layout.beforesave events.
      *
      * @access public
+     *
      * @param Event $event
      */
     public static function onBeforeSave(Event $event)
@@ -80,9 +80,10 @@ class LayoutListener
     }
 
     /**
-     * Occur on site.layout.postremove events
+     * Occur on site.layout.postremove events.
      *
      * @access public
+     *
      * @param Event $event
      */
     public static function onAfterRemove(Event $event)

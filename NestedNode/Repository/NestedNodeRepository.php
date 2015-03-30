@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,17 +24,15 @@
 namespace BackBee\NestedNode\Repository;
 
 use Doctrine\ORM\EntityRepository;
-
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\NestedNode\AbstractNestedNode;
 use BackBee\Util\Buffer;
 
 /**
- * NestedNode repository
+ * NestedNode repository.
  *
  * @category    BackBee
- * @package     BackBee/NestedNode
- * @subpackage  Repository
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -46,10 +44,12 @@ class NestedNodeRepository extends EntityRepository
     );
 
     /**
-     * [updateTreeNatively description]
-     * @param  [type] $node_uid [description]
-     * @param  [type] $leftnode [description]
-     * @param  [type] $level    [description]
+     * [updateTreeNatively description].
+     *
+     * @param [type] $node_uid [description]
+     * @param [type] $leftnode [description]
+     * @param [type] $level    [description]
+     *
      * @return [type] [description]
      */
     public function updateTreeNatively($node_uid, $leftnode = 1, $level = 0)
@@ -74,8 +74,10 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * [getNativelyNodeChildren description]
-     * @param  [type] $node_uid [description]
+     * [getNativelyNodeChildren description].
+     *
+     * @param [type] $node_uid [description]
+     *
      * @return [type] [description]
      */
     private function getNativelyNodeChildren($node_uid)
@@ -157,7 +159,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Inserts a leaf node in a tree as first child of the provided parent node
+     * Inserts a leaf node in a tree as first child of the provided parent node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                   $node   The node to be inserted
      * @param  \BackBee\NestedNode\AbstractNestedNode             $parent The parent node
      * @return \BackBee\NestedNode\AbstractNestedNode             The inserted node
@@ -169,7 +172,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Inserts a leaf node in a tree as last child of the provided parent node
+     * Inserts a leaf node in a tree as last child of the provided parent node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode             $node   The node to be inserted
      * @param  \BackBee\NestedNode\AbstractNestedNode             $parent The parent node
      * @return \BackBee\NestedNode\AbstractNestedNode             The inserted node
@@ -181,7 +185,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Inserts a leaf node in a tree
+     * Inserts a leaf node in a tree.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode             $node   The node to be inserted
      * @param  \BackBee\NestedNode\AbstractNestedNode             $parent The parent node
      * @param int                                           The new left node of the inserted node
@@ -215,9 +220,11 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get the previous sibling of the provided node
+     * Returns the query build to get the previous sibling of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
+     *
      * @deprecated since version 0.10.0
      */
     protected function _getPrevSiblingQuery(AbstractNestedNode $node)
@@ -227,7 +234,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the previous sibling node for $node or NULL if $node is the first one in its branch or root
+     * Returns the previous sibling node for $node or NULL if $node is the first one in its branch or root.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
      * @return \BackBee\NestedNode\AbstractNestedNode|NULL
      */
@@ -262,9 +270,11 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get the next sibling of the provided node
+     * Returns the query build to get the next sibling of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
+     *
      * @deprecated since version 0.10.0
      */
     protected function _getNextSiblingQuery(AbstractNestedNode $node)
@@ -274,7 +284,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the next sibling node for $node or NULL if $node is the last one in its branch
+     * Returns the next sibling node for $node or NULL if $node is the last one in its branch.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
      * @return \BackBee\NestedNode\AbstractNestedNode|NULL
      */
@@ -287,13 +298,15 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get the siblings of the provided node
+     * Returns the query build to get the siblings of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  boolean                                               $includeNode if TRUE, include $node in result array
      * @param  array                                                 $order       ordering spec
      * @param  int                                                   $limit       max number of results
      * @param  int                                                   $start       first result index
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
+     *
      * @deprecated since version 0.10.0
      */
     protected function _getSiblingsQuery(AbstractNestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
@@ -303,7 +316,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the siblings of the provided node
+     * Returns the siblings of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode   $node
      * @param  boolean                           $includeNode if TRUE, include $node in result array
      * @param  array                             $order       ordering spec
@@ -320,7 +334,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the first child of node if exists
+     * Returns the first child of node if exists.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
      * @return \BackBee\NestedNode\AbstractNestedNode|NULL
      */
@@ -335,7 +350,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the first child of node if exists
+     * Returns the first child of node if exists.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @return \BackBee\NestedNode\AbstractNestedNode|NULL
      */
@@ -350,10 +366,12 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get ancestor at level $level of the provided node
+     * Returns the query build to get ancestor at level $level of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  int                                                   $level
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
+     *
      * @deprecated since version 0.10.0
      */
     protected function _getAncestorQuery(AbstractNestedNode $node, $level = 0)
@@ -363,7 +381,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the ancestor at level $level of the provided node
+     * Returns the ancestor at level $level of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
      * @param  int                                        $level
      * @return \BackBee\NestedNode\AbstractNestedNode|NULL
@@ -389,11 +408,13 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get ancestors of the provided node
+     * Returns the query build to get ancestors of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  int                                                   $depth       Returns only ancestors from $depth number of generation
      * @param  boolean                                               $includeNode Returns also the node itsef if TRUE
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
+     *
      * @deprecated since version 0.10.0
      */
     protected function _getAncestorsQuery(AbstractNestedNode $node, $depth = null, $includeNode = false)
@@ -409,7 +430,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the ancestors of the provided node
+     * Returns the ancestors of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  int                             $depth       Returns only ancestors from $depth number of generation
      * @param  boolean                         $includeNode Returns also the node itsef if TRUE
@@ -430,11 +452,13 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get descendants of the provided node
+     * Returns the query build to get descendants of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
      * @param  int                                                   $depth       Returns only descendants from $depth number of generation
      * @param  boolean                                               $includeNode Returns also the node itsef if TRUE
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
+     *
      * @deprecated since version 0.10.0
      */
     protected function _getDescendantsQuery(AbstractNestedNode $node, $depth = null, $includeNode = false)
@@ -450,7 +474,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the descendants of the provided node
+     * Returns the descendants of the provided node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  int                             $depth       Returns only decendants from $depth number of generation
      * @param  boolean                         $includeNode Returns also the node itsef if TRUE
@@ -471,7 +496,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Move node as previous sibling of $dest
+     * Move node as previous sibling of $dest.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -487,7 +513,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Move node as next sibling of $dest
+     * Move node as next sibling of $dest.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -503,7 +530,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Move node as first child of $dest
+     * Move node as first child of $dest.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -514,7 +542,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Move node as last child of $dest
+     * Move node as last child of $dest.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -525,7 +554,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Move node regarding $dest
+     * Move node regarding $dest.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @param  string                    $position
@@ -574,7 +604,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the new left node from $dest node and position
+     * Returns the new left node from $dest node and position.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @param  string                          $position
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -603,7 +634,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the new level of node from $dest node and position
+     * Returns the new level of node from $dest node and position.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @param  string                          $position
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -628,7 +660,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the new parent node from $dest node and position
+     * Returns the new parent node from $dest node and position.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $dest
      * @param  string                          $position
      * @return \BackBee\NestedNode\AbstractNestedNode
@@ -653,7 +686,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Deletes node and it's descendants
+     * Deletes node and it's descendants.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @return boolean                         TRUE on success, FALSE if try to delete a root
      */
@@ -714,7 +748,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Shift part of a tree
+     * Shift part of a tree.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @param  int                                                 $first
      * @param  ont                                                 $delta
@@ -724,7 +759,6 @@ class NestedNodeRepository extends EntityRepository
     private function shiftRlValues(AbstractNestedNode $node, $first, $delta)
     {
         if (self::$config['nestedNodeCalculateAsync']) {
-            // $this->shiftRlValuesByJob($target, $first, $delta);
             $this->startDetachedRLValuesJob($node, $first, $delta);
         } else {
             $this->createQueryBuilder('n')
@@ -750,7 +784,7 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Detach node from its tree, ie create a new tree from node
+     * Detach node from its tree, ie create a new tree from node.
      *
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
@@ -786,7 +820,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Refresh an existing node
+     * Refresh an existing node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
      */
@@ -802,7 +837,8 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Persist a new node or detach it from tree if already exists
+     * Persist a new node or detach it from tree if already exists.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
      */
@@ -822,8 +858,10 @@ class NestedNodeRepository extends EntityRepository
 
     /**
      * Creates a new NestedNode QueryBuilder instance that is prepopulated for this entity name.
-     * @param  string                                                $alias
-     * @param  string                                                $indexBy The index for the from.
+     *
+     * @param string $alias
+     * @param string $indexBy The index for the from.
+     *
      * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
      */
     public function createQueryBuilder($alias, $indexBy = null)

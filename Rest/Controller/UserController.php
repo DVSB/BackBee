@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,7 +31,6 @@ use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Rest\Patcher\EntityPatcher;
@@ -42,17 +41,17 @@ use BackBee\Rest\Patcher\RightManager;
 use BackBee\Security\User;
 
 /**
- * User Controller
+ * User Controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class UserController extends AbstractRestController
 {
     /**
-     * Get all records
+     * Get all records.
      *
      *
      * @Rest\QueryParam(name = "limit", default="100", description="Max results", requirements = {
@@ -62,8 +61,6 @@ class UserController extends AbstractRestController
      * @Rest\QueryParam(name = "start", default="0", description="Offset", requirements = {
      *  @Assert\Type(type="digit", message="The value should be a positive number"),
      * })
-     *
-     *
      */
     public function getCollectionAction(Request $request)
     {
@@ -92,7 +89,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * GET current User
+     * GET current User.
      */
     public function getCurrentAction()
     {
@@ -106,7 +103,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * GET User
+     * GET User.
      *
      * @param int $id User ID
      */
@@ -130,7 +127,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * DELETE User
+     * DELETE User.
      *
      * @param int $id User ID
      */
@@ -167,7 +164,7 @@ class UserController extends AbstractRestController
         $token->setUser($request->request->get('username'));
         $token->setCreated($created);
         $token->setNonce(md5(uniqid('', true)));
-        $token->setDigest(md5($token->getNonce() . $created . md5($password)));
+        $token->setDigest(md5($token->getNonce().$created.md5($password)));
 
         $tokenAuthenticated = $this->getApplication()->getSecurityContext()->getAuthenticationManager()
             ->authenticate($token)
@@ -177,7 +174,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * UPDATE User
+     * UPDATE User.
      *
      * @Rest\RequestParam(name = "login", requirements = {
      *  @Assert\NotBlank(message="Login is required"),
@@ -226,7 +223,7 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * Create User
+     * Create User.
      *
      * @Rest\RequestParam(name = "login", requirements = {
      *  @Assert\NotBlank(message="Login is required"),
@@ -266,8 +263,8 @@ class UserController extends AbstractRestController
         } else {
             return new JsonResponse([
                 'errors' => [
-                    'password' => ['Password not provided.']
-                ]
+                    'password' => ['Password not provided.'],
+                ],
             ], 400);
         }
 
@@ -409,9 +406,11 @@ class UserController extends AbstractRestController
     /**
      * @todo  set minimal password size in security config
      * [updateUserPassword description]
-     * @param  User    $user    [description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     *
+     * @param User    $user    [description]
+     * @param Request $request [description]
+     *
+     * @return [type] [description]
      */
     private function patchUserPassword($id, $operations)
     {
@@ -430,16 +429,16 @@ class UserController extends AbstractRestController
         if ($operations['password'] !== $operations['confirm_password']) {
             return new JsonResponse([
                 'errors' => [
-                    'password' => ['Password and confirm password are differents.']
-                ]
+                    'password' => ['Password and confirm password are differents.'],
+                ],
             ], 400);
         }
         $password = trim($operations['password']);
         if (strlen($password) < 5) {
             return new JsonResponse([
                 'errors' => [
-                    'password' => ['Password to short.']
-                ]
+                    'password' => ['Password to short.'],
+                ],
             ], 400);
         }
 

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,8 +27,7 @@ use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  BBAbstract
+ *
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -65,7 +64,7 @@ abstract class AbstractUidEntity implements DomainObjectInterface
     }
 
     /**
-     * return the unique identifier
+     * return the unique identifier.
      *
      * @return string
      */
@@ -76,6 +75,7 @@ abstract class AbstractUidEntity implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function isNew()
@@ -85,6 +85,7 @@ abstract class AbstractUidEntity implements DomainObjectInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getObjectIdentifier()

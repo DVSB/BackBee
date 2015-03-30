@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -35,11 +35,10 @@ use BackBee\Util\Media;
 
 /**
  * Listener to ClassContent events :
- *    - classcontent.onflush: occurs when a classcontent entity is mentioned for current flush
+ *    - classcontent.onflush: occurs when a classcontent entity is mentioned for current flush.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */

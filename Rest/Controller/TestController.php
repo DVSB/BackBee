@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,23 +25,20 @@ namespace BackBee\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-
 use BackBee\Controller\Controller;
 use BackBee\Security\Encoder\RequestSignatureEncoder;
 
 /**
- * Test api key controller
+ * Test api key controller.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class TestController extends Controller
 {
     /**
-     *
-     *
      * @access public
      */
     public function generateKeyAction(Request $request)

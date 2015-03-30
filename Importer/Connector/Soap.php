@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,8 +28,7 @@ use BackBee\Importer\ImporterConnectorInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
- * @subpackage  Connector
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -54,9 +53,10 @@ class Soap implements ImporterConnectorInterface
     }
 
     /**
-     * Single interface to find
+     * Single interface to find.
      *
-     * @param  string $string
+     * @param string $string
+     *
      * @return array
      */
     public function find($string)

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,14 +26,13 @@ namespace BackBee\DependencyInjection;
 use Symfony\Component\DependencyInjection\ContainerBuilder as sfContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface as sfContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
-
 use BackBee\Event\Event;
 
 /**
- * Extended Symfony Dependency injection component
+ * Extended Symfony Dependency injection component.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -43,7 +42,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
 
     /**
      * Change current method default behavior: if we try to get a synthetic service it will return
-     * null instead of throwing an exception;
+     * null instead of throwing an exception;.
      *
      * @see Symfony\Component\DependencyInjection\ContainerBuilder::get()
      */
@@ -83,8 +82,10 @@ class Container extends sfContainerBuilder implements ContainerInterface
 
     /**
      * Giving a string, try to return the container service or parameter if exists
-     * This method can be call by array_walk or array_walk_recursive
-     * @param  mixed $item
+     * This method can be call by array_walk or array_walk_recursive.
+     *
+     * @param mixed $item
+     *
      * @return mixed
      */
     public function getContainerValues(&$item)
@@ -97,8 +98,10 @@ class Container extends sfContainerBuilder implements ContainerInterface
     }
 
     /**
-     * Replaces known container parameters key by their values
-     * @param  string $item
+     * Replaces known container parameters key by their values.
+     *
+     * @param string $item
+     *
      * @return string
      */
     private function _getContainerParameters($item)
@@ -122,8 +125,10 @@ class Container extends sfContainerBuilder implements ContainerInterface
     }
 
     /**
-     * Returns the associated service to item if exists, item itself otherwise
-     * @param  string $item
+     * Returns the associated service to item if exists, item itself otherwise.
+     *
+     * @param string $item
+     *
      * @return mixed
      */
     private function _getContainerServices($item)
@@ -159,7 +164,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
     }
 
     /**
-     * Checks if current container has an instance of service with $id or not
+     * Checks if current container has an instance of service with $id or not.
      *
      * @param string $id identifier of the service we want to check for instance
      *
@@ -171,7 +176,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
     }
 
     /**
-     * Returns true if this container has been restored from dump
+     * Returns true if this container has been restored from dump.
      *
      * @return boolean true if is restored, else false
      */

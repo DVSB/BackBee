@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,30 +24,30 @@
 namespace BackBee\Cache\MemCache;
 
 use Psr\Log\LoggerInterface;
-
 use BackBee\Cache\Exception\CacheException;
 
 /**
- * Memcache cache adapter
+ * Memcache cache adapter.
  *
  * It supports tag and expire features
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  MemCache
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Memcache extends AMemcache
 {
     /**
-     * Class constructor
-     * @param  array                                   $options Initial options for the cache adapter:
-     *                                                          - persistent_id string Optional persistent key
-     *                                                          - servers array The Memcache servers to add
-     *                                                          - options array The Memcache options to set
-     * @param  string                                  $context An optional cache context use as prefix key
-     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
+     * Class constructor.
+     *
+     * @param array                    $options Initial options for the cache adapter:
+     *                                          - persistent_id string Optional persistent key
+     *                                          - servers array The Memcache servers to add
+     *                                          - options array The Memcache options to set
+     * @param string                   $context An optional cache context use as prefix key
+     * @param \Psr\Log\LoggerInterface $logger  An optional logger
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if Memcache extension is not available.
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -72,11 +72,14 @@ class Memcache extends AMemcache
     }
 
     /**
-     * Adds a server to the server pool
-     * @param  string  $host   The hostname of the memcache server
-     * @param  int     $port   The port on which memcache is running, 11211 by default
-     * @param  int     $weight The weight of the server
+     * Adds a server to the server pool.
+     *
+     * @param string $host   The hostname of the memcache server
+     * @param int    $port   The port on which memcache is running, 11211 by default
+     * @param int    $weight The weight of the server
+     *
      * @return boolean TRUE on success or FALSE on failure.
+     *
      * @link http://php.net/manual/en/memcached.addserver.php
      */
     public function addServer($host, $port, $weight = 0)
@@ -93,7 +96,8 @@ class Memcache extends AMemcache
     }
 
     /**
-     * Closes all the Memcache server connections if not persistent
+     * Closes all the Memcache server connections if not persistent.
+     *
      * @codeCoverageIgnore
      */
     public function __destruct()

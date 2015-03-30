@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,10 +24,10 @@
 namespace BackBee\Util;
 
 /**
- * FTP Utils
+ * FTP Utils.
  *
  * @category    BackBee
- * @package     BackBee\Util
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -51,9 +51,9 @@ class Ftp
     protected $connection;
 
     /**
+     * @param type  $url
+     * @param array $params
      *
-     * @param  type                      $url
-     * @param  array                     $params
      * @throws \InvalidArgumentException
      */
     public function __construct($url, array $params = array())
@@ -72,10 +72,12 @@ class Ftp
     }
 
     /**
-     * Get parameter
+     * Get parameter.
      *
-     * @param  string                    $name
+     * @param string $name
+     *
      * @return mixed
+     *
      * @throws \InvalidArgumentException
      */
     protected function getParam($name)
@@ -88,7 +90,7 @@ class Ftp
     }
 
     /**
-     * Connect to server
+     * Connect to server.
      *
      * @return self
      */
@@ -102,9 +104,10 @@ class Ftp
     }
 
     /**
-     * Wrapper for ftp_connect()
+     * Wrapper for ftp_connect().
      *
      * @return boolean
+     *
      * @throws \RuntimeException
      */
     protected function doConnect()
@@ -125,9 +128,10 @@ class Ftp
     }
 
     /**
-     * Wrapper for ftp_login()
+     * Wrapper for ftp_login().
      *
-     * @return type              void
+     * @return type void
+     *
      * @throws \RuntimeException
      */
     protected function doLogin()
@@ -146,8 +150,8 @@ class Ftp
     }
 
     /**
+     * @return type void
      *
-     * @return type              void
      * @throws \RuntimeException
      */
     protected function doPasv()
@@ -167,7 +171,8 @@ class Ftp
     /**
      * Conditionally retry a closure if it yields an exception.
      *
-     * @param  \Closure $retry
+     * @param \Closure $retry
+     *
      * @return mixed
      */
     protected function retry(\Closure $retry)
@@ -203,7 +208,7 @@ class Ftp
     }
 
     /**
-     * Wrapper for ftp_get()
+     * Wrapper for ftp_get().
      *
      * @param string $sourceFile
      * @param string $destinationFile
@@ -230,7 +235,7 @@ class Ftp
     }
 
     /**
-     * Wrapper fo ftp_cdup()
+     * Wrapper fo ftp_cdup().
      *
      * @throws \RuntimeException
      */
@@ -248,9 +253,11 @@ class Ftp
     }
 
     /**
-     * Wrapper for ftp_rawlist()
-     * @param  type $dir
-     * @param  type $recursive
+     * Wrapper for ftp_rawlist().
+     *
+     * @param type $dir
+     * @param type $recursive
+     *
      * @return type
      */
     protected function doRawList($dir, $recursive = false)
@@ -306,9 +313,10 @@ class Ftp
     }
 
     /**
-     * Change current working directory
+     * Change current working directory.
      *
      * @param   string  dir name
+     *
      * @return bool
      */
     protected function doChangeDir($dir)
@@ -325,9 +333,10 @@ class Ftp
     }
 
     /**
-     * Check if is dir
+     * Check if is dir.
      *
      * @param   string  path to folder
+     *
      * @return bool
      */
     protected function isDir($dir)
@@ -345,7 +354,7 @@ class Ftp
     }
 
     /**
-     * Reconnecrt
+     * Reconnecrt.
      */
     protected function reconnect()
     {
@@ -354,7 +363,7 @@ class Ftp
     }
 
     /**
-     * Close ftp connection
+     * Close ftp connection.
      *
      * @return self
      */

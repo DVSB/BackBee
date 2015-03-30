@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -38,35 +38,39 @@ use BackBee\Utils\String;
 use BackBee\ClassContent\AbstractClassContent;
 
 /**
- * Abstract class for a renderer
+ * Abstract class for a renderer.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>, e.chau <eric.chau@lp-digital.fr>
  */
 abstract class AbstractRenderer implements RendererInterface
 {
     /**
-     * Current BackBee application
+     * Current BackBee application.
+     *
      * @var BackBee\BBApplication
      */
     protected $application;
 
     /**
-     * Contains evey helpers
+     * Contains evey helpers.
+     *
      * @var ParameterBag
      */
     protected $helpers;
 
     /**
-     * The current object to be render
+     * The current object to be render.
+     *
      * @var RenderableInterface
      */
     protected $_object;
 
     /**
-     * The current page to be render
+     * The current page to be render.
+     *
      * @var BackBee\NestedNode\Page
      */
     protected $_currentpage;
@@ -78,39 +82,45 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * Ignore the rendering if specified render mode is not
-     * available if TRUE, use the default template otherwise
+     * available if TRUE, use the default template otherwise.
+     *
      * @var Boolean
      */
     protected $_ignoreIfRenderModeNotAvailable;
     protected $_node;
 
     /**
-     * The content parameters
+     * The content parameters.
+     *
      * @var array
      */
     protected $_params = array();
     protected $_parentuid;
 
     /**
-     * The file path to look for templates
+     * The file path to look for templates.
+     *
      * @var array
      */
     protected $_scriptdir = array();
 
     /**
-     * The file path to look for layouts
+     * The file path to look for layouts.
+     *
      * @var array
      */
     protected $_layoutdir = array();
 
     /**
-     * Extensions to include searching file
+     * Extensions to include searching file.
+     *
      * @var array
      */
     protected $_includeExtensions = array();
 
     /**
-     * The assigned variables
+     * The assigned variables.
+     *
      * @var array
      */
     protected $_vars = array();
@@ -121,7 +131,8 @@ abstract class AbstractRenderer implements RendererInterface
     protected $__render;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param BBAplication $application The current BBapplication
      * @param array        $config      Optional configurations overriding
      */
@@ -195,7 +206,6 @@ abstract class AbstractRenderer implements RendererInterface
 
     public function __call($method, $argv)
     {
-        // FIXME
         if ('getRenderer' === $method) {
             return $this;
         }
@@ -215,9 +225,11 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Magic method to get an assign var
-     * @param  string $var the name of the variable
-     * @return mixed  the value
+     * Magic method to get an assign var.
+     *
+     * @param string $var the name of the variable
+     *
+     * @return mixed the value
      */
     public function __get($var)
     {
@@ -225,9 +237,12 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Magic method to test the setting of an assign var
+     * Magic method to test the setting of an assign var.
+     *
      * @codeCoverageIgnore
-     * @param  string  $var the name of the variable
+     *
+     * @param string $var the name of the variable
+     *
      * @return boolean
      */
     public function __isset($var)
@@ -236,7 +251,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Magic method to assign a var
+     * Magic method to assign a var.
+     *
      * @codeCoverageIgnore
      * @param  string    $var   the name of the variable
      * @param  mixed     $value the value of the variable
@@ -250,7 +266,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Magic method to unset an assign var
+     * Magic method to unset an assign var.
+     *
      * @param string $var the name of the variable
      */
     public function __unset($var)
@@ -277,6 +294,7 @@ abstract class AbstractRenderer implements RendererInterface
      * Add new helper directory in the choosen position.
      *
      * @codeCoverageIgnore
+     *
      * @param string  $new_dir  location of the new directory
      * @param integer $position position in the array
      */
@@ -293,6 +311,7 @@ abstract class AbstractRenderer implements RendererInterface
      * Add new layout directory in the choosen position.
      *
      * @codeCoverageIgnore
+     *
      * @param string  $new_dir  location of the new directory
      * @param integer $position position in the array
      */
@@ -309,6 +328,7 @@ abstract class AbstractRenderer implements RendererInterface
      * Add new script directory in the choosen position.
      *
      * @codeCoverageIgnore
+     *
      * @param strimg  $new_dir  location of the new directory
      * @param integer $position position in the array
      */
@@ -337,8 +357,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Returns an array of template files according the provided pattern
-     * @param  string $pattern
+     * Returns an array of template files according the provided pattern.
+     *
+     * @param string $pattern
+     *
      * @return array
      */
     public function getTemplatesByPattern($pattern)
@@ -356,8 +378,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the current token
+     * Return the current token.
+     *
      * @codeCoverageIgnore
+     *
      * @return \Symfony\Component\Security\Core\Authentication\Token\AbstractToken
      */
     public function getToken()
@@ -366,7 +390,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Returns the list of available render mode for the provided object
+     * Returns the list of available render mode for the provided object.
+     *
      * @param  \BackBee\Renderer\RenderableInterface $object
      * @return array
      */
@@ -384,7 +409,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Returns the ignore state of rendering if render mode is not available
+     * Returns the ignore state of rendering if render mode is not available.
+     *
      * @return Boolean
      * @codeCoverageIgnore
      */
@@ -394,9 +420,11 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Assign one or more variables
-     * @param  mixed     $var   A variable name or an array of variables to set
-     * @param  mixed     $value The variable value to set
+     * Assign one or more variables.
+     *
+     * @param mixed $var   A variable name or an array of variables to set
+     * @param mixed $value The variable value to set
+     *
      * @return AbstractRenderer The current renderer
      */
     public function assign($var, $value = null)
@@ -429,6 +457,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return \BackBee\BBApplication
      */
     public function getApplication()
@@ -437,8 +466,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the assigned variables
+     * Return the assigned variables.
+     *
      * @codeCoverageIgnore
+     *
      * @return array Array of assigned variables
      */
     public function getAssignedVars()
@@ -448,6 +479,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getClassContainer()
@@ -457,6 +489,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getCurrentElement()
@@ -466,10 +499,12 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * Returns $pathinfo with base url of current page
-     * If $site is provided, the url will be pointing on the associate domain
-     * @param  string             $pathinfo
-     * @param  string             $defaultExt
-     * @param  \BackBee\Site\Site $site
+     * If $site is provided, the url will be pointing on the associate domain.
+     *
+     * @param string             $pathinfo
+     * @param string             $defaultExt
+     * @param \BackBee\Site\Site $site
+     *
      * @return string
      */
     public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
@@ -500,6 +535,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getMaxEntry()
@@ -508,8 +544,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the current rendering mode
+     * Return the current rendering mode.
+     *
      * @codeCoverageIgnore
+     *
      * @return string
      */
     public function getMode()
@@ -519,6 +557,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getNode()
@@ -527,7 +566,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the object to be rendered
+     * Return the object to be rendered.
+     *
      * @codeCoverageIgnore
      * @return RenderableInterface
      */
@@ -538,6 +578,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getParentUid()
@@ -546,7 +587,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the previous object to be rendered
+     * Return the previous object to be rendered.
+     *
      * @codeCoverageIgnore
      * @return RenderableInterface or null
      */
@@ -556,8 +598,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the current page to be rendered
+     * Return the current page to be rendered.
+     *
      * @codeCoverageIgnore
+     *
      * @return null|BackBee\NestedNode\Page
      */
     public function getCurrentPage()
@@ -566,7 +610,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the current root of the page to be rendered
+     * Return the current root of the page to be rendered.
+     *
      * @return null|BackBee\NestedNode\Page
      */
     public function getCurrentRoot()
@@ -584,8 +629,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * return the current rendered site
+     * return the current rendered site.
+     *
      * @codeCoverageIgnore
+     *
      * @return null|BackBee\Site\Site
      */
     public function getCurrentSite()
@@ -594,9 +641,11 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return parameters
-     * @param  string $param The parameter to return
-     * @return mixed  The parameter value asked or array of the parameters
+     * Return parameters.
+     *
+     * @param string $param The parameter to return
+     *
+     * @return mixed The parameter value asked or array of the parameters
      */
     public function getParam($param = null)
     {
@@ -630,12 +679,13 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Render an error layout according to code
+     * Render an error layout according to code.
      *
-     * @param  int            $error_code Error code
-     * @param  string         $title      Optional error title
-     * @param  string         $message    Optional error message
-     * @param  string         $trace      Optional error trace
+     * @param int    $error_code Error code
+     * @param string $title      Optional error title
+     * @param string $message    Optional error message
+     * @param string $trace      Optional error trace
+     *
      * @return boolean|string false if none layout found or the rendered layout
      */
     public function error($error_code, $title = null, $message = null, $trace = null)
@@ -654,11 +704,13 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Set the rendering mode
+     * Set the rendering mode.
+     *
      * @codeCoverageIgnore
-     * @param  string    $mode
-     * @param  Boolean   $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not
-     *                                                   available if TRUE, use the default template otherwise
+     *
+     * @param string  $mode
+     * @param Boolean $ignoreIfRenderModeNotAvailable Ignore the rendering if specified render mode is not
+     *                                                available if TRUE, use the default template otherwise
      * @return AbstractRenderer The current renderer
      */
     public function setMode($mode = null, $ignoreIfRenderModeNotAvailable = true)
@@ -671,6 +723,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @param  AbstractNestedNode $node
      * @return AbstractRenderer
      */
@@ -682,7 +735,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Set the object to render
+     * Set the object to render.
+     *
      * @param  RenderableInterface $object
      * @return AbstractRenderer   The current renderer
      */
@@ -703,6 +757,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
+     * Set the current page.
+     *
      * @param  Page $page
      *
      * @return AbstractRenderer
@@ -715,9 +771,11 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Set one or set of parameters
-     * @param  mixed     $param A parameter name or an array of parameters to set
-     * @param  mixed     $value The parameter value to set
+     * Set one or set of parameters.
+     *
+     * @param mixed $param A parameter name or an array of parameters to set
+     * @param mixed $value The parameter value to set
+     *
      * @return AbstractRenderer The current renderer
      */
     public function setParam($param, $value = null)
@@ -739,7 +797,9 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
-     * @param  type $render
+     *
+     * @param type $render
+     *
      * @return AbstractRenderer
      */
     public function setRender($render)
@@ -750,7 +810,6 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     *
      * @return string
      */
     public function getRender()
@@ -759,8 +818,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Updates a file script of a layout
-     * @param  Layout $layout The layout to update
+     * Updates a file script of a layout.
+     *
+     * @param Layout $layout The layout to update
+     *
      * @return string The filename of the updated script
      */
     public function updateLayout(Layout $layout)
@@ -788,7 +849,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Unlink a file script of a layout
+     * Unlink a file script of a layout.
+     *
      * @param Layout $layout The layout to update
      */
     public function removeLayout(Layout $layout)
@@ -802,8 +864,10 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Returns helper if it exists or null
-     * @param  [type]       $method
+     * Returns helper if it exists or null.
+     *
+     * @param [type] $method
+     *
      * @return AHelper|null
      */
     public function getHelper($method)
@@ -817,10 +881,11 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Create a new helper if class exists
+     * Create a new helper if class exists.
      *
-     * @param  string       $method
-     * @param  array        $argv
+     * @param string $method
+     * @param array  $argv
+     *
      * @return AHelper|null
      */
     public function createHelper($method, $argv)
@@ -841,7 +906,8 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the relative path from the classname of an object
+     * Return the relative path from the classname of an object.
+     *
      * @param  \BackBee\Renderer\RenderableInterface $object
      * @return string
      */
@@ -893,9 +959,12 @@ abstract class AbstractRenderer implements RendererInterface
     }
 
     /**
-     * Return the file path to current layout, try to create it if not exists
-     * @param  Layout            $layout
-     * @return string            the file path
+     * Return the file path to current layout, try to create it if not exists.
+     *
+     * @param Layout $layout
+     *
+     * @return string the file path
+     *
      * @throws RendererException
      */
     protected function getLayoutFile(Layout $layout)
@@ -938,6 +1007,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * @codeCoverageIgnore
+     *
      * @return AbstractRenderer
      */
     private function resetVars()

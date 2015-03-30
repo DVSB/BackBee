@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Bundle;
 
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-
 use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\Util\ServiceLoader;
@@ -33,10 +32,10 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Util\Resolver\BundleConfigDirectory;
 
 /**
- * BundleLoader loads and injects bundles into application and its dependency injection container
+ * BundleLoader loads and injects bundles into application and its dependency injection container.
  *
  * @category    BackBee
- * @package     BackBee/Bundle
+ *
  * @copyright   Lp digital system
  * @author      eric.chau <eric.chau@lp-digital.fr>
  */
@@ -89,7 +88,7 @@ class BundleLoader
     /**
      * Loads bundles into application.
      *
-     * @param  array  $config bundle configurations
+     * @param array $config bundle configurations
      */
     public function load(array $config)
     {
@@ -119,7 +118,8 @@ class BundleLoader
     /**
      * Returns bundle id if provided path is matched with any bundle base directory.
      *
-     * @param  string $path
+     * @param string $path
+     *
      * @return string
      */
     public function getBundleIdByBaseDir($path)
@@ -139,6 +139,7 @@ class BundleLoader
      * Computes and returns bundle base directory.
      *
      * @param string $classname
+     *
      * @return string
      */
     public function buildBundleBaseDirectoryFromClassname($classname)
@@ -186,7 +187,8 @@ class BundleLoader
     /**
      * Generates bundle service identifier.
      *
-     * @param  string $id The bundle identifier
+     * @param string $id The bundle identifier
+     *
      * @return string
      */
     private function generateBundleServiceId($id)
@@ -197,10 +199,12 @@ class BundleLoader
     /**
      * Builds and return bundle definition.
      *
-     * @param  string $classname The bundle entry point classname
-     * @param  string $bundleId  The bundle id/name
-     * @param  string $baseDir   The bundle base directory
+     * @param string $classname The bundle entry point classname
+     * @param string $bundleId  The bundle id/name
+     * @param string $baseDir   The bundle base directory
+     *
      * @return \Symfony\Component\DependencyInjection\Definition
+     *
      * @throws InvalidArgumentException if provided classname does not implements BackBee\Bundle\BundleInterface
      */
     private function buildBundleDefinition($classname, $bundleId, $baseDir)
@@ -247,8 +251,9 @@ class BundleLoader
     /**
      * Loads and returns bundle's Config.
      *
-     * @param  string $serviceId
-     * @param  string $baseDir
+     * @param string $serviceId
+     * @param string $baseDir
+     *
      * @return
      */
     private function loadAndGetBundleConfigByBaseDir($serviceId, $baseDir)
@@ -312,9 +317,10 @@ class BundleLoader
     }
 
     /**
-     * Extracts and returns bundle loader recipes from Config
+     * Extracts and returns bundle loader recipes from Config.
      *
-     * @param  Config $config
+     * @param Config $config
+     *
      * @return array|null
      */
     private function getLoaderRecipesByConfig(Config $config)
@@ -331,8 +337,9 @@ class BundleLoader
     /**
      * Extracts and returns callback from recipes if there is one which matchs with provided key.
      *
-     * @param  string $key
-     * @param  array $recipes
+     * @param string $key
+     * @param array  $recipes
+     *
      * @return null|callable
      */
     private function getCallbackFromRecipes($key, array $recipes = null)

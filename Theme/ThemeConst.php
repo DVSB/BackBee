@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,65 +25,75 @@ namespace BackBee\Theme;
 
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
 abstract class ThemeConst
 {
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
-
     const DEFAULT_NAME = 'default';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const THEME_NAME = 'themes';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const PERSONAL_NAME = 'personal';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const SCRIPT_DIR = 'scripts_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const LAYOUT_DIR = 'layouts_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const HELPER_DIR = 'helpers_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const LISTENER_DIR = 'listeners_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const LESS_DIR = 'less_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const CSS_DIR = 'css_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const JS_DIR = 'js_dir';
     /**
-     * The default template name
+     * The default template name.
+     *
      * @var string
      */
     const IMG_DIR = 'img_dir';

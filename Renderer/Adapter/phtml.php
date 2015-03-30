@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,20 +23,19 @@
 
 namespace BackBee\Renderer\Adapter;
 
-use Exception;
-
 use BackBee\Renderer\AbstractRenderer;
 use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
 use BackBee\Utils\File\File;
 
+use Exception;
+
 /**
- * Rendering adapter for phtml templating files
+ * Rendering adapter for phtml templating files.
  *
  * @category    BackBee
- * @package     BackBee\Renderer
- * @subpackage  Adapter
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
@@ -44,7 +43,8 @@ use BackBee\Utils\File\File;
 class phtml extends AbstractRendererAdapter
 {
     /**
-     * Extensions to include searching file
+     * Extensions to include searching file.
+     *
      * @var array
      */
     protected $includeExtensions = array('.phtml', '.php');
@@ -60,7 +60,6 @@ class phtml extends AbstractRendererAdapter
     private $vars;
 
     /**
-     * [__construct description]
      * @param AbstractRenderer $renderer [description]
      */
     public function __construct(AbstractRenderer $renderer)
@@ -72,9 +71,11 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * Magic method to get an assign var
-     * @param  string $var the name of the variable
-     * @return mixed  the value
+     * Magic method to get an assign var.
+     *
+     * @param string $var the name of the variable
+     *
+     * @return mixed the value
      */
     public function __get($var)
     {
@@ -82,9 +83,12 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * Magic method to test the setting of an assign var
+     * Magic method to test the setting of an assign var.
+     *
      * @codeCoverageIgnore
-     * @param  string  $var the name of the variable
+     *
+     * @param string $var the name of the variable
+     *
      * @return boolean
      */
     public function __isset($var)
@@ -93,7 +97,8 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * Magic method to assign a var
+     * Magic method to assign a var.
+     *
      * @codeCoverageIgnore
      * @param  string    $var   the name of the variable
      * @param  mixed     $value the value of the variable
@@ -107,7 +112,7 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
+     * @see BackBee\Renderer\RendererAdapterInterface::getManagedFileExtensions()
      */
     public function getManagedFileExtensions()
     {
@@ -154,7 +159,8 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * Assign one or more variables
+     * Assign one or more variables.
+     *
      * @param  mixed     $var   A variable name or an array of variables to set
      * @param  mixed     $value The variable value to set
      * @return AbstractRenderer The current renderer
@@ -177,8 +183,10 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * Return the current page to be rendered
+     * Return the current page to be rendered.
+     *
      * @codeCoverageIgnore
+     *
      * @return null|BackBee\NestedNode\Page
      */
     public function setParam($param, $value = null)
@@ -199,9 +207,11 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * Return parameters
-     * @param  string $param The parameter to return
-     * @return mixed  The parameter value asked or array of the parameters
+     * Return parameters.
+     *
+     * @param string $param The parameter to return
+     *
+     * @return mixed The parameter value asked or array of the parameters
      */
     public function getParam($param = null)
     {
@@ -213,7 +223,7 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::updateLayout()
+     * @see BackBee\Renderer\RendererAdapterInterface::updateLayout()
      */
     public function updateLayout(Layout $layout, $layoutFile)
     {
@@ -240,7 +250,6 @@ class phtml extends AbstractRendererAdapter
         libxml_use_internal_errors(true);
 
         $domlayout = new \DOMDocument();
-        //$domlayout->loadHTMLFile($layoutFile);
         $layoutcontent = str_replace(array('<?php', '?>'), array('&lt;?php', '?&gt;'), file_get_contents($layoutFile));
         @$domlayout->loadHTML($layoutcontent);
         $domlayout->formatOutput = true;
@@ -271,7 +280,7 @@ class phtml extends AbstractRendererAdapter
     }
 
     /**
-     * @see BackBee\Renderer\IRendererAdapter::onRestorePreviousRenderer()
+     * @see BackBee\Renderer\RendererAdapterInterface::onRestorePreviousRenderer()
      */
     public function onRestorePreviousRenderer(AbstractRenderer $renderer)
     {

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -34,7 +34,7 @@ class KeywordBuilder
     private $em;
 
     /**
-     * KeywordBuilder's constructor
+     * KeywordBuilder's constructor.
      *
      * @param Doctrine\ORM\EntityManager $em
      */
@@ -44,9 +44,10 @@ class KeywordBuilder
     }
 
     /**
-     * Create new entity BackBee\NestedNode\KeyWord with $keyword if not exists
+     * Create new entity BackBee\NestedNode\KeyWord with $keyword if not exists.
      *
-     * @param  string                     $keyword
+     * @param string $keyword
+     *
      * @return BackBee\NestedNode\KeyWord
      */
     public function createKeywordIfNotExists($keyword, $do_persist = true)

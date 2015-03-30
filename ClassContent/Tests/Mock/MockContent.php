@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,13 +28,16 @@ use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\Text;
 use BackBee\Tests\Mock\MockInterface;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * ClassContent mock emulate a yml content cached
+ * ClassContent mock emulate a yml content cached.
  *
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
- * @Table(name="content")
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\ClassContentRepository")
+ * @ORM\Table(name="content")
+ *
  * @category    BackBee
- * @package     BackBee\ClassContent\Tests\Mock
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */

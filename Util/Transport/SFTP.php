@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,30 +27,32 @@ use BackBee\Util\Transport\Exception\TransportException;
 
 /**
  * SFTP transport
- * Openssl and libssh2 are required
+ * Openssl and libssh2 are required.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Transport
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class SFTP extends AbstractTransport
 {
     /**
-     * The default port number
+     * The default port number.
+     *
      * @var int
      */
     protected $_port = 22;
 
     /**
-     * The SSH resource
+     * The SSH resource.
+     *
      * @var resource
      */
     private $_ssh_resource = null;
 
     /**
-     * The SFTP resource
+     * The SFTP resource.
+     *
      * @var resource
      */
     private $_sftp_resource = null;
@@ -61,9 +63,10 @@ class SFTP extends AbstractTransport
      * * port
      * * username
      * * password
-     * * remotepath
+     * * remotepath.
      *
-     * @param  array                                                $config
+     * @param array $config
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if extensions OpenSSL or libssh2 are unavailable
      */
     public function __construct(array $config = array())
@@ -79,7 +82,7 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Class destructor
+     * Class destructor.
      */
     public function __destruct()
     {
@@ -87,10 +90,13 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Establish a SSH connection
-     * @param  string                                               $host
-     * @param  int                                                  $port
+     * Establish a SSH connection.
+     *
+     * @param string $host
+     * @param int    $port
+     *
      * @return \BackBee\Util\Transport\SFTP
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occurs if connection failed
      */
     public function connect($host = null, $port = null)
@@ -105,10 +111,13 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Authenticate on remote server
-     * @param  string                                               $username
-     * @param  string                                               $password
+     * Authenticate on remote server.
+     *
+     * @param string $username
+     * @param string $password
+     *
      * @return \BackBee\Util\Transport\SFTP
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if authentication failed
      */
     public function login($username = null, $password = null)
@@ -138,9 +147,12 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Change remote directory
-     * @param  string                                               $dir
+     * Change remote directory.
+     *
+     * @param string $dir
+     *
      * @return \BackBee\Util\Transport\SFTP
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function cd($dir = null)
@@ -160,9 +172,12 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * List remote files on $dir
-     * @param  string                                               $dir
+     * List remote files on $dir.
+     *
+     * @param string $dir
+     *
      * @return array|FALSE
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function ls($dir = null)
@@ -185,8 +200,10 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Returns the current remote path
+     * Returns the current remote path.
+     *
      * @return string
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function pwd()
@@ -199,11 +216,14 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Copy a local file to the remote server
-     * @param  string                                               $local_file
-     * @param  string                                               $remote_file
-     * @param  boolean                                              $overwrite
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Copy a local file to the remote server.
+     *
+     * @param string  $local_file
+     * @param string  $remote_file
+     * @param boolean $overwrite
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function send($local_file, $remote_file, $overwrite = false)
@@ -232,11 +252,14 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Copy recursively local files to the remote server
-     * @param  string                                               $local_path
-     * @param  string                                               $remote_path
-     * @param  boolean                                              $overwrite
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Copy recursively local files to the remote server.
+     *
+     * @param string  $local_path
+     * @param string  $remote_path
+     * @param boolean $overwrite
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function sendRecursive($local_path, $remote_path, $overwrite = false)
@@ -246,11 +269,14 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Copy a remote file on local filesystem
-     * @param  string                                               $local_file
-     * @param  string                                               $remote_file
-     * @param  boolean                                              $overwrite
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Copy a remote file on local filesystem.
+     *
+     * @param string  $local_file
+     * @param string  $remote_file
+     * @param boolean $overwrite
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function get($local_file, $remote_file, $overwrite = false)
@@ -277,11 +303,14 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Copy recursively remote files to the local filesystem
-     * @param  string                                               $local_path
-     * @param  string                                               $remote_path
-     * @param  boolean                                              $overwrite
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Copy recursively remote files to the local filesystem.
+     *
+     * @param string  $local_path
+     * @param string  $remote_path
+     * @param boolean $overwrite
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function getRecursive($local_path, $remote_path, $overwrite = false)
@@ -291,10 +320,13 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Creates a new remote directory
-     * @param  string                                               $dir
-     * @param  boolean                                              $recursive
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Creates a new remote directory.
+     *
+     * @param string  $dir
+     * @param boolean $recursive
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function mkdir($dir, $recursive = false)
@@ -312,10 +344,13 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Deletes a remote file
-     * @param  string                                               $remote_path
-     * @param  boolean                                              $recursive
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Deletes a remote file.
+     *
+     * @param string  $remote_path
+     * @param boolean $recursive
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function delete($remote_path, $recursive = false)
@@ -342,10 +377,13 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Renames a remote file
-     * @param  string                                               $old_name
-     * @param  string                                               $new_name
-     * @return boolean                                              Returns TRUE on success or FALSE on error
+     * Renames a remote file.
+     *
+     * @param string $old_name
+     * @param string $new_name
+     *
+     * @return boolean Returns TRUE on success or FALSE on error
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     public function rename($old_name, $new_name)
@@ -373,7 +411,8 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Disconnect from the remote server and unset resources
+     * Disconnect from the remote server and unset resources.
+     *
      * @return \BackBee\Util\Transport\SFTP
      */
     public function disconnect()
@@ -388,9 +427,12 @@ class SFTP extends AbstractTransport
     }
 
     /**
-     * Executes a command on remote server
-     * @param  string                                               $command
+     * Executes a command on remote server.
+     *
+     * @param string $command
+     *
      * @return string
+     *
      * @throws \BackBee\Util\Transport\Exception\TransportException Occures if SSH connection is invalid
      */
     private function exec($command)

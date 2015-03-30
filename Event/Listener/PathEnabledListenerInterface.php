@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\Event\Listener;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Interface for listeners that are enabled for a certain request path only
+ * Interface for listeners that are enabled for a certain request path only.
  *
  * @category    BackBee
- * @package     BackBee\Event
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -41,7 +41,8 @@ interface PathEnabledListenerInterface
     public function setPath($path);
 
     /**
-     * @param  Request $request
+     * @param Request $request
+     *
      * @return boolean - true if the listener should be enabled for the $request
      */
     public function isEnabled(Request $request = null);

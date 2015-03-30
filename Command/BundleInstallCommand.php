@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,10 +31,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use BackBee\Console\AbstractCommand;
 
 /**
- * Install bundle command
+ * Install bundle command.
  *
  * @category    BackBee
- * @package     BackBee\Command
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */

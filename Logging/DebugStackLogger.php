@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,7 +27,7 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee/Logging
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -60,7 +60,6 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
     public $currentQuery = 0;
 
     /**
-     *
      * @inheritDoc
      */
     public function startQuery($sql, array $params = null, array $types = null)
@@ -85,7 +84,6 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
     }
 
     /**
-     *
      * @inheritDoc
      */
     public function log($level, $message, array $context = array())
@@ -109,7 +107,6 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
     }
 
     /**
-     *
      * @inheritDoc
      */
     public function countErrors()

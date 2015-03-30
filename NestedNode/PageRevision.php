@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,70 +23,75 @@
 
 namespace BackBee\NestedNode;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * PageRevison object in BackBee 4
+ * PageRevison object in
  *
  * A page revision is...
  *
  * @category    BackBee
- * @package     BackBee\NestedNode
+ *
  * @copyright   Lp digital system
  * @author      m.baptista <michel.baptista@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\NestedNode\Repository\PageRevisionRepository")
- * @Table(name="page_revision")
+ * @ORM\Entity(repositoryClass="BackBee\NestedNode\Repository\PageRevisionRepository")
+ * @ORM\Table(name="page_revision")
  */
 class PageRevision
 {
     /**
-     * Versions
+     * Versions.
      */
-
     const VERSION_CURRENT = 0;
     const VERSION_DRAFT = 1;
     const VERSION_SUBMITED = 2;
 
     /**
-     * Unique identifier of the revision
+     * Unique identifier of the revision.
+     *
      * @var integer
-     * @Id @Column(type="integer", name="id")
-     * @GeneratedValue(strategy="IDENTITY")
+     * @ORM\Id
+     * @ORM\Column(type="integer", name="id")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $_id;
 
     /**
-     * The publication datetime
+     * The publication datetime.
+     *
      * @var DateTime
-     * @Column(type="datetime", name="date")
+     * @ORM\Column(type="datetime", name="date")
      */
     protected $_date;
 
     /**
-     * The version
+     * The version.
+     *
      * @var DateTime
-     * @Column(type="integer", name="version")
+     * @ORM\Column(type="integer", name="version")
      */
     protected $_version;
 
     /**
-     * @ManyToOne(targetEntity="BackBee\Security\User", inversedBy="_revisions", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="BackBee\Security\User", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     protected $_user;
 
     /**
-     * @ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_revisions", fetch="EXTRA_LAZY")
-     * @JoinColumn(name="page_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\NestedNode\Page", inversedBy="_revisions", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="page_uid", referencedColumnName="uid")
      */
     protected $_page;
 
     /**
-     * @ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
-     * @JoinColumn(name="content_uid", referencedColumnName="uid")
+     * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", cascade={"persist"}, fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
     protected $_content;
 
     /**
-     * Class constructor
+     * Class constructor.
      */
     public function __construct()
     {

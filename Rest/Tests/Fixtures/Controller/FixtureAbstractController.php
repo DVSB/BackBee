@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,16 +24,15 @@
 namespace BackBee\Rest\Tests\Fixtures\Controller;
 
 use Symfony\Component\Validator\Constraints as Assert;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 
 /**
- * Abstract Controller
+ * Abstract Controller.
  *
  * @Annotation
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -27,7 +27,7 @@ use BackBee\Theme\Exception\ThemeException;
 
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -36,7 +36,8 @@ class PersonalThemesManager extends AbstractThemesManager
     /**
      * create personal theme folder architecture.
      *
-     * @param  \BackBee\Theme\ThemeEntity $theme ThemeEntity object
+     * @param \BackBee\Theme\ThemeEntity $theme ThemeEntity object
+     *
      * @throws ThemeException
      */
     public function create(ThemeEntity $theme)
@@ -56,7 +57,8 @@ class PersonalThemesManager extends AbstractThemesManager
     /**
      * Transform theme architecture into personal theme architecture.
      *
-     * @param  array $architecture theme architecture
+     * @param array $architecture theme architecture
+     *
      * @return array personal theme architure
      */
     private function _cleanArchitecture(array $architecture)
@@ -73,10 +75,12 @@ class PersonalThemesManager extends AbstractThemesManager
     }
 
     /**
-     * Generate a theme object
+     * Generate a theme object.
      *
-     * @param  array                              $theme_config
+     * @param array $theme_config
+     *
      * @return \BackBee\Theme\PersonalThemeEntity
+     *
      * @throws ThemeException
      */
     public function hydrateTheme(array $theme_config)

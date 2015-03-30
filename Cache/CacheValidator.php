@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -30,10 +30,10 @@ use BackBee\Exception\InvalidArgumentException;
 /**
  * CacheValidator allows you to validate a set of requirements before starting cache process; every
  * validator must implements BackBee\Cache\Validator\ValidatorInterface
- * you are free provide your own validator and put it in any groups you want
+ * you are free provide your own validator and put it in any groups you want.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -42,14 +42,14 @@ class CacheValidator
     const VALIDATOR_SERVICE_TAG = 'cache.validator';
 
     /**
-     * List of every declared validators sorted by group
+     * List of every declared validators sorted by group.
      *
      * @var array
      */
     private $validators;
 
     /**
-     * constructor
+     * constructor.
      *
      * @param ContainerInterface $container the container from where we get every validators
      */
@@ -62,7 +62,7 @@ class CacheValidator
     }
 
     /**
-     * Allows you to add validator
+     * Allows you to add validator.
      *
      * @param ValidatorInterface $validator the validator we want to add
      */
@@ -78,7 +78,7 @@ class CacheValidator
     }
 
     /**
-     * It will invoke every validators of provided group name to define if current set is valid or not
+     * It will invoke every validators of provided group name to define if current set is valid or not.
      *
      * @param string $group_name the validator group name to use
      * @param mixed  $object
@@ -103,7 +103,7 @@ class CacheValidator
     }
 
     /**
-     * Define if provided group name is associated to any validators or not
+     * Define if provided group name is associated to any validators or not.
      *
      * @return boolean true if the provided group name is associated to one validator atleast, else false
      */

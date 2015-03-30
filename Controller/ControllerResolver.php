@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,6 @@ namespace BackBee\Controller;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
-
 use BackBee\ApplicationInterface;
 
 /**
@@ -35,20 +34,19 @@ use BackBee\ApplicationInterface;
  * the controller method arguments.
  *
  * @category    BackBee
- * @package     BackBee\Controller
+ *
  * @copyright   Lp system
  * @author      k.golovin
  */
 class ControllerResolver implements ControllerResolverInterface
 {
     /**
-     *
      * @var ApplicationInterface
      */
     protected $bbapp;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param \BackBee\ApplicationInterface $bbapp
      */
@@ -104,7 +102,6 @@ class ControllerResolver implements ControllerResolverInterface
     }
 
     /**
-     *
      * @param string $controllerName
      * @param string $actionName
      */

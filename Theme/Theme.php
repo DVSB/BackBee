@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,70 +31,80 @@ use BackBee\Utils\File\File;
 
 /**
  * @category    BackBee
- * @package     BackBee\Theme
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class Theme extends ThemeConst
 {
     /**
-     * Site identifier
+     * Site identifier.
+     *
      * @var string
      */
     private $_site_uid;
 
     /**
-     * Path of the theme folder
+     * Path of the theme folder.
+     *
      * @var array
      */
     private $_themes_dir = array();
 
     /**
-     * Renderer object
+     * Renderer object.
+     *
      * @var BBApplication
      */
     private $_application;
 
     /**
-     * The template folder is valid (exist ? and is readable ?)
+     * The template folder is valid (exist ? and is readable ?).
+     *
      * @var boolean
      */
     private $_is_valid = false;
 
     /**
      * Current theme.
+     *
      * @var PersonalThemeEntity
      */
     private $_personal_theme;
 
     /**
      * Current theme.
+     *
      * @var ThemeEntity
      */
     private $_theme;
 
     /**
      * Current theme.
+     *
      * @var ThemeEntity
      */
     private $_default_theme;
 
     /**
-     * Directory Entity
+     * Directory Entity.
+     *
      * @var array
      */
     private $_dir = array();
 
     /**
-     * Config
+     * Config.
+     *
      * @var BackBee\Config\Config
      */
     private $_config;
 
     /**
-     * Theme object constructor
+     * Theme object constructor.
      *
-     * @param  \BackBee\BBApplication $bbapp
+     * @param \BackBee\BBApplication $bbapp
+     *
      * @throws ThemeException
      */
     public function __construct(BBApplication $bbapp = null)
@@ -148,7 +158,8 @@ class Theme extends ThemeConst
     /**
      * Return the base theme folder.
      *
-     * @param  string $type
+     * @param string $type
+     *
      * @return Mixed
      */
     public function getThemeDir($type)
@@ -170,7 +181,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Return the path to the current theme if is valid else return the default theme
+     * Return the path to the current theme if is valid else return the default theme.
      *
      * @return string
      */
@@ -186,7 +197,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Return the path to the default theme if exist
+     * Return the path to the default theme if exist.
      *
      * @return Mixed
      */
@@ -203,9 +214,10 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Return the path to the default theme if exist
+     * Return the path to the default theme if exist.
      *
      * @return string
+     *
      * @throws ThemeException
      */
     public function getPersonalDirectory()
@@ -234,7 +246,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Parse the theme directory to know how kinde of elements the object need refernce
+     * Parse the theme directory to know how kinde of elements the object need refernce.
      *
      * @param string $name path to parse
      */
@@ -250,7 +262,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Send to the object
+     * Send to the object.
      *
      * @param string $path   current path
      * @param string $target target you need to dispatch
@@ -276,7 +288,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Validate the theme directory
+     * Validate the theme directory.
      *
      * @return boolean
      */
@@ -294,7 +306,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Init config
+     * Init config.
      *
      * @return Theme
      */
@@ -314,7 +326,7 @@ class Theme extends ThemeConst
     }
 
     /**
-     * Get config
+     * Get config.
      *
      * @return BackBee\Config\Config
      */

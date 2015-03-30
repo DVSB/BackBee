@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -32,7 +32,6 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
-
 use BackBee\Console\Console;
 use BackBee\DependencyInjection\ContainerBuilder;
 use BackBee\DependencyInjection\ContainerInterface;
@@ -46,10 +45,10 @@ use BackBee\Theme\Theme;
 use BackBee\Utils\File\File;
 
 /**
- * The main BackBee5 application
+ * The main BackBee application.
  *
  * @category    BackBee
- * @package     BackBee
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -58,28 +57,28 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     const VERSION = '0.12.0-DEV';
 
     /**
-     * application's service container
+     * application's service container.
      *
      * @var BackBee\DependencyInjection\ContainerInterface
      */
     private $_container;
 
     /**
-     * application's context
+     * application's context.
      *
      * @var string
      */
     private $_context;
 
     /**
-     * application's environment
+     * application's environment.
      *
      * @var string
      */
     private $_environment;
 
     /**
-     * define if application is started with debug mode or not
+     * define if application is started with debug mode or not.
      *
      * @var boolean
      */
@@ -99,14 +98,14 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     private $_overwrite_config;
 
     /**
-     * tell us if application has been restored by container or not
+     * tell us if application has been restored by container or not.
      *
      * @var boolean
      */
     private $_is_restored;
 
     /**
-     * [$dump_datas description]
+     * [$dump_datas description].
      *
      * @var array
      */
@@ -133,6 +132,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
         $this->_initAnnotationReader();
         $this->_initContainer();
+
+
         if ($this->isDebugMode()) {
             Debug::enable();
         }
@@ -168,7 +169,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [__destruct description]
+     * [__destruct description].
      */
     public function __destruct()
     {
@@ -192,8 +193,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Returns the associated theme
-     * @param  boolean              $force_reload Force to reload the theme if true
+     * Returns the associated theme.
+     *
+     * @param boolean $force_reload Force to reload the theme if true
+     *
      * @return \BackBee\Theme\Theme
      */
     public function getTheme($force_reload = false)
@@ -256,7 +259,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @param  type    $name
+     * @param type $name
+     *
      * @return AbstractBundle
      */
     public function getBundle($name)
@@ -270,7 +274,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * returns every registered bundles
+     * returns every registered bundles.
      *
      * @return array
      */
@@ -286,7 +290,9 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     /**
      * @deprecated since version 1.0
+     *
      * @uses isDebugMode()
+     *
      * @return boolean
      */
     public function debugMode()
@@ -326,7 +332,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Stop the current BBApplication instance
+     * Stop the current BBApplication instance.
      */
     public function stop()
     {
@@ -370,7 +376,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Returns path to Data directory
+     * Returns path to Data directory.
+     *
      * @return string absolute path to Data directory
      */
     public function getDataDir()
@@ -387,7 +394,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Get vendor dir
+     * Get vendor dir.
      *
      * @return string
      */
@@ -397,7 +404,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Returns TRUE if a starting context is defined, FALSE otherwise
+     * Returns TRUE if a starting context is defined, FALSE otherwise.
+     *
      * @return boolean
      */
     public function hasContext()
@@ -406,7 +414,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Returns the starting context
+     * Returns the starting context.
+     *
      * @return string|NULL
      */
     public function getContext()
@@ -438,7 +447,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Get cache provider from config
+     * Get cache provider from config.
+     *
      * @return string Cache provider config name or \BackBee\Cache\DAO\Cache if not found
      */
     public function getCacheProvider()
@@ -459,7 +469,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     *
      * @return \BackBee\Cache\AbstractCache
      */
     public function getBootstrapCache()
@@ -485,7 +494,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Get validator service
+     * Get validator service.
      *
      * @return \Symfony\Component\Validator\ValidatorInterface
      */
@@ -507,7 +516,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Get current environment
+     * Get current environment.
      *
      * @return string
      */
@@ -597,7 +606,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Return the classcontent repositories path for this instance
+     * Return the classcontent repositories path for this instance.
+     *
      * @return array
      */
     public function getClassContentDir()
@@ -619,8 +629,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Push one directory at the end of classcontent dirs
-     * @param  string                 $dir
+     * Push one directory at the end of classcontent dirs.
+     *
+     * @param string $dir
+     *
      * @return \BackBee\BBApplication
      */
     public function pushClassContentDir($dir)
@@ -636,8 +648,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Prepend one directory at the beginning of classcontent dirs
-     * @param  type                   $dir
+     * Prepend one directory at the beginning of classcontent dirs.
+     *
+     * @param type $dir
+     *
      * @return \BackBee\BBApplication
      */
     public function unshiftClassContentDir($dir)
@@ -653,7 +667,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Return the resource directories, if undefined, initialized with common resources
+     * Return the resource directories, if undefined, initialized with common resources.
+     *
      * @return array The resource directories
      */
     public function getResourceDir()
@@ -688,8 +703,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Push one directory at the end of resources dirs
-     * @param  string                 $dir
+     * Push one directory at the end of resources dirs.
+     *
+     * @param string $dir
+     *
      * @return \BackBee\BBApplication
      */
     public function pushResourceDir($dir)
@@ -705,8 +722,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Prepend one directory at the begining of resources dirs
-     * @param  type                   $dir
+     * Prepend one directory at the begining of resources dirs.
+     *
+     * @param type $dir
+     *
      * @return \BackBee\BBApplication
      */
     public function unshiftResourceDir($dir)
@@ -722,10 +741,13 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Prepend one directory of resources
-     * @param  String                 $dir The new resource directory to add
+     * Prepend one directory of resources.
+     *
+     * @param String $dir The new resource directory to add
+     *
      * @return \BackBee\BBApplication The current BBApplication
-     * @throws BBException            Occur on invalid path or invalid resource directories
+     *
+     * @throws BBException Occur on invalid path or invalid resource directories
      */
     public function addResourceDir($dir)
     {
@@ -747,8 +769,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Return the current resource dir (ie the first one in those defined)
-     * @return string      the file path of the current resource dir
+     * Return the current resource dir (ie the first one in those defined).
+     *
+     * @return string the file path of the current resource dir
+     *
      * @throws BBException Occur when none resource dir is defined
      */
     public function getCurrentResourceDir()
@@ -764,6 +788,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     /**
      * @return \Symfony\Component\HttpFoundation\Request
+     *
      * @throws BBException
      */
     public function getRequest()
@@ -936,7 +961,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Returns the namespace of the class proxy to use or null if no proxy is required
+     * Returns the namespace of the class proxy to use or null if no proxy is required.
      *
      * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
      */
@@ -947,7 +972,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     /**
      * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
-     * with the dump array produced by this method
+     * with the dump array produced by this method.
      *
      * @return array contains every datas required by this service to be restored at the same state
      */
@@ -960,7 +985,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * Restore current service to the dump's state
+     * Restore current service to the dump's state.
      *
      * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
      *                    restore current service
@@ -990,9 +1015,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [_initContainer description]
-     * @param  boolean $force_reload [description]
-     * @return [type]  [description]
+     * [_initContainer description].
+     *
+     * @param boolean $force_reload [description]
+     *
+     * @return [type] [description]
      */
     private function _initContainer()
     {
@@ -1002,7 +1029,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [_initEnvVariables description]
+     * [_initEnvVariables description].
      *
      * @return [type] [description]
      */
@@ -1068,10 +1095,12 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [_initAnnotationReader description]
+     * register all annotations and init the AnnotationReader
      */
     private function _initAnnotationReader()
     {
+        AnnotationRegistry::registerFile($this->getVendorDir().'/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php');
+
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces(array(
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/validator/',
@@ -1085,31 +1114,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
             return false;
         });
-
-        // AnnotationReader ignores all annotations handled by SimpleAnnotationReader
-        AnnotationReader::addGlobalIgnoredName('MappedSuperclass');
-        AnnotationReader::addGlobalIgnoredName('Entity');
-        AnnotationReader::addGlobalIgnoredName('Column');
-        AnnotationReader::addGlobalIgnoredName('Table');
-        AnnotationReader::addGlobalIgnoredName('HasLifecycleCallbacks');
-        AnnotationReader::addGlobalIgnoredName('Index');
-        AnnotationReader::addGlobalIgnoredName('Id');
-        AnnotationReader::addGlobalIgnoredName('GeneratedValue');
-        AnnotationReader::addGlobalIgnoredName('ManyToMany');
-        AnnotationReader::addGlobalIgnoredName('JoinTable');
-        AnnotationReader::addGlobalIgnoredName('JoinColumn');
-        AnnotationReader::addGlobalIgnoredName('ManyToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToOne');
-        AnnotationReader::addGlobalIgnoredName('OneToMany');
-        AnnotationReader::addGlobalIgnoredName('PreUpdate');
-        AnnotationReader::addGlobalIgnoredName('index');
-        AnnotationReader::addGlobalIgnoredName('fixtures');
-        AnnotationReader::addGlobalIgnoredName('fixture');
-        AnnotationReader::addGlobalIgnoredName('column');
     }
 
     /**
      * @return \BackBee\BBApplication
+     *
      * @throws BBException
      */
     private function _initContentWrapper()
@@ -1133,6 +1142,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     /**
      * @return \BackBee\BBApplication
+     *
      * @throws BBException
      */
     private function _initEntityManager()
@@ -1216,7 +1226,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [_initBundles description]
+     * [_initBundles description].
      *
      * @return [type] [description]
      */

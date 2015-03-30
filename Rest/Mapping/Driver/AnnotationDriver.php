@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,7 +26,6 @@ namespace BackBee\Rest\Mapping\Driver;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Metadata\ClassMetadata;
 use Metadata\Driver\DriverInterface;
-
 use BackBee\Rest\Mapping\ActionMetadata;
 
 /**
@@ -35,21 +34,21 @@ use BackBee\Rest\Mapping\ActionMetadata;
  * @Annotation
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
 class AnnotationDriver implements DriverInterface
 {
     /**
-     * an annotation reader
+     * an annotation reader.
      *
      * @var Doctrine\Common\Annotations\AnnotationReader
      */
     private $reader;
 
     /**
-     * AnnotationDriver constructor
+     * AnnotationDriver constructor.
      *
      * @param AnnotationReader $reader an annotation reader
      */
@@ -59,8 +58,8 @@ class AnnotationDriver implements DriverInterface
     }
 
     /**
+     * @param \ReflectionClass $class
      *
-     * @param  \ReflectionClass        $class
      * @return \Metadata\ClassMetadata
      */
     public function loadMetadataForClass(\ReflectionClass $class)

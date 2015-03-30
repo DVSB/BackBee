@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,16 +24,15 @@
 namespace BackBee\DependencyInjection\Tests;
 
 use Symfony\Component\DependencyInjection\Definition;
-
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\Tests\ContainerTest_Resources\Listener\TestListener;
 use BackBee\Event\Dispatcher;
 
 /**
- * Set of tests for BackBee\DependencyInjection\Container
+ * Set of tests for BackBee\DependencyInjection\Container.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  *
@@ -44,7 +43,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     const NEW_DATE_WITH_TAG_VALUE = 8000;
 
     /**
-     * test every new and overrided method provided by BackBee\DependencyInjection\Container
+     * test every new and overrided method provided by BackBee\DependencyInjection\Container.
      *
      * @covers ::get
      * @covers ::getContainerValues

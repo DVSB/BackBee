@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,7 +25,6 @@ namespace BackBee\Importer\Connector;
 
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-
 use BackBee\BBApplication;
 use BackBee\Exception\BBException;
 use BackBee\Importer\Connector\DataBase\PDOResult;
@@ -33,8 +32,7 @@ use BackBee\Importer\ImporterConnectorInterface;
 
 /**
  * @category    BackBee
- * @package     BackBee\Importer
- * @subpackage  Connector
+ *
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
@@ -65,9 +63,10 @@ class DataBase implements ImporterConnectorInterface
     }
 
     /**
-     * Single interface to find
+     * Single interface to find.
      *
-     * @param  string    $string
+     * @param string $string
+     *
      * @return PDOResult
      */
     public function find($string)
@@ -78,7 +77,7 @@ class DataBase implements ImporterConnectorInterface
     }
 
     /**
-     * Init the doctrine entity manager
+     * Init the doctrine entity manager.
      *
      * @return Doctrine\ORM\EntityManager
      */

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,17 +26,16 @@ namespace BackBee\Util\Doctrine;
 use Doctrine\DBAL\Driver;
 
 /**
- * Utility class to know supported features by the current driver
+ * Utility class to know supported features by the current driver.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Doctrine
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class DriverFeatures
 {
-    /**
+    /*
      * Drivers array supporting REPLACE command
      * @var array
      */
@@ -47,8 +46,10 @@ class DriverFeatures
     );
 
     /**
-     * Returns TRUE if the driver support REPLACE comand
-     * @param  \Doctrine\DBAL\Driver $driver
+     * Returns TRUE if the driver support REPLACE comand.
+     *
+     * @param \Doctrine\DBAL\Driver $driver
+     *
      * @return boolean
      */
     public static function replaceSupported(Driver $driver)

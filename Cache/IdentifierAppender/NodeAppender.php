@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -34,10 +34,10 @@ use BackBee\Renderer\RendererInterface;
  * to cache identifier. The node parameter can take 3 differents values:
  *     - SELF_NODE (='self'): it will append the current page uid to the cache identifier
  *     - PARENT_NODE (='parent'): it will append the current parent page uid to the cache identifier
- *     - ROOT_NODE (='root'): it will append the current root page uid to the cache identifier
+ *     - ROOT_NODE (='root'): it will append the current root page uid to the cache identifier.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -48,21 +48,21 @@ class NodeAppender implements IdentifierAppenderInterface
     const ROOT_NODE = 'root';
 
     /**
-     * Application main entity manager
+     * Application main entity manager.
      *
      * @var Doctrine\ORM\EntityManager
      */
     private $em;
 
     /**
-     * list of group name this validator belong to
+     * list of group name this validator belong to.
      *
      * @var array
      */
     private $groups;
 
     /**
-     * constructor
+     * constructor.
      *
      * @param EntityManager $em    application main entity manager
      * @param array         $group list of groups this appender belongs to
@@ -114,7 +114,7 @@ class NodeAppender implements IdentifierAppenderInterface
     }
 
     /**
-     * Try to extract cache node parameter from class content yaml files
+     * Try to extract cache node parameter from class content yaml files.
      *
      * @param AbstractClassContent $content the content which we want to extract cache node parameter
      *

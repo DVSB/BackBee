@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -40,15 +40,15 @@ use BackBee\NestedNode\AbstractNestedNode;
 
 /**
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Authorization\Voter
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class BBAclVoter extends AclVoter
 {
     /**
-     * The current BackBee application
+     * The current BackBee application.
+     *
      * @var \BackBee\BBApplication
      */
     private $_application;
@@ -61,10 +61,12 @@ class BBAclVoter extends AclVoter
 
     /**
      * Returns the vote for the given parameters.
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token      A TokenInterface instance
-     * @param  object|ObjectIdentityInterface                                       $object     The object to secure
-     * @param  array                                                                $attributes An array of attributes associated with the method being invoked
-     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token      A TokenInterface instance
+     * @param object|ObjectIdentityInterface                                       $object     The object to secure
+     * @param array                                                                $attributes An array of attributes associated with the method being invoked
+     *
+     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     public function vote(TokenInterface $token, $object, array $attributes)
     {
@@ -84,11 +86,13 @@ class BBAclVoter extends AclVoter
     }
 
     /**
-     * Returns the vote for the cuurent object, if denied try the vote for the general object
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  object|ObjectIdentityInterface                                       $object
-     * @param  array                                                                $attributes
-     * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
+     * Returns the vote for the cuurent object, if denied try the vote for the general object.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param object|ObjectIdentityInterface                                       $object
+     * @param array                                                                $attributes
+     *
+     * @return integer either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
      */
     private function _vote(TokenInterface $token, $object, array $attributes)
     {
@@ -109,8 +113,9 @@ class BBAclVoter extends AclVoter
     }
 
     /**
-     * Returns the vote for nested node object, recursively till root
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * Returns the vote for nested node object, recursively till root.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED
@@ -127,8 +132,9 @@ class BBAclVoter extends AclVoter
     }
 
     /**
-     * Returns the vote for class content object, recursively till AClassContent
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * Returns the vote for class content object, recursively till AClassContent.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      * @param  array                                                                $attributes
      * @return integer                                                              either ACCESS_GRANTED, ACCESS_ABSTAIN, or ACCESS_DENIED

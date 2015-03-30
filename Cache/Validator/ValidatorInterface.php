@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,17 +26,17 @@ namespace BackBee\Cache\Validator;
 /**
  * Every cache validator must implements this interface and its methods; every validator must belong to
  * one group atleast which ease user call to cache validator by providing group name to check a set of
- * requirements
+ * requirements.
  *
  * @category    BackBee
- * @package     BackBee\Cache
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
 interface ValidatorInterface
 {
     /**
-     * Defines if object is candidate for cache processing or not
+     * Defines if object is candidate for cache processing or not.
      *
      * @param mixed $object represents the content we want to apply cache process, can be null
      *
@@ -45,7 +45,7 @@ interface ValidatorInterface
     public function isValid($object = null);
 
     /**
-     * Returns every group name this validator is associated with
+     * Returns every group name this validator is associated with.
      *
      * @return array
      */

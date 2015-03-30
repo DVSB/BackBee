@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -25,12 +25,11 @@ namespace BackBee\Util;
 
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
-
 use BackBee\Exception\BBException;
 
 /**
  * @category    BackBee
- * @package     BackBee\Util
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -530,7 +529,8 @@ class ExtensionMimeTypeGuesser implements MimeTypeGuesserInterface
 class MimeType
 {
     /**
-     * The singleton instance
+     * The singleton instance.
+     *
      * @var MimeTypeGuesser
      */
     private static $instance = null;
@@ -553,7 +553,9 @@ class MimeType
 
     /**
      * @codeCoverageIgnore
-     * @param  type $path
+     *
+     * @param type $path
+     *
      * @return type
      */
     public function guess($path)

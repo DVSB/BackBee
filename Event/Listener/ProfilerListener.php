@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -29,11 +29,10 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener as BaseProfilerListener;
 
 /**
- * Listener to metadata events
+ * Listener to metadata events.
  *
  * @category    BackBee
- * @package     BackBee\Event
- * @subpackage  Listener
+ *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
@@ -42,7 +41,6 @@ class ProfilerListener extends BaseProfilerListener
     protected $enabled = false;
 
     /**
-     *
      * @param bool $enabled
      */
     public function setEnabled($enabled)
@@ -51,7 +49,6 @@ class ProfilerListener extends BaseProfilerListener
     }
 
     /**
-     *
      * @inheritDoc
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
@@ -64,7 +61,6 @@ class ProfilerListener extends BaseProfilerListener
     }
 
     /**
-     *
      * @inheritDoc
      */
     public function onKernelRequest(GetResponseEvent $event)

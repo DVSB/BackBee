@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,10 +26,10 @@ namespace BackBee\DependencyInjection\Tests;
 use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 
 /**
- * This class is used by ContainerProxyTest for its tests
+ * This class is used by ContainerProxyTest for its tests.
  *
  * @category    BackBee
- * @package     BackBee\DependencyInjection
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
@@ -49,14 +49,14 @@ class RandomService implements DumpableServiceInterface
     private $class_proxy;
 
     /**
-     * represents if current service has been already restored or not
+     * represents if current service has been already restored or not.
      *
      * @var boolean
      */
     protected $is_restored;
 
     /**
-     * RandomService
+     * RandomService.
      *
      * @param int $size the new size's value
      */
@@ -67,7 +67,7 @@ class RandomService implements DumpableServiceInterface
     }
 
     /**
-     * Getter for size attribute
+     * Getter for size attribute.
      *
      * @return int
      */
@@ -77,7 +77,7 @@ class RandomService implements DumpableServiceInterface
     }
 
     /**
-     * Setter for size attribute
+     * Setter for size attribute.
      *
      * @param int $size the new size value
      *

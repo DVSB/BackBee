@@ -35,7 +35,6 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-
 use BackBee\BBApplication;
 use BackBee\Event\PageFilterEvent;
 use BackBee\FrontController\Exception\FrontControllerException;
@@ -45,10 +44,10 @@ use BackBee\Routing\RequestContext;
 
 /**
  * The BackBee front controller
- * It handles and dispatches HTTP requests received
+ * It handles and dispatches HTTP requests received.
  *
  * @category    BackBee
- * @package     BackBee\FrontController
+ *
  * @copyright   Lp system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -57,25 +56,29 @@ class FrontController implements HttpKernelInterface
     const DEFAULT_URL_EXTENSION = 'html';
 
     /**
-     * Current BackBee application
+     * Current BackBee application.
+     *
      * @var \BackBee\BBApplication
      */
     protected $application;
 
     /**
-     * Current request handled
+     * Current request handled.
+     *
      * @var \Symfony\Component\HttpFoundation\Request
      */
     protected $request;
 
     /**
-     * Response
+     * Response.
+     *
      * @var \Symfony\Component\HttpFoundation\Response
      */
     protected $response;
 
     /**
-     * Current request context
+     * Current request context.
+     *
      * @var \BackBee\Routing\RequestContext
      */
     protected $requestContext;
@@ -91,9 +94,10 @@ class FrontController implements HttpKernelInterface
     protected $url_extension;
 
     /**
-     * Class constructor
+     * Class constructor.
      *
      * @access public
+     *
      * @param \BackBee\BBApplication $application The current BBapplication
      */
     public function __construct(BBApplication $application = null)
@@ -121,9 +125,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Returns current BackBee application
+     * Returns current BackBee application.
      *
      * @access public
+     *
      * @return BBApplication
      */
     public function getApplication()
@@ -132,9 +137,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Returns the current request
+     * Returns the current request.
      *
      * @access public
+     *
      * @return Request
      */
     public function getRequest()
@@ -147,9 +153,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Returns the routes collection defined
+     * Returns the routes collection defined.
      *
      * @access public
+     *
      * @return \BackBee\Routing\RouteCollection
      */
     public function getRouteCollection()
@@ -158,7 +165,7 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Returns true if url extension is required, else false
+     * Returns true if url extension is required, else false.
      *
      * @return boolean true if url extension is required, else false
      */
@@ -168,7 +175,7 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Getter of url extension
+     * Getter of url extension.
      *
      * @return string configured url extension, html by default
      */
@@ -178,13 +185,15 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Handles a request
+     * Handles a request.
      *
      * @access public
-     * @param  Request                  $request The request to handle
-     * @param  integer                  $type    The type of the request
-     *                                           (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
-     * @param  Boolean                  $catch   Whether to catch exceptions or not
+     *
+     * @param Request $request The request to handle
+     * @param integer $type    The type of the request
+     *                         (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     * @param Boolean $catch   Whether to catch exceptions or not
+     *
      * @throws FrontControllerException
      */
     public function handle(Request $request = null, $type = self::MASTER_REQUEST, $catch = true)
@@ -226,10 +235,12 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Handles the request when none other action was found
+     * Handles the request when none other action was found.
      *
      * @access public
-     * @param  string                   $uri The URI to handle
+     *
+     * @param string $uri The URI to handle
+     *
      * @throws FrontControllerException
      */
     public function defaultAction($uri = null, $sendResponse = true)
@@ -367,9 +378,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Handles an RPC request
+     * Handles an RPC request.
      *
      * @access public
+     *
      * @throws FrontControllerException
      */
     public function rpcAction()
@@ -388,8 +400,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Return the url to the provided route path
-     * @param  string $route_path
+     * Return the url to the provided route path.
+     *
+     * @param string $route_path
+     *
      * @return string
      */
     public function getUrlByRoutePath($route_path)
@@ -402,7 +416,7 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Register every valid route defined in $route_config array
+     * Register every valid route defined in $route_config array.
      *
      * @param mixed      $default_controller used as default controller if a route comes without any specific controller
      * @param array|null $route_config
@@ -433,7 +447,7 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Send response to client
+     * Send response to client.
      *
      * @param \Symfony\Component\HttpFoundation\Response $response
      */
@@ -443,7 +457,7 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * This method executed on shutdown after the response is sent
+     * This method executed on shutdown after the response is sent.
      */
     public function terminate()
     {
@@ -461,9 +475,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Returns the current request context
+     * Returns the current request context.
      *
      * @access protected
+     *
      * @return RequestContext
      */
     protected function getRequestContext()
@@ -477,9 +492,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Dispatches GetResponseEvent
+     * Dispatches GetResponseEvent.
      *
      * @access private
+     *
      * @param string  $eventName        The name of the event to dispatch
      * @param integer $type             The type of the request
      *                                  (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
@@ -502,9 +518,10 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Dispatch FilterResponseEvent then send response
+     * Dispatch FilterResponseEvent then send response.
      *
      * @acces private
+     *
      * @param Response $response The repsonse to filter then send
      * @param integer  $type     The type of the request
      *                           (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
@@ -523,10 +540,12 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Invokes associated action to the current request
+     * Invokes associated action to the current request.
      *
      * @access private
-     * @param  int                      $type request type
+     *
+     * @param int $type request type
+     *
      * @throws FrontControllerException
      */
     private function invokeAction($type = self::MASTER_REQUEST)
@@ -592,11 +611,13 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Builds and returns controller's action event name
+     * Builds and returns controller's action event name.
      *
-     * @param  object $controller
-     * @param  string $actionName
+     * @param object $controller
+     * @param string $actionName
+     *
      * @return string
+     *
      * @throws \InvalidArgumentException if provided controller is not an object
      */
     private function getControllerActionEventName($controller, $actionName)

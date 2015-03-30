@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -32,50 +32,55 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\Util\Doctrine\EntityManagerCreator;
 
 /**
- * Database cache adapter
+ * Database cache adapter.
  *
  * It supports tag and expire features
  *
  * @category    BackBee
- * @package     BackBee\Cache
- * @subpackage  DAO
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class Cache extends AbstractExtendedCache
 {
     /**
-     * The cache entity class name
+     * The cache entity class name.
+     *
      * @var string
      */
     const ENTITY_CLASSNAME = 'BackBee\Cache\DAO\Entity';
 
     /**
-     * The Doctrine entity manager to use
+     * The Doctrine entity manager to use.
+     *
      * @var \Doctrine\ORM\EntityManager
      */
     private $_em;
 
     /**
-     * The entity repository
+     * The entity repository.
+     *
      * @var \Doctrine\ORM\EntityRepository
      */
     private $_repository;
 
     /**
-     * An entity for a store cache
+     * An entity for a store cache.
+     *
      * @var \BackBee\Cache\DAO\Entity
      */
     private $_entity;
 
     /**
-     * The prefix key for cache items
+     * The prefix key for cache items.
+     *
      * @var type
      */
     private $_prefix_key = '';
 
     /**
-     * Cache adapter options
+     * Cache adapter options.
+     *
      * @var array
      */
     protected $_instance_options = array(
@@ -84,18 +89,20 @@ class Cache extends AbstractExtendedCache
     );
 
     /**
-     * Class constructor
-     * @param  array                                   $options Initial options for the cache adapter:
-     *                                                          - em \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
-     *                                                          - dbal array Optional, an array of Doctrine connection options among:
-     *                                                          - connection  \Doctrine\DBAL\Connection  Optional, an already initialized database connection
-     *                                                          - proxy_dir   string                     The proxy directory
-     *                                                          - proxy_ns    string                     The namespace for Doctrine proxy
-     *                                                          - charset     string                     Optional, the charset to use
-     *                                                          - collation   string                     Optional, the collation to use
-     *                                                          - ...         mixed                      All the required parameter to open a new connection
-     * @param  string                                  $context An optional cache context
-     * @param  \Psr\Log\LoggerInterface                $logger  An optional logger
+     * Class constructor.
+     *
+     * @param array                    $options Initial options for the cache adapter:
+     *                                          - em \Doctrine\ORM\EntityManager  Optional, an already defined EntityManager (simply returns it)
+     *                                          - dbal array Optional, an array of Doctrine connection options among:
+     *                                          - connection  \Doctrine\DBAL\Connection  Optional, an already initialized database connection
+     *                                          - proxy_dir   string                     The proxy directory
+     *                                          - proxy_ns    string                     The namespace for Doctrine proxy
+     *                                          - charset     string                     Optional, the charset to use
+     *                                          - collation   string                     Optional, the collation to use
+     *                                          - ...         mixed                      All the required parameter to open a new connection
+     * @param string                   $context An optional cache context
+     * @param \Psr\Log\LoggerInterface $logger  An optional logger
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity manager for this cache adaptor cannot be created
      */
     public function __construct(array $options = array(), $context = null, LoggerInterface $logger = null)
@@ -108,10 +115,12 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Returns the available cache for the given id if found returns false else
-     * @param  string       $id          Cache id
-     * @param  boolean      $bypassCheck Allow to find cache without test it before
-     * @param  \DateTime    $expire      Optionnal, the expiration time (now by default)
+     * Returns the available cache for the given id if found returns false else.
+     *
+     * @param string    $id          Cache id
+     * @param boolean   $bypassCheck Allow to find cache without test it before
+     * @param \DateTime $expire      Optionnal, the expiration time (now by default)
+     *
      * @return string|FALSE
      */
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
@@ -133,8 +142,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Tests if a cache is available or not (for the given id)
-     * @param  string    $id Cache id
+     * Tests if a cache is available or not (for the given id).
+     *
+     * @param string $id Cache id
+     *
      * @return int|FALSE the last modified timestamp of the available cache record
      */
     public function test($id)
@@ -153,12 +164,14 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Save some string datas into a cache record
-     * @param  string  $id       Cache id
-     * @param  string  $data     Datas to cache
-     * @param  int     $lifetime Optional, the specific lifetime for this record
-     *                           (by default null, infinite lifetime)
-     * @param  string  $tag      Optional, an associated tag to the data stored
+     * Save some string datas into a cache record.
+     *
+     * @param string $id       Cache id
+     * @param string $data     Datas to cache
+     * @param int    $lifetime Optional, the specific lifetime for this record
+     *                         (by default null, infinite lifetime)
+     * @param string $tag      Optional, an associated tag to the data stored
+     *
      * @return boolean TRUE if cache is stored FALSE otherwise
      */
     public function save($id, $data, $lifetime = null, $tag = null, $bypass_control = false)
@@ -203,8 +216,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Removes a cache record
-     * @param  string  $id Cache id
+     * Removes a cache record.
+     *
+     * @param string $id Cache id
+     *
      * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function remove($id)
@@ -228,9 +243,11 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Removes all cache records associated to one of the tags
-     * @param  string|array $tag
-     * @return boolean      TRUE if cache is removed FALSE otherwise
+     * Removes all cache records associated to one of the tags.
+     *
+     * @param string|array $tag
+     *
+     * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function removeByTag($tag)
     {
@@ -260,11 +277,13 @@ class Cache extends AbstractExtendedCache
 
     /**
      * Updates the expire date time for all cache records
-     * associated to one of the provided tags
-     * @param  string|array $tag
-     * @param  int          $lifetime Optional, the specific lifetime for this record
-     *                                (by default null, infinite lifetime)
-     * @return boolean      TRUE if cache is removed FALSE otherwise
+     * associated to one of the provided tags.
+     *
+     * @param string|array $tag
+     * @param int          $lifetime Optional, the specific lifetime for this record
+     *                               (by default null, infinite lifetime)
+     *
+     * @return boolean TRUE if cache is removed FALSE otherwise
      */
     public function updateExpireByTag($tag, $lifetime = null, $bypass_control = false)
     {
@@ -299,10 +318,12 @@ class Cache extends AbstractExtendedCache
 
     /**
      * Returns the minimum expire date time for all cache records
-     * associated to one of the provided tags
-     * @param  string|array $tag
-     * @param  int          $lifetime Optional, the specific lifetime for this record
-     *                                (by default 0, infinite lifetime)
+     * associated to one of the provided tags.
+     *
+     * @param string|array $tag
+     * @param int          $lifetime Optional, the specific lifetime for this record
+     *                               (by default 0, infinite lifetime)
+     *
      * @return int
      */
     public function getMinExpireByTag($tag, $lifetime = 0)
@@ -339,7 +360,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Clears all cache records
+     * Clears all cache records.
+     *
      * @return boolean TRUE if cache is cleared FALSE otherwise
      */
     public function clear()
@@ -362,8 +384,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Return the contextual id, according to the defined prefix key
-     * @param  string $id
+     * Return the contextual id, according to the defined prefix key.
+     *
+     * @param string $id
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -373,8 +397,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Return an array of contextual tags, according to the defined prefix key
-     * @param  array $tags
+     * Return an array of contextual tags, according to the defined prefix key.
+     *
+     * @param array $tags
+     *
      * @return array
      * @codeCoverageIgnore
      */
@@ -389,8 +415,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Returns the store entity for provided cache id
-     * @param  string                    $id Cache id
+     * Returns the store entity for provided cache id.
+     *
+     * @param string $id Cache id
+     *
      * @return \BackBee\Cache\DAO\Entity The cache entity or NULL
      * @codeCoverageIgnore
      */
@@ -406,7 +434,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Resets the last stored entity
+     * Resets the last stored entity.
+     *
      * @codeCoverageIgnore
      */
     private function _resetCacheEntity()
@@ -418,8 +447,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Returns the expiration timestamp
-     * @param  int $lifetime
+     * Returns the expiration timestamp.
+     *
+     * @param int $lifetime
+     *
      * @return int
      * @codeCoverageIgnore
      */
@@ -431,7 +462,8 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Sets the cache prefix key according to the context
+     * Sets the cache prefix key according to the context.
+     *
      * @return \BackBee\Cache\DAO\Cache
      * @codeCoverageIgnore
      */
@@ -445,8 +477,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Sets the entity repository
+     * Sets the entity repository.
+     *
      * @return \BackBee\Cache\DAO\Cache
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity repository cannot be found
      * @codeCoverageIgnore
      */
@@ -462,8 +496,10 @@ class Cache extends AbstractExtendedCache
     }
 
     /**
-     * Sets the entity manager
+     * Sets the entity manager.
+     *
      * @return \BackBee\Cache\DAO\Cache
+     *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if if enable to create a database connection.
      */
     private function _setEntityManager()

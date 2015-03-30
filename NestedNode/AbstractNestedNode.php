@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -24,9 +24,9 @@
 namespace BackBee\NestedNode;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Utils\Numeric;
@@ -42,18 +42,20 @@ use BackBee\Utils\Numeric;
  * * \BackBee\NestedNode\KeyWord     The keywords trees
  *
  * @category    BackBee
- * @package     BackBee\NestedNode
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @MappedSuperclass
+ * @ORM\MappedSuperclass
  * @Serializer\ExclusionPolicy("all")
  */
 abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 {
     /**
-     * Unique identifier of the node
+     * Unique identifier of the node.
+     *
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      *
      * @Serializer\Type("string")
      */
@@ -74,59 +76,68 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * The nested node left position.
+     *
      * @var int
-     * @Column(type="integer", name="leftnode", nullable=false)
+     * @ORM\Column(type="integer", name="leftnode", nullable=false)
      */
     protected $_leftnode;
 
     /**
      * The nested node right position.
+     *
      * @var int
-     * @Column(type="integer", name="rightnode", nullable=false)
+     * @ORM\Column(type="integer", name="rightnode", nullable=false)
      */
     protected $_rightnode;
 
     /**
      * The nested node level in the tree.
+     *
      * @var int
-     * @Column(type="integer", name="level", nullable=false)
+     * @ORM\Column(type="integer", name="level", nullable=false)
      */
     protected $_level;
 
     /**
-     * The creation datetime
+     * The creation datetime.
+     *
      * @var \DateTime
-     * @Column(type="datetime", name="created", nullable=false)
+     * @ORM\Column(type="datetime", name="created", nullable=false)
      */
     protected $_created;
 
     /**
-     * The last modification datetime
+     * The last modification datetime.
+     *
      * @var \DateTime
-     * @Column(type="datetime", name="modified", nullable=false)
+     * @ORM\Column(type="datetime", name="modified", nullable=false)
      */
     protected $_modified;
 
     /**
      * Descendants nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
      */
     protected $_descendants;
 
     /**
      * Direct children nodes.
+     *
      * @var \Doctrine\Common\Collections\ArrayCollection
      */
     protected $_children;
 
     /**
-     * Properties ignored while unserializing object
+     * Properties ignored while unserializing object.
+     *
      * @var array
      */
     protected $_unserialized_ignored = array('_created', '_modified');
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param string $uid     The unique identifier of the node
      * @param array  $options Initial options for the node
      */
@@ -146,6 +157,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns te unique identifier.
+     *
      * @return string
      */
     public function getUid()
@@ -155,6 +167,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns the root node.
+     *
      * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function getRoot()
@@ -163,7 +176,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns the parent node, NULL if this node is root
+     * Returns the parent node, NULL if this node is root.
+     *
      * @return \BackBee\NestedNode\AbstractNestedNode|NULL
      */
     public function getParent()
@@ -173,6 +187,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns the nested node left position.
+     *
      * @return int
      */
     public function getLeftnode()
@@ -182,6 +197,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns the nested node right position.
+     *
      * @return int
      */
     public function getRightnode()
@@ -191,6 +207,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns the weight of the node, ie the number of descendants plus itself.
+     *
      * @return int
      */
     public function getWeight()
@@ -199,7 +216,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns the level of the node in the tree, 0 for root node
+     * Returns the level of the node in the tree, 0 for root node.
+     *
      * @return int
      */
     public function getLevel()
@@ -209,6 +227,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns the creation date.
+     *
      * @return \DateTime
      */
     public function getCreated()
@@ -218,6 +237,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Returns the last modified date.
+     *
      * @return \DateTime
      */
     public function getModified()
@@ -226,7 +246,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns a collection of descendant nodes
+     * Returns a collection of descendant nodes.
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getDescendants()
@@ -235,7 +256,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns a collection of direct children nodes
+     * Returns a collection of direct children nodes.
+     *
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getChildren()
@@ -245,6 +267,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Is the node is a root ?
+     *
      * @return Boolean TRUE if the node is root of tree, FALSE otherwise
      */
     public function isRoot()
@@ -254,6 +277,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Is the node is a leaf ?
+     *
      * @return Boolean TRUE if the node if a leaf of tree, FALSE otherwise
      */
     public function isLeaf()
@@ -263,8 +287,10 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Is this node is an ancestor of the provided one ?
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  Boolean                         $strict Optional, if TRUE (default) this node is excluded of ancestors list
+     *
      * @return Boolean                         TRUE if this node is an anscestor or provided node, FALSE otherwise
      */
     public function isAncestorOf(AbstractNestedNode $node, $strict = true)
@@ -278,8 +304,10 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Is this node is a descendant of the provided one ?
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
      * @param  Boolean                         $strict Optional, if TRUE (default) this node is excluded of descendants list
+     *
      * @return Boolean                         TRUE if this node is a descendant or provided node, FALSE otherwise
      */
     public function isDescendantOf(AbstractNestedNode $node, $strict = true)
@@ -292,7 +320,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Determine if current node has children
+     * Determine if current node has children.
      *
      * @return boolean
      */
@@ -302,7 +330,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Sets the unique identifier of the node
+     * Sets the unique identifier of the node.
+     *
      * @param string $uid
      */
     public function setUid($uid)
@@ -314,7 +343,9 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Sets the root node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $root
+     *
      * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function setRoot(AbstractNestedNode $root)
@@ -326,7 +357,9 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Sets the parent node.
+     *
      * @param  \BackBee\NestedNode\AbstractNestedNode $parent
+     *
      * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function setParent(AbstractNestedNode $parent)
@@ -355,6 +388,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Sets the right position.
+     *
      * @param  int                                         $rightnode
      * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
@@ -372,6 +406,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
 
     /**
      * Sets the level.
+     *
      * @param  type                                        $level
      * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the value can not be cast to positive integer
@@ -388,7 +423,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Sets the creation date
+     * Sets the creation date.
+     *
      * @param  \DateTime                       $created
      * @return \BackBee\NestedNode\AbstractNestedNode
      */
@@ -400,7 +436,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Sets the last modified date
+     * Sets the last modified date.
+     *
      * @param  \DateTime                       $modified
      * @return \BackBee\NestedNode\AbstractNestedNode
      */
@@ -412,7 +449,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns an array representation of the node
+     * Returns an array representation of the node.
+     *
      * @return string
      */
     public function toArray()
@@ -430,7 +468,8 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns a string representation of node
+     * Returns a string representation of node.
+     *
      * @return string
      */
     public function serialize()
@@ -444,11 +483,11 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
     }
 
     /**
-     * Constructs the node from a string or object
+     * Constructs the node from a string or object.
+     *
      * @param  mixed                                       $serialized The string representation of the object.
      * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                                with strict mode, if a property does not exists
      */
     public function unserialize($serialized, $strict = false)
     {

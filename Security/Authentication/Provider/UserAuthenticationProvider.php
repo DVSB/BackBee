@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,35 +28,36 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-
 use BackBee\Security\Exception\SecurityException;
 use BackBee\Security\Token\UsernamePasswordToken;
 
 /**
- * Authentication provider for username/password firewall
+ * Authentication provider for username/password firewall.
  *
  * @category    BackBee
- * @package     BackBee\Security
- * @subpackage  Authentication\Provider
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
 class UserAuthenticationProvider implements AuthenticationProviderInterface
 {
     /**
-     * The user provider to query
+     * The user provider to query.
+     *
      * @var \Symfony\Component\Security\Core\User\UserProviderInterface
      */
     private $_userProvider;
 
     /**
-     * The encoders factory
+     * The encoders factory.
+     *
      * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
      */
     private $_encoderFactory;
 
     /**
-     * Class constructor
+     * Class constructor.
+     *
      * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
      */
     public function __construct(UserProviderInterface $userProvider, EncoderFactoryInterface $encoderFactory = null)
@@ -68,9 +69,11 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * Authenticate a token according to the user provider.
      *
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
      * @return \Symfony\Component\Security\Core\User\UserProviderInterface
-     * @throws SecurityException                                                    Occures on invalid connection
+     *
+     * @throws SecurityException Occures on invalid connection
      */
     public function authenticate(TokenInterface $token)
     {
@@ -106,8 +109,10 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * Checks whether this provider supports the given token.
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @return Boolean                                                              true if the implementation supports the Token, false otherwise
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     *
+     * @return Boolean true if the implementation supports the Token, false otherwise
      */
     public function supports(TokenInterface $token)
     {
@@ -115,9 +120,11 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Authenticate a token accoridng to the user provided
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
+     * Authenticate a token accoridng to the user provided.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \Symfony\Component\Security\Core\User\UserInterface                  $user
+     *
      * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
     private function _authenticateUser(TokenInterface $token, UserInterface $user)
@@ -130,9 +137,11 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Authenticate a token according to the user provided with password encoder
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
+     * Authenticate a token according to the user provided with password encoder.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \Symfony\Component\Security\Core\User\UserInterface                  $user
+     *
      * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
     private function _authenticateWithEncoder(TokenInterface $token, UserInterface $user)
@@ -150,9 +159,11 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
     }
 
     /**
-     * Authenticate a token according to the user provided without any password encoders
-     * @param  \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param  \Symfony\Component\Security\Core\User\UserInterface                  $user
+     * Authenticate a token according to the user provided without any password encoders.
+     *
+     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
+     * @param \Symfony\Component\Security\Core\User\UserInterface                  $user
+     *
      * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
     private function _authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)

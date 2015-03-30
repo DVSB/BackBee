@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,21 +23,22 @@
 
 namespace BackBee\ClassContent\Indexes;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
- * Entity class for optimized content table sorted by modified
+ * Entity class for optimized content table sorted by modified.
  *
  * @category    BackBee
- * @package     BackBee\ClassContent
- * @subpackage  Indexes
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
- * @Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @Table(
+ * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
+ * @ORM\Table(
  *   name="opt_content_modified",
  *   indexes={
- *     @index(name="IDX_CLASSNAMEO", columns={"classname"}),
- *     @index(name="IDX_NODE", columns={"node_uid"}),
- *     @index(name="IDX_MODIFIEDO", columns={"modified"})
+ *     @ORM\Index(name="IDX_CLASSNAMEO", columns={"classname"}),
+ *     @ORM\Index(name="IDX_NODE", columns={"node_uid"}),
+ *     @ORM\Index(name="IDX_MODIFIEDO", columns={"modified"})
  *   }
  * )
  */
@@ -45,37 +46,38 @@ class OptContentByModified
 {
     /**
      * @var string
-     * @Id @Column(type="string", name="uid", length=32, nullable=false)
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid", length=32, nullable=false)
      */
     protected $_uid;
 
     /**
      * @var string
-     * @Column(type="string", name="label", nullable=true)
+     * @ORM\Column(type="string", name="label", nullable=true)
      */
     protected $_label;
 
     /**
      * @var string
-     * @Column(type="string", name="classname", nullable=false)
+     * @ORM\Column(type="string", name="classname", nullable=false)
      */
     protected $_classname;
 
     /**
      * @var string
-     * @Column(type="string", length=32, name="node_uid", nullable=false)
+     * @ORM\Column(type="string", length=32, name="node_uid", nullable=false)
      */
     protected $_node_uid;
 
     /**
      * @var \DateTime
-     * @Column(type="datetime", name="modified")
+     * @ORM\Column(type="datetime", name="modified")
      */
     protected $_modified;
 
     /**
      * @var \DateTime
-     * @Column(type="datetime", name="created")
+     * @ORM\Column(type="datetime", name="created")
      */
     protected $_created;
 }

@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -31,14 +31,13 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverIn
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\SecurityContextInterface;
-
 use BackBee\Security\Authorization\ExpressionLanguage;
 
 /**
  * SecurityListener handles security restrictions on controllers.
  *
  * @category    BackBee
- * @package     BackBee\Rest
+ *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>, k.golovin
  */
@@ -111,8 +110,8 @@ class SecurityListener
     }
 
     /**
+     * @param mixed $controller
      *
-     * @param  mixed                                $controller
      * @return \BackBee\Rest\Mapping\ActionMetadata
      */
     protected function getControllerActionMetadata($controller)

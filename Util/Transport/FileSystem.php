@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -26,11 +26,10 @@ namespace BackBee\Util\Transport;
 use BackBee\Util\Transport\Exception\TransportException;
 
 /**
- * A local filesystem transport
+ * A local filesystem transport.
  *
  * @category    BackBee
- * @package     BackBee\Util
- * @subpackage  Transport
+ *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
@@ -38,9 +37,10 @@ class FileSystem extends AbstractTransport
 {
     /**
      * Class constructor, config should overwrite following option:
-     * * remotepath
+     * * remotepath.
      *
-     * @param  array                               $config
+     * @param array $config
+     *
      * @throws Exception\MisconfigurationException Occures if the remote path can not be created
      */
     public function __construct(array $config = null)
@@ -56,8 +56,9 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * @param  string                             $host
-     * @param  string                             $port
+     * @param string $host
+     * @param string $port
+     *
      * @return \BackBee\Util\Transport\FileSystem
      * @codeCoverageIgnore
      */
@@ -70,9 +71,11 @@ class FileSystem extends AbstractTransport
      * Tries to change dir to the defined remote path.
      * An error is triggered if failed.
      *
-     * @param  string                                                    $username
-     * @param  string                                                    $password
+     * @param string $username
+     * @param string $password
+     *
      * @return \BackBee\Util\Transport\FileSystem
+     *
      * @throws \BackBee\Util\Transport\Exception\AuthenticationException
      */
     public function login($username = null, $password = null)
@@ -89,7 +92,8 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Disconnects
+     * Disconnects.
+     *
      * @return \BackBee\Util\Transport\FileSystem
      * @codeCoverageIgnore
      */
@@ -99,8 +103,10 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Change remote directory
-     * @param  string  $dir
+     * Change remote directory.
+     *
+     * @param string $dir
+     *
      * @return boolean TRUE on success
      */
     public function cd($dir = null)
@@ -115,8 +121,10 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * List remote files on $dir
-     * @param  string      $dir
+     * List remote files on $dir.
+     *
+     * @param string $dir
+     *
      * @return array|FALSE
      */
     public function ls($dir = null)
@@ -130,7 +138,8 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Returns the current remote path
+     * Returns the current remote path.
+     *
      * @return string
      * @codeCoverageIgnore
      */
@@ -140,10 +149,12 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Copy a local file to the remote server
-     * @param  string  $local_file
-     * @param  string  $remote_file
-     * @param  boolean $overwrite
+     * Copy a local file to the remote server.
+     *
+     * @param string  $local_file
+     * @param string  $remote_file
+     * @param boolean $overwrite
+     *
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function send($local_file, $remote_file, $overwrite = false)
@@ -169,10 +180,12 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Copy recursively a local file and subfiles to the remote server
-     * @param  string  $local_file
-     * @param  string  $remote_file
-     * @param  boolean $overwrite
+     * Copy recursively a local file and subfiles to the remote server.
+     *
+     * @param string  $local_file
+     * @param string  $remote_file
+     * @param boolean $overwrite
+     *
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function sendRecursive($local_path, $remote_path, $overwrite = false)
@@ -207,10 +220,12 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Copy a remote file on local filesystem
-     * @param  string  $local_file
-     * @param  string  $remote_file
-     * @param  boolean $overwrite
+     * Copy a remote file on local filesystem.
+     *
+     * @param string  $local_file
+     * @param string  $remote_file
+     * @param boolean $overwrite
+     *
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function get($local_file, $remote_file, $overwrite = false)
@@ -259,9 +274,11 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Creates a new remote directory
-     * @param  string  $dir
-     * @param  boolean $recursive
+     * Creates a new remote directory.
+     *
+     * @param string  $dir
+     * @param boolean $recursive
+     *
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function mkdir($dir, $recursive = false)
@@ -275,9 +292,11 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Deletes a remote file
-     * @param  string  $remote_path
-     * @param  boolean $recursive
+     * Deletes a remote file.
+     *
+     * @param string  $remote_path
+     * @param boolean $recursive
+     *
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function delete($remote_path, $recursive = false)
@@ -305,9 +324,11 @@ class FileSystem extends AbstractTransport
     }
 
     /**
-     * Renames a remote file
-     * @param  string  $old_name
-     * @param  string  $new_name
+     * Renames a remote file.
+     *
+     * @param string $old_name
+     * @param string $new_name
+     *
      * @return boolean Returns TRUE on success or FALSE on error
      */
     public function rename($old_name, $new_name)

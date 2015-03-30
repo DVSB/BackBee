@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -58,7 +58,6 @@ class EntityFinder
     private $annotationReader;
 
     /**
-     *
      * @param string $baseDir
      */
     public function __construct($baseDir)
@@ -67,7 +66,8 @@ class EntityFinder
     }
 
     /**
-     * @param  string $path
+     * @param string $path
+     *
      * @return array
      */
     public function getEntities($path)
@@ -92,9 +92,10 @@ class EntityFinder
     }
 
     /**
-     * Get the paths that should be excluded
+     * Get the paths that should be excluded.
      *
-     * @param  string $path
+     * @param string $path
+     *
      * @return array
      */
     public function getExcludePaths($path)
@@ -117,6 +118,7 @@ class EntityFinder
 
     /**
      * @param string $folder
+     *
      * @return self
      */
     public function addIgnoredFolder($folder)
@@ -127,7 +129,8 @@ class EntityFinder
     }
 
     /**
-     * @param  string $file
+     * @param string $file
+     *
      * @return string
      */
     public function getNamespace($file)
@@ -154,8 +157,8 @@ class EntityFinder
     }
 
     /**
+     * @param string $namespace
      *
-     * @param  string $namespace
      * @return bool
      */
     private function isValidNamespace($namespace)
@@ -167,7 +170,8 @@ class EntityFinder
     }
 
     /**
-     * @param  \ReflectionClass $reflection
+     * @param \ReflectionClass $reflection
+     *
      * @return boolean
      */
     private function isEntity(\ReflectionClass $reflection)
@@ -176,11 +180,13 @@ class EntityFinder
     }
 
     /**
-     * @param  \ReflectionClass $class
+     * @param \ReflectionClass $class
+     *
      * @return Entity
      */
     private function getEntityAnnotation(\ReflectionClass $class)
     {
+        die('coucou');
         if (!$this->annotationReader) {
             $this->annotationReader = new SimpleAnnotationReader();
             $this->annotationReader->addNamespace('Doctrine\ORM\Mapping');
