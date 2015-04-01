@@ -23,13 +23,13 @@
 
 namespace BackBee\Logging;
 
+use BackBee\BBApplication;
+use BackBee\Logging\Appender\AppenderInterface;
+use BackBee\Logging\Exception\LoggingException;
+
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Psr\Log\LoggerInterface;
-use BackBee\BBApplication;
-use BackBee\FrontController\Exception\FrontControllerException;
-use BackBee\Logging\Appender\AppenderInterface;
-use BackBee\Logging\Exception\LoggingException;
 
 /**
  * @category    BackBee

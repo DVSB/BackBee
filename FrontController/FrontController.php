@@ -23,6 +23,13 @@
 
 namespace BackBee\FrontController;
 
+use BackBee\BBApplication;
+use BackBee\Event\PageFilterEvent;
+use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\NestedNode\Page;
+use BackBee\Routing\Matcher\UrlMatcher;
+use BackBee\Routing\RequestContext;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -30,17 +37,8 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use BackBee\BBApplication;
-use BackBee\Event\PageFilterEvent;
-use BackBee\FrontController\Exception\FrontControllerException;
-use BackBee\NestedNode\Page;
-use BackBee\Routing\Matcher\UrlMatcher;
-use BackBee\Routing\RequestContext;
 
 /**
  * The BackBee front controller
@@ -559,7 +557,7 @@ class FrontController implements HttpKernelInterface
         // logout Event dispatch
         if (
             null !== $request->get('logout')
-            && true == $request->get('logout')
+            && true === $request->get('logout')
             && true === $this->getApplication()->getSecurityContext()->isGranted('IS_AUTHENTICATED_FULLY')
         ) {
             $this->dispatch('frontcontroller.request.logout');

@@ -23,15 +23,6 @@
 
 namespace BackBee;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Debug\Debug;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use BackBee\Console\Console;
 use BackBee\DependencyInjection\ContainerBuilder;
 use BackBee\DependencyInjection\ContainerInterface;
@@ -44,6 +35,15 @@ use BackBee\Site\Site;
 use BackBee\Theme\Theme;
 use BackBee\Utils\File\File;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Debug\Debug;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+
 /**
  * The main BackBee application.
  *
@@ -54,7 +54,7 @@ use BackBee\Utils\File\File;
  */
 class BBApplication implements ApplicationInterface, DumpableServiceInterface, DumpableServiceProxyInterface
 {
-    const VERSION = '0.12.0-DEV';
+    const VERSION = '1.0.0-DEV';
 
     /**
      * application's service container.

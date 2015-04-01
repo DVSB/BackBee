@@ -163,7 +163,7 @@ class UrlGenerator implements UrlGeneratorInterface
             return $page->getUrl(false);
         }
 
-        if ($page->isRoot() && true == array_key_exists('_root_', $this->schemes)) {
+        if ($page->isRoot() && true === array_key_exists('_root_', $this->schemes)) {
             return $this->doGenerate($this->schemes['_root_'], $page, $content);
         }
 
@@ -185,7 +185,7 @@ class UrlGenerator implements UrlGeneratorInterface
             return $url;
         }
 
-        if (true == array_key_exists('_default_', $this->schemes)) {
+        if (true === array_key_exists('_default_', $this->schemes)) {
             return $this->doGenerate($this->schemes['_default_'], $page, $content);
         }
 

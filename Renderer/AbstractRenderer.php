@@ -986,7 +986,7 @@ abstract class AbstractRenderer implements RendererInterface
         }
 
         $dispatcher = $this->application->getEventDispatcher();
-        if (null != $dispatcher) {
+        if (null !== $dispatcher) {
             $object = null !== $object ? $object : $this->getObject();
             $event = new RendererEvent($object, null === $render ? $this : array($this, $render));
             $dispatcher->triggerEvent($name, $object, null, $event);

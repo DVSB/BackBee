@@ -23,6 +23,9 @@
 
 namespace BackBee\Rest\EventListener;
 
+use BackBee\Security\Authorization\ExpressionLanguage;
+use Symfony\Component\Security\Core\Role\Role;
+
 use Metadata\MetadataFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -31,7 +34,6 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolverIn
 use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundException;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\SecurityContextInterface;
-use BackBee\Security\Authorization\ExpressionLanguage;
 
 /**
  * SecurityListener handles security restrictions on controllers.
@@ -100,7 +102,7 @@ class SecurityListener
             'user' => $token->getUser(),
             'object' => $request,
             'request' => $request,
-            'roles' => array_map(function ($role) { return $role->getRole(); }, $roles),
+            'roles' => array_map(function (Role $role) { return $role->getRole(); }, $roles),
             'trust_resolver' => $this->trustResolver,
             'security_context' => $this->securityContext,
         );

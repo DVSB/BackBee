@@ -50,7 +50,7 @@ class RestHydrator
             if ($classMetadata->hasField($fieldName)) {
                 $fieldMappping = $classMetadata->getFieldMapping($fieldName);
 
-                if (null == $fieldMappping) {
+                if (null === $fieldMappping) {
                     throw new HydrationException($fieldName);
                 }
 

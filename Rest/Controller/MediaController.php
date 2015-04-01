@@ -23,20 +23,15 @@
 
 namespace BackBee\Rest\Controller;
 
-use DateTime;
+use BackBee\NestedNode\Media;
+use BackBee\Rest\Controller\Annotations as Rest;
+
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
-use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Validator\Constraints as Assert;
 
-use BackBee\NestedNode\Media;
-use BackBee\NestedNode\MediaFolder;
-use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Rest\Controller\ARestController;
-use BackBee\Utils;
 
 /**
  * Description of MediaController

@@ -75,7 +75,6 @@ class CleanOrphanContentCommand extends AbstractCommand
             try {
                 $orphan_object = $em->find($orphan['classname'], $orphan['uid']);
                 $em->getRepository($orphan['classname'])->deleteContent($orphan_object);
-                $em->flush();
             } catch (ClassNotFoundException $e) {
                 $uid = $orphan['uid'];
                 $em->getConnection()->executeQuery(
@@ -85,6 +84,8 @@ class CleanOrphanContentCommand extends AbstractCommand
                 $em->getConnection()->executeQuery("DELETE FROM content WHERE uid = '$uid'")->execute();
             }
         }
+
+        $em->flush();
 
         $contents_count = $em->getConnection()->executeQuery('SELECT count(*) FROM content')->fetch(\PDO::FETCH_NUM);
         $rows_saved = $before_contents_count - $contents_count[0];

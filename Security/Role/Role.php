@@ -23,7 +23,7 @@
 
 namespace BackBee\Security\Role;
 
-use Symfony\Component\Security\Core\Role\Role as sfRole;
+use Symfony\Component\Security\Core\Role\Role as SymfonyRole;
 
 /**
  * @category    BackBee
@@ -31,6 +31,6 @@ use Symfony\Component\Security\Core\Role\Role as sfRole;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Role extends sfRole
+class Role extends SymfonyRole
 {
 }

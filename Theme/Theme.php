@@ -109,7 +109,7 @@ class Theme extends ThemeConst
      */
     public function __construct(BBApplication $bbapp = null)
     {
-        if ($bbapp == null) {
+        if ($bbapp === null) {
             throw new ThemeException('Bad contruct implementation', ThemeException::THEME_BAD_CONSTRUCT);
         }
         $this->_application = $bbapp;

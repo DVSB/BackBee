@@ -66,7 +66,7 @@ class ThemeRepository extends EntityRepository
     public function setCurrentTheme($site_uid, PersonalThemeEntity $theme)
     {
         $current = $this->retrieveBySiteUid($site_uid);
-        if ($current != null) {
+        if ($current !== null) {
             foreach ($theme->toArray() as $key => $value) {
                 $current->{'set'.ucfirst($key)}($value);
             }
