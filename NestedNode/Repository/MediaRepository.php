@@ -52,27 +52,27 @@ class MediaRepository extends EntityRepository
                 ));
 
         $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
-        if (null != $typeField) {
+        if (null !== $typeField) {
             $q->andWhere('mc INSTANCE OF '.$typeField);
         }
 
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
-        if (null != $searchField) {
+        if (null !== $searchField) {
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
 
         $title = (isset($cond["mediaTitle"])) ? $cond["mediaTitle"] : null;
-        if (null != $title) {
+        if (null !== $title) {
             $q->andWhere($q->expr()->like('m._title', $q->expr()->literal('%'.$title.'%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
-        if (null != $afterPubdateField) {
+        if (null !== $afterPubdateField) {
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
         }
 
         $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
-        if (null != $beforePubdateField) {
+        if (null !== $beforePubdateField) {
             $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
         }
 
@@ -110,22 +110,22 @@ class MediaRepository extends EntityRepository
                 ));
 
         $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
-        if (null != $typeField) {
+        if (null !== $typeField) {
             $q->andWhere('mc INSTANCE OF '.$typeField);
         }
 
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
-        if (null != $searchField) {
+        if (null !== $searchField) {
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
-        if (null != $afterPubdateField) {
+        if (null !== $afterPubdateField) {
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
         }
 
         $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
-        if (null != $beforePubdateField) {
+        if (null !== $beforePubdateField) {
             $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
         }
 

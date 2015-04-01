@@ -111,44 +111,44 @@ class RevisionListener
             }
         }
     }
-    
-    public static function onFlushElementFile(Event $event) 
+
+    public static function onFlushElementFile(Event $event)
     {
         $application = $event->getApplication();
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
-        
+
         $revision = $event->getTarget();
         $content = $revision->getContent();
-        
+
         if ($content instanceof ElementFile) {
             $moveFrom = $content->path;
-            
+
             $content->originalname = Utils\String::toPath($content->originalname);
             $content->path = Media::getPathFromContent($content);
-            
+
             $moveTo = $content->path;
-            
+
             Utils\File\File::resolveFilepath($moveTo, null, array('base_dir' => $application->getMediaDir()));
-            
+
             if (!is_dir(dirname($moveTo))) {
                 mkdir(dirname($moveTo), 0755, true);
             }
 
             $content->setParam('stat', json_encode(stat($moveFrom)));
-            
+
             if ($content instanceof ElementImage) {
-                
+
                 list($width, $height) = getimagesize($moveFrom);
-                
+
                 $content->setParam('width', $width);
                 $content->setParam('height', $height);
             }
-            
+
             Utils\File\File::move($moveFrom, $moveTo);
-            
+
             $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
-        } 
+        }
     }
 
     public static function onPostLoad(Event $event)
@@ -162,7 +162,7 @@ class RevisionListener
             $revision->setEntityManager($em)
                     ->setToken($application->getBBUserToken());
 
-            if (null == $revision->getContent()) {
+            if (null === $revision->getContent()) {
                 $db = $em->getConnection();
                 $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()));
 

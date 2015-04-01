@@ -600,17 +600,17 @@ class ClassContentRepository extends EntityRepository
 
         /* else try to use indexation */
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
-        if (null != $searchField) {
+        if (null !== $searchField) {
             $qb->andWhere($qb->expr()->like('cc._label', $qb->expr()->literal('%'.$searchField.'%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
-        if (null != $afterPubdateField) {
+        if (null !== $afterPubdateField) {
             $qb->andWhere('cc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
         }
 
         $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
-        if (null != $beforePubdateField) {
+        if (null !== $beforePubdateField) {
             $qb->andWhere('cc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
         }
 
@@ -631,7 +631,7 @@ class ClassContentRepository extends EntityRepository
         }
         foreach ($criteria as $criterion) {
             //ajouter test
-            if (count($criterion) != 3) {
+            if (count($criterion) !== 3) {
                 continue;
             }
             $criterion = (object) $criterion;
@@ -789,9 +789,9 @@ class ClassContentRepository extends EntityRepository
     public function getUnorderedChildrenUids(AbstractClassContent $content)
     {
         return $this->getEntityManager()
-                        ->getConnection()
-                        ->executeQuery('SELECT content_uid FROM content_has_subcontent WHERE parent_uid=?', array($content->getUid()))
-                        ->fetchAll(\PDO::FETCH_COLUMN);
+            ->getConnection()
+            ->executeQuery('SELECT content_uid FROM content_has_subcontent WHERE parent_uid=?', array($content->getUid()))
+            ->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**

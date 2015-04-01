@@ -288,7 +288,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function getProperty($var = null)
     {
-        if (null == $var) {
+        if (null === $var) {
             return $this->properties;
         }
 
@@ -826,7 +826,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function getCreated()
     {
-        return null != $this->getDraft() ? $this->getDraft()->getCreated() : parent::getCreated();
+        return null !== $this->getDraft() ? $this->getDraft()->getCreated() : parent::getCreated();
     }
 
     /**

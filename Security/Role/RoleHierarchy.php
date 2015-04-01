@@ -23,7 +23,7 @@
 
 namespace BackBee\Security\Role;
 
-use Symfony\Component\Security\Core\Role\RoleHierarchy as sfRoleHierarchy;
+use Symfony\Component\Security\Core\Role\RoleHierarchy as SymfonyRoleHierarchy;
 
 /**
  * @category    BackBee
@@ -31,6 +31,6 @@ use Symfony\Component\Security\Core\Role\RoleHierarchy as sfRoleHierarchy;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class RoleHierarchy extends sfRoleHierarchy
+class RoleHierarchy extends SymfonyRoleHierarchy
 {
 }

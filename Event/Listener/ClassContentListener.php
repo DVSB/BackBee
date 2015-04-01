@@ -23,10 +23,7 @@
 
 namespace BackBee\Event\Listener;
 
-use Symfony\Component\Security\Core\Util\ClassUtils;
-
 use BackBee\ClassContent\AbstractClassContent;
-use BackBee\ClassContent\ContentSet;
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Revision;
@@ -93,7 +90,7 @@ class ClassContentListener
 
                     if (null !== $value) {
                         $value = $value->getData($element);
-                        if ($value instanceof AbstractClassContent && false == $em->contains($value)) {
+                        if ($value instanceof AbstractClassContent && false === $em->contains($value)) {
                             $value = $em->find(get_class($value), $value->getUid());
                         }
                     }

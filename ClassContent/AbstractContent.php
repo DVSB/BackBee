@@ -28,7 +28,6 @@ use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\RenderableInterface;
 use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
-use BackBee\Util\Parameter;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\Util\ClassUtils;

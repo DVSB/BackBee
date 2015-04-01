@@ -24,6 +24,7 @@
 namespace BackBee\Event\Listener;
 
 use Doctrine\ORM\Events;
+use Doctrine\Common\EventArgs;
 use BackBee\BBApplication;
 
 /**
@@ -95,7 +96,7 @@ class DoctrineListener
         }
 
         $dispatcher = $this->_application->getEventDispatcher();
-        if (null != $dispatcher) {
+        if (null !== $dispatcher) {
             $dispatcher->triggerEvent($eventName, $entity, $eventArgs);
         }
     }
@@ -129,7 +130,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function preFlush($eventArgs)
+    public function preFlush(EventArgs $eventArgs)
     {
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -154,7 +155,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function onFlush($eventArgs)
+    public function onFlush(EventArgs $eventArgs)
     {
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -179,7 +180,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postFlush($eventArgs)
+    public function postFlush(EventArgs $eventArgs)
     {
         $em = $eventArgs->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -204,7 +205,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postLoad($eventArgs)
+    public function postLoad(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postLoad, $eventArgs->getEntity(), $eventArgs);
@@ -222,7 +223,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postPersist($eventArgs)
+    public function postPersist(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postPersist, $eventArgs->getEntity(), $eventArgs);
@@ -236,7 +237,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function preRemove($eventArgs)
+    public function preRemove(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::preRemove, $eventArgs->getEntity(), $eventArgs);
@@ -250,7 +251,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postRemove($eventArgs)
+    public function postRemove(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postRemove, $eventArgs->getEntity(), $eventArgs);
@@ -264,7 +265,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function postUpdate($eventArgs)
+    public function postUpdate(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::postUpdate, $eventArgs->getEntity(), $eventArgs);
@@ -278,7 +279,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function prePersist($eventArgs)
+    public function prePersist(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::prePersist, $eventArgs->getEntity(), $eventArgs);
@@ -292,7 +293,7 @@ class DoctrineListener
      *
      * @param Doctrine\Common\EventArgs $eventArgs
      */
-    public function preUpdate($eventArgs)
+    public function preUpdate(EventArgs $eventArgs)
     {
         if (method_exists($eventArgs, 'getEntity')) {
             $this->_triggerEvent(Events::preUpdate, $eventArgs->getEntity(), $eventArgs);

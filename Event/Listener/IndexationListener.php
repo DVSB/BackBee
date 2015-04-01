@@ -231,13 +231,13 @@ class IndexationListener implements EventSubscriberInterface
                         $value = $content;
                         foreach ($elements as $element) {
                             $owner = $value;
-                            if (!$value instanceof \BackBee\ClassContent\AbstractClassContent) {
+                            if (!$value instanceof AbstractClassContent) {
                                 continue;
                             }
 
                             if (null !== $value) {
                                 $value = $value->getData($element);
-                                if ($value instanceof AbstractClassContent && false == $em->contains($value)) {
+                                if ($value instanceof AbstractClassContent && false === $em->contains($value)) {
                                     $value = $em->find(get_class($value), $value->getUid());
                                 }
                             }
