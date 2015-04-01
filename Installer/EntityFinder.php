@@ -23,7 +23,7 @@
 
 namespace BackBee\Installer;
 
-use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\Entity;
 
 class EntityFinder
@@ -187,8 +187,7 @@ class EntityFinder
     private function getEntityAnnotation(\ReflectionClass $class)
     {
         if (!$this->annotationReader) {
-            $this->annotationReader = new SimpleAnnotationReader();
-            $this->annotationReader->addNamespace('Doctrine\ORM\Mapping');
+            $this->annotationReader = new AnnotationReader();
         }
 
         return $this->annotationReader->getClassAnnotation($class, new Entity());
