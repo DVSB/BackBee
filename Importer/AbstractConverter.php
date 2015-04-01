@@ -32,7 +32,7 @@ use BackBee\Utils\String;
  * @copyright   Lp digital system
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  */
-abstract class AbstractConverterInterface implements ConverterInterface
+abstract class AbstractConverter implements ConverterInterface
 {
     /**
      * @var Object
