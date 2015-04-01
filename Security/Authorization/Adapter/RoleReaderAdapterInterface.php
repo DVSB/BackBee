@@ -21,7 +21,7 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Security\Authorization\Adaptator;
+namespace BackBee\Security\Authorization\Adapter;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use BackBee\BBApplication;
@@ -32,7 +32,7 @@ use BackBee\BBApplication;
  * @copyright   Lp digital system
  * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
-interface RoleReaderAdaptatorInterface
+interface RoleReaderAdapterInterface
 {
     /**
      * Object Constructor.

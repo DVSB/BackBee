@@ -23,6 +23,7 @@
 
 namespace BackBee\Util\BBAbstract;
 
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
 
 /**
@@ -35,7 +36,8 @@ abstract class AbstractUidEntity implements DomainObjectInterface
 {
     /**
      * @var string
-     * @Id @Column(type="string", name="uid")
+     * @ORM\Id
+     * @ORM\Column(type="string", name="uid")
      */
     protected $_uid;
 

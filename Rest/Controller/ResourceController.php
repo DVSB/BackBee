@@ -5,7 +5,7 @@
  *
  * This file is part of BackBee.
  *
- * BackBee5 is free software: you can redistribute it and/or modify
+ * BackBee is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -23,10 +23,11 @@
 
 namespace BackBee\Rest\Controller;
 
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use BackBee\Utils\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * REST API for Resources
@@ -41,7 +42,7 @@ class ResourceController extends AbstractRestController
     /**
      * Upload file action
      * 
-     * @return Symfony\Component\HttpFoundation\JsonResponse
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @throws NotFoundHttpException No file in the request
      * @throws BadRequestHttpException Only on file can be upload
      */

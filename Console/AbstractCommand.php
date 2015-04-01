@@ -25,6 +25,7 @@ namespace BackBee\Console;
 
 use Symfony\Component\Console\Command\Command;
 use BackBee\Bundle\AbstractBundle;
+use BackBee\DependencyInjection\ContainerInterface;
 
 /**
  * Abstract Command.

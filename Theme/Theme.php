@@ -189,7 +189,6 @@ class Theme extends ThemeConst
     {
         if ($this->_is_valid) {
             $dir = $this->getThemeDir(static::THEME_NAME).$this->_theme->getFolder();
-//            File::resolveFilepath($dir, NULL, array('base_dir' => $this->getThemeDir(static::THEME_NAME)));
             return $dir;
         }
 
@@ -328,7 +327,7 @@ class Theme extends ThemeConst
     /**
      * Get config.
      *
-     * @return BackBee\Config\Config
+     * @return \BackBee\Config\Config
      */
     public function getConfig()
     {

@@ -24,6 +24,7 @@
 namespace BackBee\NestedNode\Repository;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Exception;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;

@@ -23,10 +23,12 @@
 
 namespace BackBee\Theme;
 
-use Symfony\Component\Yaml\Exception\ParseException;
-use Symfony\Component\Yaml\Yaml;
+use BackBee\Config\Exception\ConfigException;
 use BackBee\Theme\Exception\ThemeException;
 use BackBee\Utils\File\Dir;
+
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @category    BackBee

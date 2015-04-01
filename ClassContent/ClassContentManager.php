@@ -25,6 +25,7 @@ namespace BackBee\ClassContent;
 
 use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ApplicationInterface;
+use BackBee\Exception\InvalidArgumentException;
 use BackBee\Routing\RouteCollection;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Utils\File\File;

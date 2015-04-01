@@ -24,6 +24,8 @@
 namespace BackBee\NestedNode\Repository;
 
 use Doctrine\ORM\EntityRepository;
+use Exception;
+
 use BackBee\NestedNode\Page;
 use BackBee\NestedNode\PageRevision;
 

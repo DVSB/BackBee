@@ -58,7 +58,6 @@ class ValidationException extends BadRequestHttpException
     {
         $errors = array();
 
-        //Symfony\Component\Validator\ConstraintViolation;
         foreach ($this->violations as $violation) {
             if (0 < strpos($violation->getPropertyPath(), '[')) {
                 //parse into proper php array

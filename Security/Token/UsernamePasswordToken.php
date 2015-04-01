@@ -47,8 +47,6 @@ class UsernamePasswordToken extends AbstractToken
 
         $this->setUser($user);
         $this->_credentials = $credentials;
-//        $this->roles = $roles;
-//        parent::setAuthenticated(count($roles) > 0);
     }
 
     /**

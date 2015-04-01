@@ -23,7 +23,6 @@
 
 namespace BackBee\Renderer;
 
-use Symfony\Component\HttpFoundation\ParameterBag;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\DependencyInjection\ContainerInterface;
@@ -33,8 +32,11 @@ use BackBee\NestedNode\Page;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Routing\RouteCollection;
 use BackBee\Site\Layout;
+use BackBee\Site\Site;
 use BackBee\Utils\File\File;
 use BackBee\Utils\String;
+
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Renderer engine class; able to manage multiple template engine.

@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
+
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Security\Group;

@@ -29,6 +29,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
+
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Exception\InvalidArgumentException;

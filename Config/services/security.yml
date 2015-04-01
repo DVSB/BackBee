@@ -26,7 +26,7 @@ services:
         arguments: [@security.authorization.yml_adaptor]
 
     security.authorization.yml_adaptor:
-        class: BackBee\Security\Authorization\Adaptator\Yml
+        class: BackBee\Security\Authorization\Adapter\Yml
         arguments: [@bbapp]
         public: false
 
