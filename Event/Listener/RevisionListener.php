@@ -169,7 +169,7 @@ class RevisionListener
                 $items = $stmt->fetchAll();
                 if ($items) {
                     foreach ($items as $item) {
-                        $content = $em->find($item["classname"], $item["content_uid"]); //@fixme ->use ResultSetMapping
+                        $content = $em->find($item["classname"], $item["content_uid"]);
                         if ($content) {
                             $revision->setContent($content);
                         }

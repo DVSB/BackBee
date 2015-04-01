@@ -36,7 +36,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class Memcache extends AMemcache
+class Memcache extends AbstractMemcache
 {
     /**
      * Class constructor.

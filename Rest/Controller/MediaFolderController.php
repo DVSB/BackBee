@@ -1,33 +1,55 @@
 <?php
 
+/*
+ * Copyright (c) 2011-2015 Lp digital system
+ *
+ * This file is part of BackBee.
+ *
+ * BackBee is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BackBee is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BackBee. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
+ */
+
 namespace BackBee\Rest\Controller;
 
-use BackBee\NestedNode\MediaFolder;
-use BackBee\Utils;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
+
+use BackBee\Exception\InvalidArgumentException;
+use BackBee\NestedNode\MediaFolder;
 use BackBee\Rest\Controller\Annotations as Rest;
-use BackBee\Rest\Patcher\EntityPatcher;
 use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
-use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBee\Rest\Patcher\OperationSyntaxValidator;
-use BackBee\Rest\Patcher\RightManager;
+use BackBee\Utils;
+
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Description of MediaFolderController
  *
- * @author h.baptiste
+ * @author h.baptiste <harris.baptiste@lp-digital.fr>
  */
 class MediaFolderController extends AbstractRestController
 {
 
     /**
      * Get collection of media folder
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\Pagination(default_count=100, max_count=200)
      *
@@ -36,13 +58,11 @@ class MediaFolderController extends AbstractRestController
      * )
      *
      */
-    public function getCollectionAction(Request $request, $start, $count, MediaFolder $parent = null)
+    public function getCollectionAction($start, MediaFolder $parent = null)
     {
         $results = $this->getMediaFolderRepository()->getMediaFolders($parent,array("field"=>"_leftnode", "dir"=>"asc"));
-        /*foreach ($paginator as $mediaFolder) {
-            $results[] = $mediaFolder;
-        }*/
         $response = $this->createJsonResponse($results);
+
         return $this->addRangeToContent($response, $results, $start);
     }
 
@@ -62,7 +82,7 @@ class MediaFolderController extends AbstractRestController
      *
      * @param MediaFolder $mediaFolder
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="mediaFolder", class="BackBee\NestedNode\MediaFolder")
      *
@@ -74,7 +94,7 @@ class MediaFolderController extends AbstractRestController
 
     /**
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\RequestParam(name="title", description="media title", requirements={
      *      @Assert\NotBlank()
      * })
@@ -101,7 +121,7 @@ class MediaFolderController extends AbstractRestController
     }
 
     /**
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\ParamConverter(name="mediaFolder", class="BackBee\NestedNode\MediaFolder")
      */
     public function deleteAction(MediaFolder $mediaFolder)
@@ -222,12 +242,12 @@ class MediaFolderController extends AbstractRestController
                 if (null !== $sibling_operation) {
                     unset($operations[$sibling_operation['key']]);
 
-                    $sibling = $this->getMedialFolderByUid($sibling_operation['op']['value']);
+                    $sibling = $this->getMediaFolderByUid($sibling_operation['op']['value']);
                     $this->getMediaFolderRepository()->moveAsPrevSiblingOf($mediaFolder, $sibling);
                 } elseif (null !== $parent_operation) {
                     unset($operations[$parent_operation['key']]);
 
-                    $parent = $this->getMedialFolderByUid($parent_operation['op']['value']);
+                    $parent = $this->getMediaFolderByUid($parent_operation['op']['value']);
                     $this->getMediaFolderRepository()->moveAsLastChildOf($mediaFolder, $parent);
                 }
             } catch (InvalidArgumentException $e) {
@@ -236,7 +256,7 @@ class MediaFolderController extends AbstractRestController
         }
     }
 
-    private function getMedialFolderByUid($uid)
+    private function getMediaFolderByUid($uid)
     {
         if (null === $mediaFolder = $this->getMediaFolderRepository()->find($uid)) {
             throw new NotFoundHttpException("Unable to find mediaFolder with uid `$uid`");

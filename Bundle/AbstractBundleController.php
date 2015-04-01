@@ -31,10 +31,11 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use BackBee\BBApplication;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\FrontController\FrontController;
+use BackBee\Routing\Matcher\UrlMatcher;
 use BackBee\Utils\File\File;
 
 /**
- * Abstract class for bundle controller in BackBee5 application.
+ * Abstract class for bundle controller in BackBee application.
  *
  * @category    BackBee
  *
@@ -176,8 +177,8 @@ abstract class AbstractBundleController extends FrontController implements HttpK
     {
         try {
             $this->request = $request;
-            $this->dispatch(strtolower(end(explode('\\', get_class($this)))).'.request');
-            $this->dispatch('frontcontroller.request');
+            $this->application->getEventDispatcher()->dispatch(strtolower(end(explode('\\', get_class($this)))).'.request');
+            $this->application->getEventDispatcher()->dispatch('frontcontroller.request');
 
             $urlMatcher = new UrlMatcher($this->getRouteCollection(), $this->getRequestContext());
             if ($matches = $urlMatcher->match($this->getRequest()->getPathInfo())) {

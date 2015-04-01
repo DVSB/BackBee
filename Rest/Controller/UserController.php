@@ -26,19 +26,21 @@ namespace BackBee\Rest\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
+
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Rest\Patcher\EntityPatcher;
 use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
-use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBee\Rest\Patcher\OperationSyntaxValidator;
 use BackBee\Rest\Patcher\RightManager;
 use BackBee\Security\User;
+use BackBee\Security\Token\BBUserToken;
 
 /**
  * User Controller.

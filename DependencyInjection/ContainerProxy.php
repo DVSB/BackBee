@@ -26,6 +26,7 @@ namespace BackBee\DependencyInjection;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
+use BackBee\Exception\InvalidArgumentException;
 
 /**
  * @category    BackBee

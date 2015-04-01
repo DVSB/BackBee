@@ -82,46 +82,11 @@ class SecurityContext extends sfSecurityContext
 
         $this->authmanager = $authenticationManager;
 
-        /*if (null === $this->authmanager) {
-            $this->authmanager = new AuthenticationManager(array());
-            $this->authmanager->setEventDispatcher($this->dispatcher);
-        }*/
-
         $this->createEncoderFactory($securityConfig);
         $this->createProviders($securityConfig);
         $this->createACLProvider($securityConfig);
         $this->createFirewallMap($securityConfig);
         $this->registerFirewall();
-
-        /*if (null === $accessDecisionManager) {
-            $trustResolver = new TrustResolver(
-                'BackBee\Security\Token\AnonymousToken',
-                'BackBee\Security\Token\RememberMeToken'
-            );
-
-            $voters = array();
-            $voters[] = new SudoVoter($this->getApplication());
-            $voters[] = new BBRoleVoter(new Yml($this->application));
-            $voters[] = new RoleVoter();
-            $voters[] = new AuthenticatedVoter($trustResolver);
-
-            if (null !== $this->aclprovider) {
-                $voters[] = new Authorization\Voter\BBAclVoter(
-                    $this->aclprovider,
-                    new \Symfony\Component\Security\Acl\Domain\ObjectIdentityRetrievalStrategy(),
-                    new \BackBee\Security\Acl\Domain\SecurityIdentityRetrievalStrategy(
-                            new RoleHierarchy(array()),
-                            $trustResolver
-                    ),
-                    new Acl\Permission\PermissionMap(),
-                    $this->getApplication()->getLogging(),
-                    false,
-                    $this->getApplication()
-                );
-            }
-
-            $accessDecisionManager = new DecisionManager($voters, 'affirmative', false, true);
-        }*/
 
         parent::__construct($this->authmanager, $accessDecisionManager);
     }

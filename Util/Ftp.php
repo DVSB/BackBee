@@ -346,7 +346,7 @@ class Ftp
             $this->doCdUp();
 
             return true;
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return false;
         }
 

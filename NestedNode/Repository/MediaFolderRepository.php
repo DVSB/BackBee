@@ -22,7 +22,11 @@
  */
 
 namespace BackBee\NestedNode\Repository;
+
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Revision;
+
+use Exception;
 
 /**
  * Media folder repository.

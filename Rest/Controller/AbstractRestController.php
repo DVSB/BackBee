@@ -32,6 +32,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
+
 use BackBee\Controller\Controller;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Rest\Formatter\FormatterInterface;

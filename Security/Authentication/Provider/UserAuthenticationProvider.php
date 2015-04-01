@@ -23,13 +23,16 @@
 
 namespace BackBee\Security\Authentication\Provider;
 
+use BackBee\Security\Exception\SecurityException;
+use BackBee\Security\Token\UsernamePasswordToken;
+
+use Exception;
+
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use BackBee\Security\Exception\SecurityException;
-use BackBee\Security\Token\UsernamePasswordToken;
 
 /**
  * Authentication provider for username/password firewall.

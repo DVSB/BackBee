@@ -28,6 +28,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
+
 use BackBee\Bundle\BundleInterface;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Patcher\EntityPatcher;

@@ -25,6 +25,7 @@ namespace BackBee\NestedNode\Repository;
 
 use BackBee\ClassContent\Element\Keyword;
 use BackBee\NestedNode\Page;
+use Exception;
 
 /**
  * Keyword repository.

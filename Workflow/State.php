@@ -23,12 +23,14 @@
 
 namespace BackBee\Workflow;
 
-use JMS\Serializer\Annotation as Serializer;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Site\Layout;
 use BackBee\Utils\Numeric;
+
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**
  * A workflow state for NestedNode\Page.
@@ -301,7 +303,7 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
             } elseif (true === property_exists($this, $property)) {
                 $this->$property = $value;
             } elseif (true === $strict) {
-                throw new InvalidArgumentException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this)));
+                throw new \InvalidArgumentException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this)));
             }
         }
 

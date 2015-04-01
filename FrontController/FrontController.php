@@ -548,7 +548,7 @@ class FrontController implements HttpKernelInterface
      *
      * @throws FrontControllerException
      */
-    private function invokeAction($type = self::MASTER_REQUEST)
+    protected function invokeAction($type = self::MASTER_REQUEST)
     {
         $this->dispatch('frontcontroller.request');
 

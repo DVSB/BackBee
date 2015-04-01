@@ -193,9 +193,6 @@ class BBUserToken extends AbstractToken
                 $this->_nonce,
             )
         );
-//        $serialized = unserialize(parent::serialize());
-//        $serialized[] = $this->_nonce;
-//        return serialize($serialized);
     }
 
     /**
