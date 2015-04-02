@@ -171,15 +171,15 @@ class PageBuilder
         }
 
         if (null !== $this->redirect) {
-            $page->setUrl($this->redirect);
+            $page->setRedirect($this->redirect);
         }
 
         if (null !== $this->target) {
-            $page->setUrl($this->target);
+            $page->setTarget($this->target);
         }
 
         if (null !== $this->alt_title) {
-            $page->setUrl($this->alt_title);
+            $page->setAltTitle($this->alt_title);
         }
 
         if (null !== $this->state) {
