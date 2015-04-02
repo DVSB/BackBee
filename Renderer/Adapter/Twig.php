@@ -117,7 +117,7 @@ class Twig extends AbstractRendererAdapter
             );
         }
 
-        $this->twig->setCache($cache_directory);
+        $this->twig->setCache($cacheDirectory);
     }
     /**
      * @see BackBee\Renderer\RendererAdapterInterface::getManagedFileExtensions()
