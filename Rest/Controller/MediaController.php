@@ -115,7 +115,7 @@ class MediaController extends AbstractRestController
             throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('media can\'t be found');
         }
         try {
-            $this->getEntityManager()->getRepository('BackBee\ClassContent\AClassContent')->deleteContent($media->getContent());
+            $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($media->getContent());
             $this->getEntityManager()->remove($media);
             $this->getEntityManager()->flush();
         } catch (\Exception $e) {
