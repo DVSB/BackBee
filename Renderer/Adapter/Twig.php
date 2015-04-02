@@ -135,7 +135,7 @@ class Twig extends ARendererAdapter
             );
         }
 
-        $this->twig->setCache($cache_directory);
+        $this->twig->setCache($cacheDirectory);
     }
     /**
      * @see BackBee\Renderer\IRendererAdapter::getManagedFileExtensions()
