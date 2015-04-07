@@ -112,7 +112,7 @@ class RevisionListener
         }
     }
 
-    public static function onFlushElementFile(Event $event)
+    public static function onPreFlushElementFile(Event $event)
     {
         $application = $event->getApplication();
         $em = $application->getEntityManager();
@@ -120,10 +120,15 @@ class RevisionListener
 
         $revision = $event->getTarget();
         $content = $revision->getContent();
-
+        
+        if ($uow->isScheduledForDelete($content)) {
+            return;
+        }
+        
         if ($content instanceof ElementFile) {
+            
             $moveFrom = $content->path;
-
+            
             $content->originalname = Utils\String::toPath($content->originalname);
             $content->path = Media::getPathFromContent($content);
 
@@ -146,8 +151,6 @@ class RevisionListener
             }
 
             Utils\File\File::move($moveFrom, $moveTo);
-
-            $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($content)), $content);
         }
     }
 

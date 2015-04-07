@@ -67,9 +67,9 @@ revision.postload:
     listeners:
         - [BackBee\Event\Listener\RevisionListener, onPostLoad]
         
-revision.onflush:
+revision.preflush:
     listeners:
-        - [BackBee\Event\Listener\RevisionListener, onFlushElementFile]
+        - [BackBee\Event\Listener\RevisionListener, onPreFlushElementFile]
         
 element.keyword.render:
     listeners:
