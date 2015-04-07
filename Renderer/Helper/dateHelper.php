@@ -41,10 +41,10 @@ class dateHelper extends AbstractHelper
     private static $DATE_ELEMENT = 4;
     public static $CULTURE_FR = "fr";
     public static $CULTURE_EN = "en";
-    private $format;
-    private $timezone;
-    private $date;
-    private $culture;
+    private $format = null;
+    private $timezone = null;
+    private $date = null;
+    private $culture = null;
 
     private function initFormat($format = null)
     {
@@ -54,7 +54,7 @@ class dateHelper extends AbstractHelper
             if (is_array($configDate) && array_key_exists('format', $configDate)) {
                 $this->format = $configDate['format'];
             } else {
-                throw new RendererException("Config from date 'format' is incorrect");
+                $this->format = '%Y-%m-%d at %H:%M';
             }
         } else {
             $this->format = $format;
@@ -67,8 +67,6 @@ class dateHelper extends AbstractHelper
             $configCulture = $this->_renderer->getApplication()->getConfig()->getCultureConfig();
             if (is_array($configCulture) && array_key_exists('default', $configCulture)) {
                 $this->culture = $configCulture['default'];
-            } else {
-                throw new RendererException("Config from culture 'default' is incorrect");
             }
         } else {
             $this->culture = $culture;
@@ -79,11 +77,9 @@ class dateHelper extends AbstractHelper
     {
         if (null === $timezone) {
             $config = $this->_renderer->getApplication()->getConfig()->getDateConfig();
-            if (array_key_exists('timezone', $config)) {
+            if (is_array($config) && array_key_exists('timezone', $config)) {
                 $this->timezone = $config['timezone'];
-            } else {
-                throw new RendererException("Config from date 'timezone' is incorrect");
-            }
+            } 
         } else {
             $this->timezone = $timezone;
         }
