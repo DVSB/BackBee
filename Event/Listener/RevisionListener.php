@@ -29,9 +29,8 @@ use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Element\Image as ElementImage;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
-use BackBee\Utils;
 use BackBee\Util\Media;
-
+use BackBee\Utils\File\File;
 
 /**
  * Listener to ClassContent events :
@@ -114,43 +113,37 @@ class RevisionListener
 
     public static function onPreFlushElementFile(Event $event)
     {
+        $revision = $event->getTarget();
+        $content = $revision->getContent();
+        
+        if (!$content instanceof ElementFile) {
+            return;
+        }
+        
         $application = $event->getApplication();
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
-
-        $revision = $event->getTarget();
-        $content = $revision->getContent();
         
         if ($uow->isScheduledForDelete($content)) {
             return;
         }
         
-        if ($content instanceof ElementFile) {
-            
-            $moveFrom = $content->path;
-            
-            $content->originalname = Utils\String::toPath($content->originalname);
-            $content->path = Media::getPathFromContent($content);
+        $fileRepository = $em->getRepository('BackBee\ClassContent\Element\File');
+        $fileRepository->setDirectories($application);
+        
+        $fileRepository->commitFile($content);
 
-            $moveTo = $content->path;
+        $moveFrom = $content->path;
+        File::resolveFilepath($moveFrom, null, array('base_dir' => $application->getMediaDir()));
 
-            Utils\File\File::resolveFilepath($moveTo, null, array('base_dir' => $application->getMediaDir()));
+        $content->setParam('stat', json_encode(stat($moveFrom)));
 
-            if (!is_dir(dirname($moveTo))) {
-                mkdir(dirname($moveTo), 0755, true);
-            }
+        if ($content instanceof ElementImage) {
 
-            $content->setParam('stat', json_encode(stat($moveFrom)));
+            list($width, $height) = getimagesize($moveFrom);
 
-            if ($content instanceof ElementImage) {
-
-                list($width, $height) = getimagesize($moveFrom);
-
-                $content->setParam('width', $width);
-                $content->setParam('height', $height);
-            }
-
-            Utils\File\File::move($moveFrom, $moveTo);
+            $content->setParam('width', $width);
+            $content->setParam('height', $height);
         }
     }
 
