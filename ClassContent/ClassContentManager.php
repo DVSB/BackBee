@@ -426,15 +426,15 @@ class ClassContentManager
                 }
             }
         }
-
+        
         if (isset($data['parameters'])) {
             foreach ($content->getAllParams() as $key => $params) {
                 if (!in_array($key, $data['parameters'])) {
                     $draft->setParam($key, $content->getParamValue($key));
                 }
             }
-        }
-
+        } 
+        
         if (isset($data['message'])) {
             $draft->setComment($data['message']);
         }
@@ -473,13 +473,6 @@ class ClassContentManager
                 }
 
                 $content->$key = $values;
-            }
-
-            if ($content instanceof ElementFile) {
-                $this->em->getRepository('BackBee\ClassContent\Element\File')
-                    ->setDirectories($this->application)
-                    ->commitFile($content)
-                ;
             }
         }
 

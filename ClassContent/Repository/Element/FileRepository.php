@@ -79,12 +79,14 @@ class FileRepository extends ClassContentRepository
     public function commitFile(ElementFile $file)
     {
         $filename = $file->path;
-        File::resolveFilepath($filename, null, array('base_dir' => $this->_temporarydir));
 
         $currentname = Media::getPathFromContent($file);
-        File::resolveFilepath($currentname, null, array('base_dir' => ($this->isInMediaLibrary($file)) ? $this->_mediadir : $this->_storagedir));
+        File::resolveFilepath($currentname, null, array('base_dir' => $this->_mediadir));
 
         try {
+            if (!is_dir(dirname($currentname))) {
+                mkdir(dirname($currentname), 0755, true);
+            }
             File::move($filename, $currentname);
             $file->path = Media::getPathFromContent($file);
             $this->_dispatchPostUploadEvent($currentname, $file->path);
