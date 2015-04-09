@@ -543,8 +543,13 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      */
     public function jsonSerialize()
     {
+        $draft = $this->getContent()->getDraft();
+        $this->getContent()->setDraft(null);
+
         $sourceData = $this->getContent()->jsonSerialize(self::JSON_CONCISE_FORMAT);
+        $this->getContent()->setDraft($draft);
         $draftData = parent::jsonSerialize(self::JSON_CONCISE_FORMAT);
+
         $draftData['uid'] = $sourceData['uid'];
         $draftData['type'] = $sourceData['type'];
         $draftData['elements'] = $this->computeElements($sourceData['elements'], $draftData['elements']);
