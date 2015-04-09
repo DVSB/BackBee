@@ -451,6 +451,8 @@ class ClassContentManager
      */
     private function executeCommit(AbstractClassContent $content, Revision $draft)
     {
+        $content->setDraft(null);
+
         if ($content instanceof ContentSet) {
             $content->clear();
             while ($subcontent = $draft->next()) {
