@@ -213,11 +213,14 @@ class PageController extends AbstractRestController
             $builder->setSite($this->getApplication()->getSite());
         }
 
+        $requestRedirect = $request->request->get('redirect');
+        $redirect = ($requestRedirect === '' || $requestRedirect === null) ? null : $requestRedirect;
+
         $builder->setTitle($request->request->get('title'));
         $builder->setUrl($request->request->get('url', null));
         $builder->setState($request->request->get('state'));
         $builder->setTarget($request->request->get('target'));
-        $builder->setRedirect($request->request->get('redirect'));
+        $builder->setRedirect($redirect);
         $builder->setAltTitle($request->request->get('alttitle'));
         $builder->setPublishing(
             null !== $request->request->get('publishing')
@@ -295,11 +298,15 @@ class PageController extends AbstractRestController
         $page->setLayout($layout);
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
 
+
+        $requestRedirect = $request->request->get('redirect');
+        $redirect = ($requestRedirect === '' || $requestRedirect === null) ? null : $requestRedirect;
+
         $page->setTitle($request->request->get('title'))
             ->setUrl($request->request->get('url'))
             ->setTarget($request->request->get('target'))
             ->setState($request->request->get('state'))
-            ->setRedirect($request->request->get('redirect', null))
+            ->setRedirect($redirect)
             ->setAltTitle($request->request->get('alttitle', null))
         ;
 
