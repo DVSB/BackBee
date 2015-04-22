@@ -229,7 +229,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             $pathinfo .= $defaultExt;
         }
 
-        return $pathinfo;
+        return str_replace('\\', '/', $pathinfo);
     }
 
     /**
