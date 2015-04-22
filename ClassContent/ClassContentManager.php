@@ -302,12 +302,16 @@ class ClassContentManager
             $imageUri = $data['image'];
             $urlType = RouteCollection::IMAGE_URL;
         } else {
-            $image_filepath = $this->getThumbnailBaseFolderPath().DIRECTORY_SEPARATOR.$data['image'];
             $baseFolder = $this->application->getContainer()->getParameter('classcontent_thumbnail.base_folder');
-            if (file_exists($image_filepath) && is_readable($image_filepath)) {
-                $imageUri = $baseFolder.DIRECTORY_SEPARATOR.$data['image'];
-            } else {
-                $imageUri = $baseFolder.DIRECTORY_SEPARATOR.'default_thumbnail.png';
+            foreach ($this->getThumbnailBaseFolderPath() as $baseDir) {
+                $imageFilepath = $baseDir.DIRECTORY_SEPARATOR.$data['image'];
+                if (file_exists($imageFilepath) && is_readable($imageFilepath)) {
+                    $imageUri = $baseFolder.DIRECTORY_SEPARATOR.$data['image'];
+
+                    break;
+                } else {
+                    $imageUri = $baseFolder.DIRECTORY_SEPARATOR.'default_thumbnail.png';
+                }
             }
         }
 
@@ -324,8 +328,9 @@ class ClassContentManager
     private function getThumbnailBaseFolderPath()
     {
         if (null === $this->thumbnailBaseDir) {
+            $this->thumbnailBaseDir = [];
             $baseFolder = $this->application->getContainer()->getParameter('classcontent_thumbnail.base_folder');
-            $this->thumbnailBaseDir = array_map(function ($directory) use ($baseFolder) {
+            $thumbnailBaseDir = array_map(function ($directory) use ($baseFolder) {
                 return str_replace(
                     DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,
                     DIRECTORY_SEPARATOR,
@@ -333,10 +338,9 @@ class ClassContentManager
                 );
             }, $this->application->getResourceDir());
 
-            foreach ($this->thumbnailBaseDir as $directory) {
+            foreach (array_unique($thumbnailBaseDir) as $directory) {
                 if (is_dir($directory)) {
-                    $this->thumbnailBaseDir = $directory;
-                    break;
+                    $this->thumbnailBaseDir[] = $directory;
                 }
             }
         }
@@ -426,15 +430,15 @@ class ClassContentManager
                 }
             }
         }
-        
+
         if (isset($data['parameters'])) {
             foreach ($content->getAllParams() as $key => $params) {
                 if (!in_array($key, $data['parameters'])) {
                     $draft->setParam($key, $content->getParamValue($key));
                 }
             }
-        } 
-        
+        }
+
         if (isset($data['message'])) {
             $draft->setComment($data['message']);
         }
