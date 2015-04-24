@@ -46,7 +46,9 @@ class metadata extends AbstractHelper
             return '';
         }
 
-        if (null === $metadata = $page->getMetaData()) {
+        $metadata = $page->getMetadata();
+
+        if (null === $metadata || $metadata->count() === 0) {
             $metadata = new MetaDataBag($renderer->getApplication()->getConfig()->getMetadataConfig(), $page);
             $page->setMetaData($metadata);
             if ($renderer->getApplication()->getEntityManager()->contains($page)) {
