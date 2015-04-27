@@ -98,14 +98,7 @@ class BBAclVoter extends AclVoter
     {
         if (self::ACCESS_GRANTED !== $result = parent::vote($token, $object, $attributes)) {
             // try class-scope ace
-            $objectIdentity = null;
-
-            if ($object instanceof ObjectIdentityInterface) {
-                $objectIdentity = new ObjectIdentity('class', $object->getType());
-            } else {
-                $objectIdentity = new ObjectIdentity('class', ClassUtils::getRealClass($object));
-            }
-
+            $objectIdentity = new ObjectIdentity('all', ClassUtils::getRealClass($object));
             $result = parent::vote($token, $objectIdentity, $attributes);
         }
 
@@ -150,6 +143,9 @@ class BBAclVoter extends AclVoter
                 if ('BackBee\ClassContent\AbstractClassContent' !== $parent_class) {
                     $parent_class = NAMESPACE_SEPARATOR.$parent_class;
                     $result = $this->_voteForClassContent($token, new $parent_class('*'), $attributes);
+                } else {
+                    $objectIdentity = new ObjectIdentity('all', 'BackBee\ClassContent\AbstractClassContent');
+                    $result = parent::vote($token, $objectIdentity, $attributes);
                 }
             }
         }
