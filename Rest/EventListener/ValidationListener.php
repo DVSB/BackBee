@@ -157,7 +157,6 @@ class ValidationListener extends AbstractPathEnabledListener
             if (empty($param['requirements'])) {
                 continue;
             }
-
             $value = $values->get($param['name']);
 
             $paramViolations = $validator->validateValue($value, $param['requirements']);

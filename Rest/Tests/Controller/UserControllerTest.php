@@ -136,7 +136,7 @@ class UserControllerTest extends RestTestCase
     /**
      * @covers ::getAction
      */
-    public function testGetAction_invalidUser()
+    public function testGetActionInvalidUser()
     {
         $controller = $this->getController();
 
@@ -181,7 +181,7 @@ class UserControllerTest extends RestTestCase
     /**
      * @covers ::deleteAction
      */
-    public function testDeleteAction_invalidUser()
+    public function testDeleteActionInvalidUser()
     {
         $controller = $this->getController();
 
@@ -242,7 +242,7 @@ class UserControllerTest extends RestTestCase
     /**
      * @covers ::putAction
      */
-    public function test_putAction_userDoesntExist()
+    public function testPutActionUserDoesntExist()
     {
         $controller = $this->getController();
 
@@ -254,7 +254,7 @@ class UserControllerTest extends RestTestCase
     /**
      * @covers ::putAction
      */
-    public function testPutAction_empty_required_fields()
+    public function testPutActionEmptyRequiredFields()
     {
         // create user
         $user = new User();
@@ -294,7 +294,7 @@ class UserControllerTest extends RestTestCase
     /**
      * @covers ::postAction
      */
-    public function test_postAction()
+    public function testPostAction()
     {
         // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
@@ -339,7 +339,42 @@ class UserControllerTest extends RestTestCase
     /**
      * @covers ::postAction
      */
-    public function testPostAction_missing_required_fields()
+    public function testPostActionInvalidUserLoginTooShort()
+    {
+        // set up permissions
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        $controller = $this->getController();
+
+        $data = [
+            'login' => 'user',
+            'email' => 'usernameDuplicate@provider.com',
+            'api_key_enabled' => true,
+            'api_key_public' => 'api_key_public',
+            'api_key_private' => 'api_key_private',
+            'firstname' => 'first_name',
+            'lastname' => 'last_name',
+            'activated' => false,
+            'password' => 'password',
+        ];
+
+        $response = $this->getBBApp()->getController()->handle(new Request(array(), $data, array(
+            '_action' => 'postAction',
+            '_controller' => 'BackBee\Rest\Controller\UserController',
+        ), array(), array(), array('REQUEST_URI' => '/rest/1/user')));
+
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('application/json', $response->headers->get('Content-Type'));
+        $guessedResponse = json_decode($response->getContent(), true);
+
+        $this->assertContains('Your login must be at least 6 characters', $guessedResponse['errors']['login']);
+    }
+
+    /**
+     * @covers ::postAction
+     */
+    public function testPostActionMissingRequiredFields()
     {
         $response = $this->getBBApp()->getController()->handle(new Request(array(), array(), array(
             '_action' => 'postAction',
@@ -359,7 +394,7 @@ class UserControllerTest extends RestTestCase
      * @expectedException \Symfony\Component\HttpKernel\Exception\ConflictHttpException
      * @expectedExceptionMessage User with that login already exists: usernameDuplicate
      */
-    public function test_postAction_duplicate_login()
+    public function testPostActionDuplicateLogin()
     {
         // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
