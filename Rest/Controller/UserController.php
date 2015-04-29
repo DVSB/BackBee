@@ -229,6 +229,7 @@ class UserController extends AbstractRestController
      *
      * @Rest\RequestParam(name = "login", requirements = {
      *  @Assert\NotBlank(message="Login is required"),
+     *  @Assert\Length(min=6, minMessage="Your login must be at least 6 characters")
      * })
      * @Rest\RequestParam(name = "email", requirements = {
      *  @Assert\NotBlank(message="Email not provided"),
