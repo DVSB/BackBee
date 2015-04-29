@@ -1,7 +1,7 @@
 parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
-    bbapp.locale: 'fr_FR'
-    translator.fallback: 'fr'
+    bbapp.locale: 'en_US'
+    translator.fallback: 'en'
 
     # bbapp classes
     bbapp.config.class: BackBee\Config\Config
