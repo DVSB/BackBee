@@ -583,8 +583,8 @@ class PageRepositoryTest extends TestCase
      */
     public function testDuplicateDeletedPage()
     {
-        $this->root->setState(Page::STATE_HIDDEN + Page::STATE_DELETED);
-        $this->repo->duplicate($this->root);
+        $this->page->setState(Page::STATE_HIDDEN + Page::STATE_DELETED);
+        $this->repo->duplicate($this->page);
     }
 
     /**
@@ -607,6 +607,8 @@ class PageRepositoryTest extends TestCase
         $this->root = new Page('root', array('title' => 'root', 'url' => 'url-root'));
         $this->root->setSite($site)
                 ->setLayout($layout);
+
+        $this->page = $this->createPage();
 
         $this->getEntityManager()->persist($this->root);
         $this->getEntityManager()->flush();
@@ -646,41 +648,5 @@ class PageRepositoryTest extends TestCase
         );
 
         return $this;
-    }
-
-    /**
-     * Builds a default set of layout zones.
-     *
-     * @return \stdClass
-     */
-    private function getDefaultLayoutZones()
-    {
-        $mainzone = new \stdClass();
-        $mainzone->id = 'main';
-        $mainzone->defaultContainer = null;
-        $mainzone->target = '#target';
-        $mainzone->gridClassPrefix = 'row';
-        $mainzone->gridSize = 8;
-        $mainzone->mainZone = true;
-        $mainzone->defaultClassContent = 'ContentSet';
-        $mainzone->options = null;
-
-        $asidezone = new \stdClass();
-        $asidezone->id = 'aside';
-        $asidezone->defaultContainer = null;
-        $asidezone->target = '#target';
-        $asidezone->gridClassPrefix = 'row';
-        $asidezone->gridSize = 4;
-        $asidezone->mainZone = false;
-        $asidezone->defaultClassContent = 'inherited';
-        $asidezone->options = null;
-
-        $data = new \stdClass();
-        $data->templateLayouts = array(
-            $mainzone,
-            $asidezone,
-        );
-
-        return $data;
     }
 }

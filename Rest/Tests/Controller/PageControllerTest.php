@@ -132,7 +132,6 @@ class PageControllerTest extends RestTestCase
         $homePage = new Page();
         $homePage
             ->setTitle('Page')
-            ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
         ;
         $em->persist($homePage);
@@ -168,7 +167,6 @@ class PageControllerTest extends RestTestCase
         // create page
         $page = (new Page())
             ->setTitle('Page Title')
-            ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
         ;
 
@@ -212,6 +210,7 @@ class PageControllerTest extends RestTestCase
         $deletedPage = new Page();
         $deletedPage
             ->setTitle('Deleted')
+            ->setParent(new Page())
             ->setState(Page::STATE_DELETED)
             ->setSite($this->site)
         ;
@@ -219,6 +218,7 @@ class PageControllerTest extends RestTestCase
         $offlinePage = new Page();
         $offlinePage
             ->setTitle('Offline')
+            ->setParent(new Page())
             ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
         ;
