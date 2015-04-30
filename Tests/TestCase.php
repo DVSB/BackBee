@@ -26,10 +26,15 @@ namespace BackBee\Tests;
 use Doctrine\ORM\Tools\SchemaTool;
 use BackBee\AutoLoader\AutoLoader;
 use BackBee\Installer\EntityFinder;
+use BackBee\NestedNode\Page;
 use BackBee\Security\Group;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Security\User;
+use BackBee\Site\Layout;
+use BackBee\Site\Site;
 use BackBee\Tests\Mock\MockBBApplication;
+use BackBee\Tests\TestCase;
+use BackBee\Workflow\State;
 
 /**
  * @category    BackBee
@@ -335,5 +340,60 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $metadata = $em->getMetadataFactory()->getAllMetadata();
         $schema = new SchemaTool($em);
         $schema->dropSchema($metadata);
+    }
+
+    public function createRootPage()
+    {
+        $page = new Page('test', array('title' => 'title', 'url' => 'url'));
+
+        $layout = new Layout();
+        $page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
+
+        return $page;
+    }
+
+    public function createPage()
+    {
+        $page = $this->createRootPage();
+
+        $page->setParent($this->createRootPage());
+
+        return $page;
+    }
+
+    /**
+     * Builds a default set of layout zones.
+     *
+     * @return \stdClass
+     */
+    protected function getDefaultLayoutZones()
+    {
+        $mainzone = new \stdClass();
+        $mainzone->id = 'main';
+        $mainzone->defaultContainer = null;
+        $mainzone->target = '#target';
+        $mainzone->gridClassPrefix = 'row';
+        $mainzone->gridSize = 8;
+        $mainzone->mainZone = true;
+        $mainzone->defaultClassContent = 'ContentSet';
+        $mainzone->options = null;
+
+        $asidezone = new \stdClass();
+        $asidezone->id = 'aside';
+        $asidezone->defaultContainer = null;
+        $asidezone->target = '#target';
+        $asidezone->gridClassPrefix = 'row';
+        $asidezone->gridSize = 4;
+        $asidezone->mainZone = false;
+        $asidezone->defaultClassContent = 'inherited';
+        $asidezone->options = null;
+
+        $data = new \stdClass();
+        $data->templateLayouts = array(
+            $mainzone,
+            $asidezone,
+        );
+
+        return $data;
     }
 }
