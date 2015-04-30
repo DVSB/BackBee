@@ -498,16 +498,20 @@ class PageTest extends TestCase
      */
     public function testGetParentZoneAtSamePositionIfExists()
     {
-        $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($this->page->getContentSet()->first()));
-        $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($this->page->getContentSet()->last()));
+        $page = new Page('test', array('title' => 'title', 'url' => 'url'));
+        $layout = new Layout();
+        $page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
+
+        $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($page->getContentSet()->first()));
+        $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($page->getContentSet()->last()));
 
         $child = new Page('child', array('title' => 'child', 'url' => 'url'));
-        $child->setParent($this->page)
-                ->setLayout($this->page->getLayout());
+        $child->setParent($page)
+                ->setLayout($page->getLayout());
 
         $this->assertFalse($child->getParentZoneAtSamePositionIfExists(new ContentSet()));
-        $this->assertEquals($this->page->getContentSet()->first(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->first()));
-        $this->assertEquals($this->page->getContentSet()->last(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->last()));
+        $this->assertEquals($page->getContentSet()->first(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->first()));
+        $this->assertEquals($page->getContentSet()->last(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->last()));
 
         $thirdcolumn = new \stdClass();
         $thirdcolumn->id = 'third';
@@ -524,7 +528,7 @@ class PageTest extends TestCase
 
         $layout = new Layout();
         $child->setLayout($layout->setDataObject($data));
-        $this->assertEquals($this->page->getContentSet()->last(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->item(1)));
+        $this->assertEquals($page->getContentSet()->last(), $child->getParentZoneAtSamePositionIfExists($child->getContentSet()->item(1)));
         $this->assertFalse($child->getParentZoneAtSamePositionIfExists($child->getContentSet()->last()));
     }
 
@@ -615,7 +619,7 @@ class PageTest extends TestCase
             'rel' => 'leaf',
             'uid' => 'test',
             'rootuid' => 'test',
-            'parentuid' => null,
+            'parentuid' => 'test',
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
             'isleaf' => true,
@@ -648,7 +652,7 @@ class PageTest extends TestCase
             'rel' => 'leaf',
             'uid' => 'test',
             'rootuid' => 'test',
-            'parentuid' => null,
+            'parentuid' => 'test',
             'created' => $this->current_time->getTimestamp(),
             'modified' => $this->current_time->getTimestamp(),
             'isleaf' => true,
@@ -681,13 +685,13 @@ class PageTest extends TestCase
                 ->setArchiving($this->current_time)
                 ->setPublishing($this->current_time)
                 ->setMetadata(new MetaDataBag());
-
-        $new_page = new Page();
-        $new_page->setSite($this->page->getSite())
+        $newPage = new Page();
+        $newPage->setParent($this->page->getParent())
+                ->setSite($this->page->getSite())
                 ->setLayout($this->page->getLayout())
                 ->setContentSet($this->page->getContentSet());
 
-        $this->assertEquals($this->page, $new_page->unserialize($this->page->serialize()));
+        $this->assertEquals($this->page, $newPage->unserialize($this->page->serialize()));
     }
 
     /**
@@ -727,50 +731,36 @@ class PageTest extends TestCase
     }
 
     /**
+     * Restrictions on Root page
+     * => A root page can't be archived;
+     * => A root page can't be published in the future;
+     * => A root page can't be put offline.
+     */
+
+    public function testRootPageCantBeArchived()
+    {
+        $rootPage = $this->createPage(true);
+        $rootPage->setArchiving(new \Datetime());
+    }
+
+    public function testRootPageCantBePublished()
+    {
+        $rootPage = $this->createPage(true);
+        $rootPage->setPublishing(new \Datetime());
+    }
+
+    public function testRootPageCantBePutOffline()
+    {
+        $rootPage = $this->createPage(true);
+        $rootPage->setState(Page::STATE_ONLINE);
+    }
+
+    /**
      * Sets up the fixture.
      */
     public function setUp()
     {
         $this->current_time = new \Datetime();
-        $this->page = new Page('test', array('title' => 'title', 'url' => 'url'));
-
-        $layout = new Layout();
-        $this->page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
-    }
-
-    /**
-     * Builds a default set of layout zones.
-     *
-     * @return \stdClass
-     */
-    private function getDefaultLayoutZones()
-    {
-        $mainzone = new \stdClass();
-        $mainzone->id = 'main';
-        $mainzone->defaultContainer = null;
-        $mainzone->target = '#target';
-        $mainzone->gridClassPrefix = 'row';
-        $mainzone->gridSize = 8;
-        $mainzone->mainZone = true;
-        $mainzone->defaultClassContent = 'ContentSet';
-        $mainzone->options = null;
-
-        $asidezone = new \stdClass();
-        $asidezone->id = 'aside';
-        $asidezone->defaultContainer = null;
-        $asidezone->target = '#target';
-        $asidezone->gridClassPrefix = 'row';
-        $asidezone->gridSize = 4;
-        $asidezone->mainZone = false;
-        $asidezone->defaultClassContent = 'inherited';
-        $asidezone->options = null;
-
-        $data = new \stdClass();
-        $data->templateLayouts = array(
-            $mainzone,
-            $asidezone,
-        );
-
-        return $data;
+        $this->page = $this->createPage();
     }
 }
