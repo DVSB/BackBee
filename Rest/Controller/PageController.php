@@ -295,6 +295,7 @@ class PageController extends AbstractRestController
      */
     public function putAction(Page $page, Layout $layout, Request $request)
     {
+
         $page->setLayout($layout);
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
 
@@ -310,11 +311,16 @@ class PageController extends AbstractRestController
             ->setAltTitle($request->request->get('alttitle', null))
         ;
 
-        $publishing = $request->request->get('publishing');
-        $page->setPublishing(null !== $publishing ? new \DateTime(date('c', $publishing)) : null);
 
-        $archiving = $request->request->get('archiving');
-        $page->setArchiving(null !== $archiving ? new \DateTime(date('c', $archiving)) : null);
+        if ($request->request->has('publishing')) {
+            $publishing = $request->request->get('publishing');
+            $page->setPublishing(null !== $publishing ? new \DateTime(date('c', $publishing)) : null);
+        }
+
+        if ($request->request->has('archiving')) {
+            $archiving = $request->request->get('archiving');
+            $page->setArchiving(null !== $archiving ? new \DateTime(date('c', $archiving)) : null);
+        }
 
         if (true === $page->isOnline(true)) {
             $this->granted('PUBLISH', $page);

@@ -62,7 +62,7 @@ class ExceptionListener extends AbstractPathEnabledListener
 
         if (isset($this->mapping[$exceptionClass])) {
             $code = isset($this->mapping[$exceptionClass]['code']) ? $this->mapping[$exceptionClass]['code'] : 500;
-            $message = isset($this->mapping[$exceptionClass]['message']) ? $this->mapping[$exceptionClass]['message'] : Response::$statusTexts[$code];
+            $message = isset($this->mapping[$exceptionClass]['message']) ? $this->mapping[$exceptionClass]['message'] : $exception->getMessage();
 
             if (!$event->getResponse()) {
                 $event->setResponse(new Response());

@@ -476,7 +476,7 @@ class PageBuilder
      * Get a Class Content from a Page.
      *
      * @param int $index the index in elements array of a Page
-     * @return ClassContent|null the selected content if found, else null 
+     * @return ClassContent|null the selected content if found, else null
      */
     public function getElement($index)
     {

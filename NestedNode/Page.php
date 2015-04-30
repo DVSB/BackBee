@@ -941,7 +941,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setState($state)
     {
-        if ($this->isRoot()) {
+        if ($this->isRoot() && $state !== Page::STATE_ONLINE) {
             throw new \LogicException("Root page state must be online.");
         }
 
@@ -959,7 +959,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setPublishing($publishing = null)
     {
-        if ($this->isRoot()) {
+        if ($this->isRoot() && $publishing !== null && $this->_publishing !== null) {
             throw new \LogicException("Root page is already published.");
         }
         $this->_publishing = null !== $publishing ? $this->convertTimestampToDateTime($publishing) : null;
@@ -976,7 +976,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setArchiving($archiving = null)
     {
-        if ($this->isRoot()) {
+        if ($this->isRoot() && $archiving !== null) {
             throw new \LogicException("Root page can't be archived.");
         }
         $this->_archiving = null !== $archiving ? $this->convertTimestampToDateTime($archiving) : null;
