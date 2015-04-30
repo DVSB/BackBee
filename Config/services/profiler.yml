@@ -22,9 +22,8 @@ services:
         class:      Symfony\Component\HttpKernel\Profiler\Profiler
         arguments:  [@profiler.storage, @logging]
         calls:
-            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", @data_collector.doctrine]]]
-            #"@data_collector.time",
+            - [set, [["@data_collector.config", "@data_collector.request", "@data_collector.exception", "@data_collector.events", "@data_collector.logger", "@data_collector.memory", "@data_collector.routing", "@data_collector.doctrine"]]]
 
     profiler.storage:
         class:      BackBee\Profiler\FileProfilerStorage
-        arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]
+        arguments:  [@bbapp, "file:/%bbapp.cache.dir%/_profiler/"]

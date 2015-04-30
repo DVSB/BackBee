@@ -92,6 +92,7 @@ class ToolbarListener implements ContainerAwareInterface
 
         $profiler = $event->getKernel()->getApplication()->getContainer()->get('profiler');
         $profile = $profiler->collect($request, $response, null);
+        $profile->getCollector('logger')->lateCollect();
         $renderer = $event->getKernel()->getApplication()->getRenderer();
 
         $this->injectToolbar($response, $profile, $renderer);

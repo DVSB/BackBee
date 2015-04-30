@@ -4,25 +4,25 @@
 {% block toolbar %}
         {% set icon %}
             <img width="15" height="28" alt="Logs" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAcCAYAAABoMT8aAAAA4klEQVQ4y2P4//8/AyWYYXgYwOPp6Xnc3t7+P7EYpB6k7+zZs2ADNEjRjIwDAgKWgAywIUfz8+fPVzg7O/8AGeCATQEQnAfi/SAah/wcV1dXvAYUgORANA75ehcXl+/4DHAABRIe+ZrhbgAhTHsDiEgHBA0glA6GfSDiw5mZma+A+sphBlhVVFQ88vHx+Xfu3Ll7QP5haOjjwtuAuGHv3r3NIMNABqh8+/atsaur666vr+9XUlwSHx//AGQANxCbAnEWyGQicRMQ9wBxIQM0qjiBWAFqkB00/glhayBWHwb1AgB38EJsUtxtWwAAAABJRU5ErkJggg==" />
-            {% if collector.counterrors %}
+            {% if collector.countErrors() %}
                 {% set status_color = "red" %}
             {% else %}
                 {% set status_color = "yellow" %}
             {% endif %}
-            {% set error_count = collector.counterrors + collector.countdeprecations %}
+            {% set error_count = collector.countErrors() + collector.countDeprecations() %}
             <span class="bb-toolbar-status bb-toolbar-status-{{ status_color }}">{{ error_count }}</span>
         {% endset %}
         {% set text %}
-            {% if collector.counterrors %}
+            {% if collector.countErrors() %}
                 <div class="bb-toolbar-item">
                     <b>Exception</b>
-                    <span class="bb-toolbar-status bb-toolbar-status-red">{{ collector.counterrors }}</span>
+                    <span class="bb-toolbar-status bb-toolbar-status-red">{{ collector.countErrors() }}</span>
                 </div>
             {% endif %}
-            {% if collector.countdeprecations %}
+            {% if collector.countDeprecations() %}
                 <div class="bb-toolbar-item">
                     <b>Deprecated Calls</b>
-                    <span class="bb-toolbar-status bb-toolbar-status-yellow">{{ collector.countdeprecations }}</span>
+                    <span class="bb-toolbar-status bb-toolbar-status-yellow">{{ collector.countDeprecations() }}</span>
                 </div>
             {% endif %}
         {% endset %}
@@ -32,7 +32,7 @@
 {% block panel %}
     <h2>Logs</h2>
 
-    {% if collector.logs %}
+    {% if collector.getLogs() %}
         {% import _self as logger %}
         <ol class="alt" id="bb-toolbar-log-items">
             {% for log in collector.logs if priority >= 0 and log.priority >= priority or priority < 0 and log.context.type|default(0) == priority %}
