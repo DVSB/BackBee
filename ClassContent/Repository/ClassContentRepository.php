@@ -904,18 +904,29 @@ class ClassContentRepository extends EntityRepository
         }
     }
 
-    public function getClassnames(array $content_uids)
+    /**
+     * Returns distinct classnames for provided classcontent uids.
+     *
+     * @param  array  $contentUids The array that contains every classcontent uids
+     * @return array
+     */
+    public function getClassnames(array $contentUids)
     {
-        $content_uids = array_filter($content_uids);
-        if (0 === count($content_uids)) {
-            return array();
+        $contentUids = array_map(function ($uid) {
+            return '"'.$uid.'"';
+        }, array_filter($contentUids));
+
+        if (0 === count($contentUids)) {
+            return [];
         }
 
-        $sql = 'SELECT DISTINCT c.classname FROM content c WHERE c.uid IN (:content_uids)';
+        $qb = $this->_em->getConnection()->createQueryBuilder();
 
-        return $this->getEntityManager()
-            ->getConnection()
-            ->executeQuery($sql, array('content_uids' => implode(', ', $content_uids)))
+        return $qb
+            ->select('DISTINCT c.classname')
+            ->from('content', 'c')
+            ->where($qb->expr()->in('c.uid', $contentUids))
+            ->execute()
             ->fetchAll(\PDO::FETCH_COLUMN)
         ;
     }
