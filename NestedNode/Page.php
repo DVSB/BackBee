@@ -1597,4 +1597,24 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
     {
         return parent::hasChildren();
     }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("integer")
+     * @Serializer\SerializedName("created")
+     */
+    public function getCreatedTimestamp()
+    {
+        return $this->_created ? $this->_created->format('U') : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("integer")
+     * @Serializer\SerializedName("modified")
+     */
+    public function getModifiedTimestamp()
+    {
+        return $this->_modified ? $this->_modified->format('U') : null;
+    }
 }
