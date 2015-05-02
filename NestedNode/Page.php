@@ -941,7 +941,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setState($state)
     {
-        if ($this->isRoot() && $state !== Page::STATE_ONLINE) {
+        if ($this->isRoot() && !($state & Page::STATE_ONLINE)) {
             throw new \LogicException("Root page state must be online.");
         }
 
