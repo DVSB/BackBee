@@ -372,7 +372,7 @@ class PageRepository extends NestedNodeRepository
           ->setMaxResults($maxresults)
         ;
 
-        return new Paginator($q);
+        return new Paginator($q, false);
     }
 
     /**
@@ -459,7 +459,7 @@ class PageRepository extends NestedNodeRepository
               ->setMaxResults($paging['limit'])
             ;
 
-            return new Paginator($q);
+            return new Paginator($q, false);
         }
 
         return $q->getQuery()->getResult();
