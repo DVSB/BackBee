@@ -49,7 +49,6 @@ class Cache extends AbstractCache
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
     {
         return false;
-        // TODO: Implement load() method.
     }
 
     /**
@@ -62,7 +61,6 @@ class Cache extends AbstractCache
     public function test($id)
     {
         return false;
-        // TODO: Implement test() method.
     }
 
     /**
@@ -79,7 +77,6 @@ class Cache extends AbstractCache
     public function save($id, $data, $lifetime = null, $tag = null)
     {
         return true;
-        // TODO: Implement save() method.
     }
 
     /**
@@ -92,7 +89,6 @@ class Cache extends AbstractCache
     public function remove($id)
     {
         return true;
-        // TODO: Implement remove() method.
     }
 
     /**
@@ -103,6 +99,5 @@ class Cache extends AbstractCache
     public function clear()
     {
         return true;
-        // TODO: Implement clear() method.
     }
 }
