@@ -31,6 +31,7 @@ use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBee\Event\Event;
 use BackBee\Exception\BBException;
 use BackBee\NestedNode\Repository\NestedNodeRepository;
+use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Site;
 use BackBee\Theme\Theme;
 use BackBee\Utils\File\File;
@@ -61,55 +62,50 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @var BackBee\DependencyInjection\ContainerInterface
      */
-    private $_container;
+    private $container;
 
     /**
      * application's context.
      *
      * @var string
      */
-    private $_context;
+    private $context;
 
     /**
      * application's environment.
      *
      * @var string
      */
-    private $_environment;
+    private $environment;
 
     /**
      * define if application is started with debug mode or not.
      *
      * @var boolean
      */
-    private $_debug;
-    private $_isinitialized;
-    private $_isstarted;
-    private $_bbdir;
-    private $_mediadir;
-    private $_repository;
-    private $_base_repository;
-    private $_resourcedir;
-    private $_starttime;
-    private $_storagedir;
-    private $_tmpdir;
-    private $_classcontentdir;
-    private $_theme;
-    private $_overwrite_config;
+    private $debug;
+    private $isInitialized;
+    private $isStarted;
+    private $repository;
+    private $baseRepository;
+    private $resourceDir;
+    private $storageDir;
+    private $tmpDir;
+    private $classcontentDir;
+    private $theme;
+    private $overwriteConfig;
 
     /**
      * tell us if application has been restored by container or not.
      *
      * @var boolean
      */
-    private $_is_restored;
+    private $isRestored;
 
     /**
-     * [$dump_datas description].
-     *
      * @var array
      */
-    private $dump_datas;
+    private $dumpDatas;
 
     /**
      * @param string $context
@@ -118,39 +114,43 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function __construct($context = null, $environment = null, $overwrite_config = false)
     {
-        $this->_starttime = time();
-        $this->_context = (null === $context) ? self::DEFAULT_CONTEXT : $context;
-        $this->_isinitialized = false;
-        $this->_isstarted = false;
-        $this->_overwrite_config = $overwrite_config;
-        $this->_is_restored = false;
-        $this->_environment = null !== $environment && true === is_string($environment)
+        $this->context = null === $context ? self::DEFAULT_CONTEXT : $context;
+        $this->isInitialized = false;
+        $this->isStarted = false;
+        $this->overwriteConfig = $overwrite_config;
+        $this->isRestored = false;
+        $this->environment = null !== $environment && is_string($environment)
             ? $environment
             : self::DEFAULT_ENVIRONMENT
         ;
-        $this->dump_datas = array();
+        $this->dumpDatas = [];
 
-        $this->_initAnnotationReader();
-        $this->_initContainer();
-
+        $this->initAnnotationReader();
+        $this->initContainer();
 
         if ($this->isDebugMode()) {
             Debug::enable();
         }
-        $this->_initEnvVariables();
-        $this->_initAutoloader();
-        $this->_initContentWrapper();
+
+        $this->initEnvVariables();
+        $this->initAutoloader();
+        $this->initContentWrapper();
 
         try {
-            $this->_initEntityManager();
+            $this->initEntityManager();
         } catch (\Exception $e) {
             $this->getLogging()->notice('BackBee starting without EntityManager');
         }
 
-        $this->_initBundles();
+        $this->initBundles();
 
-        if (false === $this->getContainer()->has('em')) {
-            $this->debug(sprintf('BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
+        if (!$this->getContainer()->has('em')) {
+            $this->debug(sprintf(
+                'BBApplication (v.%s) partial initialization with context `%s`, debugging set to %s',
+                self::VERSION,
+                $this->context,
+                var_export($this->debug, true)
+            ));
 
             return;
         }
@@ -158,19 +158,21 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         // Force container to create SecurityContext object to activate listener
         $this->getSecurityContext();
 
-        $this->debug(sprintf('BBApplication (v.%s) initialization with context `%s`, debugging set to %s', self::VERSION, $this->_context, var_export($this->_debug, true)));
+        $this->debug(sprintf(
+            'BBApplication (v.%s) initialization with context `%s`, debugging set to %s',
+            self::VERSION,
+            $this->context,
+            var_export($this->debug, true)
+        ));
         $this->debug(sprintf('  - Base directory set to `%s`', $this->getBaseDir()));
         $this->debug(sprintf('  - Repository directory set to `%s`', $this->getRepository()));
 
-        $this->_isinitialized = true;
+        $this->isInitialized = true;
 
         // trigger bbapplication.init
         $this->getEventDispatcher()->dispatch('bbapplication.init', new Event($this));
     }
 
-    /**
-     * [__destruct description].
-     */
     public function __destruct()
     {
         $this->stop();
@@ -179,7 +181,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     public function __call($method, $args)
     {
         if ($this->getContainer()->has('logging')) {
-            call_user_func_array(array($this->getContainer()->get('logging'), $method), $args);
+            call_user_func_array([$this->getContainer()->get('logging'), $method], $args);
         }
     }
 
@@ -195,21 +197,21 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * Returns the associated theme.
      *
-     * @param boolean $force_reload Force to reload the theme if true
+     * @param boolean $forceReload Force to reload the theme if true
      *
      * @return \BackBee\Theme\Theme
      */
-    public function getTheme($force_reload = false)
+    public function getTheme($forceReload = false)
     {
         if (null === $this->getConfig()->getSection('themes_dir') || null === $this->getConfig()->getThemeConfig()) {
             return;
         }
 
-        if (false === is_object($this->_theme) || true === $force_reload) {
-            $this->_theme = new Theme($this);
+        if (!is_object($this->theme) || true === $forceReload) {
+            $this->theme = new Theme($this);
         }
 
-        return $this->_theme;
+        return $this->theme;
     }
 
     /**
@@ -217,15 +219,21 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getMailer()
     {
-        if (false === $this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
+        if (!$this->getContainer()->has('mailer') || is_null($this->getContainer()->get('mailer'))) {
             if (null !== $mailer_config = $this->getConfig()->getSection('mailer')) {
-                $smtp = (is_array($mailer_config['smtp'])) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
-                $port = (is_array($mailer_config['port'])) ? reset($mailer_config['port']) : $mailer_config['port'];
+                $smtp = is_array($mailer_config['smtp']) ? reset($mailer_config['smtp']) : $mailer_config['smtp'];
+                $port = is_array($mailer_config['port']) ? reset($mailer_config['port']) : $mailer_config['port'];
 
                 $transport = \Swift_SmtpTransport::newInstance($smtp, $port);
                 if (array_key_exists('username', $mailer_config) && array_key_exists('password', $mailer_config)) {
-                    $username = (is_array($mailer_config['username'])) ? reset($mailer_config['username']) : $mailer_config['username'];
-                    $password = (is_array($mailer_config['password'])) ? reset($mailer_config['password']) : $mailer_config['password'];
+                    $username = is_array($mailer_config['username'])
+                        ? reset($mailer_config['username'])
+                        : $mailer_config['username']
+                    ;
+                    $password = is_array($mailer_config['password'])
+                        ? reset($mailer_config['password'])
+                        : $mailer_config['password']
+                    ;
 
                     $transport->setUsername($username)->setPassword($password);
                 }
@@ -242,7 +250,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function isDebugMode()
     {
-        $debug = (bool) $this->_debug;
+        $debug = (bool) $this->debug;
         if (null !== $this->getContainer() && $this->getContainer()->hasParameter('debug')) {
             $debug = $this->getContainer()->getParameter('debug');
         }
@@ -255,7 +263,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function isOverridedConfig()
     {
-        return $this->_overwrite_config;
+        return $this->overwriteConfig;
     }
 
     /**
@@ -266,7 +274,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     public function getBundle($name)
     {
         $bundle = null;
-        if (true === $this->getContainer()->has('bundle.'.$name)) {
+        if ($this->getContainer()->has('bundle.'.$name)) {
             $bundle = $this->getContainer()->get('bundle.'.$name);
         }
 
@@ -280,7 +288,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getBundles()
     {
-        $bundles = array();
+        $bundles = [];
         foreach ($this->getContainer()->findTaggedServiceIds('bundle') as $id => $datas) {
             $bundles[] = $this->getContainer()->get($id);
         }
@@ -289,44 +297,28 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @deprecated since version 1.0
-     *
-     * @uses isDebugMode()
-     *
-     * @return boolean
-     */
-    public function debugMode()
-    {
-        return $this->_debug;
-    }
-
-    /**
      * @param \BackBee\Site\Site $site
      */
     public function start(Site $site = null)
     {
         if (null === $site) {
-            $site = $this->getEntityManager()->getRepository('BackBee\Site\Site')->findOneBy(array()); // 40 ms
+            $site = $this->getEntityManager()->getRepository('BackBee\Site\Site')->findOneBy([]);
         }
 
         if (null !== $site) {
             $this->getContainer()->set('site', $site);
         }
 
-        $this->_isstarted = true;
-        $this->info(sprintf('BackBee application started (Site Uid: %s)', (null !== $site) ? $site->getUid() : 'none'));
-
-        if (null !== $this->getTheme()) {
-            $this->getTheme()->init();
-        }
+        $this->isStarted = true;
+        $this->info(sprintf('BackBee application started (Site Uid: %s)', null !== $site ? $site->getUid() : 'none'));
 
         // trigger bbapplication.start
-        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this)); // 15 ms
+        $this->getEventDispatcher()->dispatch('bbapplication.start', new Event($this));
 
-        if (false === $this->isClientSAPI()) {
-            $response = $this->getController()->handle(); // 140 ms
+        if (!$this->isClientSAPI()) {
+            $response = $this->getController()->handle();
             if ($response instanceof Response) {
-                $this->getController()->sendResponse($response); // 140 ms
+                $this->getController()->sendResponse($response);
             }
         }
     }
@@ -336,7 +328,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function stop()
     {
-        if (true === $this->isStarted()) {
+        if ($this->isStarted()) {
             // trigger bbapplication.stop
             $this->getEventDispatcher()->dispatch('bbapplication.stop', new Event($this));
             $this->info('BackBee application ended');
@@ -382,7 +374,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getDataDir()
     {
-        return $this->_container->getParameter('bbapp.data.dir');
+        return $this->container->getParameter('bbapp.data.dir');
     }
 
     /**
@@ -400,7 +392,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getVendorDir()
     {
-        return $this->getBaseDir().'/vendor';
+        return $this->getBaseDir().DIRECTORY_SEPARATOR.'vendor';
     }
 
     /**
@@ -410,7 +402,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function hasContext()
     {
-        return (null !== $this->_context && self::DEFAULT_CONTEXT !== $this->_context);
+        return null !== $this->context && self::DEFAULT_CONTEXT !== $this->context;
     }
 
     /**
@@ -420,23 +412,23 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getContext()
     {
-        return $this->_context;
+        return $this->context;
     }
 
     /**
-     * @return BackBee\Security\Token\BBUserToken|null
+     * @return BBUserToken|null
      */
     public function getBBUserToken()
     {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof \BackBee\Security\Token\BBUserToken))) {
+        if ((null === $token || !($token instanceof BBUserToken))) {
             if (is_null($this->getContainer()->get('bb_session'))) {
                 $token = null;
             } else {
                 if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
                     $token = unserialize($token);
 
-                    if (!($token instanceof \BackBee\Security\Token\BBUserToken)) {
+                    if (!($token instanceof BBUserToken)) {
                         $token = null;
                     }
                 }
@@ -454,10 +446,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     public function getCacheProvider()
     {
         $conf = $this->getConfig()->getCacheConfig();
-        $defaultClass = '\BackBee\Cache\DAO\Cache';
-        $parentClass = '\BackBee\Cache\AExtendedCache';
 
-        return (isset($conf['provider']) && is_subclass_of($conf['provider'], $parentClass) ? $conf['provider'] : $defaultClass);
+        return isset($conf['provider']) && is_subclass_of($conf['provider'], '\BackBee\Cache\AExtendedCache')
+            ? $conf['provider']
+            : '\BackBee\Cache\DAO\Cache'
+        ;
     }
 
     /**
@@ -478,7 +471,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     public function getCacheDir()
     {
-        if (null === $this->_container) {
+        if (null === $this->container) {
             throw new \Exception('Application\'s container is not ready!');
         }
 
@@ -490,7 +483,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getContainer()
     {
-        return $this->_container;
+        return $this->container;
     }
 
     /**
@@ -508,11 +501,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getConfig()
     {
-        if (null === $this->_container) {
+        if (null === $this->container) {
             throw new \Exception('Application\'s container is not ready!');
         }
 
-        return $this->_container->get('config');
+        return $this->container->get('config');
     }
 
     /**
@@ -522,7 +515,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getEnvironment()
     {
-        return $this->_environment;
+        return $this->environment;
     }
 
     public function getConfigDir()
@@ -542,7 +535,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     {
         try {
             if (null === $this->getContainer()->get('doctrine')) {
-                $this->_initEntityManager();
+                $this->initEntityManager();
             }
 
             return $this->getContainer()->get('doctrine')->getManager($name);
@@ -569,7 +562,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     public function getMediaDir()
     {
-        if (null === $this->_container) {
+        if (null === $this->container) {
             throw new \Exception('Application\'s container is not ready!');
         }
 
@@ -586,23 +579,23 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     public function getRepository()
     {
-        if (null === $this->_repository) {
-            $this->_repository = $this->getBaseRepository();
-            if (true === $this->hasContext()) {
-                $this->_repository .= '/'.$this->_context;
+        if (null === $this->repository) {
+            $this->repository = $this->getBaseRepository();
+            if ($this->hasContext()) {
+                $this->repository .= DIRECTORY_SEPARATOR.$this->context;
             }
         }
 
-        return $this->_repository;
+        return $this->repository;
     }
 
     public function getBaseRepository()
     {
-        if (null === $this->_base_repository) {
-            $this->_base_repository = $this->getBaseDir().DIRECTORY_SEPARATOR.'repository';
+        if (null === $this->baseRepository) {
+            $this->baseRepository = $this->getBaseDir().DIRECTORY_SEPARATOR.'repository';
         }
 
-        return $this->_base_repository;
+        return $this->baseRepository;
     }
 
     /**
@@ -612,20 +605,20 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getClassContentDir()
     {
-        if (null === $this->_classcontentdir) {
-            $this->_classcontentdir = array();
+        if (null === $this->classcontentDir) {
+            $this->classcontentDir = [];
 
-            array_unshift($this->_classcontentdir, $this->getBBDir().'/ClassContent');
-            array_unshift($this->_classcontentdir, $this->getBaseRepository().'/ClassContent');
+            array_unshift($this->classcontentDir, $this->getBBDir().'/ClassContent');
+            array_unshift($this->classcontentDir, $this->getBaseRepository().'/ClassContent');
 
-            if (true === $this->hasContext()) {
-                array_unshift($this->_classcontentdir, $this->getRepository().'/ClassContent');
+            if ($this->hasContext()) {
+                array_unshift($this->classcontentDir, $this->getRepository().'/ClassContent');
             }
 
-            array_map(array('BackBee\Utils\File\File', 'resolveFilepath'), $this->_classcontentdir);
+            array_map(['BackBee\Utils\File\File', 'resolveFilepath'], $this->classcontentDir);
         }
 
-        return $this->_classcontentdir;
+        return $this->classcontentDir;
     }
 
     /**
@@ -642,7 +635,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         $classcontentdir = $this->getClassContentDir();
         array_push($classcontentdir, $dir);
 
-        $this->_classcontentdir = $classcontentdir;
+        $this->classcontentDir = $classcontentdir;
 
         return $this;
     }
@@ -661,7 +654,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         $classcontentdir = $this->getClassContentDir();
         array_unshift($classcontentdir, $dir);
 
-        $this->_classcontentdir = $classcontentdir;
+        $this->classcontentDir = $classcontentdir;
 
         return $this;
     }
@@ -673,33 +666,33 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getResourceDir()
     {
-        if (null === $this->_resourcedir) {
-            $this->_resourcedir = array();
+        if (null === $this->resourceDir) {
+            $this->resourceDir = [];
 
             $this->addResourceDir($this->getBBDir().'/Resources');
 
-            if (true === is_dir($this->getBaseRepository().'/Resources')) {
+            if (is_dir($this->getBaseRepository().'/Resources')) {
                 $this->addResourceDir($this->getBaseRepository().'/Resources');
             }
 
-            if (true === is_dir($this->getBaseRepository().'/Ressources')) {
+            if (is_dir($this->getBaseRepository().'/Ressources')) {
                 $this->addResourceDir($this->getBaseRepository().'/Ressources');
             }
 
-            if (true === $this->hasContext()) {
-                if (true === is_dir($this->getRepository().'/Resources')) {
+            if ($this->hasContext()) {
+                if (is_dir($this->getRepository().'/Resources')) {
                     $this->addResourceDir($this->getRepository().'/Resources');
                 }
 
-                if (true === is_dir($this->getRepository().'/Resources')) {
+                if (is_dir($this->getRepository().'/Resources')) {
                     $this->addResourceDir($this->getRepository().'/Resources');
                 }
             }
 
-            array_map(array('BackBee\Utils\File\File', 'resolveFilepath'), $this->_resourcedir);
+            array_map(['BackBee\Utils\File\File', 'resolveFilepath'], $this->resourceDir);
         }
 
-        return $this->_resourcedir;
+        return $this->resourceDir;
     }
 
     /**
@@ -716,7 +709,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         $resourcedir = $this->getResourceDir();
         array_push($resourcedir, $dir);
 
-        $this->_resourcedir = $resourcedir;
+        $this->resourceDir = $resourcedir;
 
         return $this;
     }
@@ -735,7 +728,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         $resourcedir = $this->getResourceDir();
         array_unshift($resourcedir, $dir);
 
-        $this->_resourcedir = $resourcedir;
+        $this->resourceDir = $resourcedir;
 
         return $this;
     }
@@ -751,19 +744,25 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function addResourceDir($dir)
     {
-        if (null === $this->_resourcedir) {
-            $this->_resourcedir = array();
+        if (null === $this->resourceDir) {
+            $this->resourceDir = [];
         }
 
-        if (false === is_array($this->_resourcedir)) {
-            throw new BBException('Misconfiguration of the BBApplication : resource dir has to be an array', BBException::INVALID_ARGUMENT);
+        if (!is_array($this->resourceDir)) {
+            throw new BBException(
+                'Misconfiguration of the BBApplication : resource dir has to be an array',
+                BBException::INVALID_ARGUMENT
+            );
         }
 
-        if (false === file_exists($dir) || false === is_dir($dir)) {
-            throw new BBException(sprintf('The resource folder `%s` does not exist or is not a directory', $dir), BBException::INVALID_ARGUMENT);
+        if (!file_exists($dir) || !is_dir($dir)) {
+            throw new BBException(
+                sprintf('The resource folder `%s` does not exist or is not a directory', $dir),
+                BBException::INVALID_ARGUMENT
+            );
         }
 
-        array_unshift($this->_resourcedir, $dir);
+        array_unshift($this->resourceDir, $dir);
 
         return $this;
     }
@@ -779,8 +778,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     {
         $dir = $this->getResourceDir();
 
-        if (0 == count($dir)) {
-            throw new BBException('Misconfiguration of the BBApplication : none resource dir defined', BBException::INVALID_ARGUMENT);
+        if (0 === count($dir)) {
+            throw new BBException(
+                'Misconfiguration of the BBApplication : none resource dir defined',
+                BBException::INVALID_ARGUMENT
+            );
         }
 
         return array_shift($dir);
@@ -793,27 +795,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getRequest()
     {
-        if (false === $this->isStarted()) {
+        if (!$this->isStarted()) {
             throw new BBException('The BackBee application has to be started before to access request');
         }
 
-        return $this->_container->get('request');
-    }
-
-    /**
-     * @return BackBee\Services\Rpc\JsonRPCServer
-     */
-    public function getRpcServer()
-    {
-        return $this->getContainer()->get('rpcserver');
-    }
-
-    /**
-     * @return BackBee\Services\Upload\UploadServer
-     */
-    public function getUploadServer()
-    {
-        return $this->getContainer()->get('uploadserver');
+        return $this->container->get('request');
     }
 
     /**
@@ -856,12 +842,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getSite()
     {
-        $site = null;
-        if (true === $this->getContainer()->has('site')) {
-            $site = $this->getContainer()->get('site');
-        }
-
-        return $site;
+        return $this->getContainer()->has('site') ? $this->getContainer()->get('site') : null;
     }
 
     /**
@@ -869,11 +850,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getStorageDir()
     {
-        if (null === $this->_storagedir) {
-            $this->_storagedir = $this->_container->getParameter('bbapp.data.dir').'/'.'Storage';
+        if (null === $this->storageDir) {
+            $this->storageDir = $this->container->getParameter('bbapp.data.dir').DIRECTORY_SEPARATOR.'Storage';
         }
 
-        return $this->_storagedir;
+        return $this->storageDir;
     }
 
     /**
@@ -881,11 +862,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getTemporaryDir()
     {
-        if (null === $this->_tmpdir) {
-            $this->_tmpdir = $this->_container->getParameter('bbapp.data.dir').'/'.'Tmp';
+        if (null === $this->tmpDir) {
+            $this->tmpDir = $this->container->getParameter('bbapp.data.dir').DIRECTORY_SEPARATOR.'Tmp';
         }
 
-        return $this->_tmpdir;
+        return $this->tmpDir;
     }
 
     /**
@@ -893,7 +874,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function isReady()
     {
-        return ($this->_isinitialized && null !== $this->_container);
+        return $this->isInitialized && null !== $this->container;
     }
 
     /**
@@ -901,7 +882,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function isStarted()
     {
-        return (true === $this->_isstarted);
+        return $this->isStarted;
     }
 
     public function isClientSAPI()
@@ -931,7 +912,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBee\\Console\\AbstractCommand') && !$r->isAbstract() && !$r->getConstructor()->getNumberOfRequiredParameters()) {
+                if (
+                    $r->isSubclassOf('BackBee\\Console\\AbstractCommand')
+                    && !$r->isAbstract()
+                    && !$r->getConstructor()->getNumberOfRequiredParameters()
+                ) {
                     $console->add($r->newInstance());
                 }
             }
@@ -951,7 +936,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                     $ns .= '\\'.strtr($relativePath, '/', '\\');
                 }
                 $r = new \ReflectionClass($ns.'\\'.$file->getBasename('.php'));
-                if ($r->isSubclassOf('BackBee\\Console\\AbstractCommand') && !$r->isAbstract() && 0 === $r->getConstructor()->getNumberOfRequiredParameters()) {
+                if (
+                    $r->isSubclassOf('BackBee\\Console\\AbstractCommand')
+                    && !$r->isAbstract()
+                    && 0 === $r->getConstructor()->getNumberOfRequiredParameters()
+                ) {
                     $instance = $r->newInstance();
                     $instance->setBundle($bundle);
                     $console->add($instance);
@@ -976,12 +965,12 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @return array contains every datas required by this service to be restored at the same state
      */
-    public function dump(array $options = array())
+    public function dump(array $options = [])
     {
-        return array_merge($this->dump_datas, array(
-            'classcontent_directories' => $this->_classcontentdir,
-            'resources_directories'    => $this->_resourcedir,
-        ));
+        return array_merge($this->dumpDatas, [
+            'classcontent_directories' => $this->classcontentDir,
+            'resources_directories'    => $this->resourceDir,
+        ]);
     }
 
     /**
@@ -992,18 +981,18 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function restore(ContainerInterface $container, array $dump)
     {
-        $this->_classcontentdir = $dump['classcontent_directories'];
-        $this->_resourcedir = $dump['resources_directories'];
+        $this->classcontentDir = $dump['classcontent_directories'];
+        $this->resourceDir = $dump['resources_directories'];
 
-        if (true === isset($dump['date_timezone'])) {
+        if (isset($dump['date_timezone'])) {
             date_default_timezone_set($dump['date_timezone']);
         }
 
-        if (true === isset($dump['locale'])) {
+        if (isset($dump['locale'])) {
             setLocale(LC_ALL, $dump['locale']);
         }
 
-        $this->_is_restored = true;
+        $this->isRestored = true;
     }
 
     /**
@@ -1011,50 +1000,46 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function isRestored()
     {
-        return $this->_is_restored;
+        return $this->isRestored;
     }
 
     /**
-     * [_initContainer description].
+     * Initializes application's dependency injection container.
      *
-     * @param boolean $force_reload [description]
-     *
-     * @return [type] [description]
+     * @return self
      */
-    private function _initContainer()
+    private function initContainer()
     {
-        $this->_container = (new ContainerBuilder($this))->getContainer();
+        $this->container = (new ContainerBuilder($this))->getContainer();
 
         return $this;
     }
 
     /**
-     * [_initEnvVariables description].
-     *
-     * @return [type] [description]
+     * @return self
      */
-    private function _initEnvVariables()
+    private function initEnvVariables()
     {
-        if (true === $this->isRestored()) {
+        if ($this->isRestored()) {
             return $this;
         }
 
-        $date_config = $this->getConfig()->getDateConfig();
-        if (false !== $date_config && true === isset($date_config['timezone'])) {
-            if (false === date_default_timezone_set($date_config['timezone'])) {
-                throw new \Exception(sprintf('Unabled to set default timezone (:%s)', $date_config['timezone']));
+        $dateConfig = $this->getConfig()->getDateConfig();
+        if (false !== $dateConfig && isset($dateConfig['timezone'])) {
+            if (false === date_default_timezone_set($dateConfig['timezone'])) {
+                throw new \Exception(sprintf('Unabled to set default timezone (:%s)', $dateConfig['timezone']));
             }
 
-            $this->dump_datas['date_timezone'] = $date_config['timezone'];
+            $this->dumpDatas['date_timezone'] = $dateConfig['timezone'];
         }
 
         if (null !== $encoding = $this->getConfig()->getEncodingConfig()) {
-            if (true === array_key_exists('locale', $encoding)) {
+            if (array_key_exists('locale', $encoding)) {
                 if (false === setLocale(LC_ALL, $encoding['locale'])) {
                     throw new \Exception(sprintf('Unabled to setLocal with locale %s', $encoding['locale']));
                 }
 
-                $this->dump_datas['locale'] = $encoding['locale'];
+                $this->dumpDatas['locale'] = $encoding['locale'];
             }
         }
 
@@ -1064,31 +1049,41 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * @return \BackBee\BBApplication
      */
-    private function _initAutoloader()
+    private function initAutoloader()
     {
-        if (true === $this->getAutoloader()->isRestored()) {
+        if ($this->getAutoloader()->isRestored()) {
             return $this;
         }
 
         $this->getAutoloader()
             ->register()
-            ->registerNamespace('BackBee\Bundle', implode('/', array($this->getBaseDir(), 'bundle')))
-            ->registerNamespace('BackBee\ClassContent\Repository', implode('/', array($this->getRepository(), 'ClassContent', 'Repositories')))
-            ->registerNamespace('BackBee\Renderer\Helper', implode('/', array($this->getRepository(), 'Templates', 'helpers')))
-            ->registerNamespace('BackBee\Event\Listener', implode('/', array($this->getRepository(), 'Listeners')))
-            ->registerNamespace('BackBee\Controller', implode('/', array($this->getRepository(), 'Controller')))
-            ->registerNamespace('BackBee\Services\Public', implode('/', array($this->getRepository(), 'Services', 'Public')))
-            ->registerNamespace('BackBee\Traits', implode('/', array($this->getRepository(), 'Traits')))
-            ->registerNamespace('Respect\Validation\Rules', implode(DIRECTORY_SEPARATOR, array($this->getBBDir(), 'Validator', 'Rules')));
+            ->registerNamespace('BackBee\Bundle', $this->getBaseDir().DIRECTORY_SEPARATOR.'bundle')
+            ->registerNamespace(
+                'BackBee\Renderer\Helper',
+                implode(DIRECTORY_SEPARATOR, [$this->getRepository(), 'Templates', 'helpers'])
+            )
+            ->registerNamespace('BackBee\Event\Listener', $this->getRepository().DIRECTORY_SEPARATOR.'Listener')
+            ->registerNamespace('BackBee\Controller', $this->getRepository().DIRECTORY_SEPARATOR.'Controller')
+            ->registerNamespace('BackBee\Traits', $this->getRepository().DIRECTORY_SEPARATOR.'Traits')
+            ->registerNamespace(
+                'Respect\Validation\Rules',
+                implode(DIRECTORY_SEPARATOR, [$this->getBBDir(), 'Validator', 'Rules'])
+            )
+        ;
 
-        if (true === $this->hasContext()) {
+        if ($this->hasContext()) {
             $this->getAutoloader()
-                ->registerNamespace('BackBee\ClassContent\Repository', implode('/', array($this->getBaseRepository(), 'ClassContent', 'Repositories')))
-                ->registerNamespace('BackBee\Renderer\Helper', implode('/', array($this->getBaseRepository(), 'Templates', 'helpers')))
-                ->registerNamespace('BackBee\Event\Listener', implode('/', array($this->getBaseRepository(), 'Listeners')))
-                ->registerNamespace('BackBee\Controller', implode('/', array($this->getBaseRepository(), 'Controller')))
-                ->registerNamespace('BackBee\Services\Public', implode('/', array($this->getBaseRepository(), 'Services', 'Public')))
-                ->registerNamespace('BackBee\Traits', implode('/', array($this->getBaseRepository(), 'Traits')));
+                ->registerNamespace(
+                    'BackBee\Renderer\Helper',
+                    implode(DIRECTORY_SEPARATOR, [$this->getBaseRepository(), 'Templates', 'helpers'])
+                )
+                ->registerNamespace(
+                    'BackBee\Event\Listener',
+                    $this->getBaseRepository().DIRECTORY_SEPARATOR.'Listener'
+                )
+                ->registerNamespace('BackBee\Controller', $this->getBaseRepository().DIRECTORY_SEPARATOR.'Controller')
+                ->registerNamespace('BackBee\Traits', $this->getBaseRepository().DIRECTORY_SEPARATOR.'Traits')
+            ;
         }
 
         return $this;
@@ -1097,15 +1092,17 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * register all annotations and init the AnnotationReader
      */
-    private function _initAnnotationReader()
+    private function initAnnotationReader()
     {
-        AnnotationRegistry::registerFile($this->getVendorDir().'/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php');
+        AnnotationRegistry::registerFile(
+            $this->getVendorDir().'/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php'
+        );
 
         // annotations require custom autoloading
-        AnnotationRegistry::registerAutoloadNamespaces(array(
+        AnnotationRegistry::registerAutoloadNamespaces([
             'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/validator/',
-            'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
-        ));
+            'JMS\Serializer\Annotation'              => $this->getVendorDir().'/jms/serializer/src/',
+        ]);
 
         AnnotationRegistry::registerLoader(function ($classname) {
             if (0 === strpos($classname, 'BackBee')) {
@@ -1121,9 +1118,9 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @throws BBException
      */
-    private function _initContentWrapper()
+    private function initContentWrapper()
     {
-        if (true === $this->getAutoloader()->isRestored()) {
+        if ($this->getAutoloader()->isRestored()) {
             return $this;
         }
 
@@ -1145,7 +1142,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @throws BBException
      */
-    private function _initEntityManager()
+    private function initEntityManager()
     {
         // init NestedNode config
         if ($this->getConfig()->getSection('nestednode')) {
@@ -1154,18 +1151,18 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                 $this->getConfig()->getSection('nestednode')
             );
 
-            $console_command = $this->_container->getParameter('bbapp.console.command');
+            $console_command = $this->container->getParameter('bbapp.console.command');
             if ('/' !== $console_command[0]) {
                 $console_command = $this->getBaseDir().'/'.$console_command;
-                $this->_container->setParameter('bbapp.console.command', $console_command);
+                $this->container->setParameter('bbapp.console.command', $console_command);
             }
 
-            NestedNodeRepository::$config['script_command'] = $this->_container->getParameter('bbapp.script.command');
+            NestedNodeRepository::$config['script_command'] = $this->container->getParameter('bbapp.script.command');
             NestedNodeRepository::$config['console_command'] = $console_command;
             NestedNodeRepository::$config['environment'] = $this->getEnvironment();
         }
 
-        if (false === $this->_container->getDefinition('em')->isSynthetic()) {
+        if (!$this->container->getDefinition('em')->isSynthetic()) {
             return;
         }
 
@@ -1173,32 +1170,32 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
             throw new BBException('None database configuration found');
         }
 
-        if (false === array_key_exists('dbal', $doctrine_config)) {
+        if (!array_key_exists('dbal', $doctrine_config)) {
             throw new BBException('None dbal configuration found');
         }
 
-        if (false === array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
+        if (!array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
             $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
         }
 
-        if (false === array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
+        if (!array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
             $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir().'/'.'Proxies';
         }
 
-        if (true === array_key_exists('orm', $doctrine_config)) {
+        if (array_key_exists('orm', $doctrine_config)) {
             $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
         }
 
         // Init ORM event
         $r = new \ReflectionClass('Doctrine\ORM\Events');
         $definition = new Definition('Doctrine\Common\EventManager');
-        $definition->addMethodCall('addEventListener', array($r->getConstants(), new Reference('doctrine.listener')));
-        $this->_container->setDefinition('doctrine.event_manager', $definition);
+        $definition->addMethodCall('addEventListener', [$r->getConstants(), new Reference('doctrine.listener')]);
+        $this->container->setDefinition('doctrine.event_manager', $definition);
 
         try {
             $logger_id = 'logging';
 
-            if (true === $this->isDebugMode()) {
+            if ($this->isDebugMode()) {
                 // doctrine data collector
                 $this->getContainer()->get('data_collector.doctrine')->addLogger(
                     'default',
@@ -1207,15 +1204,15 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                 $logger_id = 'doctrine.dbal.logger.profiling';
             }
 
-            $definition = new Definition('Doctrine\ORM\EntityManager', array(
+            $definition = new Definition('Doctrine\ORM\EntityManager', [
                 $doctrine_config['dbal'],
                 new Reference($logger_id),
                 new Reference('doctrine.event_manager'),
                 new Reference('service_container'),
-            ));
+            ]);
             $definition->setFactoryClass('BackBee\Util\Doctrine\EntityManagerCreator');
             $definition->setFactoryMethod('create');
-            $this->_container->setDefinition('em', $definition);
+            $this->container->setDefinition('em', $definition);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));
         } catch (\Exception $e) {
@@ -1226,11 +1223,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * [_initBundles description].
+     * Loads every declared bundles into application.
      *
-     * @return [type] [description]
+     * @return self
      */
-    private function _initBundles()
+    private function initBundles()
     {
         if (null !== $this->getConfig()->getBundlesConfig()) {
             $this->getContainer()->get('bundle.loader')->load($this->getConfig()->getBundlesConfig());
