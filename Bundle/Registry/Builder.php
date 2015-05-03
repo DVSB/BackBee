@@ -158,8 +158,13 @@ class Builder
         if (is_object($this->entity) && $this->isRegistryEntity($this->entity)) {
             $this->buildRegistryFromObject();
         } else {
-            $this->buildRegistryFromSomething();// @todo change func name
+            throw new \InvalidArgumentException(sprintf(
+                'Cannot build registries: current entity must be an instance of %s, current `%s`.',
+                'BackBee\Bundle\Registry\RegistryEntityInterface',
+                gettype($this->entity)
+            ));
         }
+
         foreach ($this->registries as $registry) {
             $this->entity->{$registry->getKey()} = $registry->getValue();
         }
