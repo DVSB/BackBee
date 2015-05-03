@@ -873,9 +873,9 @@ class ClassContentRepository extends EntityRepository
     public function deleteContent(AbstractClassContent $content, $mainContent = true)
     {
         $parents = $content->getParentContent();
-        $media = $this->_em->getRepository('BackBee\NestedNode\Media')->findOneBy(array(
+        $media = $this->_em->getRepository('BackBee\NestedNode\Media')->findOneBy([
             '_content' => $content->getUid(),
-        ));
+        ]);
 
         if (($parents->count() <= 1 && null === $media) || true === $mainContent) {
             foreach ($content->getData() as $element) {
@@ -894,12 +894,13 @@ class ClassContentRepository extends EntityRepository
 
             $this->_em->getConnection()->executeQuery(
                 'DELETE FROM indexation WHERE owner_uid = :uid',
-                array('uid' => $content->getUid())
+                ['uid' => $content->getUid()]
             )->execute();
             $this->_em->getConnection()->executeQuery(
                 'DELETE FROM revision WHERE content_uid = :uid',
-                array('uid' => $content->getUid())
+                ['uid' => $content->getUid()]
             )->execute();
+
             $this->_em->remove($content);
         }
     }

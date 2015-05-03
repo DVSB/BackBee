@@ -278,6 +278,7 @@ class ClassContentController extends AbstractRestController
 
         try {
             $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($content);
+            $this->getEntityManager()->flush();
         } catch (\Exception $e) {
             throw new BadRequestHttpException("Unable to delete content with type: `$type` and uid: `$uid`");
         }
