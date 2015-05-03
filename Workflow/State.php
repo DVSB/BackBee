@@ -90,7 +90,7 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
      * The optional layout to be applied for state.
      *
      * @var \BackBee\Site\Layout
-     * @ORM\ManyToOne(targetEntity="BackBee\Site\Layout", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="BackBee\Site\Layout", inversedBy="_states", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="layout", referencedColumnName="uid")
      */
     protected $_layout;

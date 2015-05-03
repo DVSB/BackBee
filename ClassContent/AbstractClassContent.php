@@ -95,7 +95,7 @@ abstract class AbstractClassContent extends AbstractContent
      *     inverseJoinColumns={@ORM\JoinColumn(name="content_uid", referencedColumnName="uid")}
      * )
      */
-    public $_subcontent;
+    protected $_subcontent;
 
     /**
      * The main nested node (page).
