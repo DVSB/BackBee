@@ -420,7 +420,7 @@ class BundleLoader
         } else {
             $directory = realpath(dirname($config->getBaseDir()).DIRECTORY_SEPARATOR.'ClassContent');
             if (false !== $directory) {
-                $this->application->pushClassContentDir($directory);
+                $this->application->unshiftClassContentDir($directory);
             }
         }
     }
