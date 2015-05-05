@@ -49,7 +49,7 @@ parameters:
         exception: "%bbapp.base.dir%/Resources/scripts/Collector/exception.html.twig"
         events: "%bbapp.base.dir%/Resources/scripts/Collector/events.html.twig"
         logger: "%bbapp.base.dir%/Resources/scripts/Collector/logger.html.twig"
-#        time: "%bbapp.base.dir%/Resources/scripts/Collector/time.html.twig"
+        # time: "%bbapp.base.dir%/Resources/scripts/Collector/time.html.twig"
         memory: "%bbapp.base.dir%/Resources/scripts/Collector/memory.html.twig"
         routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"

@@ -111,5 +111,6 @@ class DebugStackLogger extends Logger implements DebugLoggerInterface
      */
     public function countErrors()
     {
+        return count($this->records);
     }
 }
