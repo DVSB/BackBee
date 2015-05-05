@@ -112,6 +112,65 @@ class PageControllerTest extends RestTestCase
         $this->assertEquals(201, $response->getStatusCode());
     }
 
+    public function testCloneAction()
+    {
+        $em = $this->getEntityManager();
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
+        ;
+
+        $em->persist($layout);
+        $em->flush();
+
+        $rootPage = (new Page())
+            ->setTitle('Page Root')
+            ->setSite($this->site)
+            ->setLayout($layout)
+        ;
+
+        $em->persist($rootPage);
+        $em->flush();
+
+
+        // create page
+        $clonePage = (new Page())
+            ->setTitle('Page Title')
+            ->setSite($this->site)
+            ->setLayout($layout)
+            ->setParent($rootPage)
+        ;
+
+        $em->persist($clonePage);
+        $em->flush();
+
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $rootPage,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            ['VIEW', 'EDIT']
+        )->insertOrUpdateObjectAce(
+            $layout,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            ['VIEW', 'EDIT']
+        )->insertOrUpdateObjectAce(
+            $this->site,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            ['VIEW', 'EDIT']
+        );
+
+        $response = $this->sendRequest(self::requestPost('/rest/1/page/'.$clonePage->getUid().'/clone', [
+            'title' => 'A new title'
+            ])
+        );
+
+        $this->assertTrue($response->headers->has('location'));
+        $this->assertEquals('/a-new-title', $response->headers->get('url'));
+        $this->assertEquals(201, $response->getStatusCode());
+    }
+
     /**
      * @covers ::putAction
      */

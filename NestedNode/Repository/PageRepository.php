@@ -542,23 +542,29 @@ class PageRepository extends NestedNodeRepository
      * @return \BackBee\NestedNode\Page the copy of the page
      *
      * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
+     * @throws \LogicException occures if the page is Root
      */
     public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
     {
-        $new_page = (true === $recursive) ? $this->copyRecursively($page, $title, $parent) : $this->copy($page, $title, $parent);
+        if ($page->isRoot()) {
+            throw new \LogicException("A root page can't be duplicated.");
+        }
+
+        $newPage = true === $recursive
+            ? $this->copyRecursively($page, $title, $parent)
+            : $this->copy($page, $title, $parent)
+        ;
 
         // Finally updating contentset and mainnode
         if (null !== $token) {
-            foreach ($new_page->cloning_datas['contents'] as $content) {
-                $this->updateRelatedPostCloning($content, $token, $new_page->cloning_datas)
-                     ->updateMainNodePostCloning($content, $token, $new_page->cloning_datas['pages'])
+            foreach ($newPage->cloning_datas['contents'] as $content) {
+                $this->updateRelatedPostCloning($content, $token, $newPage->cloning_datas)
+                     ->updateMainNodePostCloning($content, $token, $newPage->cloning_datas['pages'])
                 ;
             }
-
-            $this->_em->flush();
         }
 
-        return $new_page;
+        return $newPage;
     }
 
     /**
@@ -600,25 +606,21 @@ class PageRepository extends NestedNodeRepository
         }
 
         // Cloning the page
-        $new_page = clone $page;
-        $new_page->setTitle(null === $title ? $page->getTitle() : $title);
+        $newPage = clone $page;
+        $newPage->setTitle(null === $title ? $page->getTitle() : $title);
 
         // Setting the layout if exists
         if (null !== $page->getLayout()) {
-            $new_page->setLayout($page->getLayout());
+            $newPage->setLayout($page->getLayout());
         }
 
         // Setting the clone as first child of the parent if exists
         if (null !== $parent || null !== $page->getParent()) {
             $parent = (null === $parent) ? $page->getParent() : $parent;
-            $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent);
+            $newPage = $this->insertNodeAsFirstChildOf($newPage, $parent);
         }
 
-        // Persisting entities
-        $this->_em->persist($new_page);
-        $this->_em->flush();
-
-        return $new_page;
+        return $newPage;
     }
 
     /**
@@ -654,7 +656,6 @@ class PageRepository extends NestedNodeRepository
                 $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
             }
         }
-        $this->_em->flush();
 
         return $new_page;
     }
