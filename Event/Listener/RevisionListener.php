@@ -111,26 +111,26 @@ class RevisionListener
         }
     }
 
-    public static function onPreFlushElementFile(Event $event)
+    public static function onFlushElementFile(Event $event)
     {
         $revision = $event->getTarget();
         $content = $revision->getContent();
-        
+
         if (!$content instanceof ElementFile) {
             return;
         }
-        
+
         $application = $event->getApplication();
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
-        
+
         if ($uow->isScheduledForDelete($content)) {
             return;
         }
-        
+
         $fileRepository = $em->getRepository('BackBee\ClassContent\Element\File');
         $fileRepository->setDirectories($application);
-        
+
         $fileRepository->commitFile($content);
 
         $moveFrom = $content->path;
@@ -145,6 +145,8 @@ class RevisionListener
             $content->setParam('width', $width);
             $content->setParam('height', $height);
         }
+
+        $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $revision);
     }
 
     public static function onPostLoad(Event $event)
