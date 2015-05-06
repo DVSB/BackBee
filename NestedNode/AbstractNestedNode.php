@@ -269,6 +269,10 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
      * Is the node is a root ?
      *
      * @return Boolean TRUE if the node is root of tree, FALSE otherwise
+     * /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("is_root")
+     *
      */
     public function isRoot()
     {
