@@ -26,4 +26,4 @@ services:
 
     profiler.storage:
         class:      BackBee\Profiler\FileProfilerStorage
-        arguments:  [@bbapp, "file:/%bbapp.cache.dir%/_profiler/"]
+        arguments:  [@bbapp, "file:%bbapp.cache.dir%/_profiler/"]
