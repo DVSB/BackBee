@@ -116,7 +116,7 @@ class RevisionListener
         $revision = $event->getTarget();
         $content = $revision->getContent();
 
-        if (!$content instanceof ElementFile) {
+        if (!($content instanceof ElementFile) || !is_file($content->path)) {
             return;
         }
 
