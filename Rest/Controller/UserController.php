@@ -33,6 +33,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
 
+use BackBee\Event\Event;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\ValidationException;
 use BackBee\Rest\Patcher\EntityPatcher;
@@ -285,6 +286,10 @@ class UserController extends AbstractRestController
 
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
+
+
+        $event = new Event($user);
+        $this->getApplication()->getEventDispatcher()->dispatch('rest.user.creation', $event);
 
         return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
     }
