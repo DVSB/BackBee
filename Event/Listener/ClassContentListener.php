@@ -211,6 +211,40 @@ class ClassContentListener
     }
 
     /**
+     * Occurs on nestednode.page.onflush event.
+     *
+     * @param  Event  $event
+     */
+    public static function onFlushPage(Event $event)
+    {
+        $page = $event->getTarget();
+        $app = $event->getApplication();
+        $uow = $app->getEntityManager()->getUnitOfWork();
+        if (null === $app->getBBUserToken() || !$uow->isScheduledForInsert($page)) {
+            return;
+        }
+
+        $checkoutDraftForContent = function ($entity) use ($app, $uow) {
+            $draft = $app->getContainer()->get('classcontent.manager')->getDraft($entity, true);
+            $uow->computeChangeSet(
+                $app->getEntityManager()->getClassMetadata('BackBee\ClassContent\Revision'),
+                $draft
+            );
+        };
+
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+            if ($entity instanceof AbstractClassContent && $page === $entity->getMainNode()) {
+                $checkoutDraftForContent($entity);
+                foreach ($entity->getData() as $content) {
+                    if ($content instanceof AbstractClassContent) {
+                        $checkoutDraftForContent($content);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Dynamically add render modes options to the class.
      *
      * @param \BackBee\Event\Event $event

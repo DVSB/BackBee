@@ -191,7 +191,7 @@ class ClassContentManager
         return $classnames;
     }
 
-        /**
+    /**
      * Returns current revision for the given $content
      *
      * @param AbstractClassContent $content content we want to get the latest revision
