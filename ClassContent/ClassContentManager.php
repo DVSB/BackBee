@@ -71,7 +71,7 @@ class ClassContentManager
     }
 
     /**
-     * Updates the content which provided data.
+     * Updates the content whith provided data.
      *
      * @param  AbstractClassContent $content
      * @param  array         $data    array of data that must contains parameters and/or elements key
