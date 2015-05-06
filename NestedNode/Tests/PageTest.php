@@ -695,24 +695,6 @@ class PageTest extends TestCase
     }
 
     /**
-     * @covers BackBee\NestedNode\Page::getOldState
-     */
-    public function testGetOldState()
-    {
-        $this->assertEquals(null, $this->page->getOldState());
-        $this->page->setOldState(Page::STATE_DELETED);
-        $this->assertEquals(Page::STATE_DELETED, $this->page->getOldState());
-    }
-
-    /**
-     * @covers BackBee\NestedNode\Page::setOldState
-     */
-    public function testSetOldState()
-    {
-        $this->assertEquals($this->page, $this->page->setOldState(Page::STATE_DELETED));
-    }
-
-    /**
      * @covers BackBee\NestedNode\Page::setUseUrlRedirect
      */
     public function testSetUseUrlRedirect()

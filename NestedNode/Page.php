@@ -360,14 +360,6 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
     public $cloning_datas;
 
     /**
-     * old state of current object (equals to null if it's not updated);
-     * this property is not persisted.
-     *
-     * @var integer
-     */
-    public $old_state;
-
-    /**
      * Whether redirect url should be returned by getUrl() method.
      *
      * @var bool
@@ -1335,28 +1327,6 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
         }
 
         return array_reverse($breadcrumb_uids);
-    }
-
-    /**
-     * old_state property getter.
-     *
-     * @return null|integer
-     */
-    public function getOldState()
-    {
-        return $this->old_state;
-    }
-
-    /**
-     * old_state property setter.
-     *
-     * @return \BackBee\NestedNode\Page
-     */
-    public function setOldState($v)
-    {
-        $this->old_state = $v;
-
-        return $this;
     }
 
     /**
