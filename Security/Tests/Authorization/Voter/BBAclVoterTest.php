@@ -117,7 +117,7 @@ class BBAclVoterTest extends TestCase
         );
 
         $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, $this->user, ['EDIT']));
-        $this->assertEquals(BBAclVoter::ACCESS_DENIED, $this->aclVoter->vote($this->token, new ObjectIdentity('class', get_class($this->user)), ['EDIT']));
+        $this->assertEquals(BBAclVoter::ACCESS_DENIED, $this->aclVoter->vote($this->token, new ObjectIdentity('all', get_class($this->user)), ['EDIT']));
         $this->assertEquals(BBAclVoter::ACCESS_DENIED, $this->aclVoter->vote($this->token, new ObjectIdentity(23545866754, get_class($this->user)), ['EDIT']));
     }
 
@@ -125,12 +125,12 @@ class BBAclVoterTest extends TestCase
     {
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateClassAce(
-            new ObjectIdentity('class', get_class($this->user)),
+            new ObjectIdentity('all', get_class($this->user)),
             new UserSecurityIdentity($this->group->getObjectIdentifier(), get_class($this->group)),
             MaskBuilder::MASK_EDIT
         );
 
-        $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, new ObjectIdentity('class', get_class($this->user)), ['EDIT']));
+        $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, new ObjectIdentity('all', get_class($this->user)), ['EDIT']));
         $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, $this->user, ['EDIT']));
         $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, new ObjectIdentity($this->user->getId(), get_class($this->user)), ['EDIT']));
         $this->assertEquals(BBAclVoter::ACCESS_GRANTED, $this->aclVoter->vote($this->token, new ObjectIdentity(23545866754, get_class($this->user)), ['EDIT']));

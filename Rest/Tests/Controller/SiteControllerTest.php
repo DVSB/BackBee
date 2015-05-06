@@ -112,7 +112,7 @@ class SiteControllerTest extends TestCase
         );
 
         $aclManager->insertOrUpdateObjectAce(
-            new ObjectIdentity('class', 'BackBee\Site\Layout'),
+            new ObjectIdentity('all', 'BackBee\Site\Layout'),
             new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );

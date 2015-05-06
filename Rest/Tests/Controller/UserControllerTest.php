@@ -85,7 +85,7 @@ class UserControllerTest extends RestTestCase
 
          // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
-        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_IDDQD);
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('all', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_IDDQD);
     }
 
     protected function getController()
@@ -298,7 +298,7 @@ class UserControllerTest extends RestTestCase
     {
         // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
-        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('all', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
 
         $controller = $this->getController();
 
@@ -398,7 +398,7 @@ class UserControllerTest extends RestTestCase
     {
         // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
-        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('class', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
+        $aclManager->insertOrUpdateClassAce(new ObjectIdentity('all', get_class($this->user)), UserSecurityIdentity::fromAccount($this->user), MaskBuilder::MASK_CREATE);
         $controller = $this->getController();
 
         // create user

@@ -199,7 +199,7 @@ class PageController extends AbstractRestController
     public function postAction(Layout $layout, Request $request, Page $parent = null)
     {
         if (null !== $parent) {
-            $this->granted(MaskBuilder::MASK_EDIT, $parent);
+            $this->granted('EDIT', $parent);
         }
 
         $builder = $this->getApplication()->getContainer()->get('pagebuilder');

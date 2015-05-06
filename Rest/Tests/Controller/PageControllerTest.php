@@ -94,7 +94,7 @@ class PageControllerTest extends RestTestCase
         $em->flush();
 
         $this->getAclManager()->insertOrUpdateClassAce(
-            new ObjectIdentity('class', 'BackBee\NestedNode\Page'),
+            new ObjectIdentity('all', 'BackBee\NestedNode\Page'),
             new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             MaskBuilder::MASK_CREATE
         )->insertOrUpdateClassAce(
