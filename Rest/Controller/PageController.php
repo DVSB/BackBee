@@ -431,10 +431,14 @@ class PageController extends AbstractRestController
         $page = $this->getPageRepository()->duplicate(
             $source,
             $request->request->get('title'),
-            $source->getParent(),
-            true,
+            null,
+            false,
             $this->getApplication()->getBBUserToken()
         );
+
+        // Reset cloned page url is needed to not bypass rewriting url
+        // @see https://github.com/backbee/BackBee/issues/352
+        $page->setUrl(null);
 
         if (null !== $sibling) {
             $this->granted('EDIT', $sibling->getParent());
@@ -444,19 +448,21 @@ class PageController extends AbstractRestController
             $this->getPageRepository()->moveAsLastChildOf($page, $parent);
         }
 
+        $this->getApplication()->getEntityManager()->persist($page);
         $this->getApplication()->getEntityManager()->flush();
 
-        return $this->createJsonResponse(null, 201, array(
+        return $this->createJsonResponse(null, 201, [
             'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
                 'bb.rest.page.get',
-                array(
+                [
                     'version' => $request->attributes->get('version'),
                     'uid'     => $page->getUid(),
-                ),
+                ],
                 '',
                 false
             ),
-        ));
+            'url' => $page->getUrl()
+        ]);
     }
 
     /**

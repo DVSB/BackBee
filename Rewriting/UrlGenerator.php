@@ -279,8 +279,8 @@ class UrlGenerator implements UrlGeneratorInterface
             $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
                 'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
                 array(
-                    'root'  => $page->getRoot()->getUid(),
                     'regex' => $url.'(-[0-9]+)?$',
+                    'root'  => $page->getRoot()->getUid(),
                 )
             )->fetchAll();
 

@@ -480,25 +480,32 @@ class PageRepositoryTest extends TestCase
      */
     public function testDuplicate()
     {
+        $child1 = $this->repo->find('child1');
+
+        // Duplicate a page with a new title and a new parent
+        $child5 = $this->repo->duplicate($child1, 'child5', $this->root);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $child5);
+        $this->assertEquals('child5', $child5->getTitle());
+        $this->assertEquals($this->root, $child5->getParent());
+
+        // Duplicate a page not recursively to one of its descendant
+        $child4 = $this->repo->duplicate($child5, null, $child1, false);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $child4);
+        $this->assertEquals('child5', $child4->getTitle());
+        $this->assertEquals($child1, $child4->getParent());
+        $this->assertTrue($child5->isLeaf());
+    }
+
+    /**
+     * @expectedException \LogicException
+     */
+    public function testDuplicateOnRoot()
+    {
         // Duplicate a root not recursively to new a one
         $root2 = $this->repo->duplicate($this->root, null, null, false);
         $this->assertInstanceOf('BackBee\NestedNode\Page', $root2);
         $this->assertNull($root2->getParent());
         $this->assertTrue($root2->isLeaf());
-
-        // Duplicate a root not recursively to one of its descendant
-        $child1 = $this->repo->find('child1');
-        $child4 = $this->repo->duplicate($this->root, null, $child1, false);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $child4);
-        $this->assertEquals('root', $child4->getTitle());
-        $this->assertEquals($child1, $child4->getParent());
-        $this->assertTrue($root2->isLeaf());
-
-        // Duplicate a page with a new title and a new parent
-        $child5 = $this->repo->duplicate($child1, 'child5', $root2);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $child5);
-        $this->assertEquals('child5', $child5->getTitle());
-        $this->assertEquals($root2, $child5->getParent());
     }
 
     /**
@@ -506,6 +513,32 @@ class PageRepositoryTest extends TestCase
      * @covers \BackBee\NestedNode\Repository\PageRepository::_copy_recursively
      */
     public function testDuplicateRecursively()
+    {
+        // Duplicate a page with a new title and a new parent
+        $child1 = $this->repo->find('child1');
+        $child2 = $this->repo->find('child2');
+        $child5 = $this->repo->duplicate($child1, 'child5', $child2, true);
+        $this->application->getEntityManager()->persist($child5);
+        $this->application->getEntityManager()->flush();
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $child5);
+        $this->assertEquals('child5', $child5->getTitle());
+        $this->assertEquals($child2, $child5->getParent());
+
+        $this->assertEquals(1, count($this->repo->getDescendants($child2)));
+
+        // Duplicate children except deleted ones
+        $child5->setState(Page::STATE_DELETED);
+
+        $copyChild2 = $this->repo->duplicate($child2);
+        $this->application->getEntityManager()->persist($copyChild2);
+        $this->application->getEntityManager()->flush();
+        $this->assertEquals(0, count($this->repo->getDescendants($copyChild2)));
+    }
+
+    /**
+     * @expectedException \LogicException
+     */
+    public function testDuplicateRecursivelyOnRoot()
     {
         // Recursively duplicate a root to a new one
         $root2 = $this->repo->duplicate($this->root);
@@ -521,55 +554,22 @@ class PageRepositoryTest extends TestCase
         for ($i = 0; $i < count($descendants); $i++) {
             $this->assertEquals($descendants[$i]->getTitle(), $new_descendants[$i]->getTitle());
         }
-
-        // Duplicate a page with a new title and a new parent
-        $child1 = $this->repo->find('child1');
-        $child5 = $this->repo->duplicate($child1, 'child5', $root2);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $child5);
-        $this->assertEquals('child5', $child5->getTitle());
-        $this->assertEquals($root2, $child5->getParent());
-
-        // Duplicate children except deleted ones
-        $child5->setState(Page::STATE_DELETED);
-        $root3 = $this->repo->duplicate($root2);
-        $this->assertEquals(count($this->repo->getDescendants($root2)) - 1, count($this->repo->getDescendants($root3)));
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicate
-     * @covers \BackBee\NestedNode\Repository\PageRepository::_updateRelatedPostCloning
-     * @covers \BackBee\NestedNode\Repository\PageRepository::_updateMainNodePostCloning
+     * @expectedException \LogicException
      */
-    public function testDuplicateWithToken()
+    public function testDuplicateWithTokenOnRoot()
     {
         $token = new \BackBee\Security\Token\BBUserToken();
         $token->setUser(new \BackBee\Security\User('user'));
 
         $root2 = $this->repo->duplicate($this->root, null, null, true, $token);
-        $descendants = $this->repo->getDescendants($root2);
-        $expected_datas = array(
-            'pages' => array(
-                'root' => $root2,
-                'child1' => $descendants[2],
-                'child2' => $descendants[1],
-                'child3' => $descendants[0],
-            ),
-            'contents' => array(
-                $this->root->getContentSet()->getUid() => $root2->getContentSet(),
-                $this->root->getContentSet()->first()->getUid() => $root2->getContentSet()->first(),
-                $this->root->getContentSet()->first()->last()->getUid() => $root2->getContentSet()->first()->last(),
-            ),
-        );
-
-        $this->assertEquals($expected_datas, $root2->cloning_datas);
-        $this->assertEquals($this->root, $this->root->getContentSet()->first()->last()->getMainNode());
-        $this->assertEquals($root2, $root2->getContentSet()->first()->last()->getMainNode());
-        $this->assertInstanceOf('BackBee\ClassContent\Revision', $root2->getContentSet()->first()->last()->getDraft());
     }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::_copy
-     * @expectedException \BackBee\Exception\InvalidArgumentException
+     * @expectedException \LogicException
      */
     public function testDuplicatePageIn0neOfItsDescendants()
     {
