@@ -461,7 +461,7 @@ class PageController extends AbstractRestController
                 '',
                 false
             ),
-            'url' => $page->getUrl()
+            'BB-PAGE-URL' => $page->getUrl()
         ]);
     }
 
