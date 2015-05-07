@@ -60,18 +60,17 @@ class MediaRepository extends EntityRepository
         if (null !== $searchField) {
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
-
         $title = (isset($cond["mediaTitle"])) ? $cond["mediaTitle"] : null;
         if (null !== $title) {
             $q->andWhere($q->expr()->like('m._title', $q->expr()->literal('%'.$title.'%')));
         }
 
-        $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
+        $afterPubdateField = (isset($cond['afterPubdateField']) && !empty($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
         if (null !== $afterPubdateField) {
             $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
         }
 
-        $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
+        $beforePubdateField = (isset($cond['beforePubdateField']) && !empty($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
         if (null !== $beforePubdateField) {
             $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
         }
