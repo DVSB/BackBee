@@ -45,7 +45,7 @@
         position: fixed;
         right: 0;
         text-align: left;
-        z-index: 999999;
+        z-index: 99999;
     }
 
     #bb-profiler-panel.open{
@@ -58,6 +58,7 @@
         width: 100%;
         background: #eee;
         position: fixed;
+        bottom: 0px;
     }
 
     #bb-profiler-panel ul.nav li{
@@ -66,7 +67,7 @@
 
     #bb-profiler-panel .tab-content{
         background: #fff;
-        padding: 10px 20px;
+        padding: 10px 20px 10px 32px;
     }
 
     #bb-profiler-panel .nav a{
@@ -100,20 +101,33 @@
 </style>
 
 <script>
-    $('#bb-profiler-panel ul.nav li a').click(function(){
-        $('#bb-profiler-panel').css('top', '0');
-        $('#bb-profiler-panel').addClass('open');
+    var panelListLinks = document.querySelectorAll('#bb-profiler-panel ul.nav li a');
 
-    });
+    for (i=0; i < panelListLinks.length; i++) {
+        panelListLinks[i].addEventListener('click', function displayPanel() {
+            document.querySelector('#bb-profiler-panel').style.top = "0";
+            document.querySelector('#bb-profiler-panel').classList.add('open');
+        }, false);
+    }
 
 
-    $('#bb-profiler-close').click(function(){
-        $('#bb-profiler-panel').hide();
-    });
+    document.querySelector('#bb-profiler-close').addEventListener('click', function hidePanel() {
+        document.querySelector('#bb-profiler-panel').style.display = "none";
+    }, false);
 
-    $('#bb-profiler-panel .nav a').click(function(){
-        var hash = $(this).attr('href');
-        $('.tab-content .tab-pane').removeClass('active');
-        $(hash).addClass('active');
-    });
+
+    var panelLinks = document.querySelectorAll('#bb-profiler-panel .nav a');
+    for (i=0; i < panelLinks.length; i++) {
+        panelLinks[i].addEventListener('click', function completePanel() {
+            var hash = this.getAttribute('href');
+            var contentPanels = document.querySelectorAll('.tab-content .tab-pane');
+
+            for (i=0; i < contentPanels.length; i++) {
+                contentPanels[i].classList.remove('active');
+            }
+
+            document.querySelector(hash).classList.add('active');
+
+        }, false);
+    }
 </script>
