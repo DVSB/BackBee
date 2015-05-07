@@ -167,7 +167,7 @@ class PageControllerTest extends RestTestCase
         );
 
         $this->assertTrue($response->headers->has('location'));
-        $this->assertEquals('/a-new-title', $response->headers->get('url'));
+        $this->assertEquals('/a-new-title', $response->headers->get('BB-PAGE-URL'));
         $this->assertEquals(201, $response->getStatusCode());
     }
 
