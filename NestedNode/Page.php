@@ -941,6 +941,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setState($state)
     {
+        $state = (int) $state;
         if ($this->isRoot() && !($state & Page::STATE_ONLINE)) {
             throw new \LogicException("Root page state must be online.");
         }
@@ -1435,20 +1436,20 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function getStateLabel()
     {
-        $states = array_flip(self::$STATES);
-        $label = true === isset($states[$this->_state]) ? $states[$this->_state] : null;
-        if (null === $label) {
-            $labels = array();
-            foreach ($states as $value => $label) {
+        $labels = [];
+        if (self::STATE_OFFLINE === $this->_state) {
+            $labels[] = 'Offline';
+        } elseif (self::STATE_HIDDEN === $this->_state) {
+            $labels[] = 'Offline, Hidden';
+        } else {
+            foreach (self::$STATES as $label => $value) {
                 if (0 !== ($this->_state & $value)) {
                     $labels[] = $label;
                 }
             }
-
-            $label = implode(', ', $labels);
         }
 
-        return $label;
+        return implode(', ', $labels);
     }
 
     /**
