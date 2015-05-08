@@ -111,7 +111,7 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     protected $_children;
 
     /**
-     * A collection of AClassContent indexed by this keyword.
+     * A collection of AbstractClassContent indexed by this keyword.
      *
      * @ORM\ManyToMany(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(name="keywords_contents",

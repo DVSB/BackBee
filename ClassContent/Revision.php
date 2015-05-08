@@ -52,8 +52,13 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ *
  * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\RevisionRepository")
- * @ORM\Table(name="revision", indexes={@ORM\Index(name="IDX_CONTENT", columns={"content_uid"}), @ORM\Index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}), @ORM\Index(name="IDX_DRAFT", columns={"owner", "state"})})
+ * @ORM\Table(name="revision", indexes={
+ *     @ORM\Index(name="IDX_CONTENT", columns={"content_uid"}),
+ *     @ORM\Index(name="IDX_REVISION_CLASSNAME_1", columns={"classname"}),
+ *     @ORM\Index(name="IDX_DRAFT", columns={"owner", "state"})
+ * })
  * @ORM\HasLifecycleCallbacks
  */
 class Revision extends AbstractContent implements \Iterator, \Countable
@@ -103,7 +108,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * The attached revisionned content.
      *
-     * @var \BackBee\ClassContent\AClassContent
+     * @var AbstractClassContent
+     *
      * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_revisions", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
      */
@@ -113,6 +119,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      * The entity target content classname.
      *
      * @var string
+     *
      * @ORM\Column(type="string", name="classname")
      */
     private $_classname;
@@ -120,7 +127,8 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * The owner of this revision.
      *
-     * @var \Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
+     * @var UserSecurityIdentity
+     *
      * @ORM\Column(type="string", name="owner")
      */
     private $_owner;
@@ -146,7 +154,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     private $em;
 
     /**
-     * @var \BackBee\Security\Token\BBUserToken
+     * @var BBUserToken
      */
     private $token;
 
@@ -176,7 +184,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      *
      * @param \Doctrine\ORM\EntityManager $em
      *
-     * @return \BackBee\ClassContent\Revision
+     * @return Revision
      */
     public function setEntityManager(EntityManager $em = null)
     {
@@ -188,9 +196,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Sets the current BB user's token to dynamically load subrevisions.
      *
-     * @param \BackBee\Security\Token\BBUserToken $token
+     * @param  BBUserToken $token
      *
-     * @return \BackBee\ClassContent\Revision
+     * @return Revision
      */
     public function setToken(BBUserToken $token = null)
     {
@@ -202,7 +210,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Returns the revisionned content.
      *
-     * @return \BackBee\ClassContent\AbstractClassContent
+     * @return AbstractClassContent
      * @codeCoverageIgnore
      */
     public function getContent()
@@ -224,7 +232,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Returns the owner of the revision.
      *
-     * @return \Symfony\Component\Security\Acl\Domain\UserSecurityIdentity
+     * @return UserSecurityIdentity
      * @codeCoverageIgnore
      */
     public function getOwner()
@@ -248,7 +256,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      *
      * @param array $data
      *
-     * @return \BackBee\ClassContent\AbstractClassContent the current instance content
+     * @return AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setData(array $data)
@@ -261,9 +269,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Sets the attached revisionned content.
      *
-     * @param \BackBee\ClassContent\AClassContent $content
+     * @param  AbstractClassContent $content
      *
-     * @return \BackBee\ClassContent\AbstractClassContent the current instance content
+     * @return AbstractClassContent the current instance content
      */
     public function setContent(AbstractClassContent $content = null)
     {
@@ -281,7 +289,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      *
      * @param string $classname
      *
-     * @return \BackBee\ClassContent\AbstractClassContent the current instance content
+     * @return AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setClassname($classname)
@@ -294,9 +302,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Sets the owner of the revision.
      *
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @param  UserInterface $user
      *
-     * @return \BackBee\ClassContent\AbstractClassContent                 the current instance content
+     * @return AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setOwner(UserInterface $user)
@@ -311,7 +319,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      *
      * @param string $comment
      *
-     * @return \BackBee\ClassContent\AbstractClassContent the current instance content
+     * @return AbstractClassContent the current instance content
      * @codeCoverageIgnore
      */
     public function setComment($comment)
@@ -329,7 +337,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function clear()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not clear an content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not clear an content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         $this->_data = array();
@@ -344,7 +355,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function count()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not count an content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not count an content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         return count($this->_data);
@@ -358,7 +372,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function current()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not get current of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not get current of a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         return $this->getData($this->_index);
@@ -386,7 +403,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function item($index)
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not get item of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not get item of a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         if (0 <= $index && $index < $this->count()) {
@@ -404,7 +424,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function key()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not get key of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not get key of a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         return $this->_index;
@@ -428,7 +451,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function next()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not get next of a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not get next of a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         return $this->getData($this->_index++);
@@ -464,7 +490,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function push(AbstractClassContent $var)
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not push in a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not push in a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         if ($this->isAccepted($var)) {
@@ -482,7 +511,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function rewind()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not rewind a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not rewind a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         $this->_index = 0;
@@ -532,7 +564,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     public function valid()
     {
         if (!($this->_content instanceof ContentSet)) {
-            throw new ClassContentException(sprintf('Can not valid a content %s.', get_class($this)), ClassContentException::UNKNOWN_ERROR);
+            throw new ClassContentException(
+                sprintf('Can not valid a content %s.', get_class($this)),
+                ClassContentException::UNKNOWN_ERROR
+            );
         }
 
         return isset($this->_data[$this->_index]);

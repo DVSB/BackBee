@@ -32,8 +32,14 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ *
  * @ORM\Entity(repositoryClass="BackBee\ClassContent\Repository\IndexationRepository")
- * @ORM\Table(name="indexation",indexes={@ORM\Index(name="IDX_OWNER", columns={"owner_uid"}), @ORM\Index(name="IDX_CONTENT", columns={"content_uid"}), @ORM\Index(name="IDX_VALUE", columns={"value"}), @ORM\Index(name="IDX_SEARCH", columns={"field", "value"})})
+ * @ORM\Table(name="indexation",indexes={
+ *     @ORM\Index(name="IDX_OWNER", columns={"owner_uid"}),
+ *     @ORM\Index(name="IDX_CONTENT", columns={"content_uid"}),
+ *     @ORM\Index(name="IDX_VALUE", columns={"value"}),
+ *     @ORM\Index(name="IDX_SEARCH", columns={"field", "value"})
+ * })
  */
 class Indexation
 {
@@ -41,6 +47,7 @@ class Indexation
      * The indexed content.
      *
      * @var string
+     *
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", inversedBy="_indexation", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="content_uid", referencedColumnName="uid")
@@ -51,6 +58,7 @@ class Indexation
      * The indexed field of the content.
      *
      * @var string
+     *
      * @ORM\Id
      * @ORM\Column(type="string", name="field")
      */
@@ -59,7 +67,8 @@ class Indexation
     /**
      * The owner content of the indexed field.
      *
-     * @var AClassContent
+     * @var AbstractClassContent
+     *
      * @ORM\ManyToOne(targetEntity="BackBee\ClassContent\AbstractClassContent", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(name="owner_uid", referencedColumnName="uid")
      */
@@ -69,6 +78,7 @@ class Indexation
      * The value of the indexed field.
      *
      * @var string
+     *
      * @ORM\Column(type="string", name="value")
      */
     protected $_value;
@@ -77,6 +87,7 @@ class Indexation
      * The optional callback to apply while indexing.
      *
      * @var string
+     *
      * @ORM\Column(type="string", name="callback", nullable=true)
      */
     protected $_callback;
@@ -92,11 +103,13 @@ class Indexation
      */
     public function __construct($content = null, $field = null, $owner = null, $value = null, $callback = null)
     {
-        $this->setContent($content)
-                ->setField($field)
-                ->setOwner($owner)
-                ->setValue($value)
-                ->setCallback($callback);
+        $this
+            ->setContent($content)
+            ->setField($field)
+            ->setOwner($owner)
+            ->setValue($value)
+            ->setCallback($callback)
+        ;
     }
 
     /**
@@ -144,7 +157,7 @@ class Indexation
      *
      * @param string $content
      *
-     * @return \BackBee\ClassContent\Indexation
+     * @return self
      */
     public function setContent($content)
     {
@@ -158,7 +171,7 @@ class Indexation
      *
      * @param string $field
      *
-     * @return \BackBee\ClassContent\Indexation
+     * @return self
      */
     public function setField($field)
     {
@@ -172,7 +185,7 @@ class Indexation
      *
      * @param \Symfony\Component\Security\Acl\Model\SecurityIdentityInterface $owner
      *
-     * @return \BackBee\ClassContent\Indexation
+     * @return self
      */
     public function setOwner($owner)
     {
@@ -186,7 +199,7 @@ class Indexation
      *
      * @param string $value
      *
-     * @return \BackBee\ClassContent\Indexation
+     * @return self
      */
     public function setValue($value)
     {
@@ -200,7 +213,7 @@ class Indexation
      *
      * @param function $callback
      *
-     * @return \BackBee\ClassContent\Indexation
+     * @return self
      */
     public function setCallback($callback)
     {
