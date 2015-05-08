@@ -137,12 +137,23 @@ class ClassContentListener
     {
         $content = $event->getTarget();
         if (!($content instanceof AbstractClassContent)) {
-            throw new BBException('Enable to update object', BBException::INVALID_ARGUMENT, new \InvalidArgumentException(sprintf('Only BackBee\ClassContent\AClassContent can be commit, `%s` received', get_class($content))));
+            throw new BBException(
+                'Enable to update object',
+                BBException::INVALID_ARGUMENT,
+                new \InvalidArgumentException(sprintf(
+                    'Only BackBee\ClassContent\AbstractClassContent can be commit, `%s` received',
+                    get_class($content)
+                ))
+            );
         }
 
         $dispatcher = $event->getDispatcher();
         if (null === $application = $dispatcher->getApplication()) {
-            throw new BBException('Enable to update object', BBException::MISSING_APPLICATION, new \RuntimeException('BackBee application has to be initialized'));
+            throw new BBException(
+                'Enable to update object',
+                BBException::MISSING_APPLICATION,
+                new \RuntimeException('BackBee application has to be initialized')
+            );
         }
 
         if (null === $token = $application->getBBUserToken()) {
@@ -162,9 +173,16 @@ class ClassContentListener
             throw new ClassContentException('Content is up to date', ClassContentException::REVISION_UPTODATE);
         }
 
-        $lastCommitted = $em->getRepository('BackBee\ClassContent\Revision')->findBy(array('_content' => $content, '_revision' => $content->getRevision(), '_state' => Revision::STATE_COMMITTED));
+        $lastCommitted = $em->getRepository('BackBee\ClassContent\Revision')->findBy([
+            '_content'  => $content,
+            '_revision' => $content->getRevision(),
+            '_state'    => Revision::STATE_COMMITTED,
+        ]);
         if (null === $lastCommitted) {
-            throw new ClassContentException('Enable to get last committed revision', ClassContentException::REVISION_MISSING);
+            throw new ClassContentException(
+                'Enable to get last committed revision',
+                ClassContentException::REVISION_MISSING
+            );
         }
 
         $content->updateDraft($lastCommitted);

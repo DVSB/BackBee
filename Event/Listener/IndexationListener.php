@@ -76,7 +76,7 @@ class IndexationListener implements EventSubscriberInterface
     private static $_site_content_done = array();
 
     /**
-     * Updates the site-content indexes for the scheduled AClassContent.
+     * Updates the site-content indexes for the scheduled AbstractClassContent.
      *
      * @param array $contents_inserted
      * @param array $contents_removed
@@ -95,7 +95,7 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Updates the content-content indexes for the scheduled AClassContent.
+     * Updates the content-content indexes for the scheduled AbstractClassContent.
      *
      * @param array $contents_saved
      * @param array $contents_removed

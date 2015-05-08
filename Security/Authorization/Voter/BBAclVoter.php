@@ -140,7 +140,7 @@ class BBAclVoter extends AclVoter
     }
 
     /**
-     * Returns the vote for class content object, recursively till AClassContent.
+     * Returns the vote for class content object, recursively till AbstractClassContent.
      *
      * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
      * @param  \BackBee\ClassContent\AbstractClassContent $content

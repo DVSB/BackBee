@@ -217,7 +217,7 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Compute values of attributes according to the AClassContent provided.
+     * Compute values of attributes according to the AbstractClassContent provided.
      *
      * @param  \BackBee\ClassContent\AbstractClassContent $content
      *
