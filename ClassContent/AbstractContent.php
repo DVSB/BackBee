@@ -1031,6 +1031,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
             'minentry'   => $this->getMinEntry(),
             'maxentry'   => $this->getMaxEntry(),
             'elements'   => $this->computeElementsToJson($this->getData()),
+            'extra'      => [],
         ];
 
         if (0 === count($data['parameters'])) {
@@ -1086,7 +1087,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
         }
 
         if (self::JSON_DEFINITION_FORMAT === $format || self::JSON_INFO_FORMAT === $format) {
-            unset($data['elements']);
+            unset($data['elements'], $data['extra']);
         }
 
         if (self::JSON_DEFINITION_FORMAT === $format) {
