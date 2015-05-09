@@ -27,11 +27,12 @@ use BackBee\NestedNode\Media;
 use BackBee\Rest\Controller\Annotations as Rest;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Exception;
+
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Description of MediaController
@@ -40,36 +41,164 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class MediaController extends AbstractRestController
 {
+    /**
+     * Creates an instance of MediaController.
+     *
+     * @param ContainerInterface $app
+     */
+    public function setContainer(ContainerInterface $container = null)
+    {
+        parent::setContainer($container);
+
+        if ($this->getApplication()) {
+            $mediaClasses = $this->getApplication()->getAutoloader()->glob('Media'.DIRECTORY_SEPARATOR.'*');
+            foreach ($mediaClasses as $mediaClass) {
+                class_exists($mediaClass);
+            }
+        }
+    }
 
     /**
      * @param Request $request
+     *
      * @Rest\Pagination(default_count=25, max_count=100)
      */
     public function getCollectionAction(Request $request, $start, $count)
     {
-        $this->preloadMediaClasses();
         $queryParams = $request->query->all();
-        $mediaFolderUid = $request->get("mediaFolder_uid", null);
-        if (null === $mediaFolderUid) {
-            throw new BadRequestHttpException('A mediaFolder uid should be provided!');
+        $mediaFolderUid = $request->get('mediaFolder_uid', null);
+        if (empty($mediaFolderUid)) {
+            throw new BadRequestHttpException('A media folder uid should be provided.');
         }
+
         $mediaFolder = $this->getMediaFolderRepository()->find($mediaFolderUid);
         if (null === $mediaFolder) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("The mediaFolder can't be found!");
+            throw new NotFoundHttpException(sprintf('Cannot find media folder with uid `%s`.', $mediaFolderUid));
         }
-        $paging = array("start" => $start, "limit" => $count);
-        $paginator = $this->getMediaRepository()->getMedias($mediaFolder, $queryParams, "_modified", "desc", $paging);
+
+        $paging = [
+            'start' => $start,
+            'limit' => $count
+        ];
+        $paginator = $this->getMediaRepository()->getMedias($mediaFolder, $queryParams, '_modified', 'desc', $paging);
         $results = [];
         foreach ($paginator as $media) {
             $results[] = $media;
         }
-        $response = $this->createJsonResponse($this->mediaToJson($results));
-        return $this->addRangeToContent($response, $paginator, $start, $count);
+
+        return $this->addRangeToContent(
+            $this->createJsonResponse($this->mediaToJson($results)),
+            $paginator,
+            $start,
+            $count
+        );
+    }
+
+    /**
+     * @param  mixed $id
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function deleteAction($id)
+    {
+
+        if (null === $media = $this->getMediaRepository()->find($id)) {
+            throw new NotFoundHttpException(sprintf('Cannot find media with id `%s`.', $id));
+        }
+
+        $em = $this->getEntityManager();
+        try {
+            $em->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($media->getContent());
+            $em->remove($media);
+            $em->flush();
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException(sprintf('Error while deleting media `%s`: %s', $id, $e->getMessage()));
+        }
+
+        return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * Update media content's and folder
+     */
+    public function putAction($id, Request $request)
+    {
+        $mediaTitle = $request->get('title', 'Untitled media');
+        $media = $this->getMediaRepository()->find($id);
+
+        if (null === $media) {
+            throw new BadRequestHttpException(sprintf('Cannot find media with id `%s`.', $id));
+        }
+
+        $media->setTitle($mediaTitle);
+
+        $this->getEntityManager()->persist($media);
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse(null, 204);
+    }
+
+    /**
+     * @param  Request $request
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function postAction(Request $request)
+    {
+        $contentUid = $request->request->get('content_uid');
+        $contentType = $request->request->get('content_type', null);
+        $mediaFolderUid = $request->request->get('folder_uid', null);
+        $mediaTitle = $request->request->get('title', 'Untitled media');
+
+        $content = $this->getClassContentManager()->findOneByTypeAndUid($contentType, $contentUid);
+        $mediaFolder = $this->getMediaFolderRepository()->find($mediaFolderUid);
+
+        $media = new Media();
+        $media->setContent($content);
+        $media->setTitle($mediaTitle);
+        $media->setMediaFolder($mediaFolder);
+
+        $this->getEntityManager()->persist($media);
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse(null, 201, [
+            'BB-RESOURCE-UID' => $media->getId(),
+            'Location'        => $this->getApplication()->getRouting()->getUrlByRouteName(
+                'bb.rest.media.get',
+                [
+                    'version' => $request->attributes->get('version'),
+                    'uid'     => $media->getId(),
+                ],
+                '',
+                false
+            ),
+        ]);
+    }
+
+    private function getMediaRepository()
+    {
+        return $this->getEntityManager()->getRepository('BackBee\NestedNode\Media');
+    }
+
+    private function getMediaFolderRepository()
+    {
+        return $this->getEntityManager()->getRepository('BackBee\NestedNode\MediaFolder');
+    }
+
+    private function getClassContentManager()
+    {
+        $manager = $this->getApplication()
+            ->getContainer()
+            ->get('classcontent.manager')
+            ->setBBUserToken($this->getApplication()->getBBUserToken())
+        ;
+
+        return $manager;
     }
 
     private function mediaToJson($collection)
     {
-        $result = array();
+        $result = [];
         foreach ($collection as $media) {
             $content = $media->getContent();
 
@@ -92,121 +221,11 @@ class MediaController extends AbstractRestController
         if ($collection instanceof Paginator) {
             $count = count($collection->getIterator());
         }
+
         $lastResult = $start + $count - 1;
         $lastResult = $lastResult < 0 ? 0 : $lastResult;
         $response->headers->set('Content-Range', "$start-$lastResult/" . count($collection));
+
         return $response;
     }
-
-    /**
-     *
-     * @param type $id
-     * @return type
-     * @throws BadRequestHttpException
-     */
-    public function deleteAction($id = null)
-    {
-        $this->preloadMediaClasses();
-        if (null === $id) {
-            throw new BadRequestHttpException("A media id should be provided!");
-        }
-        $media = $this->getMediaRepository()->find($id);
-        if (!$media) {
-            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('media can\'t be found');
-        }
-        try {
-            $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($media->getContent());
-            $this->getEntityManager()->remove($media);
-            $this->getEntityManager()->flush();
-        } catch (\Exception $e) {
-            throw new BadRequestHttpException("Error while deleting the media: " . $e->getMessage());
-        }
-        return $this->createJsonResponse(null, 204);
-    }
-
-    private function preloadMediaClasses()
-    {
-        $media = $this->getApplication()->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
-        foreach ($media as $mediaClass) {
-            class_exists($mediaClass);
-        }
-    }
-
-    /**
-     * Update media content's and folder
-     */
-    public function putAction($id, Request $request)
-    {
-        $this->preloadMediaClasses();
-        $media = $this->getMediaRepository()->find($id);
-        $media_title = $request->get("title", "Untitled media");
-        $mediaContentUid = $request->get("content_uid");
-        $mediaType = $request->get("type", null);
-        if (!$media) {
-            throw new BadRequestHttpException('media can\'t be found');
-        }
-        $media->setTitle($media_title);
-        $this->getEntityManager()->persist($media);
-        $this->getEntityManager()->flush();
-        return $this->createJsonResponse(null, 204);
-    }
-
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @return Symfony\Component\HttpFoundation\Response
-     * @throws BadRequestHttpException
-     */
-    public function postAction(Request $request)
-    {
-        $media_id = $request->get("id", null);
-        $mediaContentUid = $request->get("content_uid");
-        $mediaType = $request->get("type", null);
-        $mediaFolder_uid = $request->get("folder_uid", null);
-        $media_title = $request->get("title", "Untitled media");
-
-        $content = $this->getClassContentManager()->findOneByTypeAndUid($mediaType, $mediaContentUid, true, true);
-        $mediaFolder = $this->getMediaFolderRepository()->find($mediaFolder_uid);
-
-        if (!$media_id) {
-            $media = new Media();
-        } else {
-            $media = $this->getMediaRepository()->find($media_id);
-            if (!$media) {
-                throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Media can't be found!");
-            }
-        }
-        $media->setContent($content);
-        $media->setTitle($media_title);
-        $media->setMediaFolder($mediaFolder);
-        $this->getEntityManager()->persist($media);
-        $this->getEntityManager()->flush();
-        return $this->createJsonResponse(null, 201, [
-                    'BB-RESOURCE-UID' => $media->getId(),
-                    'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
-                            'bb.rest.media.get', [
-                        'version' => $request->attributes->get('version'),
-                        'uid' => $media->getId()
-                            ], '', false
-                    ),
-                ]);
-    }
-
-    private function getMediaRepository()
-    {
-        return $this->getEntityManager()->getRepository('BackBee\NestedNode\Media');
-    }
-
-    private function getMediaFolderRepository()
-    {
-        return $this->getEntityManager()->getRepository('BackBee\NestedNode\MediaFolder');
-    }
-
-    private function getClassContentManager()
-    {
-        $manager = $this->getApplication()->getContainer()->get('classcontent.manager')
-                ->setBBUserToken($this->getApplication()->getBBUserToken());
-
-        return $manager;
-    }
-
 }

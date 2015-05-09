@@ -321,17 +321,20 @@ class Media implements \JsonSerializable
 
     public function jsonSerialize()
     {
-        $result = array();
+        $result = [];
         $result['id'] = $this->getId();
-        $result['uid'] = $this->getId();
         $result['image'] = $this->getContent() ? $this->getContent()->getImageName() : null;
-        $result['content_uid'] = $this->getContent()->getUid();
-        $result['mediaFolder'] = $this->getMediaFolder()->getUid();
+        $result['media_folder'] = $this->getMediaFolder()->getUid();
         $result['title'] = $this->getTitle();
-        $contentInfos = array();
-        $contentInfos["uid"] =  $this->getContent()->getUid();
-        $contentInfos["type"] = $this->getContent()->getContentType();
-        $result ["content"] = $contentInfos;
+
+        $contentData = $this->getContent() ? $this->getContent()->jsonSerialize() : [];
+
+        $result ['content'] = [
+            'uid'   => $this->getContent()->getUid(),
+            'type'  => $this->getContent()->getContentType(),
+            'extra' => isset($contentData['extra']) ? $contentData['extra'] : [],
+        ];
+
         return $result;
     }
 
