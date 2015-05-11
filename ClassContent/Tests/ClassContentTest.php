@@ -237,6 +237,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($data['elements']));
         $this->assertTrue(isset($data['properties']));
         $this->assertTrue(isset($data['image']));
+        $this->assertTrue(isset($data['extra']));
 
         $this->assertTrue(is_array($data['elements']));
 
@@ -271,6 +272,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($data['modified']));
         $this->assertFalse(isset($data['revision']));
         $this->assertFalse(isset($data['elements']));
+        $this->assertFalse(isset($data['extra']));
         $this->assertFalse(isset($data['uid']));
 
         $this->assertEquals($this->content->getDefaultImageName(), $data['image']);
@@ -286,6 +288,7 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($data['parameters']));
         $this->assertTrue(isset($data['elements']));
         $this->assertTrue(isset($data['image']));
+        $this->assertTrue(isset($data['extra']));
 
         $this->assertFalse(isset($data['state']));
         $this->assertFalse(isset($data['accept']));
@@ -318,5 +321,6 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(isset($data['minentry']));
         $this->assertFalse(isset($data['maxentry']));
         $this->assertFalse(isset($data['properties']));
+        $this->assertFalse(isset($data['extra']));
     }
 }

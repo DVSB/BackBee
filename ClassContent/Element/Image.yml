@@ -1,6 +1,7 @@
 Image:
   extends: \BackBee\ClassContent\Element\File
   repository: \BackBee\ClassContent\Repository\Element\ImageRepository
+  traits: [BackBee\ClassContent\Traits\Element\ImageJsonSerializeTrait]
   properties:
     name: Image
     description: An inline image

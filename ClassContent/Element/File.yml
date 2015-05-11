@@ -1,5 +1,6 @@
 File:
   repository: \BackBee\ClassContent\Repository\Element\FileRepository
+  traits: [BackBee\ClassContent\Traits\Element\FileJsonSerializeTrait]
   properties:
     name: File
     description: An attached file
