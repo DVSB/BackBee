@@ -39,3 +39,5 @@ encoders:
 
 acl:
     connection: default
+sudoers:
+    admin: 1

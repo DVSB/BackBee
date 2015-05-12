@@ -42,6 +42,7 @@ use BackBee\Site\Site;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\PageController
+ * @group Rest
  */
 class PageControllerTest extends RestTestCase
 {
@@ -65,7 +66,7 @@ class PageControllerTest extends RestTestCase
         // permissions
         $this->getContainer()->set('site', $this->site);
         self::$restUser = $this->createAuthUser('page_admin');
-        $this->group_id = self::$restUser->getUser()->getGroups()[0]->getId();
+        $this->group_id = self::$restUser->getGroups()[0]->getId();
     }
 
     private function getController()

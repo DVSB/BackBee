@@ -37,6 +37,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Exception\ValidationException
+ * @group Rest
  */
 class ValidationExceptionTest extends TestCase
 {

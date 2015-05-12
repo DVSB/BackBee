@@ -36,6 +36,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Encoder\ContainerEncoderProvider
+ * @group Rest
  */
 class ContainerEncoderProviderTest extends TestCase
 {

@@ -38,6 +38,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\AbstractRestController
+ * @group Rest
  */
 class AbstractRestControllerTest extends TestCase
 {

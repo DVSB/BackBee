@@ -276,12 +276,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
      *
      * @return \BackBee\Security\Token\BBUserToken
      */
-    protected function createAuthUser($groupId, $roles = array())
+    protected function createAuthUser($groupId, $roles = array('ROLE_API_USER'))
     {
         $token = new BBUserToken($roles);
         $user = new User();
         $user
-            ->setLogin(uniqid('login'))
+            ->setEmail('admin@backbee.com')
+            ->setLogin('admin')
             ->setPassword('pass')
             ->setApiKeyEnabled(true)
             ->setApiKeyPrivate(uniqid("PRIVATE", true))
@@ -307,7 +308,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->getSecurityContext()->setToken($token);
 
-        return $token;
+        return $user;
     }
 
     /**

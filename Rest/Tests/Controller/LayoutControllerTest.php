@@ -40,6 +40,7 @@ use BackBee\Workflow\State;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\LayoutController
+ * @group Rest
  */
 class LayoutControllerTest extends RestTestCase
 {
