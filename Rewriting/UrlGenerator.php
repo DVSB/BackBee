@@ -25,6 +25,7 @@ namespace BackBee\Rewriting;
 
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\AbstractContent;
 use BackBee\NestedNode\Page;
 use BackBee\Rewriting\Exception\RewritingException;
 use BackBee\Utils\String;
@@ -84,7 +85,7 @@ class UrlGenerator implements UrlGeneratorInterface
      *
      * @var array
      */
-    private $schemes = array();
+    private $schemes = [];
 
     /**
      * Array of class content used by one of the schemes.
@@ -103,18 +104,58 @@ class UrlGenerator implements UrlGeneratorInterface
         $this->application = $application;
 
         if (null !== $rewritingConfig = $this->application->getConfig()->getRewritingConfig()) {
-            if (true === array_key_exists('preserve-online', $rewritingConfig)) {
-                $this->preserveOnline = (true === $rewritingConfig['preserve-online']);
+            if (array_key_exists('preserve-online', $rewritingConfig)) {
+                $this->setPreserveOnline(true === $rewritingConfig['preserve-online']);
             }
 
-            if (true === array_key_exists('preserve-unicity', $rewritingConfig)) {
-                $this->preserveUnicity = (true === $rewritingConfig['preserve-unicity']);
+            if (array_key_exists('preserve-unicity', $rewritingConfig)) {
+                $this->setPreserveUnicity(true === $rewritingConfig['preserve-unicity']);
             }
 
-            if (true === isset($rewritingConfig['scheme']) && true === is_array($rewritingConfig['scheme'])) {
+            if (isset($rewritingConfig['scheme']) && is_array($rewritingConfig['scheme'])) {
                 $this->schemes = $rewritingConfig['scheme'];
             }
         }
+    }
+
+    /**
+     * Returns true if UrlGenerator is configured to preserve url for pages with online state, else false.
+     *
+     * @return boolean
+     */
+    public function isPreserveOnline()
+    {
+        return $this->preserveOnline;
+    }
+
+    /**
+     * Setter for UrlGenerator's preserve online option.
+     *
+     * @param boolean $preserveOnline
+     */
+    public function setPreserveOnline($preserveOnline)
+    {
+        $this->preserveOnline = (boolean) $preserveOnline;
+    }
+
+    /**
+     * Returns true if UrlGenerator is configured to preserve url for pages with online state, else false.
+     *
+     * @return boolean
+     */
+    public function isPreserveUnicity()
+    {
+        return $this->preserveUnicity;
+    }
+
+    /**
+     * Setter for UrlGenerator's preserve online option.
+     *
+     * @param boolean $preserveUnicity
+     */
+    public function setPreserveUnicity($preserveUnicity)
+    {
+        $this->preserveUnicity = (boolean) $preserveUnicity;
     }
 
     /**
@@ -126,16 +167,20 @@ class UrlGenerator implements UrlGeneratorInterface
     public function getDiscriminators()
     {
         if (null === $this->descriminators) {
-            $this->descriminators = array();
+            $this->descriminators = [];
 
-            if (true === array_key_exists('_content_', $this->schemes)) {
+            if (array_key_exists('_content_', $this->schemes)) {
                 foreach (array_keys($this->schemes['_content_']) as $descriminator) {
                     $this->descriminators[] = 'BackBee\ClassContent\\'.$descriminator;
 
                     if (null !== $this->application->getEventDispatcher()) {
-                        $this->application
-                             ->getEventDispatcher()
-                             ->addListener(str_replace(NAMESPACE_SEPARATOR, '.', $descriminator).'.onflush', array('BackBee\Event\Listener\RewritingListener', 'onFlushContent'))
+                        $this
+                            ->application
+                            ->getEventDispatcher()
+                            ->addListener(
+                                str_replace(NAMESPACE_SEPARATOR, '.', $descriminator).'.onflush',
+                                ['BackBee\Event\Listener\RewritingListener', 'onFlushContent']
+                            )
                         ;
                     }
                 }
@@ -146,54 +191,127 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Returns the URL of the page.
+     * Generates and returns url for the provided page.
      *
-     * @param \BackBee\NestedNode\Page            $page    The page
-     * @param  \BackBee\ClassContent\AbstractClassContent $content The optionnal main content of the page
-     * @return string                              The URL                                  The generated URL
+     * @param Page                 $page    The page to generate its url
+     * @param AbstractClassContent $content The optional main content of the page
+     * @return string
      */
-    public function generate(Page $page, AbstractClassContent $content = null, $exceptionOnMissingScheme = true)
+    public function generate(Page $page, AbstractClassContent $content = null, $force = false, $exceptionOnMissingScheme = true)
     {
+        if (!is_bool($force)) {
+            throw new \InvalidArgumentException(sprintf(
+                '%s method expect `force parameter` to be type of boolean, %s given',
+                __METHOD__,
+                gettype($force)
+            ));
+        }
+
         if (
             null !== $page->getUrl(false)
-            && $this->preserveOnline
-            && (null === $page->getOldState() || ($page->getOldState() & Page::STATE_ONLINE))
             && $page->getState() & Page::STATE_ONLINE
+            && (!$force && $this->preserveOnline)
         ) {
             return $page->getUrl(false);
         }
 
-        if ($page->isRoot() && true === array_key_exists('_root_', $this->schemes)) {
+        if ($page->isRoot() && array_key_exists('_root_', $this->schemes)) {
             return $this->doGenerate($this->schemes['_root_'], $page, $content);
         }
 
-        if (true === isset($this->schemes['_layout_']) && true === is_array($this->schemes['_layout_'])) {
-            if (true === array_key_exists($page->getlayout()->getUid(), $this->schemes['_layout_'])) {
+        if (isset($this->schemes['_layout_']) && is_array($this->schemes['_layout_'])) {
+            if (array_key_exists($page->getlayout()->getUid(), $this->schemes['_layout_'])) {
                 return $this->doGenerate($this->schemes['_layout_'][$page->getlayout()->getUid()], $page);
             }
         }
 
-        if (null !== $content && true === array_key_exists('_content_', $this->schemes)) {
-            $shortClassname = str_replace('BackBee\ClassContent\\', '', get_class($content));
-            if (true === array_key_exists($shortClassname, $this->schemes['_content_'])) {
+        if (null !== $content && array_key_exists('_content_', $this->schemes)) {
+            $shortClassname = str_replace(AbstractContent::CLASSCONTENT_BASE_NAMESPACE, '', get_class($content));
+            if (array_key_exists($shortClassname, $this->schemes['_content_'])) {
                 return $this->doGenerate($this->schemes['_content_'][$shortClassname], $page, $content);
             }
         }
 
-        $url = $page->getUrl(false);
-        if (false === empty($url)) {
-            return $url;
-        }
-
-        if (true === array_key_exists('_default_', $this->schemes)) {
+        if (array_key_exists('_default_', $this->schemes)) {
             return $this->doGenerate($this->schemes['_default_'], $page, $content);
         }
 
+        $url = $page->getUrl(false);
+        if (!empty($url)) {
+            return $url;
+        }
+
         if (true === $exceptionOnMissingScheme) {
-            throw new RewritingException(sprintf('No rewriting scheme found for Page(%s)', $page->getUid()), RewritingException::MISSING_SCHEME);
+            throw new RewritingException(
+                sprintf('No rewriting scheme found for Page (#%s)', $page->getUid()),
+                RewritingException::MISSING_SCHEME
+            );
         }
 
         return '/'.$page->getUid();
+    }
+
+    /**
+     * Checks for the uniqueness of the URL and postfixe it if need.
+     *
+     * @param \BackBee\NestedNode\Page $page The page
+     * @param string                   &$url The reference of the generated URL
+     */
+    public function getUniqueness(Page $page, $url)
+    {
+        if (!$this->preserveUnicity) {
+            return $url;
+        }
+
+        $pageRepository = $this->application->getEntityManager()->getRepository('BackBee\NestedNode\Page');
+        if (null === $pageRepository->findOneBy(['_url' => $url, '_root' => $page->getRoot()])) {
+            return $url;
+        }
+
+        $baseUrl = $url.'-%d';
+
+        $existings = [];
+        if (preg_match('#(.*)\/$#', $baseUrl, $matches)) {
+            $baseUrl = $matches[1].'-%d/';
+            $existings = $pageRepository->createQueryBuilder('p')
+                ->where('p._root = :root')
+                ->setParameter('root', $page->getRoot())
+                ->andWhere('p._url LIKE :url')
+                ->setParameter('url', $matches[1].'%/')
+                ->getQuery()
+                ->getResult()
+            ;
+        } else {
+            $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
+                'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
+                [
+                    'regex' => $url.'(-[0-9]+)?$',
+                    'root'  => $page->getRoot()->getUid(),
+                ]
+            )->fetchAll();
+
+            $uids = [];
+
+            foreach ($existings as $existing) {
+                $uids[] = $existing['uid'];
+            }
+
+            $existings = $pageRepository->findBy(['_uid' => $uids]);
+        }
+
+        $existingUrls = [];
+        foreach ($existings as $existing) {
+            if (!$existing->isDeleted() && $existing->getUid() !== $page->getUid()) {
+                $existingUrls[] = $existing->getUrl(false);
+            }
+        }
+
+        $count = 1;
+        while (in_array($url, $existingUrls)) {
+            $url = sprintf($baseUrl, $count++);
+        }
+
+        return $url;
     }
 
     /**
@@ -206,15 +324,15 @@ class UrlGenerator implements UrlGeneratorInterface
      */
     private function doGenerate($scheme, Page $page, AbstractClassContent $content = null)
     {
-        $replacement = array(
-            '$parent' => ($page->isRoot()) ? '' : $page->getParent()->getUrl(false),
-            '$title' => String::urlize($page->getTitle()),
+        $replacement = [
+            '$parent'   => $page->isRoot() ? '' : $page->getParent()->getUrl(false),
+            '$title'    => String::urlize($page->getTitle()),
             '$datetime' => $page->getCreated()->format('ymdHis'),
-            '$date' => $page->getCreated()->format('ymd'),
-            '$time' => $page->getCreated()->format('His'),
-        );
+            '$date'     => $page->getCreated()->format('ymd'),
+            '$time'     => $page->getCreated()->format('His'),
+        ];
 
-        $matches = array();
+        $matches = [];
         if (preg_match_all('/(\$content->[a-z]+)/i', $scheme, $matches)) {
             foreach ($matches[1] as $pattern) {
                 $property = explode('->', $pattern);
@@ -228,7 +346,7 @@ class UrlGenerator implements UrlGeneratorInterface
             }
         }
 
-        $matches = array();
+        $matches = [];
         if (preg_match_all('/(\$ancestor\[([0-9]+)\])/i', $scheme, $matches)) {
             foreach ($matches[2] as $level) {
                 $ancestor = $this->application
@@ -245,63 +363,7 @@ class UrlGenerator implements UrlGeneratorInterface
         }
 
         $url = preg_replace('/\/+/', '/', str_replace(array_keys($replacement), array_values($replacement), $scheme));
-        if (true === $this->preserveUnicity) {
-            $this->checkUniqueness($page, $url);
-        }
 
-        return $url;
-    }
-
-    /**
-     * Checks for the uniqueness of the URL and postfixe it if need.
-     *
-     * @param \BackBee\NestedNode\Page $page The page
-     * @param string                   &$url The reference of the generated URL
-     */
-    private function checkUniqueness(Page $page, &$url)
-    {
-        $baseurl = $url.'-%d';
-        $page_repository = $this->application->getEntityManager()->getRepository('BackBee\NestedNode\Page');
-
-        $count = 1;
-        $existings = array();
-        if (1 === preg_match('#(.*)\/$#', $baseurl, $matches)) {
-            $baseurl = $matches[1].'-%d/';
-            $existings = $page_repository->createQueryBuilder('p')
-                ->where('p._root = :root')
-                ->setParameter('root', $page->getRoot())
-                ->andWhere('p._url LIKE :url')
-                ->setParameter('url', $matches[1].'%/')
-                ->getQuery()
-                ->getResult()
-            ;
-        } else {
-            $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
-                'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
-                array(
-                    'regex' => $url.'(-[0-9]+)?$',
-                    'root'  => $page->getRoot()->getUid(),
-                )
-            )->fetchAll();
-
-            $uids = array();
-            foreach ($existings as $existing) {
-                $uids[] = $existing['uid'];
-            }
-
-            $existings = $page_repository->findBy(array('_uid' => $uids));
-        }
-
-        $existings_url = array();
-        foreach ($existings as $existing) {
-            if (!$existing->isDeleted() && $existing->getUid() != $page->getUid()) {
-                $existings_url[] = $existing->getUrl(false);
-                $url = sprintf($baseurl, $count++);
-            }
-        }
-
-        while (true === in_array($url, $existings_url)) {
-            $url = sprintf($baseurl, $count++);
-        }
+        return $this->getUniqueness($page, $url);
     }
 }

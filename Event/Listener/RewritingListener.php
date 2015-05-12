@@ -47,7 +47,7 @@ class RewritingListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (false === ($content instanceof AbstractClassContent)) {
+        if (!($content instanceof AbstractClassContent)) {
             return;
         }
 
@@ -69,21 +69,21 @@ class RewritingListener
     public static function onFlushPage(Event $event)
     {
         $page = $event->getTarget();
-        if (false === ($page instanceof Page)) {
+        if (!($page instanceof Page)) {
             return;
         }
 
         $maincontent = $event->getEventArgs();
-        if (false === ($maincontent instanceof AbstractClassContent)) {
+        if (!($maincontent instanceof AbstractClassContent)) {
             $maincontent = null;
         }
 
         $dispatcher = $event->getDispatcher();
         $application = $dispatcher->getApplication();
 
-        if (true === self::_updateUrl($application, $page, $maincontent)) {
+        if (self::updateUrl($application, $page, $maincontent)) {
             foreach ($page->getChildren() as $descendant) {
-                self::_updateUrl($application, $descendant);
+                self::updateUrl($application, $descendant);
             }
         }
     }
@@ -91,38 +91,41 @@ class RewritingListener
     /**
      * Update URL for a page and its descendants according to the application UrlGeneratorInterface.
      *
-     * @param \BackBee\BBApplication              $application
-     * @param \BackBee\NestedNode\Page            $page
-     * @param \BackBee\ClassContent\AbstractClassContent $maincontent
+     * @param BBApplication        $application
+     * @param Page                 $page
+     * @param AbstractClassContent $maincontent
      */
-    private static function _updateUrl(BBApplication $application, Page $page, AbstractClassContent $maincontent = null)
+    private static function updateUrl(BBApplication $application, Page $page, AbstractClassContent $maincontent = null)
     {
-        $url_generator = $application->getUrlGenerator();
-        if (false === ($url_generator instanceof UrlGeneratorInterface)) {
-            return;
-        }
+        $urlGenerator = $application->getUrlGenerator();
 
         $em = $application->getEntityManager();
-        if (null === $maincontent && 0 < count($url_generator->getDiscriminators())) {
+        if (null === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
             $maincontent = $em->getRepository('BackBee\ClassContent\AbstractClassContent')
-                ->getLastByMainnode($page, $url_generator->getDiscriminators())
+                ->getLastByMainnode($page, $urlGenerator->getDiscriminators())
             ;
         }
 
         $uow = $em->getUnitOfWork();
-        $change_set = $uow->getEntityChangeSet($page);
-        if (true === $uow->isScheduledForUpdate($page) && true === array_key_exists('_state', $change_set)) {
-            $page->setOldState($change_set['_state'][0]);
+        $changeSet = $uow->getEntityChangeSet($page);
+
+        $newUrl = null;
+        $url = $page->getUrl(false);
+        if (isset($changeSet['_url']) && !empty($url)) {
+            $newUrl = $urlGenerator->getUniqueness($page, $page->getUrl());
+        } else {
+            $force = isset($changeSet['_state']) && !($changeSet['_state'][0] & Page::STATE_ONLINE);
+            $newUrl = $urlGenerator->generate($page, $maincontent, $force);
         }
 
-        $new_url = $url_generator->generate($page, $maincontent);
-        if ($new_url !== $page->getUrl(false)) {
-            $page->setUrl($new_url);
+        if ($newUrl !== $page->getUrl(false)) {
+            $page->setUrl($newUrl);
 
+            $classMetadata = $em->getClassMetadata('BackBee\NestedNode\Page');
             if ($uow->isScheduledForInsert($page) || $uow->isScheduledForUpdate($page)) {
-                $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBee\NestedNode\Page'), $page);
+                $uow->recomputeSingleEntityChangeSet($classMetadata, $page);
             } elseif (!$uow->isScheduledForDelete($page)) {
-                $uow->computeChangeSet($em->getClassMetadata('BackBee\NestedNode\Page'), $page);
+                $uow->computeChangeSet($classMetadata, $page);
             }
 
             return true;

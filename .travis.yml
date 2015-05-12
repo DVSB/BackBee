@@ -11,11 +11,21 @@ matrix:
         - php: hhvm-nightly
 
 before_script:
+  - phpenv config-add travis.php.ini
   - curl -s http://getcomposer.org/installer | php
   - php composer.phar install  --dev --no-interaction --prefer-source
 
 script:
-  - ./vendor/bin/phpunit
+  - ./vendor/bin/phpunit ClassContent/
+  - ./vendor/bin/phpunit Command/
+  - ./vendor/bin/phpunit Config/
+  - ./vendor/bin/phpunit Controller/
+  - ./vendor/bin/phpunit DependencyInjection/
+  - ./vendor/bin/phpunit NestedNode/
+  - ./vendor/bin/phpunit Rest/
+  - ./vendor/bin/phpunit Security/
+  - ./vendor/bin/phpunit Util/
+  - ./vendor/bin/phpunit Validator/
 
 notifications:
     email: false
