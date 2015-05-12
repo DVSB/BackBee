@@ -23,6 +23,7 @@
 
 namespace BackBee\Rest\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -44,6 +45,7 @@ use BackBee\Rest\Patcher\RightManager;
  *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
+ * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
 class BundleController extends AbstractRestController
 {
@@ -95,11 +97,12 @@ class BundleController extends AbstractRestController
      *
      * @param string $id the id of the bundle we are looking for
      */
-    public function patchAction($id)
+    public function patchAction($id, Request $request)
     {
         $bundle = $this->getBundleById($id);
+
         $this->granted('EDIT', $bundle);
-        $operations = $this->getRequest()->request->all();
+        $operations = $request->request->all();
 
         try {
             (new OperationSyntaxValidator())->validate($operations);

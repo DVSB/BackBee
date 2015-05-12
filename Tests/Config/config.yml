@@ -33,3 +33,7 @@ renderer:
     path:
         scriptdir:    Templates/scripts
         layoutdir:    Layouts
+
+config:
+    save_in_registry: false
+    persistor: [BackBee\Config\Persistor\File]

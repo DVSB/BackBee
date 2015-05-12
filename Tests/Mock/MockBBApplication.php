@@ -121,6 +121,7 @@ class MockBBApplication extends BBApplication
                 'ClassContent' => [],
                 'Config' => array(
                     'bootstrap.yml' => file_get_contents(__DIR__.'/../Config/bootstrap.yml'),
+                    'bundles.yml' => file_get_contents(__DIR__.'/../Config/bundles.yml'),
                     'config.yml' => file_get_contents(__DIR__.'/../Config/config.yml'),
                     'doctrine.yml' => file_get_contents(__DIR__.'/../Config/doctrine.yml'),
                     'logging.yml' => file_get_contents(__DIR__.'/../Config/logging.yml'),
@@ -144,6 +145,21 @@ class MockBBApplication extends BBApplication
         $this->_mock_basedir = vfsStream::setup('repositorydir', 0777, $mockConfig);
 
         return $this;
+    }
+
+    /**
+     * Create the table needed by BackBee to manage bundles
+     */
+    protected function installBundles()
+    {
+        $bbapp = $this->getContainer()->get('bbapp');
+
+        foreach ($bbapp->getBundles() as $bundle) {
+            $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
+            $bundle->install();
+        }
+
+        parent::installBundles();
     }
 
     /**

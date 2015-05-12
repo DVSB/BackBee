@@ -1,3 +1,4 @@
 parameters:
     # bbapp parameters, somes will be set at init of container by BBApplication
     bbapp.cache.dir: vfs://repositorydir/cache/
+    bbapp.config.configurator.class: BackBee\Tests\Mock\MockConfigurator
