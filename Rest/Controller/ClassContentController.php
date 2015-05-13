@@ -26,7 +26,6 @@ namespace BackBee\Rest\Controller;
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Rest\Controller\Annotations as Rest;
-
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,6 +54,8 @@ class ClassContentController extends AbstractRestController
      * @param string $id category's id
      *
      * @return Response
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getCategoryAction($id)
     {
@@ -70,6 +71,8 @@ class ClassContentController extends AbstractRestController
      * Returns every availables categories datas.
      *
      * @return Response
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getCategoryCollectionAction()
     {
@@ -87,6 +90,7 @@ class ClassContentController extends AbstractRestController
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\Pagination(default_count=25, max_count=100)
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getCollectionAction($start, $count, Request $request)
     {
@@ -121,6 +125,7 @@ class ClassContentController extends AbstractRestController
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\Pagination(default_count=25, max_count=100)
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getCollectionByTypeAction($type, $start, $count)
     {
@@ -148,6 +153,8 @@ class ClassContentController extends AbstractRestController
      * @Rest\ParamConverter(
      *   name="page", id_name="page_uid", id_source="query", class="BackBee\NestedNode\Page", required=false
      * )
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getAction($type, $uid, Request $request)
     {
@@ -178,10 +185,13 @@ class ClassContentController extends AbstractRestController
      * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function postAction($type, Request $request)
     {
         $classname = AbstractClassContent::getClassnameByContentType($type);
+        $this->granted('CREATE', $classname);
         $content = new $classname();
 
         $this->getEntityManager()->persist($content);
@@ -210,9 +220,13 @@ class ClassContentController extends AbstractRestController
      * @param string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function putAction($type, $uid, Request $request)
     {
+        $this->granted('VIEW', $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true));
+        $this->granted('EDIT', $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true));
         $this->updateClassContent($type, $uid, $request->request->all());
         $this->getEntityManager()->flush();
 
@@ -225,6 +239,8 @@ class ClassContentController extends AbstractRestController
      * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function putCollectionAction(Request $request)
     {
@@ -236,6 +252,9 @@ class ClassContentController extends AbstractRestController
 
             try {
                 $content = $this->updateClassContent($data['type'], $data['uid'], $data);
+                $this->granted('VIEW', $content);
+                $this->granted('EDIT', $content);
+
                 $result[] = [
                     'uid'        => $content->getUid(),
                     'type'       => $content->getContentType(),
@@ -271,10 +290,13 @@ class ClassContentController extends AbstractRestController
      * @param string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function deleteAction($type, $uid)
     {
         $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
+        $this->granted('DELETE', $content);
 
         try {
             $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($content);
@@ -293,6 +315,8 @@ class ClassContentController extends AbstractRestController
      * @param string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getDraftAction($type, $uid)
     {
@@ -305,9 +329,13 @@ class ClassContentController extends AbstractRestController
      * Returns all drafts of current user.
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getDraftCollectionAction()
     {
+        $this->granted('VIEW', 'BackBee\ClassContent\Revision');
+
         $contents = $this->getEntityManager()
             ->getRepository('BackBee\ClassContent\Revision')
             ->getAllDrafts($this->getApplication()->getBBUserToken())
@@ -325,6 +353,8 @@ class ClassContentController extends AbstractRestController
      * @param string $uid  identifier of the class content
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function putDraftAction($type, $uid, Request $request)
     {
@@ -340,6 +370,8 @@ class ClassContentController extends AbstractRestController
      * @param Request $request
      *
      * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function putDraftCollectionAction(Request $request)
     {
@@ -458,9 +490,10 @@ class ClassContentController extends AbstractRestController
     /**
      * Updates and returns content and its draft according to provided data.
      *
-     * @param  string $type
-     * @param  string $uid
-     * @param  array $data
+     * @param string $type
+     * @param string $uid
+     * @param array  $data
+     *
      * @return AbstractClassContent
      */
     private function updateClassContent($type, $uid, $data)
@@ -475,14 +508,18 @@ class ClassContentController extends AbstractRestController
     /**
      * Commits or reverts content's draft according to provided data.
      *
-     * @param  string $type
-     * @param  string $uid
-     * @param  array  $data
+     * @param string $type
+     * @param string $uid
+     * @param array  $data
+     *
      * @return AbstractClassContent
      */
     private function updateClassContentDraft($type, $uid, $data)
     {
-        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid));
+        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
+
+        $this->granted('VIEW', $content);
+        $this->granted('EDIT', $content);
 
         $operation = $data['operation'];
         if (!in_array($operation, ['commit', 'revert'])) {
@@ -499,6 +536,7 @@ class ClassContentController extends AbstractRestController
      *
      * @param string $type
      * @param string $uid
+     *
      * @return AbstractClassContent
      */
     private function getClassContentByTypeAndUid($type, $uid)
@@ -597,7 +635,7 @@ class ClassContentController extends AbstractRestController
         $definitions = [];
         foreach ($classnames as $classname) {
             $definitions[] = $this->getClassContentManager()->jsonEncode(
-                (new $classname),
+                (new $classname()),
                 AbstractClassContent::JSON_DEFINITION_FORMAT
             );
         }
