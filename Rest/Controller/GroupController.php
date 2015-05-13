@@ -44,6 +44,7 @@ class GroupController extends AbstractRestController
 {
     /**
      * Get all records.
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getCollectionAction(Request $request)
     {
@@ -63,6 +64,7 @@ class GroupController extends AbstractRestController
      * GET Group.
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('VIEW', group)")
      */
     public function getAction(Group $group)
     {
@@ -73,6 +75,7 @@ class GroupController extends AbstractRestController
      * DELETE.
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('DELETE', group)")
      */
     public function deleteAction(Group $group)
     {
@@ -91,6 +94,7 @@ class GroupController extends AbstractRestController
      * })
      *
      * @Rest\ParamConverter(name="group", id_name = "id", class="BackBee\Security\Group")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('EDIT', group) & is_granted('VIEW', group)")
      */
     public function putAction(Group $group, Request $request)
     {
@@ -109,6 +113,7 @@ class GroupController extends AbstractRestController
      *  @Assert\NotBlank(message="Name is required"),
      *  @Assert\Length(max=50, minMessage="Maximum length of name is 50 characters")
      * })
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('CREATE', '\BackBee\Security\Group')")
      */
     public function postAction(Request $request)
     {

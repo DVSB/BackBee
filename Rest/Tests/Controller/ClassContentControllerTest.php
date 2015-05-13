@@ -28,6 +28,17 @@ use BackBee\ClassContent\Category;
 use BackBee\Rest\Controller\ClassContentController;
 use BackBee\Tests\TestCase;
 
+/**
+ * Test for AclController class.
+ *
+ * @category    BackBee
+ *
+ * @copyright   Lp digital system
+ * @author      eric.chau <eric.chau@lp-digital.fr>
+ *
+ * @coversDefaultClass \BackBee\Rest\Controller\ClassContentController
+ * @group Rest
+ */
 class ClassContentControllerTest extends TestCase
 {
     public function testGetCategory()

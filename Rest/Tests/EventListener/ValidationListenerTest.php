@@ -39,6 +39,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\EventListener\ValidationListener
+ * @group Rest
  */
 class ValidationListenerTest extends TestCase
 {

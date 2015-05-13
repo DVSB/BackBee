@@ -39,6 +39,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\GroupController
+ * @group Rest
  */
 class GroupControllerTest extends TestCase
 {
@@ -51,6 +52,7 @@ class GroupControllerTest extends TestCase
         $this->initAutoload();
         $bbapp = $this->getBBApp();
         $this->initDb($bbapp);
+        $this->initAcl();
         $this->getBBApp()->setIsStarted(true);
 
         $this->site = new Site();
@@ -67,7 +69,9 @@ class GroupControllerTest extends TestCase
 
         $bbapp->getEntityManager()->flush();
 
-        $this->createAuthUser($this->groupEditor->getId());
+        $this->user = $this->createAuthUser($this->groupEditor->getId());
+        $bbapp->getEntityManager()->persist($this->user);
+        $bbapp->getEntityManager()->flush();
     }
 
     protected function getController()
@@ -289,8 +293,9 @@ class GroupControllerTest extends TestCase
      * @covers ::postAction
      * @expectedException \BackBee\Rest\Exception\ValidationException
      */
-    public function test_postAction_invalidStie()
+    public function test_postAction_invalidSite()
     {
+        $controller = $this->getController();
         // invalide site
         $data = array(
             'name' => 'newGroupName',

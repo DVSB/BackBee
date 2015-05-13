@@ -38,6 +38,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Mapping\Driver\AnnotationDriver
+ * @group Rest
  */
 class AnnotationDriverTest extends TestCase
 {

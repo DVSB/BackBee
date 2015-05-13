@@ -39,6 +39,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\EventListener\ExceptionListener
+ * @group Rest
  */
 class ExceptionListenerTest extends TestCase
 {

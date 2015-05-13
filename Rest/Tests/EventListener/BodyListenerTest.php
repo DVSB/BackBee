@@ -39,6 +39,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\EventListener\BodyListener
+ * @group Rest
  */
 class BodyListenerTest extends TestCase
 {

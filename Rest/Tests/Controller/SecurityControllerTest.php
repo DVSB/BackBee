@@ -39,6 +39,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\SecurityController
+ * @group Rest
  */
 class SecurityControllerTest extends TestCase
 {

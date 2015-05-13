@@ -40,6 +40,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\EventListener\PaginationListener
+ * @group Rest
  */
 class PaginationListenerTest extends TestCase
 {

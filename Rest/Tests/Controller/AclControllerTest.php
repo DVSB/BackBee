@@ -41,6 +41,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\AclController
+ * @group Rest
  */
 class AclControllerTest extends TestCase
 {

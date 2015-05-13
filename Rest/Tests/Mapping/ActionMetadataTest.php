@@ -35,6 +35,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Mapping\ActionMetadata
+ * @group Rest
  */
 class ActionMetadataTest extends TestCase
 {

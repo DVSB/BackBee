@@ -41,6 +41,7 @@ use BackBee\Tests\TestCase;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\SiteController
+ * @group Rest
  */
 class SiteControllerTest extends TestCase
 {
@@ -102,18 +103,18 @@ class SiteControllerTest extends TestCase
     public function testGetLayoutsAction()
     {
         // authenticate user , set up permissions
-        $token = $this->createAuthUser('super_admin', array('ROLE_API_USER'));
+        $user = $this->createAuthUser('super_admin', array('ROLE_API_USER'));
 
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
-            new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
+            new UserSecurityIdentity($user->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity('all', 'BackBee\Site\Layout'),
-            new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
+            new UserSecurityIdentity($user->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 
@@ -136,13 +137,13 @@ class SiteControllerTest extends TestCase
     public function testGetLayoutsAction_noAuthorizedLayouts()
     {
         // authenticate a user with super admin authority
-        $token = $this->createAuthUser('editor_layout', array('ROLE_API_USER'));
+        $user = $this->createAuthUser('editor_layout', array('ROLE_API_USER'));
 
         // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
         $aclManager->insertOrUpdateObjectAce(
             new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
-            new UserSecurityIdentity($token->getUser()->getGroups()[0]->getId(), 'BackBee\Security\Group'),
+            new UserSecurityIdentity($user->getGroups()[0]->getId(), 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
 

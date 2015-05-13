@@ -42,6 +42,7 @@ use BackBee\Security\User;
  * @author      k.golovin
  *
  * @coversDefaultClass \BackBee\Rest\Controller\UserController
+ * @group Rest
  */
 class UserControllerTest extends RestTestCase
 {
