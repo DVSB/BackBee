@@ -344,4 +344,10 @@ class PageControllerTest extends RestTestCase
         $this->assertCount(1, $res3);
         $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
     }
+
+    protected function tearDown()
+    {
+        $this->dropDb($this->getBBApp());
+        $this->getBBApp()->stop();
+    }
 }
