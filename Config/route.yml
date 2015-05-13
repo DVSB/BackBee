@@ -378,7 +378,6 @@ bb.rest.layout.get:
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
         version: \d+
-        uid: \w{32}
         _method: GET
 
 # bb.rest.layout.post:
@@ -397,7 +396,6 @@ bb.rest.layout.put:
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
         version: \d+
-        uid: \w{32}
         _method: PUT
 
 bb.rest.layout.delete:
@@ -407,7 +405,6 @@ bb.rest.layout.delete:
         _controller: BackBee\Rest\Controller\LayoutController
     requirements:
         version: \d+
-        uid: \w{32}
         _method: DELETE
 
 bb.rest.classcontent.category.get:

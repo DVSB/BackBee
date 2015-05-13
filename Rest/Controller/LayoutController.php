@@ -125,7 +125,7 @@ class LayoutController extends AbstractRestController
 
     /**
      * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
-     * @Rest\Security(expression="is_granted('VIEW', layout)")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('VIEW', layout)")
      */
     public function getAction(Layout $layout)
     {
@@ -133,86 +133,5 @@ class LayoutController extends AbstractRestController
         $response->setContent($this->formatItem($layout));
 
         return $response;
-    }
-
-    /**
-     * /!\ IMPORTANT: This route is currently disabled in route.yml.
-     *
-     * @Rest\RequestParam(name="label", requirements={
-     *   @Assert\NotBlank()
-     * })
-     * Rest\RequestParam(name="picpath", requirements={
-     *   Assert\NotBlank()
-     * })
-     * @Rest\RequestParam(name="path", requirements={
-     *   @Assert\NotBlank()
-     * })
-     * @Rest\RequestParam(name="data", requirements={
-     *   @Assert\NotBlank()
-     * })
-     *
-     * @Rest\ParamConverter(name="site", id_name="site_uid", id_source="request", class="BackBee\Site\Site")
-     */
-    public function postAction()
-    {
-        $layout = new Layout();
-        $layout->setData(json_encode($this->getRequest()->request->get('data')));
-        $layout->setSite($this->getEntityFromAttributes('site'));
-        $layout->setLabel($this->getRequest()->request->get('label'));
-        $layout->setPath($this->getRequest()->request->get('path'));
-        $layout->setPicPath('img/layouts/'.$layout->getUid().'.png');
-
-        $this->granted('CREATE', $layout);
-
-        $this->getEntityManager()->persist($layout);
-        $this->getEntityManager()->flush($layout);
-
-        return $this->createJsonResponse(null, 201, array(
-            'Location' => '',
-        ));
-    }
-
-    /**
-     * @Rest\RequestParam(name="label", requirements={
-     *   @Assert\NotBlank()
-     * })
-     * @Rest\RequestParam(name="picpath", requirements={
-     *   @Assert\NotBlank()
-     * })
-     * @Rest\RequestParam(name="path", requirements={
-     *   @Assert\NotBlank()
-     * })
-     * @Rest\RequestParam(name="data", requirements={
-     *   @Assert\NotBlank()
-     * })
-     *
-     * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
-     * @Rest\Security(expression="is_granted('EDIT', layout)")
-     */
-    public function putAction(Layout $layout)
-    {
-        $layout->setLabel($this->getRequest()->request->get('label'));
-        $layout->setData(json_encode($this->getRequest()->request->get('data')));
-        $layout->setPath($this->getRequest()->request->get('path'));
-        $layout->setPicPath($this->getRequest()->request->get('picpath'));
-
-        $this->getEntityManager()->flush($layout);
-
-        return $this->createJsonResponse(null, 204);
-    }
-
-    /**
-     * @Rest\ParamConverter(name="layout", class="BackBee\Site\Layout")
-     */
-    public function deleteAction(Layout $layout)
-    {
-        try {
-            $this->getEntityManager()->remove($layout);
-            $this->getEntityManager()->flush($layout);
-        } catch (\Exception $e) {
-            return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
-        }
-
-        return $this->createJsonResponse(null, 204);
     }
 }
