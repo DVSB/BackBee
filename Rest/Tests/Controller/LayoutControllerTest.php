@@ -26,18 +26,20 @@ namespace BackBee\Rest\Tests\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use BackBee\Rest\Controller\LayoutController;
 use BackBee\Rest\Test\RestTestCase;
+use BackBee\Security\Group;
 use BackBee\Security\User;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Workflow\State;
 
 /**
- * Test for SecurityController class.
+ * Test for LayoutController class.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
+ * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  *
  * @coversDefaultClass \BackBee\Rest\Controller\LayoutController
  * @group Rest
@@ -51,23 +53,16 @@ class LayoutControllerTest extends RestTestCase
         $this->initAutoload();
 
         $this->bbapp = $this->getBBApp();
+        $this->em = $this->getEntityManager();
         $this->initDb($this->bbapp);
-
-        $this->bbapp->start();
-
-        // valid user
-        $user = new User();
-        $user->setLogin('user123');
-        $user->setEmail('user123@provider.com');
-        $user->setPassword(md5('password123'));
-        $user->setActivated(true);
-        $this->getEntityManager()->persist($user);
+        $this->initAcl();
+        $this->getBBApp()->setIsStarted(true);
 
         // create site
         $this->site = (new Site())
             ->setLabel('Default Site')
         ;
-        $this->getEntityManager()->persist($this->site);
+        $this->em->persist($this->site);
 
         // create site layout
         $this->siteLayout = (new Layout('site1'))
@@ -76,7 +71,7 @@ class LayoutControllerTest extends RestTestCase
             ->setSite($this->site)
             ->setPath($this->getBBApp()->getBaseRepository().'/Layouts')
         ;
-        $this->getEntityManager()->persist($this->siteLayout);
+        $this->em->persist($this->siteLayout);
 
         $state = (new State())
             ->setCode(2)
@@ -85,7 +80,7 @@ class LayoutControllerTest extends RestTestCase
             ->setListener('stdClass')
         ;
 
-        $this->getEntityManager()->persist($state);
+        $this->em->persist($state);
         $this->siteLayout->addState($state);
 
         // create global layout
@@ -94,9 +89,21 @@ class LayoutControllerTest extends RestTestCase
             ->setData("{}")
             ->setPath($this->getBBApp()->getBaseRepository().'/Layouts')
         ;
-        $this->getEntityManager()->persist($this->globalLayout);
+        $this->em->persist($this->globalLayout);
 
-        $this->getEntityManager()->flush();
+        $this->groupEditor = new Group();
+        $this->groupEditor->setName('groupName');
+        $this->groupEditor->setSite($this->site);
+
+        $this->em->persist($this->groupEditor);
+        $this->getContainer()->set('site', $this->site);
+
+        $this->em->flush();
+
+        // permissions
+        $this->user = $this->createAuthUser($this->groupEditor->getId());
+        $this->em->persist($this->user);
+        $this->em->flush();
     }
 
     /**
@@ -110,14 +117,38 @@ class LayoutControllerTest extends RestTestCase
         return $controller;
     }
 
-    /**
-     * @covers ::getCollectionAction
-     */
-    public function test_getCollectionAction_global()
+    public function testGetWorkflowStateAction()
     {
-        $request = new Request();
+        $url = '/rest/1/layout/'. $this->siteLayout->getUid().'/workflow_state';
+        $response = $this->sendRequest(self::requestGet($url));
+        $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
+        $workflowStates = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $workflowStates);
+    }
 
-        $response = $this->getController()->getCollectionAction($request);
+    public function testGetAction()
+    {
+        $url = '/rest/1/layout/'. $this->siteLayout->getUid();
+
+        $response = $this->sendRequest(self::requestGet($url));
+        $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
+        $layout = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $layout);
+
+        $properties = ['site_uid', 'site_label', 'data', 'workflow_states', 'uid', 'label', 'path', 'created', 'modified', 'picpath'];
+
+        foreach ($properties as $property) {
+            $this->assertArrayHasKey($property, $layout);
+        }
+
+        $this->assertEquals($this->siteLayout->getUid(), $layout['uid']);
+    }
+
+    public function testGetCollectionAction()
+    {
+        $url = '/rest/1/layout';
+
+        $response = $this->sendRequest(self::requestGet($url));
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
 
@@ -128,13 +159,11 @@ class LayoutControllerTest extends RestTestCase
         $this->assertCount(2, $layoutTest['workflow_states']);
     }
 
-    /**
-     * @covers ::getCollectionAction
-     */
-    public function test_getCollectionAction_site()
+    public function testGetCollectionActionWithSite()
     {
-        $request = new Request([], [], ['site' => $this->site]);
-        $response = $this->getController()->getCollectionAction($request);
+        $url = '/rest/1/layout';
+
+        $response = $this->sendRequest(self::requestGet($url, ['site_uid' => $this->site->getUid()]));
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
 
