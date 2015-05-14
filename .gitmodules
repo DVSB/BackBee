@@ -1,3 +1,0 @@
-#[submodule "TestUnit"]
-#	path = TestUnit
-#	url = git@gitlab.lp-digital.fr:BackBee/testunit.git

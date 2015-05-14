@@ -1,0 +1,7 @@
+<?php
+
+require(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__.'/TestCase.php');
+
+$unitTests = new BackBee\Tests\TestCase();
+$unitTests->initAutoload();

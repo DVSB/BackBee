@@ -1,7 +1,0 @@
-<?php
-ini_set('memory_limit', '512M');
-require(__DIR__ . "/vendor/autoload.php");
-require_once(__DIR__ . '/Tests/TestCase.php');
-
-$back_builder_unit_test = new \BackBee\Tests\TestCase();
-$back_builder_unit_test->initAutoload();
