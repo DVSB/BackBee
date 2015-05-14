@@ -24,6 +24,7 @@
 namespace BackBee\ClassContent;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
+use BackBee\ClassContent\Exception\InvalidContentTypeException;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\RenderableInterface;
@@ -177,7 +178,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
         }
 
         if (!$exists) {
-            throw new \InvalidArgumentException("`$type` is not a classcontent valid type.");
+            throw new InvalidContentTypeException($type);
         }
 
         return $className;

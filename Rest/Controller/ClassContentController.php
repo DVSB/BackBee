@@ -23,8 +23,8 @@
 
 namespace BackBee\Rest\Controller;
 
-use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Exception\InvalidContentTypeException;
 use BackBee\Rest\Controller\Annotations as Rest;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
@@ -158,7 +158,7 @@ class ClassContentController extends AbstractRestController
      */
     public function getAction($type, $uid, Request $request)
     {
-        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true));
+        $this->granted('VIEW', $content = $this->getClassContentByTypeAndUid($type, $uid, true));
 
         $response = null;
         if (in_array('text/html', $request->getAcceptableContentTypes())) {
@@ -295,8 +295,7 @@ class ClassContentController extends AbstractRestController
      */
     public function deleteAction($type, $uid)
     {
-        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
-        $this->granted('DELETE', $content);
+        $this->granted('DELETE', $content = $this->getClassContentByTypeAndUid($type, $uid));
 
         try {
             $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($content);
@@ -320,7 +319,7 @@ class ClassContentController extends AbstractRestController
      */
     public function getDraftAction($type, $uid)
     {
-        $this->granted('VIEW', $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid));
+        $this->granted('VIEW', $content = $this->getClassContentByTypeAndUid($type, $uid));
 
         return $this->createJsonResponse($this->getClassContentManager()->getDraft($content));
     }
@@ -498,8 +497,7 @@ class ClassContentController extends AbstractRestController
      */
     private function updateClassContent($type, $uid, $data)
     {
-        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true, true);
-        $this->granted('EDIT', $content);
+        $this->granted('EDIT', $content = $this->getClassContentByTypeAndUid($type, $uid, true, true));
         $this->getClassContentManager()->update($content, $data);
 
         return $content;
@@ -516,9 +514,7 @@ class ClassContentController extends AbstractRestController
      */
     private function updateClassContentDraft($type, $uid, $data)
     {
-        $content = $this->getClassContentManager()->findOneByTypeAndUid($type, $uid);
-
-        $this->granted('VIEW', $content);
+        $this->granted('VIEW', $content = $this->getClassContentByTypeAndUid($type, $uid));
         $this->granted('EDIT', $content);
 
         $operation = $data['operation'];
@@ -539,19 +535,23 @@ class ClassContentController extends AbstractRestController
      *
      * @return AbstractClassContent
      */
-    private function getClassContentByTypeAndUid($type, $uid)
+    private function getClassContentByTypeAndUid($type, $uid, $hydrateDraft = false, $checkoutOnMissing = false)
     {
         $content = null;
-        $classname = AbstractClassContent::getClassnameByContentType($type);
 
         try {
-            $content = $this->getEntityManager()->find($classname, $uid);
-        } catch (ClassNotFoundException $e) {
-            throw new NotFoundHttpException("No classcontent found with provided type (:$type)");
+            $content = $this->getClassContentManager()->findOneByTypeAndUid(
+                $type,
+                $uid,
+                $hydrateDraft,
+                $checkoutOnMissing
+            );
+        } catch (InvalidContentTypeException $e) {
+            throw new NotFoundHttpException(sprintf('Provided content type (:%s) is invalid.', $type));
         }
 
         if (null === $content) {
-            throw new NotFoundHttpException("No `$classname` exists with uid `$uid`");
+            throw new NotFoundHttpException(sprintf('Cannot find `%s` with uid `%s`.', $type, $uid));
         }
 
         return $content;
