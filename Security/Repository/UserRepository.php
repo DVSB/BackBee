@@ -25,11 +25,14 @@ namespace BackBee\Security\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
+use Symfony\Component\Security\Core\Exception\DisabledException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use BackBee\Security\ApiUserProviderInterface;
+use BackBee\Security\User;
 
 /**
  * @category    BackBee
@@ -47,14 +50,58 @@ class UserRepository extends EntityRepository implements UserProviderInterface, 
     {
     }
 
+    /**
+     * Loads the user for the given public API key.
+     *
+     * @param string $publicApiKey The username
+     *
+     * @return UserInterface
+     *
+     * @throws UsernameNotFoundException if the user is not found
+     */
     public function loadUserByPublicKey($publicApiKey)
     {
-        return $this->findOneBy(array('_api_key_public' => $publicApiKey));
+        if (null === $user = $this->findOneBy(array('_api_key_public' => $publicApiKey))) {
+            throw new UsernameNotFoundException(sprintf('Unknown public API key `%s`.', $publicApiKey));
+        }
+
+        return $this->checkActivatedStatus($user);
     }
 
+    /**
+     * Loads the user for the given username.
+     *
+     * @param string $username The username
+     *
+     * @return UserInterface
+     *
+     * @throws UsernameNotFoundException if the user is not found
+     */
     public function loadUserByUsername($username)
     {
-        return $this->findOneBy(array('_login' => $username));
+        if (null === $user = $this->findOneBy(array('_login' => $username))) {
+            throw new UsernameNotFoundException(sprintf('Unknown username `%s`.', $username));
+        }
+
+        return $this->checkActivatedStatus($user);
+    }
+
+    /**
+     * Checks that the user is activated
+     *
+     * @param User $user The user
+     *
+     * @return User
+     *
+     * @throws DisabledException if the user is not activated
+     */
+    private function checkActivatedStatus(User $user)
+    {
+        if (!$user->isActivated()) {
+            throw new DisabledException(sprintf('Account `%s`is disabled.', $user->getUsername()));
+        }
+
+        return $user;
     }
 
     public function refreshUser(UserInterface $user)

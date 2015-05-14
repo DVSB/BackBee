@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\Exception\DisabledException;
 
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Security\Token\AnonymousToken;
@@ -59,6 +60,10 @@ class SecurityController extends AbstractRestController
         $tokenAuthenticated = $this->getApplication()->getSecurityContext()->getAuthenticationManager()
             ->authenticate($token)
         ;
+
+        if (!$tokenAuthenticated->getUser()->getApiKeyEnabled()) {
+            throw new DisabledException('API access forbidden');
+        }
 
         $this->getApplication()->getSecurityContext()->setToken($tokenAuthenticated);
 

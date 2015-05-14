@@ -21,36 +21,25 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Security\Tests;
+namespace BackBee\Security;
 
-use BackBee\Security\User;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * Test for User class.
- *
+ * Interface to API users
+ * 
  * @category    BackBee
  *
  * @copyright   Lp digital system
- * @author      k.golovin
- *
- * @coversDefaultClass \BackBee\Security\User
+ * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class UserTest extends \PHPUnit_Framework_TestCase
+interface ApiUserInterface extends UserInterface
 {
+
     /**
-     * @covers ::getRoles
+     * Has the user an API key enabled?
+     *
+     * @return bool
      */
-    public function testGetRoles()
-    {
-        $user = new User();
-
-        $user->setApiKeyEnabled(true);
-        $this->assertContains('ROLE_API_USER', $user->getRoles());
-
-        $user->setActivated(false);
-        $this->assertNotContains('ROLE_ACTIVE_USER', $user->getRoles());
-
-        $user->setActivated(true);
-        $this->assertContains('ROLE_ACTIVE_USER', $user->getRoles());
-    }
+    public function getApiKeyEnabled();
 }

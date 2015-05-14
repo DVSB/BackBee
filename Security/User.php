@@ -26,7 +26,6 @@ namespace BackBee\Security;
 use BackBee\Installer\Annotation as BB;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -43,7 +42,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
  * @BB\Fixtures(qty=20)
  */
-class User implements UserInterface
+class User implements ApiUserInterface
 {
     const PASSWORD_NOT_PICKED = 0;
     const PASSWORD_PICKED = 0;
@@ -468,17 +467,7 @@ class User implements UserInterface
      */
     public function getRoles()
     {
-        $roles =  array();
-
-        if ($this->getApiKeyEnabled()) {
-            $roles[] = 'ROLE_API_USER';
-        }
-
-        if ($this->_activated) {
-            $roles[] = 'ROLE_ACTIVE_USER';
-        }
-
-        return $roles;
+        return [];
     }
 
     /**
@@ -496,6 +485,15 @@ class User implements UserInterface
     public function getUsername()
     {
         return $this->getLogin();
+    }
+
+    /**
+     * Is the user activated?
+     * @return boolean
+     */
+    public function isActivated()
+    {
+        return true === $this->_activated;
     }
 
     /**

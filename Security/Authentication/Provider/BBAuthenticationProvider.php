@@ -32,7 +32,6 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use BackBee\Bundle\Registry;
 use BackBee\Security\Encoder\RequestSignatureEncoder;
 use BackBee\Security\Exception\SecurityException;
-use BackBee\Security\Exception\UnknownUserException;
 use BackBee\Security\Token\BBUserToken;
 
 /**
@@ -116,11 +115,8 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
             throw new SecurityException('Invalid token provided', SecurityException::UNSUPPORTED_TOKEN);
         }
 
-        if (null === $user = $this->user_provider->loadUserByUsername($token->getUsername())) {
-            throw new UnknownUserException();
-        }
-
         try {
+            $user = $this->user_provider->loadUserByUsername($token->getUsername());
             $secret = $user->getPassword();
             if ($this->encoder_factory) {
                 try {
@@ -145,7 +141,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
             }
 
             $this->checkNonce($token, $secret);
-        } catch (SecurityException $e) {
+        } catch (\Exception $e) {
             $this->clearNonce($token);
             throw $e;
         }

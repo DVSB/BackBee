@@ -24,6 +24,9 @@
 namespace BackBee\Security\Authentication\Provider;
 
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use BackBee\Security\ApiUserInterface;
 use BackBee\Security\Encoder\RequestSignatureEncoder;
 use BackBee\Security\Exception\SecurityException;
 use BackBee\Security\Token\PublicKeyToken;
@@ -38,6 +41,27 @@ use BackBee\Security\Token\PublicKeyToken;
  */
 class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
 {
+
+    /**
+     * Role for API user
+     * @var string
+     */
+    private $apiUserRole;
+    
+    /**
+     * Class constructor.
+     *
+     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
+     * @param string                                                      $nonceDir
+     * @param int                                                         $lifetime
+     * @param \BackBuillder\Bundle\Registry\Repository                    $registryRepository
+     */
+    public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300, $registryRepository = null, EncoderFactoryInterface $encoderFactory = null, $apiUserRole = 'ROLE_API_USER')
+    {
+        parent::__construct($userProvider, $nonceDir, $lifetime, $registryRepository, $encoderFactory);
+        $this->apiUserRole = $apiUserRole;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -70,10 +94,25 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
             throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
         }
 
-        $authenticated_token = new PublicKeyToken($user->getRoles());
-        $authenticated_token->setUser($user);
+        $authenticated_token = new PublicKeyToken($this->getRoles($user));
+        $authenticated_token->setUser($user)->setNonce($token->getNonce());
 
         return $authenticated_token;
+    }
+
+    /**
+     * Add API user role to authenticated token
+     * @param ApiUserInterface $user
+     * @return array
+     */
+    private function getRoles(ApiUserInterface $user)
+    {
+        $roles = $user->getRoles();
+        if ($user->getApiKeyEnabled()) {
+            $roles[] = $this->apiUserRole;
+        }
+
+        return $roles;
     }
 
     /**

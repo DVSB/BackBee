@@ -57,7 +57,8 @@ class RestfulContext extends BBAuthContext
                         $this->getNonceDirectory($config),
                         $config['lifetime'],
                         true === $config['use_registry'] ? $this->getRegistryRepository() : null,
-                        $this->_context->getEncoderFactory()
+                        $this->_context->getEncoderFactory(),
+                        $this->getApiUserRole()
                     )
                 );
 
@@ -70,5 +71,25 @@ class RestfulContext extends BBAuthContext
         }
 
         return $listeners;
+    }
+
+    /**
+     * Gets the API user role from container
+     * @return string
+     */
+    private function getApiUserRole()
+    {
+        $apiUserRole = null;
+
+        $container = $this->_context->getApplication()->getContainer();
+        if ($container->hasParameter('bbapp.securitycontext.role.apiuser')) {
+            $apiUserRole = $container->getParameter('bbapp.securitycontext.role.apiuser');
+            
+            if ($container->hasParameter('bbapp.securitycontext.roles.prefix')) {
+                $apiUserRole = $container->getParameter('bbapp.securitycontext.roles.prefix') . $apiUserRole;
+            }
+        }
+
+        return $apiUserRole;
     }
 }
