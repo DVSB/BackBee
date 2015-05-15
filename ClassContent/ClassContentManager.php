@@ -277,7 +277,7 @@ class ClassContentManager
         $classname = AbstractClassContent::getClassnameByContentType($type);
         $content = $this->em->getRepository($classname)->findOneBy(['_uid' => $uid]);
 
-        if (true === $hydrateDraft && null !== $this->token) {
+        if (null !== $content && true === $hydrateDraft && null !== $this->token) {
             $content->setDraft($this->getDraft($content, $checkoutOnMissing));
         }
 
