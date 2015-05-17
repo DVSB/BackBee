@@ -133,8 +133,8 @@ class CacheListener implements EventSubscriberInterface
         $this->validator = $validator;
         $this->identifier_generator = $generator;
 
-        if (true === $this->application->getContainer()->has('cache.control')) {
-            $cache_content = $this->application->getContainer()->get('cache.control');
+        if (true === $this->application->getContainer()->has('cache.content')) {
+            $cache_content = $this->application->getContainer()->get('cache.content');
             if (true === ($cache_content instanceof AbstractExtendedCache)) {
                 $this->cache_content = $cache_content;
             }
