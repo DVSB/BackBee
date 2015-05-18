@@ -376,28 +376,6 @@ class FrontController implements HttpKernelInterface
     }
 
     /**
-     * Handles an RPC request.
-     *
-     * @access public
-     *
-     * @throws FrontControllerException
-     */
-    public function rpcAction()
-    {
-        if (null === $this->application) {
-            throw new FrontControllerException('A valid BackBee application is required.', FrontControllerException::INTERNAL_ERROR);
-        }
-
-        try {
-            $response = $this->application->getRpcServer()->handle($this->getRequest());
-        } catch (\Exception $e) {
-            throw new FrontControllerException('An error occured while processing RPC request', FrontControllerException::INTERNAL_ERROR, $e);
-        }
-
-        $this->send($response);
-    }
-
-    /**
      * Return the url to the provided route path.
      *
      * @param string $route_path

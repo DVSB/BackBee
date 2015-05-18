@@ -101,28 +101,6 @@ class MediaController
     }
 
     /**
-     * Handles an upload by RPC request.
-     *
-     * @throws FrontControllerException
-     *
-     * @return Response
-     */
-    public function uploadAction()
-    {
-        try {
-            $response = $this->application->getUploadServer()->handle($this->application->getRequest());
-        } catch (\Exception $e) {
-            throw new FrontControllerException(
-                'An error occured while processing RPC request',
-                FrontControllerException::INTERNAL_ERROR,
-                $e
-            );
-        }
-
-        return $response;
-    }
-
-    /**
      * Create Response object for media.
      *
      * @param string $filename valid filepath (file exists and readable)
