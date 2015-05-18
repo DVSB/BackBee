@@ -300,10 +300,3 @@ services:
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBee\Event\Listener\PageListener
-
-    array.validator:
-        class: BackBee\Validator\ArrayValidator
-
-    entity.validator:
-        class: BackBee\Validator\EntityValidator
-        arguments: ["@em"]
