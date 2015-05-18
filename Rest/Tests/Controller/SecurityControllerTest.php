@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 use BackBee\Rest\Controller\SecurityController;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Security\User;
-use BackBee\Tests\TestCase;
+use BackBee\Rest\Test\RestTestCase;
 
 /**
  * Test for SecurityController class.
@@ -41,7 +41,7 @@ use BackBee\Tests\TestCase;
  * @coversDefaultClass \BackBee\Rest\Controller\SecurityController
  * @group Rest
  */
-class SecurityControllerTest extends TestCase
+class SecurityControllerTest extends RestTestCase
 {
     protected $bbapp;
 
@@ -62,8 +62,9 @@ class SecurityControllerTest extends TestCase
         $user->setActivated(true);
 
         $this->getEntityManager()->persist($user);
-
         $this->getEntityManager()->flush();
+
+        $this->controller = $this->getController();
     }
 
     /**
@@ -83,8 +84,6 @@ class SecurityControllerTest extends TestCase
      */
     public function testFirewallAuthenticateActionBbArea()
     {
-        $controller = $this->getController();
-
         $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
         $nonce = '05a90bfd413c223a3451d68968f9e5fa';
         $username = 'user123';
@@ -98,13 +97,14 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce,
         ));
 
-        $response = $controller->firewallAuthenticateAction('bb_area', $request);
+        $response = $this->controller->firewallAuthenticateAction('bb_area', $request);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
 
         $content = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $content);
         $this->assertArrayHasKey('nonce', $content);
+        $this->assertEquals($nonce, $content['nonce']);
     }
 
     /**
@@ -116,8 +116,6 @@ class SecurityControllerTest extends TestCase
      */
     public function testFirewallAuthenticateActionBbAreaExpired()
     {
-        $controller = $this->getController();
-
         $created = date('r', time() - 301); // -5.01 minutes
         $nonce = '05a90bfd413c223a3451d68968f9e5fa';
         $username = 'user123';
@@ -131,7 +129,7 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce,
         ));
 
-        $controller->firewallAuthenticateAction('bb_area', $request);
+        $this->controller->firewallAuthenticateAction('bb_area', $request);
     }
 
     /**
@@ -143,8 +141,6 @@ class SecurityControllerTest extends TestCase
      */
     public function testFirewallAuthenticateActionBbAreaUserDoesntExist()
     {
-        $controller = $this->getController();
-
         $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
         $nonce = '05a90bfd413c223a3451d68968f9e5fa';
         $username = 'userThatDoesntExist';
@@ -157,7 +153,7 @@ class SecurityControllerTest extends TestCase
             'digest' => $digest,
             'nonce' => $nonce,
         ));
-        $controller->firewallAuthenticateAction('bb_area', $request);
+        $this->controller->firewallAuthenticateAction('bb_area', $request);
     }
 
     /**
@@ -169,8 +165,6 @@ class SecurityControllerTest extends TestCase
      */
     public function testFirewallAuthenticateActionBbAreaInvalidPassword()
     {
-        $controller = $this->getController();
-
         $created = date('r'); //'Wed, 09 Jul 2014 14:04:27 GMT';
         $nonce = '05a90bfd413c223a3451d68968f9e5fa';
         $username = 'user123';
@@ -184,7 +178,7 @@ class SecurityControllerTest extends TestCase
             'nonce' => $nonce,
         ));
 
-        $controller->firewallAuthenticateAction('bb_area', $request);
+        $this->controller->firewallAuthenticateAction('bb_area', $request);
     }
 
     /**
@@ -193,11 +187,8 @@ class SecurityControllerTest extends TestCase
      */
     public function testFirewallAuthenticateActionInvalidFirewall()
     {
-        $controller = $this->getController();
-
-        $response = $controller->firewallAuthenticateAction('invalidFirewallName', new Request());
-
-        $this->assertEquals(400, $response->getStatusCode());
+        $response = $this->controller->firewallAuthenticateAction('invalidFirewallName', new Request());
+        $this->assertTrue($response->isClientError(), sprintf('HTTP 400 expected, HTTP %s returned.', $response->getStatusCode()));
     }
 
     /**
@@ -206,54 +197,47 @@ class SecurityControllerTest extends TestCase
      */
     public function testFirewallAuthenticateActionFirewallWithoutSupportedContexts()
     {
-        $controller = $this->getController();
-
-        $response = $controller->firewallAuthenticateAction('rest_api_area_test', new Request());
-
-        $this->assertEquals(400, $response->getStatusCode());
+        $response = $this->controller->firewallAuthenticateAction('rest_api_area_test', new Request());
+        $this->assertTrue($response->isClientError(), sprintf('HTTP 400 expected, HTTP %s returned.', $response->getStatusCode()));
     }
 
     /**
      * @covers ::deleteSessionAction
+     * note: this won't test user is realy fully authenticated
+     * but it's ok because only the authenticated user is able to access this session from outside.
      */
     public function testDeleteSessionAction()
     {
-        $this->getBBApp()->start();
-        $controller = $this->getController();
-
         // authenticated anonymously
         $token = new \BackBee\Security\Token\AnonymousToken('test', 'test');
         $this->getSecurityContext()->setToken($token);
         $request = new Request();
         $request->setSession($this->getBBApp()->getSession());
-        $response = $controller->deleteSessionAction($request);
-        $this->assertTrue($response instanceof Response);
-        $this->assertEquals(204, $response->getStatusCode());
+        $response = $this->controller->deleteSessionAction($request);
+
+        $this->assertTrue($response->isEmpty(), sprintf('HTTP 204 expected, HTTP %s returned.', $response->getStatusCode()));
 
         // create token
         $token = new BBUserToken();
         $this->getSecurityContext()->setToken($token);
         $request = new Request();
         $request->setSession($this->getBBApp()->getSession());
-        $response = $controller->deleteSessionAction($request);
+        $response = $this->controller->deleteSessionAction($request);
 
-        $this->assertTrue($response instanceof Response);
-        $this->assertEquals(204, $response->getStatusCode());
+        $this->assertTrue($response->isEmpty(), sprintf('HTTP 204 expected, HTTP %s returned.', $response->getStatusCode()));
     }
 
     /**
      * @covers ::deleteSessionAction
      * @expectedException Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * note: this won't test user is realy fully authenticated
+     * but it's ok because only the authenticated user is able to access this session from outside.
      */
     public function testDeleteSessionActionSessionDoesntExist()
     {
-        $this->getBBApp()->start();
-        $controller = $this->getController();
-
         // session doesnt exist
-        $response = $controller->deleteSessionAction(new Request());
-        $this->assertTrue($response instanceof Response);
-        $this->assertEquals(401, $response->getStatusCode());
+        $response = $this->controller->deleteSessionAction(new Request());
+        $this->assertTrue($response->isClientError(), sprintf('HTTP 401 expected, HTTP %s returned.', $response->getStatusCode()));
     }
 
     protected function tearDown()
