@@ -1,9 +1,16 @@
 firewalls:
     rest_api_area:
         pattern: ^/rest
+        requirements:
+            HTTP-X-API-SIGNATURE: \w+
+            HTTP-X-API-KEY: \w+
         provider: public_key
         public_key: ~
-        restful: ~
+        restful:
+            provider: bb_user
+            nonce_dir: security/nonces
+            lifetime: 1800
+            use_registry: true
         anonymous: ~
 
 providers:
@@ -16,7 +23,7 @@ providers:
             class: BackBee\Security\User
 
 contexts:
-    BackBee\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
+    BackBee\Security\Context: [StatelessContext, AnonymousContext, UsernamePasswordContext, LogoutContext, RestfulContext]
 
 encoders:
     BackBee\Security\User:

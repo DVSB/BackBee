@@ -26,7 +26,9 @@ namespace BackBee\Rest\EventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\AccountStatusException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\Security\Exception\SecurityException;
@@ -90,6 +92,12 @@ class ExceptionListener extends AbstractPathEnabledListener
             }
             // keep the HTTP status code
             $event->getResponse()->setStatusCode($exception->getStatusCode());
+        } elseif ($exception instanceof AccountStatusException) {
+            // Forbidden access
+            $this->setNewResponse($event, 403, $exception->getMessage());
+        } elseif ($exception instanceof AuthenticationException || $exception instanceof AccessDeniedException) {
+            // Unauthorized access
+            $this->setNewResponse($event, 401, $exception->getMessage());
         } elseif ($exception instanceof SecurityException) {
             $event->setResponse(new Response());
 
@@ -107,7 +115,21 @@ class ExceptionListener extends AbstractPathEnabledListener
                     $statusCode = 403;
             }
 
-            $event->getResponse()->setStatusCode($statusCode, $exception->getMessage());
+            $this->setNewResponse($event, $statusCode, $exception->getMessage());
+        } else {
+            $this->setNewResponse($event, 500, $exception->getMessage());
         }
+    }
+
+    /**
+     * Sets a new response to $event
+     * @param GetResponseForExceptionEvent $event   The event
+     * @param int $statusCode                       The status code of the new response
+     * @param string $message                       Optional, the message of the new response
+     */
+    private function setNewResponse(GetResponseForExceptionEvent $event, $statusCode, $message = '')
+    {
+        $event->setResponse(new Response());
+        $event->getResponse()->setStatusCode($statusCode, $message);
     }
 }

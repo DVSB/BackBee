@@ -30,7 +30,7 @@ use BackBee\Rest\Controller\UserController;
 use BackBee\Rest\Test\RestTestCase;
 use BackBee\Security\Acl\Permission\MaskBuilder;
 use BackBee\Security\Group;
-use BackBee\Security\Token\UsernamePasswordToken;
+use BackBee\Security\Token\BBUserToken;
 use BackBee\Security\User;
 
 /**
@@ -82,7 +82,14 @@ class UserControllerTest extends RestTestCase
         $bbapp->getEntityManager()->flush();
 
         // login user
-        $this->getSecurityContext()->setToken(new UsernamePasswordToken($this->user, []));
+        $created = date('Y-m-d H:i:s');
+        $token = new BBUserToken();
+        $token->setUser($this->user);
+        $token->setCreated($created);
+        $token->setNonce(md5(uniqid('', true)));
+        $token->setDigest(md5($token->getNonce().$created.md5($this->user->getPassword())));
+
+        $this->getSecurityContext()->setToken($token);
 
          // set up permissions
         $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');

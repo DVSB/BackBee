@@ -59,7 +59,7 @@ class ExceptionListenerTest extends TestCase
 
         $listener->setMapping([]);
         $listener->onKernelException($event);
-        $this->assertEquals(null, $event->getResponse());
+        $this->assertEquals(500, $event->getResponse()->getStatusCode());
 
         $listener->setMapping([
             'InvalidArgumentException' => [

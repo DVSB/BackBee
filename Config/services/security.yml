@@ -3,6 +3,8 @@
 parameters:
     bbapp.securitycontext.class: BackBee\Security\SecurityContext
     bbapp.expression_language.class: BackBee\Security\Authorization\ExpressionLanguage
+    bbapp.securitycontext.roles.prefix: ROLE_
+    bbapp.securitycontext.role.apiuser: 'API_USER'
 
 services:
     security.context:
@@ -22,13 +24,8 @@ services:
         arguments: [@bbapp]
 
     security.voter.bb_role:
-        class: BackBee\Security\Authorization\Voter\BBRoleVoter
-        arguments: [@security.authorization.yml_adaptor]
-
-    security.authorization.yml_adaptor:
-        class: BackBee\Security\Authorization\Adapter\Yml
-        arguments: [@bbapp]
-        public: false
+        class: Symfony\Component\Security\Core\Authorization\Voter\RoleVoter
+        arguments: [%bbapp.securitycontext.roles.prefix%]
 
     security.voter.role:
         class: Symfony\Component\Security\Core\Authorization\Voter\RoleVoter
