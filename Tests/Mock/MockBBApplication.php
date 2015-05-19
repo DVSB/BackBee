@@ -95,7 +95,16 @@ class MockBBApplication extends BBApplication
     }
 
     /**
-     * Mock the merhod returning the base repository directory.
+     * Mock the method returning the Resources directory
+     *
+     */
+    public function getResourcesRepository()
+    {
+        return vfsStream::url('repositorydir/Data/Media');
+    }
+
+    /**
+     * Mock the method returning the base repository directory.
      *
      * @return string
      */
@@ -117,9 +126,9 @@ class MockBBApplication extends BBApplication
     protected function mockInitStructure(array $mockConfig = null)
     {
         if (null === $mockConfig) {
-            $mockConfig = array(
+            $mockConfig = [
                 'ClassContent' => [],
-                'Config' => array(
+                'Config' => [
                     'bootstrap.yml' => file_get_contents(__DIR__.'/../Config/bootstrap.yml'),
                     'bundles.yml' => file_get_contents(__DIR__.'/../Config/bundles.yml'),
                     'config.yml' => file_get_contents(__DIR__.'/../Config/config.yml'),
@@ -127,18 +136,18 @@ class MockBBApplication extends BBApplication
                     'logging.yml' => file_get_contents(__DIR__.'/../Config/logging.yml'),
                     'security.yml' => file_get_contents(__DIR__.'/../Config/security.yml'),
                     'services.yml' => file_get_contents(__DIR__.'/../Config/services.yml'),
-                ),
+                ],
                 'Layouts' => ['default.twig' => '<html></html>'],
-                'Data' => array(
-                    'Media' => array(),
-                    'Storage' => array(),
-                    'Tmp' => array(),
-                ),
-                'Ressources' => array(),
-                'cache' => array(
-                    'Proxies' => array(),
-                ),
-            );
+                'Data' => [
+                    'Media' => ['BackBee.png' => file_get_contents(__DIR__.'/../Fixtures/Resources/BackBee.png')],
+                    'Storage' => [],
+                    'Tmp' => [],
+                ],
+                'Ressources' => [],
+                'cache' => [
+                    'Proxies' => [],
+                ],
+            ];
         }
 
         vfsStream::umask(0000);

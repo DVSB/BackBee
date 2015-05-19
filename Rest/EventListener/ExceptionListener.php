@@ -30,6 +30,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\Security\Exception\SecurityException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Body listener/encoder.
@@ -80,6 +81,8 @@ class ExceptionListener extends AbstractPathEnabledListener
 
             if ($exception instanceof \BackBee\Rest\Exception\ValidationException) {
                 $event->getResponse()->setContent(json_encode(array('errors' => $exception->getErrorsArray())));
+            }else{
+                $event->getResponse()->setContent(json_encode(array('exception' => $exception->getMessage())));
             }
         } elseif ($exception instanceof FrontControllerException) {
             if (!$event->getResponse()) {

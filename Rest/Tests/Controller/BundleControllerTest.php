@@ -114,7 +114,7 @@ class BundleControllerTest extends RestTestCase
         $response = $this->sendRequest(self::requestGet('/rest/1/bundle/bundle-dont-exists'));
         $this->assertTrue($response->isNotFound());
         $content = json_decode($response->getContent(), true);
-        $this->assertNull($content);
+        $this->assertEquals(['exception' => 'No bundle exists with id `bundle-dont-exists`'], $content);
     }
 
     public function testPatchAction()
