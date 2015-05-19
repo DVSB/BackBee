@@ -51,7 +51,6 @@ class MockBBApplication extends BBApplication
     private $_tmpdir;
     private $_bundles;
     private $_classcontentdir;
-    private $_theme;
     private $_overwrite_config;
 
     /**
