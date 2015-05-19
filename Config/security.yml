@@ -23,7 +23,7 @@ providers:
             class: BackBee\Security\User
 
 contexts:
-    BackBee\Security\Context: [StatelessContext, AnonymousContext, BBAuthContext, UsernamePasswordContext, LogoutContext, RestfulContext]
+    BackBee\Security\Context: [StatelessContext, AnonymousContext, UsernamePasswordContext, LogoutContext, RestfulContext]
 
 encoders:
     BackBee\Security\User:

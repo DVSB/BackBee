@@ -47,7 +47,7 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
      * @var string
      */
     private $apiUserRole;
-    
+
     /**
      * Class constructor.
      *
@@ -77,6 +77,7 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
             $this->onInvalidAuthentication();
         }
 
+
         $user = $this->user_provider->loadUserByPublicKey($publicKey);
 
         if (null === $user) {
@@ -84,7 +85,6 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
         }
 
         $token->setUser($user);
-
         $signature_encoder = new RequestSignatureEncoder();
         if (false === $signature_encoder->isApiSignatureValid($token, $nonce[1])) {
             $this->onInvalidAuthentication();
