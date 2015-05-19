@@ -11,9 +11,7 @@ parameters:
     bbapp.media.controller.class: BackBee\Controller\MediaController
     bbapp.resource.controller.class: BackBee\Controller\ResourceController
     bbapp.renderer.class: BackBee\Renderer\Renderer
-    bbapp.ed.class: BackBee\Event\Dispatcher
-    bbapp.rpcserver.class: BackBee\Services\Rpc\JsonRPCServer
-    bbapp.uploadserver.class: BackBee\Services\Upload\UploadServer
+    bbapp.event.dispatcher.class: BackBee\Event\Dispatcher
     bbapp.urlgenerator.class: BackBee\Rewriting\UrlGenerator
     bbapp.translator.class: BackBee\Translation\Translator
     bbapp.pagebuilder.class: BackBee\NestedNode\Builder\PageBuilder
@@ -54,8 +52,6 @@ parameters:
         routing: "%bbapp.base.dir%/Resources/scripts/Collector/routing.html.twig"
         db: "%bbapp.base.dir%/Resources/scripts/Collector/db.html.twig"
 
-    bbapp.analytics.class: BackBee\Application\Analytics
-
     config.yml_files_to_ignore: ['services', 'bootstrap']
 
     bbapp.config.configurator.class: BackBee\Config\Configurator
@@ -77,7 +73,7 @@ services:
         configurator: [@config.configurator, configureApplicationConfig]
 
     event.dispatcher:
-        class:      %bbapp.ed.class%
+        class:      %bbapp.event.dispatcher.class%
         arguments:  [@bbapp, @config]
         tags:
             - { name: "dumpable", dispatch_event: false }
@@ -106,13 +102,6 @@ services:
         arguments:  [@bbapp]
         tags:
             - { name: "dumpable", dispatch_event: false }
-    rpcserver:
-        class:      %bbapp.rpcserver.class%
-        arguments:  [@bbapp]
-
-    uploadserver:
-        class:      %bbapp.uploadserver.class%
-        arguments:  [@bbapp]
 
     rewriting.urlgenerator:
         class:      %bbapp.urlgenerator.class%
@@ -165,10 +154,6 @@ services:
     classcontent.manager:
         class:      %bbapp.classcontent.manager.class%
         arguments: [@bbapp]
-
-    analytics:
-        class: BackBee\Application\Analytics
-        arguments:  [@bbapp]
 
     doctrine.listener:
         class: BackBee\Event\Listener\DoctrineListener

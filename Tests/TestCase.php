@@ -64,47 +64,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $BackBee_autoloader->setApplication($this->getBBApp())
             ->register()
-            ->registerNamespace('BackBee\Bundle\Tests', implode(DIRECTORY_SEPARATOR, [
-                $this->root_folder,
-                'bundle',
-                'Tests',
-            ]))
-            ->registerNamespace('BackBee\Bundle', implode(DIRECTORY_SEPARATOR, [
-                $this->root_folder,
-                'bundle',
-            ]))
-            ->registerNamespace('BackBee\Tests\Fixtures', implode(DIRECTORY_SEPARATOR, [
-                $this->repository_folder,
-                'Fixtures',
-            ]))
-            ->registerNamespace('BackBee\ClassContent\Repository', implode(DIRECTORY_SEPARATOR, [
-                $this->repository_folder,
-                'ClassContent',
-                'Repositories',
-            ]))
-            ->registerNamespace('BackBee\Renderer\Helper', implode(DIRECTORY_SEPARATOR, [
-                $this->repository_folder,
-                'Templates',
-                'helpers',
-            ]))
-            ->registerNamespace('BackBee\Event\Listener', implode(DIRECTORY_SEPARATOR, [
-                $this->repository_folder,
-                'Listeners',
-            ]))
-            ->registerNamespace('BackBee\Services\Public', implode(DIRECTORY_SEPARATOR, [
-                $this->repository_folder,
-                'Services',
-                'Public',
-            ]))
-            ->registerNamespace('Doctrine\Tests', implode(DIRECTORY_SEPARATOR, [
-                $this->root_folder,
-                'vendor',
-                'doctrine',
-                'orm',
-                'tests',
-                'Doctrine',
-                'Tests',
-            ]))
+            ->registerNamespace('BackBee\ClassContent\Element', __DIR__.'/../ClassContent/Element')
         ;
     }
 

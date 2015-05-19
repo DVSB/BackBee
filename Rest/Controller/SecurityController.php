@@ -69,66 +69,6 @@ class SecurityController extends AbstractRestController
     }
 
     /**
-     * Authenticate against a specific firewall.
-     *
-     * Note: request attributes as well as the request format depend on the
-     * specific implementation of the firewall and its provider
-     *
-     *
-     * @Rest\RequestParam(name = "firewall", description="Firewall to authenticate against", requirements = {
-     *  @Assert\Choice(choices = {"bb_area"}, message="The requested firewall is invalid"),
-     * })
-     */
-    public function firewallAuthenticateAction($firewall, Request $request)
-    {
-        $contexts = $this->getSecurityContextConfig($firewall);
-
-        if (0 === count($contexts)) {
-            $response = new Response();
-            $response->setStatusCode(400, sprintf('No supported security contexts found for firewall: %s', $firewall));
-
-            return $response;
-        }
-
-        $securityContext = $this->getApplication()->getSecurityContext();
-
-        if (null === $securityContext) {
-            $response = new Response();
-            $response->setStatusCode(400, sprintf('Firewall not configured: %s', $firewall));
-
-            return $response;
-        }
-
-        $response = new JsonResponse();
-
-        if (in_array('bb_auth', $contexts)) {
-            $username = $request->request->get('username');
-            $created = $request->request->get('created');
-            $nonce = $request->request->get('nonce');
-            $digest = $request->request->get('digest');
-
-            $token = new BBUserToken();
-            $token->setUser($username);
-            $token->setCreated($created);
-            $token->setNonce($nonce);
-            $token->setDigest($digest);
-
-            $authProvider = $securityContext->getAuthProvider('bb_auth');
-
-            $tokenAuthenticated = $authProvider->authenticate($token);
-
-            $response->setContent($this->formatItem([
-                'nonce' => $nonce,
-                'user' => [
-                    'id' => $tokenAuthenticated->getUser()->getId(),
-                ],
-            ]), 'json');
-        }
-
-        return $response;
-    }
-
-    /**
      * @Rest\Security(expression="is_fully_authenticated()")
      */
     public function deleteSessionAction(Request $request)
@@ -141,26 +81,5 @@ class SecurityController extends AbstractRestController
         $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
 
         return new Response('', 204);
-    }
-
-    /**
-     * @param type $firewall
-     *
-     * @return array
-     */
-    private function getSecurityContextConfig($firewall)
-    {
-        $securityConfig = $this->getApplication()->getConfig()->getSection('security');
-
-        if (!isset($securityConfig['firewalls'][$firewall])) {
-            return;
-        }
-
-        $firewallConfig = $securityConfig['firewalls'][$firewall];
-
-        $allowedContexts = ['bb_auth'];
-        $contexts = array_intersect(array_keys($firewallConfig), $allowedContexts);
-
-        return $contexts;
     }
 }

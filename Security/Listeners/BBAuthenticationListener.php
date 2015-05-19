@@ -60,13 +60,6 @@ class BBAuthenticationListener implements ListenerInterface
         $ecode = 0;
         $emsg = '';
 
-        try {
-            if (false === \BackBee\Services\Rpc\JsonRPCServer::isRPCInvokedMethodSecured($request)) {
-                return;
-            }
-        } catch (\Exception $e) {
-        }
-
         if ($request->headers->has('X_BB_AUTH')) {
             $pattern = '/UsernameToken Username="([^"]+)", PasswordDigest="([^"]+)", Nonce="([^"]+)", Created="([^"]+)"/';
 

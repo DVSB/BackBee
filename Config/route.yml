@@ -1,22 +1,3 @@
-# BackBee RPC services
-bb.method:
-    pattern: /
-    defaults:
-        _action: rpcAction
-    requirements:
-        HTTP-X-Requested-With:  XMLHttpRequest
-        HTTP-X-BB-METHOD:       JsonRpc
-
-# BackBee RPC upload service
-bb.upload:
-    pattern: /
-    defaults:
-        _action: uploadAction
-        _controller: media.controller
-    requirements:
-        HTTP-X-Requested-With:  XMLHttpRequest
-        HTTP-X-BB-METHOD:       Upload
-
 # BackBee resources
 bb.classcontent_thumbnail:
     pattern: /%bbapp.routing.resource_uri_prefix%/%classcontent_thumbnail.base_folder%/{filename}
@@ -47,7 +28,6 @@ bb.images:
 # BackBee REST API
 
 # Resource Rest API
-
 bb.rest.resource.upload:
     pattern: /rest/{version}/resource/upload
     defaults:
