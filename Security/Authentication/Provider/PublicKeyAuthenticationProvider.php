@@ -94,10 +94,15 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
             throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
         }
 
-        $authenticated_token = new PublicKeyToken($this->getRoles($user));
-        $authenticated_token->setUser($user)->setNonce($token->getNonce());
+        $authenticatedToken = new PublicKeyToken($this->getRoles($user));
+        $authenticatedToken
+            ->setUser($user)
+            ->setNonce($token->getNonce())
+            ->setCreated(new \DateTime())
+            ->setLifetime($this->lifetime)
+        ;
 
-        return $authenticated_token;
+        return $authenticatedToken;
     }
 
     /**

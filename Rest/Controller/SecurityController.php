@@ -23,16 +23,18 @@
 
 namespace BackBee\Rest\Controller;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Security\Core\Exception\DisabledException;
-
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Security\Token\AnonymousToken;
 use BackBee\Security\Token\BBUserToken;
+
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\Exception\DisabledException;
 
 /**
  * Auth Controller.
@@ -82,8 +84,12 @@ class SecurityController extends AbstractRestController
             throw new NotFoundHttpException('Session doesn\'t exist');
         }
 
-        $request->getSession()->invalidate();
-        $this->getContainer()->get('security.context')->setToken(new AnonymousToken(uniqid(), 'anon.', []));
+        $event = new GetResponseEvent(
+            $this->getApplication()->getController(),
+            $request,
+            HttpKernelInterface::MASTER_REQUEST
+        );
+        $this->getApplication()->getEventDispatcher()->dispatch('frontcontroller.request.logout', $event);
 
         return new Response('', 204);
     }

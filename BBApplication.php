@@ -30,11 +30,13 @@ use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBee\Event\Event;
 use BackBee\Exception\BBException;
+use BackBee\Security\Token\AnonymousToken;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Site;
 use BackBee\Utils\File\File;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Debug\Debug;
@@ -42,6 +44,8 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * The main BackBee application.
@@ -384,26 +388,23 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return BBUserToken|null
+     * @return \BackBee\Security\Token\BBUserToken|null
      */
     public function getBBUserToken()
     {
         $token = $this->getSecurityContext()->getToken();
-        if ((null === $token || !($token instanceof BBUserToken))) {
-            if (is_null($this->getContainer()->get('bb_session'))) {
-                $token = null;
-            } else {
-                if (null !== $token = $this->getContainer()->get('bb_session')->get('_security_bb_area')) {
-                    $token = unserialize($token);
 
-                    if (!($token instanceof BBUserToken)) {
-                        $token = null;
-                    }
-                }
-            }
+        if ($token instanceof BBUserToken && $token->isExpired()) {
+            $event = new GetResponseEvent(
+                $this->getController(),
+                $this->getRequest(),
+                HttpKernelInterface::MASTER_REQUEST
+            );
+            $this->getEventDispatcher()->dispatch('frontcontroller.request.logout', $event);
+            $token = null;
         }
 
-        return $token;
+        return $token instanceof BBUserToken ? $token : null;
     }
 
     /**
@@ -763,10 +764,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getRequest()
     {
-        if (!$this->isStarted()) {
-            throw new BBException('The BackBee application has to be started before to access request');
-        }
-
         return $this->container->get('request');
     }
 
@@ -1033,10 +1030,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
             ->registerNamespace('BackBee\Event\Listener', $this->getRepository().DIRECTORY_SEPARATOR.'Listener')
             ->registerNamespace('BackBee\Controller', $this->getRepository().DIRECTORY_SEPARATOR.'Controller')
             ->registerNamespace('BackBee\Traits', $this->getRepository().DIRECTORY_SEPARATOR.'Traits')
-            ->registerNamespace(
-                'Respect\Validation\Rules',
-                implode(DIRECTORY_SEPARATOR, [$this->getBBDir(), 'Validator', 'Rules'])
-            )
         ;
 
         if ($this->hasContext()) {

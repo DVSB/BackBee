@@ -147,7 +147,12 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         $validToken = new BBUserToken($user->getRoles());
-        $validToken->setUser($user)->setNonce($token->getNonce());
+        $validToken
+            ->setUser($user)
+            ->setNonce($token->getNonce())
+            ->setCreated(new \DateTime())
+            ->setLifetime($this->lifetime)
+        ;
 
         $this->writeNonceValue($validToken);
 
