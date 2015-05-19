@@ -34,6 +34,7 @@ use BackBee\Tests\TestCase;
  *
  * @copyright   Lp digital system
  * @author      k.golovin
+ * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
 class RestTestCase extends TestCase
 {
@@ -124,6 +125,27 @@ class RestTestCase extends TestCase
     protected static function requestGet($uri, array $filters = [], $sign = false)
     {
         $request = new Request($filters, [], [], [], [], ['REQUEST_URI' => $uri, 'REQUEST_METHOD' => 'GET']);
+
+        if ($sign) {
+            self::signRequest($request);
+        }
+
+        return $request;
+    }
+
+    /**
+     * Delete request helper.
+     *
+     * @param type  $uri
+     * @param array $data
+     * @param type  $contentType
+     * @param array $headers
+     *
+     * @return \Symfony\Component\HttpFoundation\Request
+     */
+    protected static function requestDelete($uri, array $filters = [], $sign = false)
+    {
+        $request = new Request($filters, [], [], [], [], ['REQUEST_URI' => $uri, 'REQUEST_METHOD' => 'DELETE']);
 
         if ($sign) {
             self::signRequest($request);

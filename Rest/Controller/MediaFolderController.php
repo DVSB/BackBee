@@ -34,7 +34,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\NestedNode\MediaFolder;
 use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Patcher\EntityPatcher;
 use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
+use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
+use BackBee\Rest\Patcher\RightManager;
 use BackBee\Rest\Patcher\OperationSyntaxValidator;
 use BackBee\Utils\String;
 
@@ -55,6 +58,7 @@ class MediaFolderController extends AbstractRestController
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBee\NestedNode\MediaFolder", required=false
      * )
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('VIEW','\BackBee\NestedNode\MediaFolder')")
      */
     public function getCollectionAction($start, MediaFolder $parent = null)
     {
@@ -71,6 +75,7 @@ class MediaFolderController extends AbstractRestController
      * @return Response
      *
      * @Rest\ParamConverter(name="mediaFolder", class="BackBee\NestedNode\MediaFolder")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('VIEW', mediaFolder)")
      */
     public function getAction(MediaFolder $mediaFolder)
     {
@@ -84,6 +89,7 @@ class MediaFolderController extends AbstractRestController
      *      @Assert\NotBlank()
      * })
      * @Rest\ParamConverter(name="mediaFolder", class="BackBee\NestedNode\MediaFolder")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('EDIT', mediaFolder)")
      */
     public function putAction(MediaFolder $mediaFolder, Request $request)
     {
@@ -95,6 +101,7 @@ class MediaFolderController extends AbstractRestController
         }
 
         $title = trim($request->request->get('title'));
+
         if ($this->mediaFolderAlreadyExists($title, $parent)) {
             throw new BadRequestHttpException(sprintf('A MediaFolder named %s already exists.', $title));
         }
@@ -111,6 +118,7 @@ class MediaFolderController extends AbstractRestController
      * @return Response
      *
      * @Rest\ParamConverter(name="mediaFolder", class="BackBee\NestedNode\MediaFolder")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('DELETE', mediaFolder)")
      */
     public function deleteAction(MediaFolder $mediaFolder)
     {
@@ -119,7 +127,7 @@ class MediaFolderController extends AbstractRestController
         }
 
         $response = new Response('', 204);
-        if (0 < $this->getMediaRepository()->countMedias($mediaFolder)) {
+        if (0 === (int) $this->getMediaRepository()->countMedias($mediaFolder)) {
             $this->getMediaFolderRepository()->delete($mediaFolder);
         } else {
             $response = new Response(sprintf('MediaFolder `%s` is not empty.', $mediaFolder->getTitle()), 500);
@@ -140,6 +148,7 @@ class MediaFolderController extends AbstractRestController
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="request", class="BackBee\NestedNode\MediaFolder", required=false
      * )
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('CREATE', mediaFolder)")
      */
     public function postAction(Request $request, $parent = null)
     {
@@ -199,6 +208,7 @@ class MediaFolderController extends AbstractRestController
      * @return Response
      *
      * @Rest\ParamConverter(name="mediaFolder", class="BackBee\NestedNode\MediaFolder")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('EDIT', mediaFolder)")
      */
     public function patchAction(MediaFolder $mediaFolder, Request $request)
     {
@@ -210,6 +220,13 @@ class MediaFolderController extends AbstractRestController
         }
 
         $this->patchSiblingAndParentOperation($mediaFolder, $operations);
+        $entityPatcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+        try {
+            $entityPatcher->patch($mediaFolder, $operations);
+        } catch (UnauthorizedPatchOperationException $e) {
+            throw new BadRequestHttpException('Invalid patch operation: '.$e->getMessage());
+        }
+
         $this->getEntityManager()->flush();
         return $this->createJsonResponse(null, 204);
     }
