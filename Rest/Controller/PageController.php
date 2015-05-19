@@ -142,12 +142,12 @@ class PageController extends AbstractRestController
     public function getCollectionAction(Request $request, $start, $count, Page $parent = null)
     {
         $response = null;
-        $content_uid = $request->query->get('content_uid', null);
-        $content_type = $request->query->get('content_type', null);
+        $contentUid = $request->query->get('content_uid', null);
+        $contentType = $request->query->get('content_type', null);
 
-        if (null !== $content_uid && null !== $content_type) {
-            $response = $this->doGetCollectionByContent($content_type, $content_uid);
-        } elseif ((null === $content_uid && null !== $content_type) || (null !== $content_uid && null === $content_type)) {
+        if (null !== $contentUid && null !== $contentType) {
+            $response = $this->doGetCollectionByContent($contentType, $contentUid);
+        } elseif ((null === $contentUid && null !== $contentType) || (null !== $contentUid && null === $contentType)) {
             throw new BadRequestHttpException(
                 'To get page collection by content, you must provide `content_uid` and `content_type` as query parameters.'
             );
@@ -478,25 +478,25 @@ class PageController extends AbstractRestController
     /**
      * Returns every pages that contains provided classcontent.
      *
-     * @param string $content_type
-     * @param string $content_uid
+     * @param string $contentType
+     * @param string $contentUid
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
-    private function doGetCollectionByContent($content_type, $content_uid)
+    private function doGetCollectionByContent($contentType, $contentUid)
     {
         $content = null;
-        $classname = AbstractClassContent::getClassnameByContentType($content_type);
+        $classname = AbstractClassContent::getClassnameByContentType($contentType);
         $em = $this->getApplication()->getEntityManager();
 
         try {
-            $content = $em->find($classname, $content_uid);
+            $content = $em->find($classname, $contentUid);
         } catch (ClassNotFoundException $e) {
-            throw new NotFoundHttpException("No classcontent found with provided type (:$content_type)");
+            throw new NotFoundHttpException("No classcontent found with provided type (:$contentType)");
         }
 
         if (null === $content) {
-            throw new NotFoundHttpException("No `$classname` exists with uid `$content_uid`");
+            throw new NotFoundHttpException("No `$classname` exists with uid `$contentUid`");
         }
 
         $pages = $em->getRepository("BackBee\ClassContent\AbstractClassContent")->findPagesByContent($content);
