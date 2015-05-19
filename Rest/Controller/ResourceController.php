@@ -24,9 +24,11 @@
 namespace BackBee\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Utils\File\File;
 
 /**
@@ -36,23 +38,23 @@ use BackBee\Utils\File\File;
  * @package     BackBee\Rest
  * @copyright   Lp digital system
  * @author      f.kroockmann <florian.kroockmann@lp-digital.fr>
+ * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
 class ResourceController extends AbstractRestController
 {
     /**
      * Upload file action
-     * 
+     *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @throws NotFoundHttpException No file in the request
      * @throws BadRequestHttpException Only on file can be upload
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
-    public function uploadAction() 
+    public function uploadAction(Request $request)
     {
-        $request = $this->getRequest();
-        
         $files = $request->files;
         $data = [];
-        
+
         if ($files->count() === 1) {
             foreach ($files as $file) {
                 $data = $this->doRequestUpload($file);
@@ -71,22 +73,22 @@ class ResourceController extends AbstractRestController
                 throw new BadRequestHttpException('You can upload only one file by request');
             }
         }
-        
+
         return $this->createJsonResponse($data, 201);
     }
-    
+
     /**
      * Upload file from the request
-     * 
+     *
      * @param  UploadedFile $file
-     * @return Array $data Retrieve into the content of response 
+     * @return Array $data Retrieve into the content of response
      * @throws BadRequestHttpException The file is too big
      */
     private function doRequestUpload(UploadedFile $file)
     {
         $tmpDirectory = $this->getApplication()->getTemporaryDir();
         $data = [];
-        
+
         if (null !== $file) {
             if ($file->isValid()) {
                 if ($file->getClientSize() <= $file->getMaxFilesize()) {
@@ -99,13 +101,13 @@ class ResourceController extends AbstractRestController
                 throw new BadRequestHttpException($file->getErrorMessage());
             }
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Upload file from a base64
-     * 
+     *
      * @param String $src base64
      * @param String $originalName
      * @return Array $data
@@ -117,10 +119,10 @@ class ResourceController extends AbstractRestController
 
         return $data;
     }
-    
+
     /**
      * Build data for retrieve into the content of response
-     * 
+     *
      * @param String $originalName
      * @param String $extension
      * @return Array $data
@@ -129,13 +131,13 @@ class ResourceController extends AbstractRestController
     {
         $tmpDirectory = $this->getApplication()->getTemporaryDir();
         $fileName = md5($originalName . time()) . '.' . $extension;
-        
+
         $data = [
             'originalname' => $originalName,
             'path'         => $tmpDirectory . DIRECTORY_SEPARATOR . $fileName,
             'filename'     => $fileName
         ];
-        
+
         return $data;
     }
 }
