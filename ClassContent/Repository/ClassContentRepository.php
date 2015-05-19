@@ -803,30 +803,46 @@ class ClassContentRepository extends EntityRepository
      */
     public function findPagesByContent($content)
     {
-        $rootContents = array();
-        $this->getRootContentParents($content, $rootContents);
-        $qb = $this->_em->createQueryBuilder("p");
-        $qb->select("p")->from("BackBee\NestedNode\Page", "p")
-                ->andWhere('p._contentset IN (:contentset)')
-                ->setParameter('contentset', $rootContents);
-        $result = $qb->getQuery()->getResult();
+        $parentUids = implode(', ', array_unique(array_map(function ($uid) {
+            return '"'.$uid.'"';
+        }, $this->getContentsParentUids($content->getUid()))));
 
-        return $result;
+        $pageUids = $this->_em->getConnection()->executeQuery(
+            sprintf('SELECT uid FROM page WHERE contentset IN (%s)', $parentUids)
+        )->fetchAll(\PDO::FETCH_COLUMN);
+
+        return $this->_em->createQueryBuilder('p')
+            ->select('p')
+            ->from('BackBee\NestedNode\Page', 'p')
+            ->where('p._uid IN (:uids)')
+            ->setParameter('uids', $pageUids)
+            ->getQuery()
+            ->getResult()
+        ;
     }
 
-    private function getRootContentParents($content, &$rootContainer)
+    /**
+     * Returns all parents uid of provided contents.
+     *
+     * @param  string|array $contentUids Contents' uid we want to get all parents uid
+     * @return array
+     */
+    public function getContentsParentUids($contentUids)
     {
-        $contentParents = $content->getParentContent();
-        /* if it has no parents --> is a root element */
-        if ($contentParents->isEmpty()) {
-            $rootContainer[] = $content;
-        } else {
-            foreach ($contentParents as $content) {
-                $this->getRootContentParents($content, $rootContainer);
-            }
+        $contentUids = (array) $contentUids;
+        if (0 === count($contentUids)) {
+            return [];
         }
 
-        return $rootContainer;
+        $contentUids = implode(', ', array_unique(array_map(function ($uid) {
+            return '"'.$uid.'"';
+        }, $contentUids)));
+
+        $parentUids = $this->_em->getConnection()->executeQuery(
+            sprintf('SELECT parent_uid FROM content_has_subcontent WHERE content_uid IN (%s)', $contentUids)
+        )->fetchAll(\PDO::FETCH_COLUMN);
+
+        return array_merge($parentUids, $this->getContentsParentUids($parentUids));
     }
 
     /**
