@@ -184,6 +184,25 @@ class MediaFolderControllerTest extends RestTestCase
         $this->assertEquals($updatedTitle, $mediaFolder->getTitle());
     }
 
+    public function testPostAction()
+    {
+        $url = '/rest/1/media-folder';
+        $title = 'Media Folder creation';
+        $urlMedia = '/an/url/';
+
+        $response = $this->sendRequest(self::requestPost($url,['title' => $title, 'url' => $urlMedia]));
+
+        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode(), sprintf('HTTP % expected, HTTP %s returned.', Response::HTTP_CREATED, $response->getStatusCode()));
+        $this->assertTrue($response->headers->has('bb-resource-uid'));
+
+        $uid = $response->headers->get('bb-resource-uid');
+
+        $mediaFolder = $this->em->getRepository('\BackBee\NestedNode\MediaFolder')->find($uid);
+
+        $this->assertEquals($title, $mediaFolder->getTitle());
+        $this->assertEquals($urlMedia, $mediaFolder->getUrl());
+    }
+
     public function testDeleteAction()
     {
         $url = '/rest/1/media-folder/'.$this->subMediaFolder->getUid();
