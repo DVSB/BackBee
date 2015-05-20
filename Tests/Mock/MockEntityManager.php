@@ -41,7 +41,6 @@ class MockInterfaceEntityManager extends \PHPUnit_Framework_TestCase implements 
     {
         $this->faker = Factory::create();
         $this->faker->seed(1337);
-        $this->faker->addProvider(new \BackBee\Tests\Fixtures\Provider\Theme($this->faker));
     }
 
     public function getRepository($namespace)
@@ -52,18 +51,5 @@ class MockInterfaceEntityManager extends \PHPUnit_Framework_TestCase implements 
         }
 
         return $this->stub_container[$namespace];
-    }
-
-    private function personalThemeEntityStub()
-    {
-        $theme = new \BackBee\Theme\PersonalThemeEntity($this->faker->themeEntity);
-
-        $stub = $this->getMockBuilder('BackBee\Theme\Repository\ThemeRepository')->disableOriginalConstructor()->getMock();
-
-        $stub->expects($this->any())
-              ->method('retrieveBySiteUid')
-              ->will($this->returnValue($theme));
-
-        return $stub;
     }
 }

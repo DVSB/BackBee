@@ -8,26 +8,6 @@ contentwrapper:
     protocol:     bb.class
     adapter:      \BackBee\Stream\ClassWrapper\Adapter\Yaml
 
-
-# Theme
-themes_dir:
-  default: BackBee
-  themes: repository/Ressources/themes
-  personal: repository/Data/themes
-
-theme:
-  name: Default
-  description: BackBee 5 default theme.
-  screenshot: screenshoot.png
-  folder: Resources
-  architecture:
-    layouts_dir: layouts
-    scripts_dir: scripts
-    less_dir: less
-    css_dir: css
-    img_dir: img
-    js_dir: js
-
 renderer:
     adapter:      [\BackBee\Renderer\Adapter\Twig, \BackBee\Renderer\Adapter\phtml]
     path:

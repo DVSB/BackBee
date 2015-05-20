@@ -33,7 +33,6 @@ use BackBee\Exception\BBException;
 use BackBee\NestedNode\Repository\NestedNodeRepository;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Site;
-use BackBee\Theme\Theme;
 use BackBee\Utils\File\File;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
@@ -92,7 +91,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     private $storageDir;
     private $tmpDir;
     private $classcontentDir;
-    private $theme;
     private $overwriteConfig;
 
     /**
@@ -183,26 +181,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         if ($this->getContainer()->has('logging')) {
             call_user_func_array([$this->getContainer()->get('logging'), $method], $args);
         }
-    }
-
-    /**
-     * Returns the associated theme.
-     *
-     * @param boolean $forceReload Force to reload the theme if true
-     *
-     * @return \BackBee\Theme\Theme
-     */
-    public function getTheme($forceReload = false)
-    {
-        if (null === $this->getConfig()->getSection('themes_dir') || null === $this->getConfig()->getThemeConfig()) {
-            return;
-        }
-
-        if (!is_object($this->theme) || true === $forceReload) {
-            $this->theme = new Theme($this);
-        }
-
-        return $this->theme;
     }
 
     /**

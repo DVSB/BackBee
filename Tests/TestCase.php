@@ -162,7 +162,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
             $bbapp->getBBDir().'/Site',
             $bbapp->getBBDir().'/Site/Metadata',
             $bbapp->getBBDir().'/Stream/ClassWrapper',
-            $bbapp->getBBDir().'/Theme',
             $bbapp->getBBDir().'/Util/Sequence/Entity',
             $bbapp->getBBDir().'/Workflow',
         ];

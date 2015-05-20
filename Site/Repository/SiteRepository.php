@@ -33,14 +33,16 @@ use Doctrine\ORM\EntityRepository;
  */
 class SiteRepository extends EntityRepository
 {
-    public function findByServerName($server_name)
+    public function findByServerName($serverName)
     {
-        $q = $this->createQueryBuilder('s')
-                ->andWhere('s._server_name = :server_name')
-                ->setParameters(array('server_name' => $server_name));
-        $theme = $q->getQuery()->getOneOrNullResult();
-
-        return $theme;
+        return $this->createQueryBuilder('s')
+            ->andWhere('s._server_name = :server_name')
+            ->setParameters([
+                'server_name' => $serverName
+            ])
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     /**
