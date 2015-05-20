@@ -185,15 +185,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         }
     }
 
-    public function runImport()
-    {
-        if (null !== $bundles = $this->getConfig()->getSection('importbundles')) {
-            foreach ($bundles as $classname) {
-                new $classname($this);
-            }
-        }
-    }
-
     /**
      * Returns the associated theme.
      *
