@@ -25,7 +25,6 @@ namespace BackBee\Site;
 
 use BackBee\Installer\Annotation as BB;
 use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
-use BackBee\Site\Metadata\Metadata;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -43,6 +42,7 @@ use JMS\Serializer\Annotation as Serializer;
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ *
  * @ORM\Entity(repositoryClass="BackBee\Site\Repository\SiteRepository")
  * @ORM\Table(name="site", indexes={
  *     @ORM\Index(name="IDX_SERVERNAME", columns={"server_name"}),
@@ -128,22 +128,6 @@ class Site extends AbstractObjectIdentifiable
     protected $_layouts;
 
     /**
-     * The default metadatas associated tto the pages of this website.
-     *
-     * @ORM\ManyToMany(targetEntity="BackBee\Site\Metadata\Metadata", cascade={"all"}, fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(name="metadata_site",
-     *      joinColumns={
-     *         @ORM\JoinColumn(name="site_uid", referencedColumnName="uid")
-     *      },
-     *      inverseJoinColumns={
-     *         @ORM\JoinColumn(name="metadata_uid", referencedColumnName="uid")}
-     *      )
-     *
-     * @Serializer\Expose
-     */
-    protected $_metadata;
-
-    /**
      * Class constructor.
      *
      * @param string $uid     The unique identifier of the site.
@@ -157,7 +141,6 @@ class Site extends AbstractObjectIdentifiable
         $this->_modified = new \DateTime();
 
         $this->_layouts = new ArrayCollection();
-        $this->_metadata = new ArrayCollection();
 
         if (
                 true === is_array($options) &&
@@ -236,18 +219,6 @@ class Site extends AbstractObjectIdentifiable
     }
 
     /**
-     * Returns the default metadatas set for the pages of this wesite.
-     *
-     * @codeCoverageIgnore
-     *
-     * @return \Doctrine\Common\Collections\ArrayCollection
-     */
-    public function getMetadata()
-    {
-        return $this->_metadata;
-    }
-
-    /**
      * Sets the label of the website.
      *
      * @param string $label
@@ -264,29 +235,13 @@ class Site extends AbstractObjectIdentifiable
     /**
      * Sets the server name.
      *
-     * @param string $server_name
+     * @param string $serverName
      *
      * @return \BackBee\Site\Site
      */
-    public function setServerName($server_name)
+    public function setServerName($serverName)
     {
-        $this->_server_name = $server_name;
-
-        return $this;
-    }
-
-    /**
-     * Adds a new metadata set to the collection of the website.
-     *
-     * @codeCoverageIgnore
-     *
-     * @param \BackBee\Site\Metadata\Metadata $metadata
-     *
-     * @return \BackBee\Site\Site
-     */
-    public function setMetadata(Metadata $metadata)
-    {
-        $this->_metadata->add($metadata);
+        $this->_server_name = $serverName;
 
         return $this;
     }
