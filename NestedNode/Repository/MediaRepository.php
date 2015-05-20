@@ -23,7 +23,11 @@
 
 namespace BackBee\NestedNode\Repository;
 
+use BackBee\NestedNode\Media;
+use BackBee\NestedNode\MediaFolder;
+
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * Media repository.
@@ -35,51 +39,67 @@ use Doctrine\ORM\EntityRepository;
  */
 class MediaRepository extends EntityRepository
 {
-    public function getMedias(\BackBee\NestedNode\MediaFolder $mediafolder, $cond, $order_sort = '_title', $order_dir = 'asc', $paging = array())
+    public function getMedias(MediaFolder $mediafolder, $cond, $order_sort = '_title', $order_dir = 'asc', $paging = [])
     {
         $result = null;
         $q = $this->createQueryBuilder('m')
-                ->leftJoin('m._media_folder', 'mf')
-                ->leftJoin('m._content', 'mc')
-                ->andWhere('mf._root = :root_'.$mediafolder->getUid())
-                ->andWhere('mf._leftnode >= :leftnode_'.$mediafolder->getUid())
-                ->andWhere('mf._rightnode <= :rightnode_'.$mediafolder->getUid())
-                ->orderBy('m.'.$order_sort, $order_dir)
-                ->setParameters(array(
-            'root_'.$mediafolder->getUid() => $mediafolder->getRoot(),
-            'leftnode_'.$mediafolder->getUid() => $mediafolder->getLeftnode(),
-            'rightnode_'.$mediafolder->getUid() => $mediafolder->getRightnode(),
-                ));
+            ->leftJoin('m._media_folder', 'mf')
+            ->leftJoin('m._content', 'mc')
+            ->where('mf._root = :root')
+            ->andWhere('mf._leftnode >= :leftnode')
+            ->andWhere('mf._rightnode <= :rightnode')
+            ->orderBy('m.'.$order_sort, $order_dir)
+            ->setParameters([
+                'root'      => $mediafolder->getRoot(),
+                'leftnode'  => $mediafolder->getLeftnode(),
+                'rightnode' => $mediafolder->getRightnode(),
+            ])
+        ;
 
-        $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
+        $typeField = isset($cond['typeField']) && 'all' !== $cond['typeField'] ? $cond['typeField'] : null;
         if (null !== $typeField) {
             $q->andWhere('mc INSTANCE OF '.$typeField);
         }
 
-        $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
+        $searchField = isset($cond['searchField']) ? $cond['searchField'] : null;
         if (null !== $searchField) {
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
-        $title = (isset($cond["mediaTitle"])) ? $cond["mediaTitle"] : null;
+
+        $title = isset($cond['mediaTitle']) ? $cond['mediaTitle'] : null;
         if (null !== $title) {
             $q->andWhere($q->expr()->like('m._title', $q->expr()->literal('%'.$title.'%')));
         }
 
-        $afterPubdateField = (isset($cond['afterPubdateField']) && !empty($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
+        $afterPubdateField = isset($cond['afterPubdateField']) && !empty($cond['afterPubdateField'])
+            ? $cond['afterPubdateField']
+            : null
+        ;
         if (null !== $afterPubdateField) {
-            $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
+            $q
+                ->andWhere('mc._modified > :afterPubdateField')
+                ->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField))
+            ;
         }
 
-        $beforePubdateField = (isset($cond['beforePubdateField']) && !empty($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
+        $beforePubdateField = isset($cond['beforePubdateField']) && !empty($cond['beforePubdateField'])
+            ? $cond['beforePubdateField']
+            : null
+        ;
         if (null !== $beforePubdateField) {
-            $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
+            $q
+                ->andWhere('mc._modified < :beforePubdateField')
+                ->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField))
+            ;
         }
 
         if (is_array($paging)) {
-            if (array_key_exists("start", $paging) && array_key_exists("limit", $paging)) {
-                $q->setFirstResult($paging["start"])
-                        ->setMaxResults($paging["limit"]);
-                $result = new \Doctrine\ORM\Tools\Pagination\Paginator($q);
+            if (array_key_exists('start', $paging) && array_key_exists('limit', $paging)) {
+                $q
+                    ->setFirstResult($paging['start'])
+                    ->setMaxResults($paging['limit'])
+                ;
+                $result = new Paginator($q);
             }
         } else {
             $result = $q->getQuery()->getResult();
@@ -88,66 +108,67 @@ class MediaRepository extends EntityRepository
         return $result;
     }
 
-    public function delete(\BackBee\NestedNode\Media $media)
+    public function countMedias(MediaFolder $mediafolder, $cond = [])
     {
-        return false;
-    }
+        $q = $this->createQueryBuilder('m')
+            ->select('COUNT(m)')
+            ->leftJoin('m._media_folder', 'mf')
+            ->leftJoin('m._content', 'mc')
+            ->where('mf._root = :root')
+            ->andWhere('mf._leftnode >= :leftnode')
+            ->andWhere('mf._rightnode <= :rightnode')
+            ->setParameters([
+                'root'      => $mediafolder->getRoot(),
+                'leftnode'  => $mediafolder->getLeftnode(),
+                'rightnode' => $mediafolder->getRightnode(),
+            ])
+        ;
 
-    public function countMedias(\BackBee\NestedNode\MediaFolder $mediafolder, $cond = array())
-    {
-        $q = $this->createQueryBuilder("m")
-                ->select("COUNT(m)")
-                ->leftJoin('m._media_folder', 'mf')
-                ->leftJoin('m._content', 'mc')
-                ->andWhere('mf._root = :root_'.$mediafolder->getUid())
-                ->andWhere('mf._leftnode >= :leftnode_'.$mediafolder->getUid())
-                ->andWhere('mf._rightnode <= :rightnode_'.$mediafolder->getUid())
-                ->setParameters(array(
-            'root_'.$mediafolder->getUid() => $mediafolder->getRoot(),
-            'leftnode_'.$mediafolder->getUid() => $mediafolder->getLeftnode(),
-            'rightnode_'.$mediafolder->getUid() => $mediafolder->getRightnode(),
-                ));
-
-        $typeField = (isset($cond['typeField']) && "all" != $cond['typeField']) ? $cond['typeField'] : null;
+        $typeField = isset($cond['typeField']) && 'all' !== $cond['typeField'] ? $cond['typeField'] : null;
         if (null !== $typeField) {
             $q->andWhere('mc INSTANCE OF '.$typeField);
         }
 
-        $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
+        $searchField = isset($cond['searchField']) ? $cond['searchField'] : null;
         if (null !== $searchField) {
             $q->andWhere($q->expr()->like('mc._label', $q->expr()->literal('%'.$searchField.'%')));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
         if (null !== $afterPubdateField) {
-            $q->andWhere('mc._modified > :afterPubdateField')->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField));
+            $q
+                ->andWhere('mc._modified > :afterPubdateField')
+                ->setParameter('afterPubdateField', date('Y/m/d', $afterPubdateField))
+            ;
         }
 
         $beforePubdateField = (isset($cond['beforePubdateField'])) ? $cond['beforePubdateField'] : null;
         if (null !== $beforePubdateField) {
-            $q->andWhere('mc._modified < :beforePubdateField')->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField));
+            $q
+                ->andWhere('mc._modified < :beforePubdateField')
+                ->setParameter('beforePubdateField', date('Y/m/d', $beforePubdateField))
+            ;
         }
 
         return $q->getQuery()->getSingleScalarResult();
     }
 
-    public function getMediasByFolder(\BackBee\NestedNode\MediaFolder $mediafolder)
+    public function getMediasByFolder(MediaFolder $mediafolder)
     {
         $result = null;
         $q = $this->createQueryBuilder('m')
-                ->leftJoin('m._media_folder', 'mf')
-                ->leftJoin('m._content', 'mc')
-                ->andWhere('mf._root = :root_'.$mediafolder->getUid())
-                ->andWhere('mf._leftnode >= :leftnode_'.$mediafolder->getUid())
-                ->andWhere('mf._rightnode <= :rightnode_'.$mediafolder->getUid())
-                ->setParameters(array(
-            'root_'.$mediafolder->getUid() => $mediafolder->getRoot(),
-            'leftnode_'.$mediafolder->getUid() => $mediafolder->getLeftnode(),
-            'rightnode_'.$mediafolder->getUid() => $mediafolder->getRightnode(),
-                ));
+            ->leftJoin('m._media_folder', 'mf')
+            ->leftJoin('m._content', 'mc')
+            ->andWhere('mf._root = :root')
+            ->andWhere('mf._leftnode >= :leftnode')
+            ->andWhere('mf._rightnode <= :rightnode')
+            ->setParameters([
+                'root'      => $mediafolder->getRoot(),
+                'leftnode'  => $mediafolder->getLeftnode(),
+                'rightnode' => $mediafolder->getRightnode(),
+            ])
+        ;
 
-        $result = $q->getQuery()->getResult();
-
-        return $result;
+        return $q->getQuery()->getResult();
     }
 }

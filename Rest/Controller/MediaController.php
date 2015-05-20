@@ -101,7 +101,6 @@ class MediaController extends AbstractRestController
      */
     public function deleteAction($id)
     {
-
         if (null === $media = $this->getMediaRepository()->find($id)) {
             throw new NotFoundHttpException(sprintf('Cannot find media with id `%s`.', $id));
         }
@@ -204,6 +203,13 @@ class MediaController extends AbstractRestController
 
             if (null !== $draft = $this->getClassContentManager()->getDraft($content)) {
                 $content->setDraft($draft);
+            }
+
+            // we also need to load content's elements draft
+            foreach ($content->getData() as $element) {
+                if (null !== $draft = $this->getClassContentManager()->getDraft($element)) {
+                    $element->setDraft($draft);
+                }
             }
 
             $mediaJson = $media->jsonSerialize();

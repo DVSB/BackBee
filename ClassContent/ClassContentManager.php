@@ -423,7 +423,7 @@ class ClassContentManager
                     $draft->push($element);
                 }
             }
-        } else {
+        } elseif (AbstractClassContent::STATE_NORMAL === $content->getState()) {
             foreach ($content->getData() as $key => $element) {
                 if (!isset($data['elements']) || !in_array($key, $data['elements'])) {
                     $draft->$key = $content->$key;
