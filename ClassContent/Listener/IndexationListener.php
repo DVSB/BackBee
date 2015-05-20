@@ -21,14 +21,14 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Event\Listener;
-
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+namespace BackBee\ClassContent\Listener;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Indexation;
 use BackBee\Event\Event;
 use BackBee\Util\Doctrine\ScheduledEntities;
+
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Listener to indexation events.
@@ -66,14 +66,14 @@ class IndexationListener implements EventSubscriberInterface
      *
      * @var type
      */
-    private static $_content_content_done = array();
+    private static $_content_content_done = [];
 
     /**
      * Array of content uids already treated.
      *
      * @var type
      */
-    private static $_site_content_done = array();
+    private static $_site_content_done = [];
 
     /**
      * Updates the site-content indexes for the scheduled AbstractClassContent.
@@ -231,13 +231,13 @@ class IndexationListener implements EventSubscriberInterface
                         $value = $content;
                         foreach ($elements as $element) {
                             $owner = $value;
-                            if (!$value instanceof AbstractClassContent) {
+                            if (!($value instanceof AbstractClassContent)) {
                                 continue;
                             }
 
                             if (null !== $value) {
                                 $value = $value->getData($element);
-                                if ($value instanceof AbstractClassContent && false === $em->contains($value)) {
+                                if ($value instanceof AbstractClassContent && !$em->contains($value)) {
                                     $value = $em->find(get_class($value), $value->getUid());
                                 }
                             }
@@ -252,17 +252,24 @@ class IndexationListener implements EventSubscriberInterface
                     }
 
                     if (null !== $owner && null !== $value) {
-                        $index = $em->getRepository('BackBee\ClassContent\Indexation')->find(array('_content' => $content, '_field' => $indexedElement[0]));
+                        $index = $em->getRepository('BackBee\ClassContent\Indexation')->find([
+                            '_content' => $content,
+                            '_field'   => $indexedElement[0],
+                        ]);
                         if (null === $index) {
                             $index = new Indexation($content, $indexedElement[0], $owner, $value, serialize($callback));
                             $em->persist($index);
                         }
+
                         $index->setValue($value);
-                        $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index);
+                        $em
+                            ->getUnitOfWork()
+                            ->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
+                        ;
                     }
                 }
 
-                $alreadyIndex = $em->getRepository('BackBee\ClassContent\Indexation')->findBy(array('_owner' => $content));
+                $alreadyIndex = $em->getRepository('BackBee\ClassContent\Indexation')->findBy(['_owner' => $content]);
                 foreach ($alreadyIndex as $index) {
                     $field = $index->getField();
                     $callback = unserialize($index->getCallback());
@@ -283,7 +290,10 @@ class IndexationListener implements EventSubscriberInterface
 
                             if ($value != $index->getValue() && null !== $value) {
                                 $index->setValue($value);
-                                $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index);
+                                $em
+                                    ->getUnitOfWork()
+                                    ->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
+                                ;
                             }
                         } catch (\Exception $e) {
                             // Nothing to do
@@ -292,12 +302,17 @@ class IndexationListener implements EventSubscriberInterface
                 }
             }
         } elseif ($uow->isScheduledForDelete($content)) {
-            self::$_em->getRepository('BackBee\ClassContent\Indexes\OptContentByModified')
-                    ->removeOptContentTable($content);
+            self::$_em
+                ->getRepository('BackBee\ClassContent\Indexes\OptContentByModified')
+                ->removeOptContentTable($content)
+            ;
 
             foreach ($content->getIndexation() as $index) {
                 $em->remove($index);
-                $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index);
+                $em
+                    ->getUnitOfWork()
+                    ->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
+                ;
             }
         }
     }
@@ -309,9 +324,9 @@ class IndexationListener implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
-            'classcontent.onflush' => 'onFlushContent',
+        return [
+            'classcontent.onflush'    => 'onFlushContent',
             'nestednode.page.onflush' => 'onFlushPage',
-        );
+        ];
     }
 }

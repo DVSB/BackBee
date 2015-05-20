@@ -21,7 +21,7 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Event\Listener;
+namespace BackBee\ClassContent\Listener;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
@@ -29,7 +29,7 @@ use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ClassContent\Element\Image as ElementImage;
 use BackBee\ClassContent\Revision;
 use BackBee\Event\Event;
-use BackBee\Util\Media;
+use BackBee\Security\Token\BBUserToken;
 use BackBee\Utils\File\File;
 
 /**
@@ -87,10 +87,7 @@ class RevisionListener
         }
 
         $token = $application->getSecurityContext()->getToken();
-        if (null === $token) {
-            return;
-        }
-        if ('BackBee\Security\Token\BBUserToken' != get_class($token)) {
+        if (!($token instanceof BBUserToken)) {
             return;
         }
 
@@ -157,12 +154,17 @@ class RevisionListener
 
         if (null !== $application) {
             $em = $application->getEntityManager();
-            $revision->setEntityManager($em)
-                    ->setToken($application->getBBUserToken());
+            $revision
+                ->setEntityManager($em)
+                ->setToken($application->getBBUserToken())
+            ;
 
             if (null === $revision->getContent()) {
                 $db = $em->getConnection();
-                $stmt = $db->executeQuery("SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?", array($revision->getUid()));
+                $stmt = $db->executeQuery(
+                    'SELECT `content_uid`, `classname` FROM `revision` WHERE `uid` = ?',
+                    [$revision->getUid()]
+                );
 
                 $items = $stmt->fetchAll();
                 if ($items) {
@@ -202,16 +204,23 @@ class RevisionListener
         $em = $application->getEntityManager();
         if (null !== $revision = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token)) {
             $content->setDraft($revision);
-            $application->debug(sprintf('Revision found for `%s` content and `%s` user', $content->getUid(), $token->getUsername()));
+            $application->debug(sprintf(
+                'Revision found for `%s` content and `%s` user',
+                $content->getUid(),
+                $token->getUsername()
+            ));
         }
 
-        if (false === ($content instanceof ContentSet)) {
+        if (!($content instanceof ContentSet)) {
             foreach ($content->getData() as $key => $subcontent) {
                 if (null === $subcontent) {
                     $contenttype = $content->getAcceptedType($key);
                     if (0 === strpos($contenttype, 'BackBee\ClassContent\\')) {
                         if (null === $content->getDraft()) {
-                            $revision = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true);
+                            $revision = $em
+                                ->getRepository('BackBee\ClassContent\Revision')
+                                ->getDraft($content, $token, true)
+                            ;
                             $content->setDraft($revision);
                         }
                         $content->$key = new $contenttype();
