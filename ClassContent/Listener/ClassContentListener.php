@@ -21,7 +21,7 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Event\Listener;
+namespace BackBee\ClassContent\Listener;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\File as ElementFile;
@@ -214,21 +214,6 @@ class ClassContentListener
     }
 
     /**
-     * Occure on services.local.classcontent.postcall.
-     *
-     * @param \BackBee\Event\Event $event
-     */
-    public static function onServicePostCall(Event $event)
-    {
-        $service = $event->getTarget();
-        if (false === is_a($service, 'BackBee\Services\Local\ClassContent')) {
-            return;
-        }
-
-        self::setRendermodeParameter($event);
-    }
-
-    /**
      * Occurs on nestednode.page.onflush event.
      *
      * @param  Event  $event
@@ -260,57 +245,5 @@ class ClassContentListener
                 }
             }
         }
-    }
-
-    /**
-     * Dynamically add render modes options to the class.
-     *
-     * @param \BackBee\Event\Event $event
-     */
-    private static function setRendermodeParameter(Event $event)
-    {
-        $application = $event->getDispatcher()->getApplication();
-        if (null === $application) {
-            return;
-        }
-
-        $method = $event->getArgument('method');
-        if ('getContentParameters' !== $method) {
-            return;
-        }
-
-        $result = $event->getArgument('result', array());
-        if (!array_key_exists('rendermode', $result)) {
-            return;
-        }
-        if (!array_key_exists('array', $result['rendermode'])) {
-            return;
-        }
-        if (!array_key_exists('options', $result['rendermode']['array'])) {
-            return;
-        }
-
-        $params = $event->getArgument('params', array());
-        if (!array_key_exists('nodeInfos', $params)) {
-            return;
-        }
-        if (!array_key_exists('type', $params['nodeInfos'])) {
-            return;
-        }
-
-        $classname = '\BackBee\ClassContent\\'.$params['nodeInfos']['type'];
-        if (!class_exists($classname)) {
-            return;
-        }
-
-        $renderer = $application->getRenderer();
-        $modes = array('default' => 'default');
-        foreach ($renderer->getAvailableRenderMode(new $classname()) as $mode) {
-            $modes[$mode] = $mode;
-        }
-
-        $result['rendermode']['array']['options'] = $modes;
-
-        $event->setArgument('result', $result);
     }
 }

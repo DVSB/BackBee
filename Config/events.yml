@@ -1,27 +1,27 @@
 classcontent.include:
     listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onInclude]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onInclude]
 
 classcontent.update:
     listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onUpdate]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onUpdate]
 
 classcontent.onflush:
     listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onFlushContent]
-        - [BackBee\Event\Listener\RevisionListener, onFlushContent]
-        - [BackBee\Event\Listener\IndexationListener, onFlushContent]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onFlushContent]
+        - [BackBee\ClassContent\Listener\RevisionListener, onFlushContent]
+        - [BackBee\ClassContent\Listener\IndexationListener, onFlushContent]
         - [@cache.listener, onFlushContent]
         - [BackBee\Event\Listener\MetaDataListener, onFlushContent]
         - [BackBee\Event\Listener\RewritingListener, onFlushContent]
 
 classcontent.preremove:
     listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onPreRemove]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onPreRemove]
 
 classcontent.prerender:
     listeners:
-        - [BackBee\Event\Listener\RevisionListener, onPrerenderContent]
+        - [BackBee\ClassContent\Listener\RevisionListener, onPrerenderContent]
         - [@cache.listener, onPreRenderContent]
 
 classcontent.postrender:
@@ -30,7 +30,7 @@ classcontent.postrender:
 
 element.file.postremove:
     listeners:
-        - [BackBee\Event\Listener\ClassContentListener, onRemoveElementFile]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onRemoveElementFile]
 
 nestednode.page.prerender:
     listeners:
@@ -47,9 +47,9 @@ nestednode.page.postrender:
 nestednode.page.onflush:
     listeners:
         - [BackBee\Event\Listener\MetaDataListener, onFlushPage]
-        - [BackBee\Event\Listener\IndexationListener, onFlushPage]
+        - [BackBee\ClassContent\Listener\IndexationListener, onFlushPage]
         - [BackBee\Event\Listener\RewritingListener, onFlushPage]
-        - [BackBee\Event\Listener\ClassContentListener, onFlushPage]
+        - [BackBee\ClassContent\Listener\ClassContentListener, onFlushPage]
         - [@cache.listener, onFlushPage]
 
 site.layout.prepersist:
@@ -66,11 +66,11 @@ site.layout.postremove:
 
 revision.postload:
     listeners:
-        - [BackBee\Event\Listener\RevisionListener, onPostLoad]
+        - [BackBee\ClassContent\Listener\RevisionListener, onPostLoad]
 
 revision.onflush:
     listeners:
-        - [BackBee\Event\Listener\RevisionListener, onFlushElementFile]
+        - [BackBee\ClassContent\Listener\RevisionListener, onFlushElementFile]
 
 element.keyword.render:
     listeners:
