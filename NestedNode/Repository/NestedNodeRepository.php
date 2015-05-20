@@ -38,59 +38,42 @@ use BackBee\Util\Buffer;
  */
 class NestedNodeRepository extends EntityRepository
 {
-    public static $config = array(
-        // calculate nested node values asynchronously via a CLI command
-        'nestedNodeCalculateAsync' => false,
-    );
-
-    /**
-     * [updateTreeNatively description].
-     *
-     * @param [type] $node_uid [description]
-     * @param [type] $leftnode [description]
-     * @param [type] $level    [description]
-     *
-     * @return [type] [description]
-     */
-    public function updateTreeNatively($node_uid, $leftnode = 1, $level = 0)
+    public function updateTreeNatively($nodeUid, $leftnode = 1, $level = 0)
     {
         $node = new \StdClass();
-        $node->uid = $node_uid;
+        $node->uid = $nodeUid;
         $node->leftnode = $leftnode;
         $node->rightnode = $leftnode + 1;
         $node->level = $level;
 
-        foreach ($children = $this->getNativelyNodeChildren($node_uid) as $row) {
+        foreach ($children = $this->getNativelyNodeChildren($nodeUid) as $row) {
             $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
             $node->rightnode = $child->rightnode + 1;
             $leftnode = $child->rightnode;
         }
 
         $this->_em->getConnection()->exec(sprintf(
-                        'update page set leftnode = %d, rightnode = %d, level = %d where uid = "%s";', $node->leftnode, $node->rightnode, $node->level, $node->uid
+            'UPDATE page SET leftnode = %d, rightnode = %d, level = %d WHERE uid = "%s";',
+            $node->leftnode,
+            $node->rightnode,
+            $node->level,
+            $node->uid
         ));
 
         return $node;
     }
 
-    /**
-     * [getNativelyNodeChildren description].
-     *
-     * @param [type] $node_uid [description]
-     *
-     * @return [type] [description]
-     */
-    private function getNativelyNodeChildren($node_uid)
+    private function getNativelyNodeChildren($nodeUid)
     {
         return $this->_em->getConnection()->executeQuery(sprintf(
-                                'select uid from page where parent_uid = "%s" order by leftnode asc, modified desc', $node_uid
-                ))->fetchAll();
+            'select uid from page where parent_uid = "%s" order by leftnode asc, modified desc', $nodeUid
+        ))->fetchAll();
     }
 
-    public function updateTreeNativelyWithProgressMessage($node_uid)
+    public function updateTreeNativelyWithProgressMessage($nodeUid)
     {
-        $node_uid = (array) $node_uid;
-        if (0 === count($node_uid)) {
+        $nodeUid = (array) $nodeUid;
+        if (0 === count($nodeUid)) {
             Buffer::dump("\n##### Nothing to update. ###\n");
 
             return;
@@ -106,7 +89,7 @@ class NestedNodeRepository extends EntityRepository
 
         Buffer::dump("\n##### Update tree (natively) started ###\n");
 
-        foreach ($node_uid as $uid) {
+        foreach ($nodeUid as $uid) {
             $this->_em->clear();
 
             $starttime = microtime(true);
@@ -715,38 +698,6 @@ class NestedNodeRepository extends EntityRepository
         return true;
     }
 
-    private function shiftRlValuesByJob(AbstractNestedNode $target, $first, $delta)
-    {
-        $job = new \BackBee\Job\NestedNodeLRCalculateJob();
-
-        $job->args = array(
-            'nodeId' => $target->getUid(),
-            'nodeClass' => get_class($target),
-            'first' => $first,
-            'delta' => $delta,
-        );
-
-        $queue = new \BackBee\Job\Queue\RegistryQueue('NESTED_NODE');
-        $queue->setEntityManager($this->getEntityManager());
-
-        $queue->enqueue($job);
-    }
-
-    private function startDetachedRLValuesJob(AbstractNestedNode $target, $first, $delta)
-    {
-        $this->_em->flush($target);
-        exec(sprintf(
-            '%s %s nestednode:job:lrcalculate --nodeId="%s" --nodeClass="%s" --first="%s" --delta="%s" %s &',
-            self::$config['script_command'],
-            self::$config['console_command'],
-            $target->getUid(),
-            get_class($target),
-            $first,
-            $delta,
-            false === empty(self::$config['environment']) ? '--env='.self::$config['environment'] : ''
-        ));
-    }
-
     /**
      * Shift part of a tree.
      *
@@ -758,27 +709,25 @@ class NestedNodeRepository extends EntityRepository
      */
     private function shiftRlValues(AbstractNestedNode $node, $first, $delta)
     {
-        if (self::$config['nestedNodeCalculateAsync']) {
-            $this->startDetachedRLValuesJob($node, $first, $delta);
-        } else {
-            $this->createQueryBuilder('n')
-                    ->set('n._leftnode', 'n._leftnode + :delta')
-                    ->andRootIs($node->getRoot())
-                    ->andLeftnodeIsUpperThan($first)
-                    ->setParameter('delta', $delta)
-                    ->update()
-                    ->getQuery()
-                    ->execute();
+        $this->createQueryBuilder('n')
+            ->set('n._leftnode', 'n._leftnode + :delta')
+            ->andRootIs($node->getRoot())
+            ->andLeftnodeIsUpperThan($first)
+            ->setParameter('delta', $delta)
+            ->update()
+            ->getQuery()
+            ->execute()
+        ;
 
-            $this->createQueryBuilder('n')
-                    ->set('n._rightnode', 'n._rightnode + :delta')
-                    ->andRootIs($node->getRoot())
-                    ->andRightnodeIsUpperThan($first)
-                    ->setParameter('delta', $delta)
-                    ->update()
-                    ->getQuery()
-                    ->execute();
-        }
+        $this->createQueryBuilder('n')
+            ->set('n._rightnode', 'n._rightnode + :delta')
+            ->andRootIs($node->getRoot())
+            ->andRightnodeIsUpperThan($first)
+            ->setParameter('delta', $delta)
+            ->update()
+            ->getQuery()
+            ->execute()
+        ;
 
         return $this;
     }

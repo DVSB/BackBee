@@ -637,11 +637,8 @@ class PageRepositoryTest extends TestCase
     private function _setRepo()
     {
         $this->repo = $this->getEntityManager()
-                ->getRepository('BackBee\NestedNode\Page');
-
-        PageRepository::$config = array(
-            'nestedNodeCalculateAsync' => false,
-        );
+            ->getRepository('BackBee\NestedNode\Page')
+        ;
 
         PageQueryBuilder::$config = array(
             'dateSchemeForPublishing' => 'Y-m-d H:i:s',

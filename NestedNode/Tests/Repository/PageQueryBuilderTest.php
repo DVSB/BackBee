@@ -310,12 +310,9 @@ class PageQueryBuilderTest extends TestCase
     private function _setRepo()
     {
         $this->repo = $this->application
-                ->getEntityManager()
-                ->getRepository('BackBee\NestedNode\Page');
-
-        PageRepository::$config = array(
-            'nestedNodeCalculateAsync' => false,
-        );
+            ->getEntityManager()
+            ->getRepository('BackBee\NestedNode\Page')
+        ;
 
         return $this;
     }

@@ -30,7 +30,6 @@ use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBee\Event\Event;
 use BackBee\Exception\BBException;
-use BackBee\NestedNode\Repository\NestedNodeRepository;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Site;
 use BackBee\Theme\Theme;
@@ -1144,24 +1143,6 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     private function initEntityManager()
     {
-        // init NestedNode config
-        if ($this->getConfig()->getSection('nestednode')) {
-            NestedNodeRepository::$config = array_merge(
-                NestedNodeRepository::$config,
-                $this->getConfig()->getSection('nestednode')
-            );
-
-            $console_command = $this->container->getParameter('bbapp.console.command');
-            if ('/' !== $console_command[0]) {
-                $console_command = $this->getBaseDir().'/'.$console_command;
-                $this->container->setParameter('bbapp.console.command', $console_command);
-            }
-
-            NestedNodeRepository::$config['script_command'] = $this->container->getParameter('bbapp.script.command');
-            NestedNodeRepository::$config['console_command'] = $console_command;
-            NestedNodeRepository::$config['environment'] = $this->getEnvironment();
-        }
-
         if (!$this->container->getDefinition('em')->isSynthetic()) {
             return;
         }
