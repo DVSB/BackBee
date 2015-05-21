@@ -78,7 +78,7 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
         }
 
 
-        $user = $this->user_provider->loadUserByPublicKey($publicKey);
+        $user = $this->userProvider->loadUserByPublicKey($publicKey);
 
         if (null === $user) {
             $this->onInvalidAuthentication();
@@ -91,6 +91,7 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
         }
 
         if (time() > $nonce[0] + $this->lifetime) {
+            $this->removeNonce($token->getNonce());
             throw new SecurityException('Prior authentication expired', SecurityException::EXPIRED_AUTH);
         }
 
@@ -101,6 +102,8 @@ class PublicKeyAuthenticationProvider extends BBAuthenticationProvider
             ->setCreated(new \DateTime())
             ->setLifetime($this->lifetime)
         ;
+
+        $this->writeNonceValue($authenticatedToken);
 
         return $authenticatedToken;
     }
