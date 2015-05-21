@@ -196,6 +196,12 @@ class ClassContentController extends AbstractRestController
 
         $this->getEntityManager()->persist($content);
         $content->setDraft($this->getClassContentManager()->getDraft($content, true));
+        foreach ($content->getData() as $element) {
+            if ($element instanceof AbstractClassContent) {
+                $element->setDraft($this->getClassContentManager()->getDraft($element, true));
+            }
+        }
+
         $this->getEntityManager()->flush();
 
         return $this->createJsonResponse(null, 201, [
