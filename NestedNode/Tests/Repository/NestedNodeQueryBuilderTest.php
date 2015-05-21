@@ -509,12 +509,9 @@ class NestedNodeQueryBuilderTest extends TestCase
     private function _setRepo()
     {
         $this->repo = $this->application
-                ->getEntityManager()
-                ->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode');
-
-        NestedNodeRepository::$config = array(
-            'nestedNodeCalculateAsync' => false,
-        );
+            ->getEntityManager()
+            ->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode')
+        ;
 
         return $this;
     }

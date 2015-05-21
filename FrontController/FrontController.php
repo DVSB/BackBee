@@ -446,7 +446,10 @@ class FrontController implements HttpKernelInterface
 
         // $response may not be set
         if ($this->response instanceof Response) {
-            $this->application->getEventDispatcher()->dispatch(KernelEvents::TERMINATE, new PostResponseEvent($this, $this->getRequest(), $this->response));
+            $this->application->getEventDispatcher()->dispatch(
+                KernelEvents::TERMINATE,
+                new PostResponseEvent($this, $this->getRequest(), $this->response)
+            );
         }
     }
 
