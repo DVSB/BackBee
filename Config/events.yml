@@ -49,7 +49,6 @@ nestednode.page.onflush:
         - [BackBee\Event\Listener\MetaDataListener, onFlushPage]
         - [BackBee\ClassContent\Listener\IndexationListener, onFlushPage]
         - [BackBee\Event\Listener\RewritingListener, onFlushPage]
-        - [BackBee\ClassContent\Listener\ClassContentListener, onFlushPage]
         - [@cache.listener, onFlushPage]
 
 site.layout.prepersist:

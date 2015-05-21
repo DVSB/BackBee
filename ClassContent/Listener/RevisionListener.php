@@ -72,19 +72,7 @@ class RevisionListener
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
-        if (!($content instanceof AbstractClassContent)) {
-            return;
-        }
-
-        $dispatcher = $event->getDispatcher();
-        if (null === $dispatcher) {
-            return;
-        }
-
-        $application = $dispatcher->getApplication();
-        if (null === $application) {
-            return;
-        }
+        $application = $event->getApplication();
 
         $token = $application->getSecurityContext()->getToken();
         if (!($token instanceof BBUserToken)) {
@@ -94,10 +82,14 @@ class RevisionListener
         $em = $application->getEntityManager();
         $uow = $em->getUnitOfWork();
 
-        if ($uow->isScheduledForInsert($content) && AbstractClassContent::STATE_NEW == $content->getState()) {
-            $revision = $em->getRepository('BackBee\ClassContent\Revision')->checkout($content, $token);
-            $em->persist($revision);
-            $uow->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $revision);
+        if ($uow->isScheduledForInsert($content) && AbstractClassContent::STATE_NEW === $content->getState()) {
+            if (null === $draft = $content->getDraft()) {
+                $draft = $em->getRepository('BackBee\ClassContent\Revision')->checkout($content, $token);
+            }
+
+            $content->setDraft($draft);
+            $em->persist($draft);
+            $uow->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $draft);
         } elseif ($uow->isScheduledForDelete($content)) {
             $revisions = $em->getRepository('BackBee\ClassContent\Revision')->getRevisions($content);
             foreach ($revisions as $revision) {

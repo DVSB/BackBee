@@ -107,7 +107,7 @@ class MediaController extends AbstractRestController
 
         $em = $this->getEntityManager();
         try {
-            $em->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($media->getContent());
+            $em->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($media->getContent(), true);
             $em->remove($media);
             $em->flush();
         } catch (\Exception $e) {
