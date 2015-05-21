@@ -589,48 +589,50 @@ class PageController extends AbstractRestController
      */
     private function patchStateOperation(Page $page, array &$operations)
     {
-        $state_operation = null;
-        $is_visible_operation = null;
+        $stateOp = null;
+        $isHiddenOp = null;
         foreach ($operations as $key => $operation) {
-            $op = array('key' => $key, 'op' => $operation);
+            $op = [
+                'key' => $key,
+                'op' => $operation
+            ];
             if ('/state' === $operation['path']) {
-                $state_operation = $op;
-            } elseif ('/is_visible' === $operation['path']) {
-                $is_visible_operation = $op;
+                $stateOp = $op;
+            } elseif ('/is_hidden' === $operation['path']) {
+                $isHiddenOp = $op;
             }
         }
 
-        if (null !== $state_operation) {
-            unset($operations[$state_operation['key']]);
-            $states = explode('_', $state_operation['op']['value']);
+        if (null !== $stateOp) {
+            unset($operations[$stateOp['key']]);
+            $states = explode('_', $stateOp['op']['value']);
             if (in_array($state = (int) array_shift($states), Page::$STATES)) {
                 $page->setState($state | ($page->getState() & Page::STATE_HIDDEN ? Page::STATE_HIDDEN : 0));
             }
 
             if ($code = (int) array_shift($states)) {
-                $workflow_state = $this->getApplication()->getEntityManager()
+                $workflowState = $this->getApplication()->getEntityManager()
                     ->getRepository('BackBee\Workflow\State')
-                    ->findOneBy(array(
+                    ->findOneBy([
                         '_code'   => $code,
                         '_layout' => $page->getLayout(),
-                    ))
+                    ])
                 ;
 
-                if (null !== $workflow_state) {
-                    $page->setWorkflowState($workflow_state);
+                if (null !== $workflowState) {
+                    $page->setWorkflowState($workflowState);
                 }
             }
         }
 
-        if (null !== $is_visible_operation) {
-            unset($operations[$is_visible_operation['key']]);
+        if (null !== $isHiddenOp) {
+            unset($operations[$isHiddenOp['key']]);
 
-            $is_visible = (boolean) $is_visible_operation['op']['value'];
-
-            if ($is_visible && ($page->getState() & Page::STATE_HIDDEN)) {
-                $page->setState($page->getState() ^ Page::STATE_HIDDEN);
-            } elseif (!$is_visible && !($page->getState() & Page::STATE_HIDDEN)) {
+            $isHidden = (boolean) $isHiddenOp['op']['value'];
+            if ($isHidden && !($page->getState() & Page::STATE_HIDDEN)) {
                 $page->setState($page->getState() | Page::STATE_HIDDEN);
+            } elseif (!$isHidden && ($page->getState() & Page::STATE_HIDDEN)) {
+                $page->setState($page->getState() ^ Page::STATE_HIDDEN);
             }
         }
     }
