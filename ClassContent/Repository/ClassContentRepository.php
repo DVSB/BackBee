@@ -803,12 +803,13 @@ class ClassContentRepository extends EntityRepository
      */
     public function findPagesByContent($content)
     {
-        $parentUids = implode(', ', array_unique(array_map(function ($uid) {
+        $contentUids = array_merge($this->getContentsParentUids($content->getUid()), [$content->getUid()]);
+        $contentUids = implode(', ', array_unique(array_map(function ($uid) {
             return '"'.$uid.'"';
-        }, $this->getContentsParentUids($content->getUid()))));
+        }, $contentUids)));
 
         $pageUids = $this->_em->getConnection()->executeQuery(
-            sprintf('SELECT uid FROM page WHERE contentset IN (%s)', $parentUids)
+            sprintf('SELECT uid FROM page WHERE contentset IN (%s)', $contentUids)
         )->fetchAll(\PDO::FETCH_COLUMN);
 
         return $this->_em->createQueryBuilder('p')
