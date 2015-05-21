@@ -36,25 +36,37 @@ use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 class BBUserToken extends AbstractToken
 {
     /**
+     * Token default lifetime (20 minutes)
+     */
+    const DEFAULT_LIFETIME = 1200;
+
+    /**
      * Creation date of the token.
      *
      * @var \DateTime
      */
-    private $_created;
+    private $created;
 
     /**
      * Digest to be checks associated to the token.
      *
      * @var string
      */
-    private $_digest;
+    private $digest;
 
     /**
      * User's private nonce for the token.
      *
      * @var string
      */
-    private $_nonce;
+    private $nonce;
+
+    /**
+     * Token max lifetime (in second).
+     *
+     * @var integer
+     */
+    private $lifetime = self::DEFAULT_LIFETIME;
 
     /**
      * Class Constructor.
@@ -76,7 +88,7 @@ class BBUserToken extends AbstractToken
      */
     public function getCreated()
     {
-        return $this->_created;
+        return $this->created;
     }
 
     /**
@@ -100,7 +112,7 @@ class BBUserToken extends AbstractToken
      */
     public function getDigest()
     {
-        return $this->_digest;
+        return $this->digest;
     }
 
     /**
@@ -112,7 +124,7 @@ class BBUserToken extends AbstractToken
      */
     public function getNonce()
     {
-        return $this->_nonce;
+        return $this->nonce;
     }
 
     /**
@@ -122,13 +134,43 @@ class BBUserToken extends AbstractToken
      *
      * @param type $created
      *
-     * @return \BackBee\Security\Token\BBUserToken
+     * @return self
      */
     public function setCreated($created)
     {
-        $this->_created = $created;
+        $this->created = $created instanceof \DateTime ? $created->format('Y-m-d H:i:s') : $created;
 
         return $this;
+    }
+
+    /**
+     * Sets token max lifetime.
+     *
+     * @param integer $lifetime The token max lifetime value
+     */
+    public function setLifetime($lifetime)
+    {
+        $this->lifetime = (int) $lifetime;
+
+        return $this;
+    }
+
+    /**
+     * Returns true if current token is expired by comparing current timestamp
+     * with token created datetime and its max lifetime.
+     *
+     * @return boolean
+     * @throws \LogicException if token max lifetime or/and token created datetime are not setted
+     */
+    public function isExpired()
+    {
+        if (null === $this->created || 0 === $this->lifetime) {
+            throw new \LogicException(
+                'Cannot define if token is expired, created datetime or/and lifetime are missing.'
+            );
+        }
+
+        return time() > strtotime($this->created) + $this->lifetime;
     }
 
     /**
@@ -138,11 +180,11 @@ class BBUserToken extends AbstractToken
      *
      * @param type $digest
      *
-     * @return \BackBee\Security\Token\BBUserToken
+     * @return self
      */
     public function setDigest($digest)
     {
-        $this->_digest = $digest;
+        $this->digest = $digest;
 
         return $this;
     }
@@ -154,11 +196,11 @@ class BBUserToken extends AbstractToken
      *
      * @param type $nonce
      *
-     * @return \BackBee\Security\Token\BBUserToken
+     * @return self
      */
     public function setNonce($nonce)
     {
-        $this->_nonce = $nonce;
+        $this->nonce = $nonce;
 
         return $this;
     }
@@ -170,7 +212,7 @@ class BBUserToken extends AbstractToken
      *
      * @param type $user
      *
-     * @return \BackBee\Security\Token\BBUserToken
+     * @return self
      */
     public function setUser($user)
     {
@@ -184,15 +226,15 @@ class BBUserToken extends AbstractToken
      */
     public function serialize()
     {
-        return serialize(
-            array(
-                is_object($this->getUser()) ? clone $this->getUser() : $this->getUser(),
-                $this->isAuthenticated(),
-                $this->getRoles(),
-                $this->getAttributes(),
-                $this->_nonce,
-            )
-        );
+        return serialize([
+            is_object($this->getUser()) ? clone $this->getUser() : $this->getUser(),
+            $this->isAuthenticated(),
+            $this->getRoles(),
+            $this->getAttributes(),
+            $this->nonce,
+            $this->created,
+            $this->lifetime,
+        ]);
     }
 
     /**
@@ -201,7 +243,9 @@ class BBUserToken extends AbstractToken
     public function unserialize($serialized)
     {
         $array = unserialize($serialized);
-        $this->_nonce = array_pop($array);
+        $this->lifetime = array_pop($array);
+        $this->created = array_pop($array);
+        $this->nonce = array_pop($array);
 
         parent::unserialize(serialize($array));
     }

@@ -49,14 +49,14 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @var string
      */
-    private $nonce_directory;
+    private $nonceDir;
 
     /**
      * The user provider use to retrieve user.
      *
      * @var \Symfony\Component\Security\Core\User\UserProviderInterface
      */
-    protected $user_provider;
+    protected $userProvider;
 
     /**
      * The life time of the connection.
@@ -70,14 +70,14 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @var \BackBuillder\Bundle\Registry\Repository
      */
-    private $registry_repository;
+    private $registryRepository;
 
     /**
      * The encoders factory.
      *
      * @var \Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface
      */
-    protected $encoder_factory;
+    protected $encoderFactory;
 
     /**
      * Class constructor.
@@ -89,14 +89,14 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function __construct(UserProviderInterface $userProvider, $nonceDir, $lifetime = 300, $registryRepository = null, EncoderFactoryInterface $encoderFactory = null)
     {
-        $this->user_provider = $userProvider;
-        $this->nonce_directory = $nonceDir;
+        $this->userProvider = $userProvider;
+        $this->nonceDir = $nonceDir;
         $this->lifetime = $lifetime;
-        $this->registry_repository = $registryRepository;
-        $this->encoder_factory = $encoderFactory;
+        $this->registryRepository = $registryRepository;
+        $this->encoderFactory = $encoderFactory;
 
-        if (null === $this->registry_repository && false === file_exists($this->nonce_directory)) {
-            mkdir($this->nonce_directory, 0700, true);
+        if (null === $this->registryRepository && false === file_exists($this->nonceDir)) {
+            mkdir($this->nonceDir, 0700, true);
         }
     }
 
@@ -116,11 +116,11 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         try {
-            $user = $this->user_provider->loadUserByUsername($token->getUsername());
+            $user = $this->userProvider->loadUserByUsername($token->getUsername());
             $secret = $user->getPassword();
-            if ($this->encoder_factory) {
+            if ($this->encoderFactory) {
                 try {
-                    $encoder = $this->encoder_factory->getEncoder($user);
+                    $encoder = $this->encoderFactory->getEncoder($user);
 
                     if ($encoder instanceof PlaintextPasswordEncoder) {
                         $secret = md5($secret);
@@ -147,7 +147,12 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
         }
 
         $validToken = new BBUserToken($user->getRoles());
-        $validToken->setUser($user)->setNonce($token->getNonce());
+        $validToken
+            ->setUser($user)
+            ->setNonce($token->getNonce())
+            ->setCreated(new \DateTime())
+            ->setLifetime($this->lifetime)
+        ;
 
         $this->writeNonceValue($validToken);
 
@@ -225,9 +230,9 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
     {
         $value = null;
 
-        if (null === $this->registry_repository) {
-            if (true === is_readable($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce)) {
-                $value = file_get_contents($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce);
+        if (null === $this->registryRepository) {
+            if (true === is_readable($this->nonceDir.DIRECTORY_SEPARATOR.$nonce)) {
+                $value = file_get_contents($this->nonceDir.DIRECTORY_SEPARATOR.$nonce);
             }
         } else {
             $value = $this->getRegistry($nonce)->getValue();
@@ -247,15 +252,15 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     protected function writeNonceValue(BBUserToken $token)
     {
-        $now = time();
+        $now = strtotime($token->getCreated());
         $nonce = $token->getNonce();
         $signature_generator = new RequestSignatureEncoder();
         $signature = $signature_generator->createSignature($token);
-        if (null === $this->registry_repository) {
-            file_put_contents($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce, "$now;$signature");
+        if (null === $this->registryRepository) {
+            file_put_contents($this->nonceDir.DIRECTORY_SEPARATOR.$nonce, "$now;$signature");
         } else {
             $registry = $this->getRegistry($nonce)->setValue("$now;$signature");
-            $this->registry_repository->save($registry);
+            $this->registryRepository->save($registry);
         }
     }
 
@@ -266,11 +271,11 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     protected function removeNonce($nonce)
     {
-        if (null === $this->registry_repository) {
-            @unlink($this->nonce_directory.DIRECTORY_SEPARATOR.$nonce);
+        if (null === $this->registryRepository) {
+            @unlink($this->nonceDir.DIRECTORY_SEPARATOR.$nonce);
         } else {
             $registry = $this->getRegistry($nonce);
-            $this->registry_repository->remove($registry);
+            $this->registryRepository->remove($registry);
         }
     }
 
@@ -283,7 +288,7 @@ class BBAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function getRegistry($nonce)
     {
-        if (null === $registry = $this->registry_repository->findOneBy(array('key' => $nonce, 'scope' => 'SECURITY.NONCE'))) {
+        if (null === $registry = $this->registryRepository->findOneBy(['key' => $nonce, 'scope' => 'SECURITY.NONCE'])) {
             $registry = new Registry();
             $registry->setKey($nonce)->setScope('SECURITY.NONCE');
         }

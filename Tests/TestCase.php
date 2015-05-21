@@ -261,8 +261,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         $user->addGroup($group);
 
-        $token->setUser($user);
         $token->setAuthenticated(true);
+        $token
+            ->setUser($user)
+            ->setCreated(new \DateTime())
+            ->setLifetime(300)
+        ;
 
         $this->getSecurityContext()->setToken($token);
 
