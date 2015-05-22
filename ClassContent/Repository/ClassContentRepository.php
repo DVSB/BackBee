@@ -63,6 +63,12 @@ class ClassContentRepository extends EntityRepository
         return $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
     }
 
+    /**
+     * Returns provided content direct parents entity.
+     *
+     * @param  AbstractClassContent $content The content we want to get its direct parents
+     * @return array
+     */
     public function getParentContents(AbstractClassContent $content)
     {
         $result = $this->_em->getConnection()
@@ -927,13 +933,13 @@ class ClassContentRepository extends EntityRepository
             }
 
             foreach ($parents as $parent) {
-                if (true === $mainContent && !$this->_em->getUnitOfWork()->isScheduledForDelete($parent)) {
+                if (
+                    true === $mainContent
+                    && !($parent instanceof ContentSet)
+                    && !$this->_em->getUnitOfWork()->isScheduledForDelete($parent)
+                ) {
                     foreach ($parent->getData() as $key => $element) {
-                        if (
-                            $element instanceof AbstractClassContent
-                            && !($element instanceof ContentSet)
-                            && $element === $content
-                        ) {
+                        if ($element instanceof AbstractClassContent && $element === $content) {
                             $classname = get_class($element);
                             $newContent = new $classname();
                             $this->_em->persist($newContent);
