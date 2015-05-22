@@ -172,27 +172,6 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * An array representation of the bag.
-     *
-     * @return array
-     *
-     * @deprecated since version 1.0
-     *
-     * @codeCoverageIgnore
-     */
-    public function toArray()
-    {
-        $metadata = array();
-        if (is_array($this->metadatas)) {
-            foreach ($this->metadatas as $meta) {
-                $metadata[$meta->getName()] = $meta->toArray();
-            }
-        }
-
-        return $metadata;
-    }
-
-    /**
      * @param \stdClass $object
      *
      * @return \BackBee\MetaData\MetaDataBag

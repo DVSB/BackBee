@@ -160,30 +160,24 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
     }
 
     /**
-     * Returns an array representation of the media folder.
      *
-     * @return array
-     */
-    public function toArray()
-    {
-        $result = parent::toArray();
-        $result['title'] = $this->getTitle();
-        $result['url'] = $this->getUrl();
-
-        return $result;
-    }
-
-    /**
-     *
-     * @return
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
-        $result = parent::toArray();
-        $result['title'] = $this->getTitle();
-        $result['url'] = $this->getUrl();
-        return $result;
+        return $result = [
+            'uid'          => $this->getUid(),
+            'root_uid'     => $this->getRoot()->getUid(),
+            'is_root'      => $this->isRoot(),
+            'parent_uid'   => $this->getParent() ? $this->getParent()->getUid() : null,
+            'title'        => $this->getTitle(),
+            'url'          => $this->getUrl(),
+            'has_children' => $this->hasChildren(),
+            'created'      => $this->getCreated() ? $this->getCreated()->getTimestamp() : null,
+            'modified'     => $this->getModified() ? $this->getModified()->getTimestamp() : null,
+        ];
     }
+
     /**
      * Sets the title.
      *

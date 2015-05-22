@@ -336,28 +336,6 @@ class MetaData implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
-     * Returns a array representation of this metadata.
-     *
-     * @return array
-     *
-     * @deprecated since version 1.0
-     */
-    public function toArray()
-    {
-        $attributes = array();
-        foreach ($this->attributes as $attribute => $value) {
-            $attr = new \stdClass();
-            $attr->attr = $attribute;
-            $attr->value = $value;
-            $attr->iscomputed = $this->is_computed[$attribute];
-            $attr->scheme = (true === array_key_exists($attribute, $this->scheme)) ? $this->scheme[$attribute] : null;
-            $attributes[] = $attr;
-        }
-
-        return $attributes;
-    }
-
-    /**
      * Returns the number of attributes.
      *
      * @return int

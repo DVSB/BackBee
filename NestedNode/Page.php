@@ -636,17 +636,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function getData($var = null)
     {
-        $data = $this->toArray();
-
-        if (null !== $var) {
-            if (false === array_key_exists($var, $data)) {
-                return;
-            }
-
-            return $data[$var];
-        }
-
-        return $data;
+        return null !== $var ? null : [];
     }
 
     /**
@@ -1226,81 +1216,6 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
         }
 
         return $newContentSet;
-    }
-
-    /**
-     * Returns an array representation of the page.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $result = parent::toArray();
-
-        $result['siteuid'] = (null !== $this->getSite()) ? $this->getSite()->getUid() : null;
-        $result['title'] = $this->getTitle();
-        $result['alttitle'] = $this->getAltTitle();
-        $result['url'] = $this->getUrl();
-        $result['target'] = $this->getTarget();
-        $result['redirect'] = $this->getRedirect();
-        $result['state'] = $this->getState();
-        $result['date'] = (null !== $this->getDate()) ? $this->getDate()->getTimestamp() : null;
-        $result['publishing'] = (null !== $this->getPublishing()) ? $this->getPublishing()->getTimestamp() : null;
-        $result['archiving'] = (null !== $this->getArchiving()) ? $this->getArchiving()->getTimestamp() : null;
-        $result['metadata'] = (null !== $this->getMetaData()) ? $this->getMetaData()->toArray() : null;
-        $result['layout_uid'] = (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null;
-        $result['workflow_state'] = (null !== $this->getWorkflowState()) ? $this->getWorkflowState()->getCode() : null;
-
-        return $result;
-    }
-
-    /**
-     * Constructs the node from a string or object.
-     *
-     * @param mixed $serialized The string representation of the object.
-     *
-     * @return \BackBee\NestedNode\AbstractNestedNode
-     *
-     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                     with strict mode, if a property does not exists
-     */
-    public function unserialize($serialized, $strict = false)
-    {
-        if (false === is_object($serialized)) {
-            if (null === $serialized = json_decode($serialized)) {
-                throw new InvalidArgumentException('The serialized value can not be unserialized to node object.');
-            }
-        }
-
-        parent::unserialize($serialized, $strict);
-
-        if (true === property_exists($serialized, 'date')) {
-            $this->setDateTimeValue('_date', $serialized->date);
-        }
-
-        if (true === property_exists($serialized, 'publishing')) {
-            $this->setDateTimeValue('_publishing', $serialized->publishing);
-        }
-
-        if (true === property_exists($serialized, 'archiving')) {
-            $this->setDateTimeValue('_archiving', $serialized->archiving);
-        }
-
-        if (true === property_exists($serialized, 'metadata')) {
-            $meta = new MetaDataBag();
-            $meta->fromStdClass((object) $serialized->metadata);
-            $this->setMetaData($meta);
-        }
-
-        if (true === property_exists($serialized, 'workflow_state')) {
-            if (null === $serialized->workflow_state) {
-                $this->setWorkflowState(null);
-            } elseif ($serialized->workflow_state instanceof State) {
-                $this->setWorkflowState($serialized->workflow_state);
-            }
-        }
-
-        return $this;
     }
 
     /**

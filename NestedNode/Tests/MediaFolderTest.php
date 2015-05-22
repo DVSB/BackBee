@@ -79,27 +79,6 @@ class MediaFolderTest extends TestCase
     }
 
     /**
-     * @covers BackBee\NestedNode\MediaFolder::toArray
-     */
-    public function testToArray()
-    {
-        $expected = array(
-            'id' => 'node_test',
-            'rel' => 'leaf',
-            'uid' => 'test',
-            'rootuid' => 'test',
-            'parentuid' => null,
-            'created' => $this->current_time->getTimestamp(),
-            'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => true,
-            'title' => 'title',
-            'url' => 'url',
-        );
-
-        $this->assertEquals($expected, $this->folder->toArray());
-    }
-
-    /**
      * Sets up the fixture.
      */
     public function setUp()

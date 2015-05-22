@@ -67,9 +67,8 @@ class KeyWordTest extends TestCase
      */
     public function testGetData()
     {
-        $this->assertEquals($this->keyword->toArray(), $this->keyword->getData());
         $this->assertNull($this->keyword->getData('fake'));
-        $this->assertEquals('node_test', $this->keyword->getData('id'));
+        $this->assertEquals([], $this->keyword->getData());
     }
 
     /**
@@ -87,26 +86,6 @@ class KeyWordTest extends TestCase
         $this->assertNull($this->keyword->getParam('fake'));
 
         $this->assertEquals($this->keyword->getLeftnode(), $this->keyword->getParam('left'));
-    }
-
-    /**
-     * @covers BackBee\NestedNode\MediaFolder::toArray
-     */
-    public function testToArray()
-    {
-        $expected = array(
-            'id' => 'node_test',
-            'rel' => 'leaf',
-            'uid' => 'test',
-            'rootuid' => 'test',
-            'parentuid' => null,
-            'created' => $this->current_time->getTimestamp(),
-            'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => true,
-            'keyword' => 'test',
-        );
-
-        $this->assertEquals($expected, $this->keyword->toArray());
     }
 
     /**
