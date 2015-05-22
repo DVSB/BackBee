@@ -27,7 +27,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Acl\Model\DomainObjectInterface;
-
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Exception\InvalidArgumentException;
@@ -776,7 +775,9 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
 
     /**
      * Sets the main contentset associated to the node.
-     * @param  \BackBee\ClassContent\ContentSet $contentset
+     *
+     * @param \BackBee\ClassContent\ContentSet $contentset
+     *
      * @return \BackBee\NestedNode\AbstractNestedNode
      */
     public function setContentset(ContentSet $contentset)
@@ -802,10 +803,11 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
 
     /**
      * Sets the layout for the page.
-     * Adds as much ContentSet to the page main ContentSet than defined zones in layout
+     * Adds as much ContentSet to the page main ContentSet than defined zones in layout.
      *
-     * @param  \BackBee\Site\Layout                $layout
-     * @param  \BackBee\ClassContent\AbstractClassContent $toPushInMainZone
+     * @param \BackBee\Site\Layout                       $layout
+     * @param \BackBee\ClassContent\AbstractClassContent $toPushInMainZone
+     *
      * @return \BackBee\NestedNode\Page
      */
     public function setLayout(Layout $layout, AbstractClassContent $toPushInMainZone = null)
@@ -952,12 +954,35 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setPublishing($publishing = null)
     {
+        if ($publishing === null) {
+            $this->_publishing = null;
+        } else {
+            $this->_publishing = $this->validatePublishing($publishing);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Validate the publishing date.
+     *
+     * @param \DateTime $publishing
+     */
+    private function validatePublishing($publishing)
+    {
         if ($this->isRoot() && $publishing !== null && $this->_publishing !== null) {
             throw new \LogicException("Root page is already published.");
         }
-        $this->_publishing = null !== $publishing ? $this->convertTimestampToDateTime($publishing) : null;
 
-        return $this;
+        if (!($publishing instanceof \DateTime)) {
+            $publishing = $this->convertTimestampToDateTime($publishing);
+        }
+
+        if ($publishing->getTimestamp() < time()) {
+            throw new \LogicException("Page can't be published in the past.");
+        }
+
+        return $publishing;
     }
 
     /**
@@ -969,12 +994,35 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function setArchiving($archiving = null)
     {
+        if ($archiving === null) {
+            $this->_archiving = null;
+        } else {
+            $this->_archiving = $this->validateArchiving($archiving);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Validate the archiving date.
+     *
+     * @param \DateTime $archiving
+     */
+    private function validateArchiving($archiving)
+    {
         if ($this->isRoot() && $archiving !== null) {
             throw new \LogicException("Root page can't be archived.");
         }
-        $this->_archiving = null !== $archiving ? $this->convertTimestampToDateTime($archiving) : null;
 
-        return $this;
+        if (!($archiving instanceof \DateTime)) {
+            $archiving = $this->convertTimestampToDateTime($archiving);
+        }
+
+        if ($archiving->getTimestamp() < time() || $archiving < $this->_publishing) {
+            throw new \LogicException("Page can't be archived in the past or before publication date.");
+        }
+
+        return $archiving;
     }
 
     /**
@@ -1051,7 +1099,9 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
 
     /**
      * Returns the parent ContentSet in the same zone, false if it is not found.
-     * @param  \BackBee\ClassContent\ContentSet      $contentSet
+     *
+     * @param \BackBee\ClassContent\ContentSet $contentSet
+     *
      * @return \BackBee\ClassContent\ContentSet|false
      */
     public function getParentZoneAtSamePositionIfExists(ContentSet $contentSet)
@@ -1210,6 +1260,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      * @param mixed $serialized The string representation of the object.
      *
      * @return \BackBee\NestedNode\AbstractNestedNode
+     *
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
      *                                                     with strict mode, if a property does not exists
      */
@@ -1510,8 +1561,9 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
     /**
      * Returns the inherited content from parent, $default if not found.
      *
-     * @param int                                 $index
-     * @param  \BackBee\ClassContent\AbstractClassContent $default
+     * @param int                                        $index
+     * @param \BackBee\ClassContent\AbstractClassContent $default
+     *
      * @return \BackBee\ClassContent\AbstractClassContent
      */
     private function getInheritedContent($index, AbstractClassContent $default)
@@ -1550,7 +1602,8 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
                 }
 
                 $label->$property = $this->getTitle();
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
 
         if (true === $mainzone) {
