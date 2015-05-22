@@ -267,11 +267,6 @@ class PageTest extends TestCase
         $this->assertTrue($this->page->isOnline(true));
 
         $this->page->setPublishing()
-                ->setArchiving($yesterday);
-        $this->assertFalse($this->page->isOnline());
-        $this->assertTrue($this->page->isOnline(true));
-
-        $this->page->setPublishing($yesterday)
                 ->setArchiving($tomorrow);
         $this->assertTrue($this->page->isOnline());
         $this->assertTrue($this->page->isOnline(true));
@@ -428,6 +423,27 @@ class PageTest extends TestCase
     }
 
     /**
+     * @expectedException     \LogicException
+     * @expectedExceptionMessage Root page is already published.
+     */
+    public function testSetPublishingOnRootPagesFails()
+    {
+        $rootPage = $this->createRootPage();
+        // first publication
+        $rootPage->setPublishing(new \DateTime());
+        $rootPage->setPublishing(new \DateTime()); // forbidden
+    }
+
+    /**
+     * @expectedException     \LogicException
+     * @expectedExceptionMessage Page can't be published in the past.
+     */
+    public function testSetPublishingWithADateBeforeTodayFails()
+    {
+        $this->page->setPublishing(new \DateTime('NOW -1 day'));
+    }
+
+    /**
      * @covers BackBee\NestedNode\Page::setArchiving
      */
     public function testSetArchiving()
@@ -436,6 +452,35 @@ class PageTest extends TestCase
         $this->assertEquals($this->current_time, $this->page->getArchiving());
         $this->assertEquals($this->page, $this->page->setArchiving(null));
         $this->assertNull($this->page->getArchiving());
+    }
+
+    /**
+     * @expectedException     \LogicException
+     * @expectedExceptionMessage Root page can't be archived.
+     */
+    public function testSetArchivingOnRootPagesFails()
+    {
+        $rootPage = $this->createRootPage();
+        $rootPage->setArchiving(new \DateTime());
+    }
+
+    /**
+     * @expectedException     \LogicException
+     * @expectedExceptionMessage Page can't be archived in the past or before publication date.
+     */
+    public function testSetArchivingWithADateBeforeTodayFails()
+    {
+        $this->page->setArchiving(new \DateTime('NOW -1 day'));
+    }
+
+    /**
+     * @expectedException     \LogicException
+     * @expectedExceptionMessage Page can't be archived in the past or before publication date.
+     */
+    public function testSetArchivingWithADateBeforePublicationDateFails()
+    {
+        $this->page->setPublishing(new \DateTime());
+        $this->page->setArchiving($this->page->getPublishing()->modify('-1 hour'));
     }
 
     /**
@@ -718,7 +763,6 @@ class PageTest extends TestCase
      * => A root page can't be published in the future;
      * => A root page can't be put offline.
      */
-
     public function testRootPageCantBeArchived()
     {
         $rootPage = $this->createPage(true);
