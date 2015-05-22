@@ -180,8 +180,7 @@ class PageTest extends TestCase
      */
     public function testGetData()
     {
-        $this->assertEquals($this->page->toArray(), $this->page->getData());
-        $this->assertEquals('title', $this->page->getData('title'));
+        $this->assertEquals([], $this->page->getData());
         $this->assertNull($this->page->getData('unknown'));
     }
 
@@ -652,91 +651,6 @@ class PageTest extends TestCase
 
         $this->assertEquals($newContentSet, $child->replaceRootContentSet($child->getContentSet()->last(), $newContentSet));
         $this->assertEquals($newContentSet, $child->getContentSet()->last());
-    }
-
-    /**
-     * @covers BackBee\NestedNode\Page::toArray
-     */
-    public function testToArray()
-    {
-        $expected = array(
-            'id' => 'node_test',
-            'rel' => 'leaf',
-            'uid' => 'test',
-            'rootuid' => 'test',
-            'parentuid' => 'test',
-            'created' => $this->current_time->getTimestamp(),
-            'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => true,
-            'siteuid' => null,
-            'title' => 'title',
-            'alttitle' => null,
-            'url' => 'url',
-            'target' => '_self',
-            'redirect' => null,
-            'state' => Page::STATE_HIDDEN,
-            'date' => null,
-            'publishing' => null,
-            'archiving' => null,
-            'metadata' => null,
-            'layout_uid' => $this->page->getLayout()->getUid(),
-            'workflow_state' => null,
-        );
-
-        $this->assertEquals($expected, $this->page->toArray());
-
-        $this->page->setSite(new Site())
-                ->setDate($this->current_time)
-                ->setArchiving($this->current_time)
-                ->setPublishing($this->current_time)
-                ->setMetadata(new MetaDataBag())
-                ->setWorkflowState(new State(null, array('code' => 1)));
-
-        $expected = array(
-            'id' => 'node_test',
-            'rel' => 'leaf',
-            'uid' => 'test',
-            'rootuid' => 'test',
-            'parentuid' => 'test',
-            'created' => $this->current_time->getTimestamp(),
-            'modified' => $this->current_time->getTimestamp(),
-            'isleaf' => true,
-            'siteuid' => $this->page->getSite()->getUid(),
-            'title' => 'title',
-            'alttitle' => null,
-            'url' => 'url',
-            'target' => '_self',
-            'redirect' => null,
-            'state' => Page::STATE_HIDDEN,
-            'date' => $this->current_time->getTimestamp(),
-            'publishing' => $this->current_time->getTimestamp(),
-            'archiving' => $this->current_time->getTimestamp(),
-            'metadata' => array(),
-            'layout_uid' => $this->page->getLayout()->getUid(),
-            'workflow_state' => 1,
-        );
-
-        $this->assertEquals($expected, $this->page->toArray());
-    }
-
-    /**
-     * @covers BackBee\NestedNode\Page::serialize
-     * @covers BackBee\NestedNode\Page::_setDateTimeValue
-     */
-    public function testUnserialize()
-    {
-        $this->page->setSite(new Site())
-                ->setDate($this->current_time)
-                ->setArchiving($this->current_time)
-                ->setPublishing($this->current_time)
-                ->setMetadata(new MetaDataBag());
-        $newPage = new Page();
-        $newPage->setParent($this->page->getParent())
-                ->setSite($this->page->getSite())
-                ->setLayout($this->page->getLayout())
-                ->setContentSet($this->page->getContentSet());
-
-        $this->assertEquals($this->page, $newPage->unserialize($this->page->serialize()));
     }
 
     /**

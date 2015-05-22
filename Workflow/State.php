@@ -242,75 +242,6 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * Returns an array representation of the workflow state.
-     *
-     * @return string
-     *
-     * @deprecated since version 1.0
-     */
-    public function toArray()
-    {
-        return array(
-            'uid' => $this->getUid(),
-            'code' => $this->getCode(),
-            'label' => $this->getLabel(),
-            'layout' => (null !== $this->getLayout()) ? $this->getLayout()->getUid() : null,
-            'listener' => $this->getListener(),
-        );
-    }
-
-    /**
-     * Returns a string representation of the workflow state.
-     *
-     * @return string
-     *
-     * @deprecated since version 1.0
-     */
-    public function serialize()
-    {
-        $serialized = new \stdClass();
-        foreach ($this->toArray() as $key => $value) {
-            $serialized->$key = $value;
-        }
-
-        return json_encode($serialized);
-    }
-
-    /**
-     * Constructs the state from a string or object.
-     *
-     * @param mixed $serialized The string representation of the object.
-     *
-     * @return \BackBee\Workflow\State
-     *
-     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the serialized data can not be decode or,
-     *                                                     with strict mode, if a property does not exists
-     *
-     * @deprecated since version 1.0
-     */
-    public function unserialize($serialized, $strict = false)
-    {
-        if (false === is_object($serialized)) {
-            if (null === $serialized = json_decode($serialized)) {
-                throw new InvalidArgumentException('The serialized value can not be unserialized to node object.');
-            }
-        }
-
-        foreach (get_object_vars($serialized) as $property => $value) {
-            $property = '_'.$property;
-            if (true === in_array($property, array('_layout'))) {
-                $this->$property = new Layout($value);
-            } elseif (true === property_exists($this, $property)) {
-                $this->$property = $value;
-            } elseif (true === $strict) {
-                throw new \InvalidArgumentException(sprintf('Unknown property `%s` in %s.', $property, ClassUtils::getRealClass($this)));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * Layout's uid getter.
      *
      * @return null|string
@@ -324,15 +255,15 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
     }
 
     /**
-     * {@inherit}.
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
-        return array(
+        return [
             'uid'        => $this->getUid(),
             'layout_uid' => null !== $this->getLayout() ? $this->getLayout()->getUid() : null,
             'code'       => $this->getCode(),
             'label'      => $this->getLabel(),
-        );
+        ];
     }
 }

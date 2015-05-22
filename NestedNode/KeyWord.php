@@ -194,19 +194,6 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
     }
 
     /**
-     * Returns an array representation of the keyword.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $result = parent::toArray();
-        $result['keyword'] = $this->getKeyWord();
-
-        return $result;
-    }
-
-    /**
      * Returns data associated to $var for rendering assignation, all data if NULL provided.
      *
      * @param string $var
@@ -215,17 +202,7 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
      */
     public function getData($var = null)
     {
-        $data = $this->toArray();
-
-        if (null !== $var) {
-            if (false === array_key_exists($var, $data)) {
-                return;
-            }
-
-            return $data[$var];
-        }
-
-        return $data;
+        return null !== $var ? null : [];
     }
 
     /**

@@ -79,7 +79,7 @@ class MediaFolderController extends AbstractRestController
      */
     public function getAction(MediaFolder $mediaFolder)
     {
-        return $this->createResponse($this->formatItem($mediaFolder));
+        return $this->createJsonResponse($mediaFolder);
     }
 
     /**

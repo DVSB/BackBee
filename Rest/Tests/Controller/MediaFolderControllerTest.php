@@ -97,9 +97,8 @@ class MediaFolderControllerTest extends RestTestCase
         $this->assertInternalType('array', $mediaFoldersCollection);
         $this->assertCount(1, $mediaFoldersCollection);
 
-        foreach($mediaFoldersCollection as $mediaFolder) {
-            $properties = $this->expectedCollectionProperties();
-
+        $properties = $this->expectedSingleProperties();
+        foreach ($mediaFoldersCollection as $mediaFolder) {
             foreach ($properties as $property) {
                 $this->assertArrayHasKey($property, $mediaFolder);
             }
@@ -119,9 +118,8 @@ class MediaFolderControllerTest extends RestTestCase
         $this->assertInternalType('array', $mediaFoldersCollection);
         $this->assertCount(1, $mediaFoldersCollection);
 
-        foreach($mediaFoldersCollection as $mediaFolder) {
-            $properties = $this->expectedCollectionProperties();
-
+        $properties = $this->expectedSingleProperties();
+        foreach ($mediaFoldersCollection as $mediaFolder) {
             foreach ($properties as $property) {
                 $this->assertArrayHasKey($property, $mediaFolder);
             }
@@ -239,34 +237,18 @@ class MediaFolderControllerTest extends RestTestCase
         return $mediaFolder;
     }
 
-    private function expectedCollectionProperties()
-    {
-        return [
-            'id',
-            'rel',
-            'uid',
-            'rootuid',
-            'parentuid',
-            'created',
-            'modified',
-            'isleaf',
-            'title',
-            'url'
-        ];
-    }
-
     private function expectedSingleProperties()
     {
         return [
-            'is_root',
             'uid',
-            '_root',
-            '_parent',
+            'is_root',
+            'root_uid',
+            'parent_uid',
             'title',
             'url',
-            '_descendants',
-            '_children',
-            '_medias'
+            'has_children',
+            'modified',
+            'created',
         ];
     }
 
