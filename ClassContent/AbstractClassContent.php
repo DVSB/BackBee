@@ -1083,8 +1083,8 @@ abstract class AbstractClassContent extends AbstractContent
                     }
 
                     if ($subContent->getUid() == $contentUid) {
-                        if ($totalContent == 1) {
-                            $this->_data[$key] = array();
+                        if (1 === $totalContent) {
+                            $this->_data[$key] = [];
                             $this->_subcontent->removeElement($subContent);
                         } else {
                             unset($value[$cKey]);

@@ -57,10 +57,31 @@ class ClassContentRepository extends EntityRepository
                 ->createQueryBuilder()
                 ->select('c.parent_uid')
                 ->from('content_has_subcontent', 'c')
-                ->andWhere('c.content_uid = :uid')
+                ->where('c.content_uid = :uid')
                 ->setParameter('uid', $content_uid);
 
         return $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    public function getParentContents(AbstractClassContent $content)
+    {
+        $result = $this->_em->getConnection()
+            ->createQueryBuilder()
+            ->select('p.parent_uid', 'c.classname')
+            ->from('content_has_subcontent', 'p')
+            ->leftJoin('p', 'content', 'c', 'p.parent_uid = c.uid')
+            ->where('p.content_uid = :uid')
+            ->setParameter('uid', $content->getUid())
+            ->execute()
+            ->fetchAll()
+        ;
+
+        $parents = [];
+        foreach ($result as $parentData) {
+            $parents[] = $this->_em->find($parentData['classname'], $parentData['parent_uid']);
+        }
+
+        return $parents;
     }
 
     /**
@@ -889,12 +910,12 @@ class ClassContentRepository extends EntityRepository
      */
     public function deleteContent(AbstractClassContent $content, $mainContent = true)
     {
-        $parents = $content->getParentContent();
+        $parents = $this->getParentContents($content);
         $media = $this->_em->getRepository('BackBee\NestedNode\Media')->findOneBy([
             '_content' => $content->getUid(),
         ]);
 
-        if (($parents->count() <= 1 && null === $media) || true === $mainContent) {
+        if ((1 >= count($parents) && null === $media) || true === $mainContent) {
             foreach ($content->getData() as $element) {
                 if ($element instanceof AbstractClassContent) {
                     $this->deleteContent($element, false);
@@ -906,16 +927,36 @@ class ClassContentRepository extends EntityRepository
             }
 
             foreach ($parents as $parent) {
-                $parent->unsetSubContent($content);
+                if (true === $mainContent && !$this->_em->getUnitOfWork()->isScheduledForDelete($parent)) {
+                    foreach ($parent->getData() as $key => $element) {
+                        if (
+                            $element instanceof AbstractClassContent
+                            && !($element instanceof ContentSet)
+                            && $element === $content
+                        ) {
+                            $classname = get_class($element);
+                            $newContent = new $classname();
+                            $this->_em->persist($newContent);
+                            $parent->$key = $newContent;
+                        }
+                    }
+                } else {
+                    $parent->unsetSubContent($content);
+                }
             }
 
             $this->_em->getConnection()->executeQuery(
                 'DELETE FROM indexation WHERE owner_uid = :uid',
-                ['uid' => $content->getUid()]
+                [
+                    'uid' => $content->getUid()
+                ]
             )->execute();
+
             $this->_em->getConnection()->executeQuery(
                 'DELETE FROM revision WHERE content_uid = :uid',
-                ['uid' => $content->getUid()]
+                [
+                    'uid' => $content->getUid()
+                ]
             )->execute();
 
             $this->_em->remove($content);
