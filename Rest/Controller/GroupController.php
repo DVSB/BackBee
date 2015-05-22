@@ -23,6 +23,8 @@
 
 namespace BackBee\Rest\Controller;
 
+
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -98,6 +100,16 @@ class GroupController extends AbstractRestController
      */
     public function putAction(Group $group, Request $request)
     {
+        $site = $this->getSite($request);
+
+        if ($this->isDuplicated($request->request->get('name'), $site)) {
+            return new JsonResponse([
+                'errors' => [
+                    'name' => 'Group already exists.',
+                ],
+            ], 400);
+        }
+
         $this->deserializeEntity($request->request->all(), $group);
 
         $this->getEntityManager()->persist($group);
@@ -119,21 +131,14 @@ class GroupController extends AbstractRestController
     {
         $group = new Group();
 
-        if ($request->request->has('site_uid')) {
-            $this->checkSiteUid($request->request->get('site_uid'));
+        $site = $this->getSite($request);
 
-            $site = $this->getEntityManager()->find('BackBee\Site\Site', $request->request->get('site_uid'));
-        } else {
-            $site = $this->getApplication()->getSite();
-        }
-
-        $duplicate = $this->getEntityManager()->getRepository('BackBee\Security\Group')->findOneBy([
-            '_name' => $request->request->get('name'),
-            '_site' => $site,
-        ]);
-
-        if ($duplicate !== null) {
-            return new Response('', 409);
+        if ($this->isDuplicated($request->request->get('name'), $site)) {
+            return new JsonResponse([
+                'errors' => [
+                    'name' => 'Group already exists.',
+                ],
+            ], 400);
         }
 
         $group->setName($request->request->get('name'));
@@ -147,6 +152,18 @@ class GroupController extends AbstractRestController
         return new Response($this->formatItem($group), 200, ['Content-Type' => 'application/json']);
     }
 
+    private function getSite(Request $request)
+    {
+        if ($request->request->has('site_uid')) {
+            $this->checkSiteUid($request->request->get('site_uid'));
+
+            $site = $this->getEntityManager()->find('BackBee\Site\Site', $request->request->get('site_uid'));
+        } else {
+            $site = $this->getApplication()->getSite();
+        }
+        return $site;
+    }
+
     private function checkSiteUid($site_uid)
     {
         $site = $this->getEntityManager()->find('BackBee\Site\Site', $site_uid);
@@ -156,5 +173,14 @@ class GroupController extends AbstractRestController
         if (count($violations) > 0) {
             throw new ValidationException($violations);
         }
+    }
+
+    private function isDuplicated($name, $site) {
+        $duplicate = $this->getEntityManager()->getRepository('BackBee\Security\Group')->findOneBy([
+            '_name' => $name,
+            '_site' => $site,
+        ]);
+
+        return $duplicate !== null;
     }
 }

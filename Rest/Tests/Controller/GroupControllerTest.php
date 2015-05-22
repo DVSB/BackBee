@@ -230,6 +230,16 @@ class GroupControllerTest extends TestCase
         $groupUpdated = $this->getBBApp()->getEntityManager()->getRepository('BackBee\Security\Group')->find($groupId);
         $this->assertEquals($data['name'], $groupUpdated->getName());
         $this->assertEquals($data['site_uid'], $groupUpdated->getSite()->getUid());
+
+        // duplicate identifier
+        $data = array(
+            'name' => 'newGroupName',
+            'site_uid' => $this->site->getUid(),
+        );
+
+        $controller->postAction(new Request(array(), $data));
+        $response = $controller->putAction($this->groupEditor, new Request(array(), $data));
+        $this->assertEquals(400, $response->getStatusCode());
     }
 
     /**
@@ -286,7 +296,7 @@ class GroupControllerTest extends TestCase
         );
 
         $response = $controller->postAction(new Request(array(), $data));
-        $this->assertEquals(409, $response->getStatusCode());
+        $this->assertEquals(400, $response->getStatusCode());
     }
 
     /**
