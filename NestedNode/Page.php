@@ -1368,24 +1368,26 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
 
     /**
      * @Serializer\VirtualProperty
-     * @Serializer\SerializedName("state_label")
+     * @Serializer\SerializedName("states")
      */
-    public function getStateLabel()
+    public function getStates()
     {
-        $labels = [];
+        $states = [];
+
         if (self::STATE_OFFLINE === $this->_state) {
-            $labels[] = 'Offline';
+            $states[] = self::STATE_OFFLINE;
         } elseif (self::STATE_HIDDEN === $this->_state) {
-            $labels[] = 'Offline, Hidden';
+            $states[] = self::STATE_OFFLINE;
+            $states[] = self::STATE_HIDDEN;
         } else {
-            foreach (self::$STATES as $label => $value) {
+            foreach (self::$STATES as $value) {
                 if (0 !== ($this->_state & $value)) {
-                    $labels[] = $label;
+                    $states[] = $value;
                 }
             }
         }
 
-        return implode(', ', $labels);
+        return $states;
     }
 
     /**
