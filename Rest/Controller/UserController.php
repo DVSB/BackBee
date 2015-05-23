@@ -280,10 +280,6 @@ class UserController extends AbstractRestController
 
         $user->setPassword($password);
 
-        if (!$request->request->has('api_key_private')) {
-            $user->generateRandomApiKey();
-        }
-
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
 

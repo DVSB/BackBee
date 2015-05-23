@@ -314,7 +314,6 @@ class UserControllerTest extends RestTestCase
             'login' => 'username',
             'email' => 'username@provider.com',
             'api_key_enabled' => true,
-            'api_key_public' => 'api_key_public',
             'api_key_private' => 'api_key_private',
             'firstname' => 'first_name',
             'lastname' => 'last_name',
@@ -334,7 +333,7 @@ class UserControllerTest extends RestTestCase
         $this->assertEquals($data['login'], $res['login']);
         $this->assertEquals($data['email'], $res['email']);
         $this->assertEquals($data['api_key_enabled'], $res['api_key_enabled']);
-        $this->assertEquals($data['api_key_public'], $res['api_key_public']);
+        $this->assertNotNull($res['api_key_public']);
         $this->assertEquals($data['firstname'], $res['firstname']);
         $this->assertEquals($data['lastname'], $res['lastname']);
 

@@ -242,9 +242,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->setEmail('admin@backbee.com')
             ->setLogin('admin')
             ->setPassword('pass')
-            ->setApiKeyEnabled(true)
             ->setApiKeyPrivate(uniqid("PRIVATE", true))
             ->setApiKeyPublic(uniqid("PUBLIC", true))
+            ->setApiKeyEnabled(true)
         ;
 
         $group = $this->getBBApp()->getEntityManager()
