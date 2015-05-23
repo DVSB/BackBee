@@ -32,7 +32,7 @@ use BackBee\Tests\TestCase;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class AbstractNestedNodeTest extends TestCase
+class AbstractNestedNodeTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Datetime

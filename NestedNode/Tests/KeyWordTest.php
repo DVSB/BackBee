@@ -32,7 +32,7 @@ use BackBee\Tests\TestCase;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class KeyWordTest extends TestCase
+class KeyWordTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Datetime

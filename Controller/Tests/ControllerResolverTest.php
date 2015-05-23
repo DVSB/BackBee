@@ -25,7 +25,7 @@ namespace BackBee\Controller\Tests;
 
 use Symfony\Component\HttpFoundation\Request;
 use BackBee\Controller\ControllerResolver;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * ControllerResolver Test.
@@ -37,11 +37,11 @@ use BackBee\Tests\TestCase;
  *
  * @coversDefaultClass \BackBee\Controller\ControllerResolver
  */
-class ControllerResolverTest extends TestCase
+class ControllerResolverTest extends BackBeeTestCase
 {
     public function test__construct()
     {
-        $resolver = new ControllerResolver($this->getBBApp());
+        $resolver = new ControllerResolver(self::$app);
 
         $this->assertInstanceOf('BackBee\Controller\ControllerResolver', $resolver);
     }
@@ -52,7 +52,7 @@ class ControllerResolverTest extends TestCase
      */
     public function test_getController()
     {
-        $resolver = new ControllerResolver($this->getBBApp());
+        $resolver = new ControllerResolver(self::$app);
 
         $request = new Request();
         $this->assertFalse($resolver->getController($request));

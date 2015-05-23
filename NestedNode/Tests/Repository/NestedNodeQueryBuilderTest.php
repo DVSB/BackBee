@@ -25,7 +25,7 @@ namespace BackBee\NestedNode\Tests\Repository;
 
 use BackBee\NestedNode\Repository\NestedNodeRepository;
 use BackBee\NestedNode\Tests\Mock\MockNestedNode;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * @category    BackBee
@@ -33,13 +33,8 @@ use BackBee\Tests\TestCase;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class NestedNodeQueryBuilderTest extends TestCase
+class NestedNodeQueryBuilderTest extends BackBeeTestCase
 {
-    /**
-     * @var \BackBee\TestUnit\Mock\MockBBApplication
-     */
-    private $application;
-
     /**
      * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
      */
@@ -48,7 +43,34 @@ class NestedNodeQueryBuilderTest extends TestCase
     /**
      * @var \BackBee\NestedNode\Repository\NestedNodeRepository
      */
-    private $repo;
+    private $repository;
+
+    public function __construct($name = null, array $data = array(), $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+
+        $this->repository = self::$em->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode');
+    }
+
+    /**
+     * Sets up the fixture.
+     */
+    public function setUp()
+    {
+        self::$em->clear();
+
+        self::$kernel->resetDatabase([
+            self::$em->getClassMetaData('BackBee\NestedNode\Tests\Mock\MockNestedNode'),
+        ]);
+
+        $this->root = new MockNestedNode('root');
+        self::$em->persist($this->root);
+        self::$em->flush($this->root);
+
+        $child1 = $this->repository->insertNodeAsLastChildOf(new MockNestedNode('child1'), $this->root);
+        self::$em->persist($child1);
+        self::$em->flush($child1);
+    }
 
     /**
      * @covers \BackBee\NestedNode\Repository\NestedNodeQueryBuilder::andIsNot
@@ -56,7 +78,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsNot()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsNot($this->root);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -69,7 +91,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndRootIs()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andRootIs($this->root);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -82,14 +104,14 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndParentIs()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andParentIs($this->root);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._parent = :parent0', $q->getDql());
         $this->assertEquals($this->root, $q->getParameter('parent0')->getValue());
 
-        $qn = $this->repo->createQueryBuilder('n')
+        $qn = $this->repository->createQueryBuilder('n')
                 ->andParentIs(null);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._parent IS NULL', $qn->getDql());
@@ -100,7 +122,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndLevelEquals()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andLevelEquals(5);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level = :level0', $q->getDql());
@@ -112,14 +134,14 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndLevelIsLowerThan()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andLevelIsLowerThan(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level <= :level0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('level0')->getValue());
 
-        $qs = $this->repo->createQueryBuilder('n')
+        $qs = $this->repository->createQueryBuilder('n')
                 ->andLevelIsLowerThan(5, true);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level <= :level0', $qs->getDql());
@@ -131,14 +153,14 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndLevelIsUpperThan()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andLevelIsUpperThan(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level >= :level0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('level0')->getValue());
 
-        $qs = $this->repo->createQueryBuilder('n')
+        $qs = $this->repository->createQueryBuilder('n')
                 ->andLevelIsUpperThan(5, true);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._level >= :level0', $qs->getDql());
@@ -150,7 +172,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndLeftnodeEquals()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andLeftnodeEquals(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -163,14 +185,14 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndLeftnodeIsLowerThan()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andLeftnodeIsLowerThan(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode <= :leftnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('leftnode0')->getValue());
 
-        $qs = $this->repo->createQueryBuilder('n')
+        $qs = $this->repository->createQueryBuilder('n')
                 ->andLeftnodeIsLowerThan(5, true);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode <= :leftnode0', $qs->getDql());
@@ -182,14 +204,14 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndLeftnodeIsUpperThan()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andLeftnodeIsUpperThan(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode >= :leftnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('leftnode0')->getValue());
 
-        $qs = $this->repo->createQueryBuilder('n')
+        $qs = $this->repository->createQueryBuilder('n')
                 ->andLeftnodeIsUpperThan(5, true);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._leftnode >= :leftnode0', $qs->getDql());
@@ -201,7 +223,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndRightnodeEquals()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andRightnodeEquals(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -214,14 +236,14 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndRightnodeIsLowerThan()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andRightnodeIsLowerThan(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode <= :rightnode0', $q->getDql());
         $this->assertEquals(5, $q->getParameter('rightnode0')->getValue());
 
-        $qs = $this->repo->createQueryBuilder('n')
+        $qs = $this->repository->createQueryBuilder('n')
                 ->andRightnodeIsLowerThan(5, true);
 
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._rightnode <= :rightnode0', $qs->getDql());
@@ -233,7 +255,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndRightnodeIsUpperThan()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andRightnodeIsUpperThan(5);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -253,7 +275,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsSiblingsOf()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsSiblingsOf($this->root);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -274,7 +296,7 @@ class NestedNodeQueryBuilderTest extends TestCase
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._uid = :uid0 AND n._parent IS NULL ORDER BY n._rightnode desc', $q->getDql());
         $this->assertEquals($this->root->getUid(), $q->getParameter('uid0')->getValue());
 
-        $child1 = $this->repo->find('child1');
+        $child1 = $this->repository->find('child1');
         $q->resetDQLPart('where')
                 ->setParameters(array())
                 ->andIsSiblingsOf($child1);
@@ -316,8 +338,8 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsPreviousSiblingOf()
     {
-        $child1 = $this->repo->find('child1');
-        $q = $this->repo->createQueryBuilder('n')
+        $child1 = $this->repository->find('child1');
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsPreviousSiblingOf($child1);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -331,8 +353,8 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsPreviousSiblingsOf()
     {
-        $child1 = $this->repo->find('child1');
-        $q = $this->repo->createQueryBuilder('n')
+        $child1 = $this->repository->find('child1');
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsPreviousSiblingsOf($child1);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -346,8 +368,8 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsNextSiblingOf()
     {
-        $child1 = $this->repo->find('child1');
-        $q = $this->repo->createQueryBuilder('n')
+        $child1 = $this->repository->find('child1');
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsNextSiblingOf($child1);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -361,8 +383,8 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsNextSiblingsOf()
     {
-        $child1 = $this->repo->find('child1');
-        $q = $this->repo->createQueryBuilder('n')
+        $child1 = $this->repository->find('child1');
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsNextSiblingsOf($child1);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -377,8 +399,8 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsAncestorOf()
     {
-        $child1 = $this->repo->find('child1');
-        $q = $this->repo->createQueryBuilder('n')
+        $child1 = $this->repository->find('child1');
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsAncestorOf($child1);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -412,8 +434,8 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testAndIsDescendantOf()
     {
-        $child1 = $this->repo->find('child1');
-        $q = $this->repo->createQueryBuilder('n')
+        $child1 = $this->repository->find('child1');
+        $q = $this->repository->createQueryBuilder('n')
                 ->andIsDescendantOf($child1);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -447,7 +469,7 @@ class NestedNodeQueryBuilderTest extends TestCase
      */
     public function testOrderByMultiple()
     {
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->orderByMultiple();
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n ORDER BY n._leftnode asc', $q->getDql());
 
@@ -465,7 +487,7 @@ class NestedNodeQueryBuilderTest extends TestCase
     {
         $now = new \DateTime();
 
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andModifiedIsLowerThan($now);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
@@ -479,59 +501,10 @@ class NestedNodeQueryBuilderTest extends TestCase
     {
         $now = new \DateTime();
 
-        $q = $this->repo->createQueryBuilder('n')
+        $q = $this->repository->createQueryBuilder('n')
                 ->andModifiedIsGreaterThan($now);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\NestedNodeQueryBuilder', $q);
         $this->assertEquals('SELECT n FROM BackBee\NestedNode\Tests\Mock\MockNestedNode n WHERE n._modified > :date0', $q->getDql());
-    }
-
-    /**
-     * Sets up the fixture.
-     */
-    public function setUp()
-    {
-        $this->application = $this->getBBApp();
-        $em = $this->application->getEntityManager();
-
-        $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Tests\Mock\MockNestedNode')));
-
-        $this->_setRepo()
-                ->_setRoot();
-    }
-
-    /**
-     * Sets the NestedNode Repository.
-     *
-     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
-     */
-    private function _setRepo()
-    {
-        $this->repo = $this->application
-            ->getEntityManager()
-            ->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode')
-        ;
-
-        return $this;
-    }
-
-    /**
-     * Initiate a new tree with node added as last child.
-     *
-     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
-     */
-    private function _setRoot()
-    {
-        $this->root = new MockNestedNode('root');
-
-        $em = $this->application->getEntityManager();
-        $em->persist($this->root);
-        $em->flush($this->root);
-
-        $child1 = $this->repo->insertNodeAsLastChildOf(new MockNestedNode('child1'), $this->root);
-        $em->flush($child1);
-
-        return $this;
     }
 }

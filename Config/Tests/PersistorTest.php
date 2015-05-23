@@ -31,6 +31,7 @@ use BackBee\Config\Tests\Persistor\FakeContainerBuilder;
 use BackBee\DependencyInjection\Container;
 use BackBee\Site\Site;
 use BackBee\Tests\Mock\ManualBBApplication;
+use BackBee\Tests\TestKernel;
 
 /**
  * Set of tests for BackBee\Config\Persistor.
@@ -263,5 +264,10 @@ class PersistorTest extends \PHPUnit_Framework_TestCase
             $this->configurator->getConfigDefaultSections($this->application->getConfig()),
             $updated_override_section
         ), $this->application->getContainer()->getParameter('config_to_persist'));
+    }
+
+    public static function tearDownAfterClass()
+    {
+        TestKernel::getInstance()->getApplication()->resetStructure();
     }
 }

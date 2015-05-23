@@ -27,7 +27,8 @@ use BackBee\Rest\Controller\AclController;
 use BackBee\Rest\Tests\Fixtures\Model\MockUser;
 use BackBee\Security\User;
 use BackBee\Site\Site;
-use BackBee\Tests\TestCase;
+use BackBee\Rest\Tests\Fixtures\Controller\MockAbstractRestImplController;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * Test for AclController class.
@@ -40,26 +41,16 @@ use BackBee\Tests\TestCase;
  * @coversDefaultClass \BackBee\Rest\Controller\AbstractRestController
  * @group Rest
  */
-class AbstractRestControllerTest extends TestCase
+class AbstractRestControllerTest extends BackBeeTestCase
 {
-    protected $user;
-    protected $site;
-    protected $groupEditor;
+    protected $controller;
 
-    protected function setUp()
+    public function __construct($name = null, array $data = array(), $dataName = '')
     {
-        $this->initAutoload();
-        $bbapp = $this->getBBApp();
-        $this->initDb($bbapp);
-        $this->getBBApp()->setIsStarted(true);
-    }
+        parent::__construct($name, $data, $dataName);
 
-    protected function getController()
-    {
-        $controller = new \BackBee\Rest\Tests\Fixtures\Controller\MockAbstractRestImplController();
-        $controller->setContainer($this->getBBApp()->getContainer());
-
-        return $controller;
+        $this->controller = new MockAbstractRestImplController();
+        $this->controller->setContainer(self::$app->getContainer());
     }
 
     /**
@@ -70,7 +61,7 @@ class AbstractRestControllerTest extends TestCase
     {
         $arrayCollection = [new MockUser()];
 
-        $serialized = $this->getController()->formatCollection($arrayCollection, 'json');
+        $serialized = $this->controller->formatCollection($arrayCollection, 'json');
 
         $this->assertEquals([[
             'id' => 1,
@@ -84,14 +75,14 @@ class AbstractRestControllerTest extends TestCase
      */
     public function test_formatItem()
     {
-        $json = $this->getController()->formatItem(new MockUser(), 'json');
+        $json = $this->controller->formatItem(new MockUser(), 'json');
         $this->assertEquals([
             'id' => 1,
             'login' => 'userLogin',
         ], json_decode($json, true));
 
-        $this->getController()->getRequest()->query->set('jsonp.callback', 'JSONP.callback');
-        $jsonp = $this->getController()->formatItem(new MockUser(), 'jsonp');
+        $this->controller->getRequest()->query->set('jsonp.callback', 'JSONP.callback');
+        $jsonp = $this->controller->formatItem(new MockUser(), 'jsonp');
 
         $this->assertEquals('/**/JSONP.callback('.json_encode(['id' => 1, 'login' => 'userLogin']).')', $jsonp);
     }
@@ -103,8 +94,8 @@ class AbstractRestControllerTest extends TestCase
      */
     public function test_formatItem_jsonpXssAttack()
     {
-        $this->getController()->getRequest()->query->set('jsonp.callback', '(function xss(x){evil()})');
-        $this->getController()->formatItem(new MockUser(), 'jsonp');
+        $this->controller->getRequest()->query->set('jsonp.callback', '(function xss(x){evil()})');
+        $this->controller->formatItem(new MockUser(), 'jsonp');
     }
 
     /**
@@ -117,7 +108,7 @@ class AbstractRestControllerTest extends TestCase
 
         $data = ['login' => 'userLoginChanged'];
 
-        $serialized = $this->getController()->deserializeEntity($data, $user);
+        $serialized = $this->controller->deserializeEntity($data, $user);
 
         $this->assertEquals($data['login'], $user->getLogin());
     }
@@ -127,7 +118,7 @@ class AbstractRestControllerTest extends TestCase
      */
     public function test_create404Response()
     {
-        $response = $this->getController()->create404ResponseAction();
+        $response = $this->controller->create404ResponseAction();
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
         $this->assertEquals(404, $response->getStatusCode());
@@ -138,7 +129,7 @@ class AbstractRestControllerTest extends TestCase
      */
     public function test_create404createValidationExceptionAction()
     {
-        $response = $this->getController()->createValidationExceptionAction();
+        $response = $this->controller->createValidationExceptionAction();
         $this->assertInstanceOf('BackBee\Rest\Exception\ValidationException', $response);
     }
 }

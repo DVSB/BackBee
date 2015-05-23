@@ -26,6 +26,7 @@ namespace BackBee\ClassContent\Repository;
 use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
+use BackBee\ClassContent\Revision;
 use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Util\Doctrine\SettablePaginator;
@@ -722,7 +723,7 @@ class ClassContentRepository extends EntityRepository
     public function removeFromPost(AbstractClassContent $content, $value = null, AbstractClassContent $parent = null)
     {
         if (null !== $draft = $content->getDraft()) {
-            $draft->setState(\BackBee\ClassContent\Revision::STATE_TO_DELETE);
+            $draft->setState(Revision::STATE_TO_DELETE);
         }
 
         return $content;

@@ -28,7 +28,7 @@ use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
 use BackBee\Workflow\State;
 
 /**
@@ -37,7 +37,7 @@ use BackBee\Workflow\State;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageTest extends TestCase
+class PageTest extends BackBeeTestCase
 {
     /**
      * @var \Datetime
@@ -346,28 +346,24 @@ class PageTest extends TestCase
 
     public function testHasChildren()
     {
-        $em = $this->getEntityManager();
-        $repository = $em->getRepository('BackBee\NestedNode\Page');
+        $repository = self::$em->getRepository('BackBee\NestedNode\Page');
 
-        $this->initDb($this->getApplication());
+        self::$kernel->resetDatabase();
 
         $site = new Site(null, array('label' => 'Site 1'));
-        $em->persist($site);
-        $em->flush($site);
+        self::$em->persist($site);
+        self::$em->flush($site);
 
-        $layout = new Layout();
-        $layout->setDataObject($this->getDefaultLayoutZones());
-        $layout->setLabel('test has children');
-        $layout->setPath('path');
-        $em->persist($layout);
-        $em->flush($layout);
+        $layout = self::$kernel->createLayout('test_has_children');
+        self::$em->persist($layout);
+        self::$em->flush($layout);
 
         $uid = 'testhaschildrenpage';
         $parent = new Page($uid, array('title' => 'page'));
         $parent->setLayout($layout);
         $parent->setSite($site);
-        $em->persist($parent);
-        $em->flush($parent);
+        self::$em->persist($parent);
+        self::$em->flush($parent);
 
         // Test without children
         $this->assertFalse(false, $parent->hasChildren());
@@ -380,10 +376,10 @@ class PageTest extends TestCase
 
         $repository->insertNodeAsFirstChildOf($child1, $parent);
 
-        $em->persist($child1);
-        $em->flush($child1);
+        self::$em->persist($child1);
+        self::$em->flush($child1);
 
-        $em->clear();
+        self::$em->clear();
 
         $parent = $repository->find($uid);
 
@@ -397,10 +393,10 @@ class PageTest extends TestCase
 
         $repository->insertNodeAsFirstChildOf($child2, $parent);
 
-        $em->persist($child2);
-        $em->flush($child2);
+        self::$em->persist($child2);
+        self::$em->flush($child2);
 
-        $em->clear();
+        self::$em->clear();
 
         $parent = $repository->find($uid);
 
@@ -492,7 +488,7 @@ class PageTest extends TestCase
      */
     public function testSetPublishingOnRootPagesFails()
     {
-        $rootPage = $this->createRootPage();
+        $rootPage = self::$kernel->createRootPage();
         // first publication
         $rootPage->setPublishing(new \DateTime());
         $rootPage->setPublishing(new \DateTime()); // forbidden
@@ -524,7 +520,7 @@ class PageTest extends TestCase
      */
     public function testSetArchivingOnRootPagesFails()
     {
-        $rootPage = $this->createRootPage();
+        $rootPage = self::$kernel->createRootPage();
         $rootPage->setArchiving(new \DateTime());
     }
 
@@ -608,8 +604,7 @@ class PageTest extends TestCase
     public function testGetParentZoneAtSamePositionIfExists()
     {
         $page = new Page('test', array('title' => 'title', 'url' => 'url'));
-        $layout = new Layout();
-        $page->setLayout($layout->setDataObject($this->getDefaultLayoutZones()));
+        $page->setLayout(self::$kernel->createLayout('test'));
 
         $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($page->getContentSet()->first()));
         $this->assertFalse($this->page->getParentZoneAtSamePositionIfExists($page->getContentSet()->last()));
@@ -632,7 +627,7 @@ class PageTest extends TestCase
         $thirdcolumn->defaultClassContent = 'inherited';
         $thirdcolumn->options = null;
 
-        $data = $this->getDefaultLayoutZones();
+        $data = self::$kernel->getDefaultLayoutZones();
         $data->templateLayouts[] = $thirdcolumn;
 
         $layout = new Layout();
@@ -744,19 +739,19 @@ class PageTest extends TestCase
      */
     public function testRootPageCantBeArchived()
     {
-        $rootPage = $this->createPage(true);
+        $rootPage = self::$kernel->createPage();
         $rootPage->setArchiving(new \Datetime());
     }
 
     public function testRootPageCantBePublished()
     {
-        $rootPage = $this->createPage(true);
+        $rootPage = self::$kernel->createPage();
         $rootPage->setPublishing(new \Datetime());
     }
 
     public function testRootPageCantBePutOffline()
     {
-        $rootPage = $this->createPage(true);
+        $rootPage = self::$kernel->createPage();
         $rootPage->setState(Page::STATE_ONLINE);
     }
 
@@ -766,6 +761,6 @@ class PageTest extends TestCase
     public function setUp()
     {
         $this->current_time = new \Datetime();
-        $this->page = $this->createPage();
+        $this->page = self::$kernel->createPage();
     }
 }

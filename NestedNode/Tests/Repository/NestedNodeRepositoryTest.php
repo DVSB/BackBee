@@ -25,7 +25,7 @@ namespace BackBee\NestedNode\Tests\Repository;
 
 use BackBee\NestedNode\Repository\NestedNodeRepository;
 use BackBee\NestedNode\Tests\Mock\MockNestedNode;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * @category    BackBee
@@ -33,12 +33,45 @@ use BackBee\Tests\TestCase;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class NestedNodeRepositoryTest extends TestCase
+class NestedNodeRepositoryTest extends BackBeeTestCase
 {
+    /**
+     * @var \BackBee\NestedNode\Repository\NestedNodeRepository
+     */
+    private $repository;
+
+    public function __construct($name = null, array $data = array(), $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+
+        $this->repository = self::$em->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode');
+    }
+
+    public static function setUpBeforeClass()
+    {
+        self::$kernel->resetDatabase();
+    }
+
+    /**
+     * Sets up the fixture.
+     */
+    public function setUp()
+    {
+        self::$em->clear();
+
+        self::$kernel->resetDatabase([
+            self::$em->getClassMetaData('BackBee\NestedNode\Tests\Mock\MockNestedNode'),
+        ]);
+
+        $this
+            ->setRootAsc()
+            ->setRootDesc()
+        ;
+    }
+
     /**
      * @var \BackBee\Tests\Mock\MockBBApplication
      */
-    private $application;
 
     /**
      * @var \BackBee\NestedNode\Tests\Mock\MockNestedNode
@@ -51,31 +84,26 @@ class NestedNodeRepositoryTest extends TestCase
     private $root_desc;
 
     /**
-     * @var \BackBee\NestedNode\Repository\NestedNodeRepository
-     */
-    private $repo;
-
-    /**
      * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::delete
      * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::shiftRlValues
      */
     public function testDelete()
     {
-        $child = $this->repo->find('a-child1');
+        $child = $this->repository->find('a-child1');
 
-        $this->assertFalse($this->repo->delete($this->root_asc));
-        $this->assertTrue($this->repo->delete($child));
-        $this->application->getEntityManager()->refresh($this->root_asc);
+        $this->assertFalse($this->repository->delete($this->root_asc));
+        $this->assertTrue($this->repository->delete($child));
+        self::$em->refresh($this->root_asc);
 
         $this->assertEquals(1, $this->root_asc->getLeftnode());
         $this->assertEquals(4, $this->root_asc->getRightnode());
         $this->assertEquals(1, $this->root_desc->getLeftnode());
         $this->assertEquals(10, $this->root_desc->getRightnode());
 
-        $this->application->getEntityManager()->clear();
-        $this->assertNull($this->repo->find('a-child1'));
-        $this->assertNull($this->repo->find('a-subchild1'));
-        $this->assertNull($this->repo->find('a-subchild2'));
+        self::$em->clear();
+        $this->assertNull($this->repository->find('a-child1'));
+        $this->assertNull($this->repository->find('a-subchild1'));
+        $this->assertNull($this->repository->find('a-subchild2'));
     }
 
     /**
@@ -83,21 +111,21 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetAncestor()
     {
-        $child = $this->repo->find('a-child1');
-        $subchild = $this->repo->find('a-subchild1');
+        $child = $this->repository->find('a-child1');
+        $subchild = $this->repository->find('a-subchild1');
 
-        $this->assertNull($this->repo->getAncestor($this->root_asc, 1));
-        $this->assertEquals($this->root_asc, $this->repo->getAncestor($this->root_asc));
+        $this->assertNull($this->repository->getAncestor($this->root_asc, 1));
+        $this->assertEquals($this->root_asc, $this->repository->getAncestor($this->root_asc));
 
-        $this->assertEquals($this->root_asc, $this->repo->getAncestor($child));
-        $this->assertEquals($this->root_asc, $this->repo->getAncestor($child, 0));
-        $this->assertEquals($child, $this->repo->getAncestor($child, 1));
-        $this->assertNull($this->repo->getAncestor($child, 2));
+        $this->assertEquals($this->root_asc, $this->repository->getAncestor($child));
+        $this->assertEquals($this->root_asc, $this->repository->getAncestor($child, 0));
+        $this->assertEquals($child, $this->repository->getAncestor($child, 1));
+        $this->assertNull($this->repository->getAncestor($child, 2));
 
-        $this->assertEquals($this->root_asc, $this->repo->getAncestor($subchild));
-        $this->assertEquals($child, $this->repo->getAncestor($subchild, 1));
-        $this->assertEquals($subchild, $this->repo->getAncestor($subchild, 2));
-        $this->assertNull($this->repo->getAncestor($subchild, 3));
+        $this->assertEquals($this->root_asc, $this->repository->getAncestor($subchild));
+        $this->assertEquals($child, $this->repository->getAncestor($subchild, 1));
+        $this->assertEquals($subchild, $this->repository->getAncestor($subchild, 2));
+        $this->assertNull($this->repository->getAncestor($subchild, 3));
     }
 
     /**
@@ -105,22 +133,22 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetAncestors()
     {
-        $child = $this->repo->find('a-child1');
-        $subchild = $this->repo->find('a-subchild1');
+        $child = $this->repository->find('a-child1');
+        $subchild = $this->repository->find('a-subchild1');
 
-        $this->assertEquals(array(), $this->repo->getAncestors($this->root_asc));
-        $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($this->root_asc, null, true));
-        $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($this->root_asc, 0, true));
-        $this->assertEquals(array($this->root_asc), $this->repo->getAncestors($child));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, null, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($child, 1, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild));
-        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, null, true));
-        $this->assertEquals(array($this->root_asc, $child), $this->repo->getAncestors($subchild, 2));
-        $this->assertEquals(array($child), $this->repo->getAncestors($subchild, 1));
-        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repo->getAncestors($subchild, 2, true));
-        $this->assertEquals(array($child), $this->repo->getAncestors($subchild, 1));
-        $this->assertEquals(array($child, $subchild), $this->repo->getAncestors($subchild, 1, true));
+        $this->assertEquals(array(), $this->repository->getAncestors($this->root_asc));
+        $this->assertEquals(array($this->root_asc), $this->repository->getAncestors($this->root_asc, null, true));
+        $this->assertEquals(array($this->root_asc), $this->repository->getAncestors($this->root_asc, 0, true));
+        $this->assertEquals(array($this->root_asc), $this->repository->getAncestors($child));
+        $this->assertEquals(array($this->root_asc, $child), $this->repository->getAncestors($child, null, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repository->getAncestors($child, 1, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repository->getAncestors($subchild));
+        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repository->getAncestors($subchild, null, true));
+        $this->assertEquals(array($this->root_asc, $child), $this->repository->getAncestors($subchild, 2));
+        $this->assertEquals(array($child), $this->repository->getAncestors($subchild, 1));
+        $this->assertEquals(array($this->root_asc, $child, $subchild), $this->repository->getAncestors($subchild, 2, true));
+        $this->assertEquals(array($child), $this->repository->getAncestors($subchild, 1));
+        $this->assertEquals(array($child, $subchild), $this->repository->getAncestors($subchild, 1, true));
     }
 
     /**
@@ -128,16 +156,16 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetDescendants()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild1 = $this->repo->find('a-subchild1');
-        $subchild2 = $this->repo->find('a-subchild2');
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild1 = $this->repository->find('a-subchild1');
+        $subchild2 = $this->repository->find('a-subchild2');
 
-        $this->assertEquals(array($child1, $subchild1, $subchild2, $child2), $this->repo->getDescendants($this->root_asc));
-        $this->assertEquals(array($this->root_asc, $child1, $subchild1, $subchild2, $child2), $this->repo->getDescendants($this->root_asc, null, true));
-        $this->assertEquals(array($this->root_asc, $child1, $child2), $this->repo->getDescendants($this->root_asc, 1, true));
-        $this->assertEquals(array($subchild1, $subchild2), $this->repo->getDescendants($child1));
-        $this->assertEquals(array(), $this->repo->getDescendants($child2));
+        $this->assertEquals(array($child1, $subchild1, $subchild2, $child2), $this->repository->getDescendants($this->root_asc));
+        $this->assertEquals(array($this->root_asc, $child1, $subchild1, $subchild2, $child2), $this->repository->getDescendants($this->root_asc, null, true));
+        $this->assertEquals(array($this->root_asc, $child1, $child2), $this->repository->getDescendants($this->root_asc, 1, true));
+        $this->assertEquals(array($subchild1, $subchild2), $this->repository->getDescendants($child1));
+        $this->assertEquals(array(), $this->repository->getDescendants($child2));
     }
 
     /**
@@ -146,10 +174,10 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testInsertNodeAsFirstChildOf()
     {
-        $child1 = $this->repo->find('d-child1');
-        $child2 = $this->repo->find('d-child2');
-        $subchild1 = $this->repo->find('d-subchild1');
-        $subchild2 = $this->repo->find('d-subchild2');
+        $child1 = $this->repository->find('d-child1');
+        $child2 = $this->repository->find('d-child2');
+        $subchild1 = $this->repository->find('d-subchild1');
+        $subchild2 = $this->repository->find('d-subchild2');
 
         $this->assertEquals(1, $this->root_desc->getLeftnode());
         $this->assertEquals(2, $child2->getLeftnode());
@@ -188,10 +216,10 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function test_insertNodeNotLeaf()
     {
-        $child1 = $this->repo->find('d-child1');
-        $child2 = $this->repo->find('d-child2');
+        $child1 = $this->repository->find('d-child1');
+        $child2 = $this->repository->find('d-child2');
 
-        $this->repo->insertNodeAsFirstChildOf($child1, $child2);
+        $this->repository->insertNodeAsFirstChildOf($child1, $child2);
     }
 
     /**
@@ -200,9 +228,9 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function test_insertNodeSameAsParent()
     {
-        $child1 = $this->repo->find('d-child1');
+        $child1 = $this->repository->find('d-child1');
 
-        $this->repo->insertNodeAsFirstChildOf($child1, $child1);
+        $this->repository->insertNodeAsFirstChildOf($child1, $child1);
     }
 
     /**
@@ -211,10 +239,10 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function test_refreshExistingNode()
     {
-        $child1 = $this->repo->find('d-child1');
+        $child1 = $this->repository->find('d-child1');
         $parent = new MockNestedNode('new-parent');
 
-        $this->repo->insertNodeAsFirstChildOf($child1, $parent);
+        $this->repository->insertNodeAsFirstChildOf($child1, $parent);
     }
 
     /**
@@ -223,10 +251,10 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testInsertNodeAsLastChildOf()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild1 = $this->repo->find('a-subchild1');
-        $subchild2 = $this->repo->find('a-subchild2');
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild1 = $this->repository->find('a-subchild1');
+        $subchild2 = $this->repository->find('a-subchild2');
 
         $this->assertEquals(1, $this->root_asc->getLeftnode());
         $this->assertEquals(2, $child1->getLeftnode());
@@ -264,16 +292,16 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetPrevSibling()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild1 = $this->repo->find('a-subchild1');
-        $subchild2 = $this->repo->find('a-subchild2');
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild1 = $this->repository->find('a-subchild1');
+        $subchild2 = $this->repository->find('a-subchild2');
 
-        $this->assertNull($this->repo->getPrevSibling($this->root_desc));
-        $this->assertNull($this->repo->getPrevSibling($child1));
-        $this->assertNull($this->repo->getPrevSibling($subchild1));
-        $this->assertEquals($subchild1, $this->repo->getPrevSibling($subchild2));
-        $this->assertEquals($child1, $this->repo->getPrevSibling($child2));
+        $this->assertNull($this->repository->getPrevSibling($this->root_desc));
+        $this->assertNull($this->repository->getPrevSibling($child1));
+        $this->assertNull($this->repository->getPrevSibling($subchild1));
+        $this->assertEquals($subchild1, $this->repository->getPrevSibling($subchild2));
+        $this->assertEquals($child1, $this->repository->getPrevSibling($child2));
     }
 
     /**
@@ -281,16 +309,16 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetNextSibling()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild1 = $this->repo->find('a-subchild1');
-        $subchild2 = $this->repo->find('a-subchild2');
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild1 = $this->repository->find('a-subchild1');
+        $subchild2 = $this->repository->find('a-subchild2');
 
-        $this->assertNull($this->repo->getNextSibling($this->root_desc));
-        $this->assertEquals($child2, $this->repo->getNextSibling($child1));
-        $this->assertEquals($subchild2, $this->repo->getNextSibling($subchild1));
-        $this->assertNull($this->repo->getNextSibling($subchild2));
-        $this->assertNull($this->repo->getNextSibling($child2));
+        $this->assertNull($this->repository->getNextSibling($this->root_desc));
+        $this->assertEquals($child2, $this->repository->getNextSibling($child1));
+        $this->assertEquals($subchild2, $this->repository->getNextSibling($subchild1));
+        $this->assertNull($this->repository->getNextSibling($subchild2));
+        $this->assertNull($this->repository->getNextSibling($child2));
     }
 
     /**
@@ -298,23 +326,23 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetSiblings()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild1 = $this->repo->find('a-subchild1');
-        $subchild2 = $this->repo->find('a-subchild2');
-        $subchild3 = $this->repo->insertNodeAsLastChildOf(new MockNestedNode('a-subchild3'), $child1);
-        $this->application->getEntityManager()->flush();
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild1 = $this->repository->find('a-subchild1');
+        $subchild2 = $this->repository->find('a-subchild2');
+        $subchild3 = $this->repository->insertNodeAsLastChildOf(new MockNestedNode('a-subchild3'), $child1);
+        self::$em->flush();
 
-        $this->assertEquals(array(), $this->repo->getSiblings($this->root_asc));
-        $this->assertEquals(array($this->root_asc), $this->repo->getSiblings($this->root_asc, true));
-        $this->assertEquals(array($child2), $this->repo->getSiblings($child1));
-        $this->assertEquals(array($subchild1, $subchild3), $this->repo->getSiblings($subchild2));
-        $this->assertEquals(array($subchild1, $subchild2), $this->repo->getSiblings($subchild3));
-        $this->assertEquals(array($subchild1, $subchild2, $subchild3), $this->repo->getSiblings($subchild1, true));
-        $this->assertEquals(array($subchild3, $subchild2, $subchild1), $this->repo->getSiblings($subchild1, true, array('_leftnode' => 'desc')));
-        $this->assertEquals(array($subchild3, $subchild2), $this->repo->getSiblings($subchild1, true, array('_leftnode' => 'desc'), 2));
-        $this->assertEquals(array($subchild2, $subchild1), $this->repo->getSiblings($subchild1, true, array('_leftnode' => 'desc'), 2, 1));
-        $this->assertEquals(array(), $this->repo->getSiblings($subchild1, true, array('_leftnode' => 'desc'), 2, 3));
+        $this->assertEquals(array(), $this->repository->getSiblings($this->root_asc));
+        $this->assertEquals(array($this->root_asc), $this->repository->getSiblings($this->root_asc, true));
+        $this->assertEquals(array($child2), $this->repository->getSiblings($child1));
+        $this->assertEquals(array($subchild1, $subchild3), $this->repository->getSiblings($subchild2));
+        $this->assertEquals(array($subchild1, $subchild2), $this->repository->getSiblings($subchild3));
+        $this->assertEquals(array($subchild1, $subchild2, $subchild3), $this->repository->getSiblings($subchild1, true));
+        $this->assertEquals(array($subchild3, $subchild2, $subchild1), $this->repository->getSiblings($subchild1, true, array('_leftnode' => 'desc')));
+        $this->assertEquals(array($subchild3, $subchild2), $this->repository->getSiblings($subchild1, true, array('_leftnode' => 'desc'), 2));
+        $this->assertEquals(array($subchild2, $subchild1), $this->repository->getSiblings($subchild1, true, array('_leftnode' => 'desc'), 2, 1));
+        $this->assertEquals(array(), $this->repository->getSiblings($subchild1, true, array('_leftnode' => 'desc'), 2, 3));
     }
 
     /**
@@ -322,13 +350,13 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetFirstChild()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild1 = $this->repo->find('a-subchild1');
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild1 = $this->repository->find('a-subchild1');
 
-        $this->assertEquals($child1, $this->repo->getFirstChild($this->root_asc));
-        $this->assertEquals($subchild1, $this->repo->getFirstChild($child1));
-        $this->assertNull($this->repo->getFirstChild($child2));
+        $this->assertEquals($child1, $this->repository->getFirstChild($this->root_asc));
+        $this->assertEquals($subchild1, $this->repository->getFirstChild($child1));
+        $this->assertNull($this->repository->getFirstChild($child2));
     }
 
     /**
@@ -336,13 +364,13 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testGetLastChild()
     {
-        $child1 = $this->repo->find('a-child1');
-        $child2 = $this->repo->find('a-child2');
-        $subchild2 = $this->repo->find('a-subchild2');
+        $child1 = $this->repository->find('a-child1');
+        $child2 = $this->repository->find('a-child2');
+        $subchild2 = $this->repository->find('a-subchild2');
 
-        $this->assertEquals($child2, $this->repo->getLastChild($this->root_asc));
-        $this->assertEquals($subchild2, $this->repo->getLastChild($child1));
-        $this->assertNull($this->repo->getFirstChild($child2));
+        $this->assertEquals($child2, $this->repository->getLastChild($this->root_asc));
+        $this->assertEquals($subchild2, $this->repository->getLastChild($child1));
+        $this->assertNull($this->repository->getFirstChild($child2));
     }
 
     /**
@@ -350,27 +378,27 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsNextSiblingOf()
     {
-        $source = $this->repo->find('a-child1');
-        $target = $this->repo->find('d-child2');
+        $source = $this->repository->find('a-child1');
+        $target = $this->repository->find('d-child2');
 
-        $this->repo->moveAsNextSiblingOf($source, $target);
-        $this->application->getEntityManager()->flush();
-        $this->application->getEntityManager()->clear();
+        $this->repository->moveAsNextSiblingOf($source, $target);
+        self::$em->flush();
+        self::$em->clear();
 
-        $this->root_asc = $this->repo->find('a-root');
-        $achild2 = $this->repo->find('a-child2');
+        $this->root_asc = $this->repository->find('a-root');
+        $achild2 = $this->repository->find('a-child2');
 
         $this->assertEquals(1, $this->root_asc->getLeftnode());
         $this->assertEquals(2, $achild2->getLeftnode());
         $this->assertEquals(3, $achild2->getRightnode());
         $this->assertEquals(4, $this->root_asc->getRightnode());
 
-        $this->root_desc = $this->repo->find('d-root');
-        $achild1 = $this->repo->find('a-child1');
-        $asubchild1 = $this->repo->find('a-subchild1');
-        $asubchild2 = $this->repo->find('a-subchild2');
-        $dchild1 = $this->repo->find('d-child1');
-        $dchild2 = $this->repo->find('d-child2');
+        $this->root_desc = $this->repository->find('d-root');
+        $achild1 = $this->repository->find('a-child1');
+        $asubchild1 = $this->repository->find('a-subchild1');
+        $asubchild2 = $this->repository->find('a-subchild2');
+        $dchild1 = $this->repository->find('d-child1');
+        $dchild2 = $this->repository->find('d-child2');
 
         $this->assertEquals(1, $this->root_desc->getLeftnode());
         $this->assertEquals(2, $dchild2->getLeftnode());
@@ -394,29 +422,29 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsPrevSiblingOf()
     {
-        $source = $this->repo->find('d-child1');
-        $target = $this->repo->find('a-subchild2');
+        $source = $this->repository->find('d-child1');
+        $target = $this->repository->find('a-subchild2');
 
-        $this->repo->moveAsPrevSiblingOf($source, $target);
-        $this->application->getEntityManager()->flush();
-        $this->application->getEntityManager()->clear();
+        $this->repository->moveAsPrevSiblingOf($source, $target);
+        self::$em->flush();
+        self::$em->clear();
 
-        $this->root_desc = $this->repo->find('d-root');
-        $dchild2 = $this->repo->find('d-child2');
+        $this->root_desc = $this->repository->find('d-root');
+        $dchild2 = $this->repository->find('d-child2');
 
         $this->assertEquals(1, $this->root_desc->getLeftnode());
         $this->assertEquals(2, $dchild2->getLeftnode());
         $this->assertEquals(3, $dchild2->getRightnode());
         $this->assertEquals(4, $this->root_desc->getRightnode());
 
-        $this->root_asc = $this->repo->find('a-root');
-        $dchild1 = $this->repo->find('d-child1');
-        $dsubchild1 = $this->repo->find('d-subchild1');
-        $dsubchild2 = $this->repo->find('d-subchild2');
-        $achild1 = $this->repo->find('a-child1');
-        $asubchild1 = $this->repo->find('a-subchild1');
-        $asubchild2 = $this->repo->find('a-subchild2');
-        $achild2 = $this->repo->find('a-child2');
+        $this->root_asc = $this->repository->find('a-root');
+        $dchild1 = $this->repository->find('d-child1');
+        $dsubchild1 = $this->repository->find('d-subchild1');
+        $dsubchild2 = $this->repository->find('d-subchild2');
+        $achild1 = $this->repository->find('a-child1');
+        $asubchild1 = $this->repository->find('a-subchild1');
+        $asubchild2 = $this->repository->find('a-subchild2');
+        $achild2 = $this->repository->find('a-child2');
 
         $this->assertEquals(1, $this->root_asc->getLeftnode());
         $this->assertEquals(2, $achild1->getLeftnode());
@@ -444,16 +472,16 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsFirstChildOf()
     {
-        $source = $this->repo->find('a-subchild2');
-        $this->repo->moveAsFirstChildOf($source, $this->root_asc);
-        $this->application->getEntityManager()->flush();
-        $this->application->getEntityManager()->clear();
+        $source = $this->repository->find('a-subchild2');
+        $this->repository->moveAsFirstChildOf($source, $this->root_asc);
+        self::$em->flush();
+        self::$em->clear();
 
-        $this->root_asc = $this->repo->find('a-root');
-        $achild1 = $this->repo->find('a-child1');
-        $asubchild1 = $this->repo->find('a-subchild1');
-        $asubchild2 = $this->repo->find('a-subchild2');
-        $achild2 = $this->repo->find('a-child2');
+        $this->root_asc = $this->repository->find('a-root');
+        $achild1 = $this->repository->find('a-child1');
+        $asubchild1 = $this->repository->find('a-subchild1');
+        $asubchild2 = $this->repository->find('a-subchild2');
+        $achild2 = $this->repository->find('a-child2');
 
         $this->assertEquals(1, $this->root_asc->getLeftnode());
         $this->assertEquals(2, $asubchild2->getLeftnode());
@@ -474,17 +502,17 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsLastChildOf()
     {
-        $source = $this->repo->find('d-child2');
-        $target = $this->repo->find('d-child1');
-        $this->repo->moveAsLastChildOf($source, $target);
-        $this->application->getEntityManager()->flush();
-        $this->application->getEntityManager()->clear();
+        $source = $this->repository->find('d-child2');
+        $target = $this->repository->find('d-child1');
+        $this->repository->moveAsLastChildOf($source, $target);
+        self::$em->flush();
+        self::$em->clear();
 
-        $this->root_desc = $this->repo->find('d-root');
-        $dchild1 = $this->repo->find('d-child1');
-        $dsubchild1 = $this->repo->find('d-subchild1');
-        $dsubchild2 = $this->repo->find('d-subchild2');
-        $dchild2 = $this->repo->find('d-child2');
+        $this->root_desc = $this->repository->find('d-root');
+        $dchild1 = $this->repository->find('d-child1');
+        $dsubchild1 = $this->repository->find('d-subchild1');
+        $dsubchild2 = $this->repository->find('d-subchild2');
+        $dchild2 = $this->repository->find('d-child2');
 
         $this->assertEquals(1, $this->root_desc->getLeftnode());
         $this->assertEquals(2, $dchild1->getLeftnode());
@@ -506,9 +534,9 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsNextSiblingOfDescendant()
     {
-        $source = $this->repo->find('a-child1');
-        $target = $this->repo->find('a-subchild1');
-        $this->repo->moveAsNextSiblingOf($source, $target);
+        $source = $this->repository->find('a-child1');
+        $target = $this->repository->find('a-subchild1');
+        $this->repository->moveAsNextSiblingOf($source, $target);
     }
 
     /**
@@ -517,8 +545,8 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsNextSiblingOfIself()
     {
-        $source = $this->repo->find('a-child1');
-        $this->repo->moveAsNextSiblingOf($source, $source);
+        $source = $this->repository->find('a-child1');
+        $this->repository->moveAsNextSiblingOf($source, $source);
     }
 
     /**
@@ -527,43 +555,8 @@ class NestedNodeRepositoryTest extends TestCase
      */
     public function testMoveAsNextSiblingOfRoot()
     {
-        $source = $this->repo->find('a-child1');
-        $this->repo->moveAsNextSiblingOf($source, $this->root_asc);
-    }
-
-    /**
-     * Sets up the fixture.
-     */
-    public function setUp()
-    {
-        $this->application = $this->getBBApp();
-        $em = $this->application->getEntityManager();
-
-        $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Tests\Mock\MockNestedNode')));
-
-        $this->root = new MockNestedNode('root');
-        $em->persist($this->root);
-        $em->flush($this->root);
-
-        $this->_setRepo()
-                ->_setRootAsc()
-                ->_setRootDesc();
-    }
-
-    /**
-     * Sets the NestedNode Repository.
-     *
-     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
-     */
-    private function _setRepo()
-    {
-        $this->repo = $this->application
-            ->getEntityManager()
-            ->getRepository('BackBee\NestedNode\Tests\Mock\MockNestedNode')
-        ;
-
-        return $this;
+        $source = $this->repository->find('a-child1');
+        $this->repository->moveAsNextSiblingOf($source, $this->root_asc);
     }
 
     /**
@@ -571,30 +564,29 @@ class NestedNodeRepositoryTest extends TestCase
      *
      * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
-    private function _setRootAsc()
+    private function setRootAsc()
     {
         $this->root_asc = new MockNestedNode('a-root');
 
-        $em = $this->application->getEntityManager();
-        $em->persist($this->root_asc);
-        $em->flush($this->root_asc);
+        self::$em->persist($this->root_asc);
+        self::$em->flush($this->root_asc);
 
-        $child1 = $this->repo->insertNodeAsLastChildOf(new MockNestedNode('a-child1'), $this->root_asc);
-        $em->flush($child1);
+        $child1 = $this->repository->insertNodeAsLastChildOf(new MockNestedNode('a-child1'), $this->root_asc);
+        self::$em->flush($child1);
 
-        $child2 = $this->repo->insertNodeAsLastChildOf(new MockNestedNode('a-child2'), $this->root_asc);
-        $em->flush($child2);
-        $em->refresh($child1);
+        $child2 = $this->repository->insertNodeAsLastChildOf(new MockNestedNode('a-child2'), $this->root_asc);
+        self::$em->flush($child2);
+        self::$em->refresh($child1);
 
-        $subchild1 = $this->repo->insertNodeAsLastChildOf(new MockNestedNode('a-subchild1'), $child1);
-        $em->flush($subchild1);
+        $subchild1 = $this->repository->insertNodeAsLastChildOf(new MockNestedNode('a-subchild1'), $child1);
+        self::$em->flush($subchild1);
 
-        $this->repo->insertNodeAsLastChildOf(new MockNestedNode('a-subchild2'), $child1);
-        $em->flush();
+        $this->repository->insertNodeAsLastChildOf(new MockNestedNode('a-subchild2'), $child1);
+        self::$em->flush();
 
-        $em->refresh($this->root_asc);
-        $em->refresh($child2);
-        $em->refresh($subchild1);
+        self::$em->refresh($this->root_asc);
+        self::$em->refresh($child2);
+        self::$em->refresh($subchild1);
 
         return $this;
     }
@@ -604,30 +596,29 @@ class NestedNodeRepositoryTest extends TestCase
      *
      * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
      */
-    private function _setRootDesc()
+    private function setRootDesc()
     {
         $this->root_desc = new MockNestedNode('d-root');
 
-        $em = $this->application->getEntityManager();
-        $em->persist($this->root_desc);
-        $em->flush($this->root_desc);
+        self::$em->persist($this->root_desc);
+        self::$em->flush($this->root_desc);
 
-        $child1 = $this->repo->insertNodeAsFirstChildOf(new MockNestedNode('d-child1'), $this->root_desc);
-        $em->flush($child1);
+        $child1 = $this->repository->insertNodeAsFirstChildOf(new MockNestedNode('d-child1'), $this->root_desc);
+        self::$em->flush($child1);
 
-        $child2 = $this->repo->insertNodeAsFirstChildOf(new MockNestedNode('d-child2'), $this->root_desc);
-        $em->flush($child2);
-        $em->refresh($child1);
+        $child2 = $this->repository->insertNodeAsFirstChildOf(new MockNestedNode('d-child2'), $this->root_desc);
+        self::$em->flush($child2);
+        self::$em->refresh($child1);
 
-        $subchild1 = $this->repo->insertNodeAsFirstChildOf(new MockNestedNode('d-subchild1'), $child1);
-        $em->flush($subchild1);
+        $subchild1 = $this->repository->insertNodeAsFirstChildOf(new MockNestedNode('d-subchild1'), $child1);
+        self::$em->flush($subchild1);
 
-        $this->repo->insertNodeAsFirstChildOf(new MockNestedNode('d-subchild2'), $child1);
-        $em->flush();
+        $this->repository->insertNodeAsFirstChildOf(new MockNestedNode('d-subchild2'), $child1);
+        self::$em->flush();
 
-        $em->refresh($this->root_desc);
-        $em->refresh($child2);
-        $em->refresh($subchild1);
+        self::$em->refresh($this->root_desc);
+        self::$em->refresh($child2);
+        self::$em->refresh($subchild1);
 
         return $this;
     }

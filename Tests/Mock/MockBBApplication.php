@@ -58,7 +58,7 @@ class MockBBApplication extends BBApplication
      *
      * @var \org\bovigo\vfs\vfsStreamDirectory
      */
-    private $_mock_basedir;
+    private $mockedStructure;
 
     /**
      * Mock the BBApplication class constructor.
@@ -117,6 +117,14 @@ class MockBBApplication extends BBApplication
         return vfsStream::url('repositorydir/cache');
     }
 
+    public function resetStructure()
+    {
+        if (null !== $this->mockedStructure) {
+            vfsStream::umask(0000);
+            vfsStream::setup('repositorydir', 0777, $this->mockedStructure);
+        }
+    }
+
     /**
      * Initilizes the mock structure.
      *
@@ -125,20 +133,24 @@ class MockBBApplication extends BBApplication
     protected function mockInitStructure(array $mockConfig = null)
     {
         if (null === $mockConfig) {
-            $mockConfig = [
+            $this->mockedStructure = [
                 'ClassContent' => [],
                 'Config' => [
                     'bootstrap.yml' => file_get_contents(__DIR__.'/../Config/bootstrap.yml'),
-                    'bundles.yml' => file_get_contents(__DIR__.'/../Config/bundles.yml'),
-                    'config.yml' => file_get_contents(__DIR__.'/../Config/config.yml'),
-                    'doctrine.yml' => file_get_contents(__DIR__.'/../Config/doctrine.yml'),
-                    'logging.yml' => file_get_contents(__DIR__.'/../Config/logging.yml'),
-                    'security.yml' => file_get_contents(__DIR__.'/../Config/security.yml'),
-                    'services.yml' => file_get_contents(__DIR__.'/../Config/services.yml'),
+                    'bundles.yml'   => file_get_contents(__DIR__.'/../Config/bundles.yml'),
+                    'config.yml'    => file_get_contents(__DIR__.'/../Config/config.yml'),
+                    'doctrine.yml'  => file_get_contents(__DIR__.'/../Config/doctrine.yml'),
+                    'logging.yml'   => file_get_contents(__DIR__.'/../Config/logging.yml'),
+                    'security.yml'  => file_get_contents(__DIR__.'/../Config/security.yml'),
+                    'services.yml'  => file_get_contents(__DIR__.'/../Config/services.yml'),
                 ],
-                'Layouts' => ['default.twig' => '<html></html>'],
+                'Layouts' => [
+                    'default.twig' => '<html></html>',
+                ],
                 'Data' => [
-                    'Media' => ['BackBee.png' => file_get_contents(__DIR__.'/../Fixtures/Resources/BackBee.png')],
+                    'Media' => [
+                        'BackBee.png' => file_get_contents(__DIR__.'/../Fixtures/Resources/BackBee.png'),
+                    ],
                     'Storage' => [],
                     'Tmp' => [],
                 ],
@@ -149,8 +161,7 @@ class MockBBApplication extends BBApplication
             ];
         }
 
-        vfsStream::umask(0000);
-        $this->_mock_basedir = vfsStream::setup('repositorydir', 0777, $mockConfig);
+        $this->resetStructure();
 
         return $this;
     }
