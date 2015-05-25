@@ -67,6 +67,16 @@ class Group implements DomainObjectInterface
     protected $_name;
 
     /**
+     * Group description.
+     *
+     * @var string
+     * @ORM\Column(type="string", name="description", nullable=true)
+     *
+     * @Serializer\Expose
+     */
+    protected $_description;
+
+    /**
      * @var \Doctrine\Common\Collections\ArrayCollection
      *
      * @Serializer\Expose
@@ -154,6 +164,30 @@ class Group implements DomainObjectInterface
     /**
      * @codeCoverageIgnore
      *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->_description;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     *
+     * @param string $description
+     *
+     * @return \BackBee\Security\Group
+     */
+    public function setDescription($description)
+    {
+        $this->_description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     *
      * @return type
      */
     public function getUsers()
@@ -185,6 +219,21 @@ class Group implements DomainObjectInterface
     public function addUser(User $user)
     {
         $this->_users->add($user);
+
+        return $this;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     * Remove an from the group
+     *
+     * @param \BackBee\Security\User $user
+     *
+     * @return \BackBee\Security\Group
+     */
+    public function removeUser(User $user)
+    {
+        $this->_users->removeElement($user);
 
         return $this;
     }

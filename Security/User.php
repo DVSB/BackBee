@@ -45,7 +45,7 @@ use Doctrine\ORM\Mapping as ORM;
 class User implements ApiUserInterface
 {
     const PASSWORD_NOT_PICKED = 0;
-    const PASSWORD_PICKED = 0;
+    const PASSWORD_PICKED = 1;
     /**
      * Unique identifier of the user.
      *
