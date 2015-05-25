@@ -276,8 +276,6 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      * @var \DateTime
      * @ORM\Column(type="datetime", name="publishing", nullable=true)
      *
-     * @Serializer\Expose
-     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_publishing;
 
@@ -287,8 +285,6 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      * @var \DateTime
      * @ORM\Column(type="datetime", name="archiving", nullable=true)
      *
-     * @Serializer\Expose
-     * @Serializer\Type("DateTime<'U'>")
      */
     protected $_archiving;
 
@@ -1547,6 +1543,26 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
     public function getCreatedTimestamp()
     {
         return $this->_created ? $this->_created->format('U') : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("integer")
+     * @Serializer\SerializedName("publishing")
+     */
+    public function getPublishingDate()
+    {
+        return $this->_publishing ? $this->_publishing->format('U') : null;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("integer")
+     * @Serializer\SerializedName("archiving")
+     */
+    public function getArchivingDate()
+    {
+        return $this->_archiving ? $this->_archiving->format('U') : null;
     }
 
     /**
