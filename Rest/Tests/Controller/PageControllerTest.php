@@ -77,6 +77,40 @@ class PageControllerTest extends RestTestCase
         return $controller;
     }
 
+    public function testGetAction()
+    {
+        // create pages
+        $now = new \DateTime();
+
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Home Page')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+            ->setPublishing($now)
+        ;
+
+
+        $this->em->persist($homePage);
+
+        $this->em->flush();
+
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            MaskBuilder::MASK_VIEW
+        );
+
+        // no filters - should return current site root page
+        $response = $this->sendRequest(self::requestGet('/rest/1/page/'. $homePage->getUid()));
+        $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
+        $pageProperties = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $pageProperties);
+        $this->assertCount(24, $pageProperties);
+        $this->assertEquals($homePage->getUid(), $pageProperties['uid']);
+        $this->assertEquals($now->getTimestamp(), $pageProperties['publishing']);
+    }
+
     /**
      * @covers ::postAction
      */
