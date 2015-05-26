@@ -143,7 +143,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function addRendererAdapter(RendererAdapterInterface $rendererAdapter)
     {
         $key = $this->getRendererAdapterKey($rendererAdapter);
-        if (false === $this->renderer_adapters->has($key)) {
+        if (!$this->renderer_adapters->has($key)) {
             $this->renderer_adapters->set($key, $rendererAdapter);
             $this->addManagedExtensions($rendererAdapter);
         }
@@ -178,7 +178,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function defaultAdapter($adapterKey)
     {
         $exists = false;
-        if (true === in_array($adapterKey, $this->renderer_adapters->keys())) {
+        if (in_array($adapterKey, $this->renderer_adapters->keys())) {
             $this->default_adapter = $adapterKey;
             $exists = true;
         }
@@ -228,12 +228,16 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         }
 
         $application = $this->getApplication();
-        if (false === $obj->isRenderable() && null === $application->getBBUserToken()) {
+        if (!$obj->isRenderable() && null === $application->getBBUserToken()) {
             return;
         }
 
         $application->debug(sprintf(
-            'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).', get_class($obj), $obj->getUid(), $mode, $ignoreModeIfNotSet
+            'Starting to render `%s(%s)` with mode `%s` (ignore if not available: %d).',
+            get_class($obj),
+            $obj->getUid(),
+            $mode,
+            $ignoreModeIfNotSet
         ));
 
         $parent = $this->getObject();
@@ -244,14 +248,15 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
 
         $this->setRenderParams($renderer, $params);
 
-        $renderer->setObject($obj)
+        $renderer
+            ->setObject($obj)
             ->setMode($mode, $ignoreModeIfNotSet)
             ->triggerEvent('prerender')
         ;
 
         if (null === $renderer->__render) {
             // Rendering a page with layout
-            if (true === ($obj instanceof Page)) {
+            if ($obj instanceof Page) {
                 $renderer->setCurrentPage($obj);
                 $renderer->__render = $renderer->renderPage($template, $params);
                 $renderer->insertExternalResources();
@@ -275,13 +280,13 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function tryResolveParentObject(AbstractClassContent $parent, AbstractClassContent $element)
     {
         foreach ($parent->getData() as $key => $values) {
-            if (false === is_array($values)) {
+            if (!is_array($values)) {
                 $values = array($values);
             }
 
             foreach ($values as $value) {
                 if ($value instanceof AbstractClassContent) {
-                    if (false === $value->isLoaded()) {
+                    if (!$value->isLoaded()) {
                         // try to load subcontent
                         if (null !== $subcontent = $this->getApplication()
                                 ->getEntityManager()
@@ -291,7 +296,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
                         }
                     }
 
-                    if (true === $element->equals($value)) {
+                    if ($element->equals($value)) {
                         $this->__currentelement = $key;
                         $this->__object = $parent;
                         $this->_parentuid = $parent->getUid();
@@ -318,7 +323,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     {
         $this->template_file = $template;
         File::resolveFilepath($this->template_file, null, array('include_path' => $this->_scriptdir));
-        if (false === is_file($this->template_file) || false === is_readable($this->template_file)) {
+        if (!is_file($this->template_file) || !is_readable($this->template_file)) {
             throw new RendererException(sprintf(
                 'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
             ), RendererException::SCRIPTFILE_ERROR);
@@ -349,7 +354,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             }
         }
 
-        if (false === $found) {
+        if (!$found) {
             foreach ($this->manageable_ext->keys() as $ext) {
                 $this->template_file = 'error'.DIRECTORY_SEPARATOR.'default'.$ext;
                 if (true === $this->isValidTemplateFile($this->template_file)) {
@@ -359,7 +364,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             }
         }
 
-        if (false === $found) {
+        if (!$found) {
             return false;
         }
 
@@ -423,20 +428,20 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     }
 
     /**
-     * Compute route which matched with route_name and replace every token by its values specified in route_params;
+     * Compute route which matched with routeName and replace every token by its values specified in routeParams;
      * You can also give base url (by default current site base url will be used).
      *
-     * @param string      $route_name
-     * @param array|null  $route_params
-     * @param string|null $base_url
-     * @param boolean     $add_ext
+     * @param string      $routeName
+     * @param array|null  $routeParams
+     * @param string|null $baseUrl
+     * @param boolean     $addExt
      * @param  \BackBee\Site\Site
      *
      * @return string
      */
-    public function generateUrlByRouteName($route_name, array $route_params = null, $base_url = null, $add_ext = true, Site $site = null, $build_query = false)
+    public function generateUrlByRouteName($routeName, array $routeParams = null, $baseUrl = null, $addExt = true, Site $site = null, $buildQuery = false)
     {
-        return $this->application->getRouting()->getUrlByRouteName($route_name, $route_params, $base_url, $add_ext, $site, $build_query);
+        return $this->application->getRouting()->getUrlByRouteName($routeName, $routeParams, $baseUrl, $addExt, $site, $buildQuery);
     }
 
     /**
@@ -480,7 +485,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         $layoutFile = parent::updateLayout($layout);
         $adapter = $this->determineWhichAdapterToUse($layoutFile);
 
-        if (false === is_array($this->_layoutdir) || 0 === count($this->_layoutdir)) {
+        if (!is_array($this->_layoutdir) || 0 === count($this->_layoutdir)) {
             throw new RendererException('None layout directory defined', RendererException::SCRIPTFILE_ERROR);
         }
 
@@ -677,7 +682,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $header_render .= $this->generateJavascriptTag($src);
         }
 
-        if (false === empty($header_render)) {
+        if (!empty($header_render)) {
             $this->setRender(str_replace('</head>', "$header_render</head>", $this->getRender()));
         }
 
@@ -687,7 +692,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $footer_render .= $this->generateJavascriptTag($src);
         }
 
-        if (false === empty($footer_render)) {
+        if (!empty($footer_render)) {
             $this->setRender(str_replace('</body>', "$footer_render</body>", $this->getRender()));
         }
 
@@ -765,7 +770,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     private function getRightAdapter(array $adapters)
     {
         $adapter = null;
-        if (1 < count($adapters) && true === in_array($this->default_adapter, $adapters)) {
+        if (1 < count($adapters) && in_array($this->default_adapter, $adapters)) {
             $adapter = $this->default_adapter;
         } else {
             $adapter = reset($adapters);
@@ -781,7 +786,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     private function determineWhichAdapterToUse($filename = null)
     {
-        if (null === $filename || false === is_string($filename)) {
+        if (null === $filename || !is_string($filename)) {
             return;
         }
 
@@ -792,7 +797,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
 
         $ext = '.'.$pieces[count($pieces) - 1];
         $adaptersForExt = $this->manageable_ext->get($ext);
-        if (false === is_array($adaptersForExt) || 0 === count($adaptersForExt)) {
+        if (!is_array($adaptersForExt) || 0 === count($adaptersForExt)) {
             return;
         }
 
@@ -828,9 +833,9 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $zoneIndex = 0;
 
             foreach ($contentSet->getData() as $content) {
-                if (true === array_key_exists($zoneIndex, $zones)) {
+                if (array_key_exists($zoneIndex, $zones)) {
                     $zone = $zones[$zoneIndex];
-                    $isMain = null !== $zone && true === property_exists($zone, 'mainZone') && true === $zone->mainZone;
+                    $isMain = null !== $zone && property_exists($zone, 'mainZone') && true === $zone->mainZone;
                     $this->container()->add($this->render($content, $this->getMode(), array(
                         'class' => 'rootContentSet',
                         'isRoot' => true,
@@ -844,10 +849,10 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         // Check for a valid layout file
         $this->template_file = $layoutFile;
         if (null === $this->template_file) {
-            $this->template_file = $this->getLayoutFile($this->layout());
+            $this->template_file = $this->getLayoutFile($this->getCurrentPage()->getLayout());
         }
 
-        if (false === $this->isValidTemplateFile($this->template_file, true)) {
+        if (!$this->isValidTemplateFile($this->template_file, true)) {
             throw new RendererException(
                 sprintf('Unable to read layout %s.', $this->template_file), RendererException::LAYOUT_ERROR
             );
@@ -893,12 +898,12 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $render = '';
 
             // Unknown template, try to render subcontent
-            if (null !== $this->_object && true === is_array($this->_object->getData())) {
+            if (null !== $this->_object && is_array($this->_object->getData())) {
                 foreach ($this->_object->getData() as $subcontents) {
                     $subcontents = (array) $subcontents;
 
                     foreach ($subcontents as $sc) {
-                        if (true === is_a($sc, 'BackBee\Renderer\RenderableInterface')) {
+                        if ($sc instanceof RenderableInterface) {
                             $scRender = $this->render(
                                 $sc, $this->getMode(), $params, $template, $this->_ignoreIfRenderModeNotAvailable
                             );
@@ -921,7 +926,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         if (null !== $this->_object) {
             $draft = $this->_object->getDraft();
             $aClassContentClassname = 'BackBee\ClassContent\AbstractClassContent';
-            if (true === is_a($this->_object, $aClassContentClassname) && false === $this->_object->isLoaded()) {
+            if ($this->_object instanceof $aClassContentClassname && !$this->_object->isLoaded()) {
                 // trying to refresh unloaded content
                 $em = $application->getEntityManager();
 
@@ -943,7 +948,11 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         }
 
         if (null !== $application) {
-            $application->debug(sprintf('Rendering content `%s(%s)`.', get_class($this->_object), $this->_object->getUid()));
+            $application->debug(sprintf(
+                'Rendering content `%s(%s)`.',
+                get_class($this->_object),
+                $this->_object->getUid()
+            ));
         }
 
         return $this->renderTemplate();
@@ -980,7 +989,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         $template = $this->getTemplatePath($object);
         foreach ($this->manageable_ext->keys() as $ext) {
             $this->template_file = $template.(null !== $mode ? '.'.$mode : '').$ext;
-            if (true === $this->isValidTemplateFile($this->template_file)) {
+            if ($this->isValidTemplateFile($this->template_file)) {
                 $filename = $this->template_file;
                 $this->template_file = $tmpStorage;
 
@@ -1041,6 +1050,26 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $this->triggerEvent();
         }
 
-        return $adapter->renderTemplate($this->template_file, $dirs, $this->getParam(), $this->getAssignedVars());
+        return $adapter->renderTemplate(
+            $this->template_file,
+            $dirs,
+            array_merge($this->getParam(), $this->getDefaultParams()),
+            $this->getAssignedVars()
+        );
+    }
+
+    /**
+     * Returns default parameters that are availables in every templates.
+     *
+     * @return array
+     */
+    private function getDefaultParams()
+    {
+        return [
+            'app'     => $this->getApplication(),
+            'bbtoken' => $this->getApplication()->getBBUserToken(),
+            'request' => $this->getApplication()->getContainer()->get('request'),
+            'routing' => $this->getApplication()->getContainer()->get('routing'),
+        ];
     }
 }

@@ -340,12 +340,12 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      *
      * @var array
      */
-    public static $STATES = array(
+    public static $STATES = [
         'Offline' => self::STATE_OFFLINE,
-        'Online' => self::STATE_ONLINE,
-        'Hidden' => self::STATE_HIDDEN,
+        'Online'  => self::STATE_ONLINE,
+        'Hidden'  => self::STATE_HIDDEN,
         'Deleted' => self::STATE_DELETED,
-    );
+    ];
 
     /**
      * Utility property used on cloning page.
@@ -366,7 +366,15 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      *
      * @var array
      */
-    protected $_unserialized_ignored = array('_created', '_modified', '_date', '_publishing', '_archiving', '_metadata', '_workflow_state');
+    protected $_unserialized_ignored = [
+        '_created',
+        '_modified',
+        '_date',
+        '_publishing',
+        '_archiving',
+        '_metadata',
+        '_workflow_state'
+    ];
 
     /**
      * Class constructor.
@@ -820,7 +828,10 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
                 $contentset = $this->getInheritedContent($i, $contentset);
             } elseif ($zone->defaultClassContent) {
                 // New default content push
-                $contentset->push($this->createNewDefaultContent('BackBee\ClassContent\\'.$zone->defaultClassContent, $zone->mainZone));
+                $contentset->push($this->createNewDefaultContent(
+                    'BackBee\ClassContent\\'.$zone->defaultClassContent,
+                    $zone->mainZone
+                ));
             }
 
             $this->getContentSet()->push($contentset);
@@ -1202,8 +1213,8 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function replaceRootContentSet(ContentSet $contentToReplace, ContentSet $newContentSet, $checkContentsLinkToParent = true)
     {
-        $checkContentsLinkToParent = (true === is_bool($checkContentsLinkToParent)) ? $checkContentsLinkToParent : false;
-        $contentIsLinked = (true === $checkContentsLinkToParent) ? $this->isLinkedToHisParentBy($contentToReplace) : true;
+        $checkContentsLinkToParent = is_bool($checkContentsLinkToParent) ? $checkContentsLinkToParent : false;
+        $contentIsLinked = true === $checkContentsLinkToParent ? $this->isLinkedToHisParentBy($contentToReplace) : true;
 
         if (true === $contentIsLinked) {
             if (null !== $this->getContentSet()) {
@@ -1323,7 +1334,17 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function getTemplateName()
     {
-        return str_replace(array("BackBee".NAMESPACE_SEPARATOR."NestedNode".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR), array("", DIRECTORY_SEPARATOR), get_class($this));
+        return str_replace(
+            [
+                'BackBee'.NAMESPACE_SEPARATOR.'NestedNode'.NAMESPACE_SEPARATOR,
+                NAMESPACE_SEPARATOR
+            ],
+            [
+                '',
+                DIRECTORY_SEPARATOR
+            ],
+            get_class($this)
+        );
     }
 
     /**
@@ -1332,7 +1353,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function getLayoutUid()
     {
-        return null !== $this->getlayout() ? $this->getlayout()->getUid() : '';
+        return null !== $this->getLayout() ? $this->getLayout()->getUid() : '';
     }
 
     /**
@@ -1341,7 +1362,7 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      */
     public function getLayoutLabel()
     {
-        return null !== $this->getlayout() ? $this->getlayout()->getLabel() : '';
+        return null !== $this->getLayout() ? $this->getLayout()->getLabel() : '';
     }
 
     /**
