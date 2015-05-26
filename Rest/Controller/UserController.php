@@ -372,9 +372,15 @@ class UserController extends AbstractRestController
         $operations = $this->flattenPatchRequest($operations);
 
         foreach ($operations['groups'] as $key => $value) {
-            if ($value == 'added') {
+            if ($value == 'added' || $value == 'removed') {
                 $group = $this->getEntityManager()->find('BackBee\Security\Group', $key);
-                $group->addUser($user);
+
+                if ($value == 'added') {
+                    $group->addUser($user);
+                } else if ($value == 'removed') {
+                    $group->removeUser($user);
+                }
+
                 $this->getEntityManager()->persist($group);
                 $this->getEntityManager()->flush($group);
             }
