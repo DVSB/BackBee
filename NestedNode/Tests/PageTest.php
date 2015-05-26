@@ -344,6 +344,71 @@ class PageTest extends TestCase
         $this->assertEquals($column, $child->getContentSet()->last()->first());
     }
 
+    public function testHasChildren()
+    {
+        $em = $this->getEntityManager();
+        $repository = $em->getRepository('BackBee\NestedNode\Page');
+
+        $this->initDb($this->getApplication());
+
+        $site = new Site(null, array('label' => 'Site 1'));
+        $em->persist($site);
+        $em->flush($site);
+
+        $layout = new Layout();
+        $layout->setDataObject($this->getDefaultLayoutZones());
+        $layout->setLabel('test has children');
+        $layout->setPath('path');
+        $em->persist($layout);
+        $em->flush($layout);
+
+        $uid = 'testhaschildrenpage';
+        $parent = new Page($uid, array('title' => 'page'));
+        $parent->setLayout($layout);
+        $parent->setSite($site);
+        $em->persist($parent);
+        $em->flush($parent);
+
+        // Test without children
+        $this->assertFalse(false, $parent->hasChildren());
+        $this->assertFalse(false, $parent->hasChildren(false));
+
+        $child1 = new Page(null, array('title' => 'title 1'));
+        $child1->setLayout($layout);
+        $child1->setParent($parent);
+        $child1->setState(Page::STATE_DELETED);
+
+        $repository->insertNodeAsFirstChildOf($child1, $parent);
+
+        $em->persist($child1);
+        $em->flush($child1);
+
+        $em->clear();
+
+        $parent = $repository->find($uid);
+
+        // Test with a non deleted page
+        $this->assertFalse($parent->hasChildren());
+        $this->assertTrue($parent->hasChildren(false));
+
+        $child2 = new Page(null, array('title' => 'title 2'));
+        $child2->setLayout($parent->getLayout());
+        $child2->setParent($parent);
+
+        $repository->insertNodeAsFirstChildOf($child2, $parent);
+
+        $em->persist($child2);
+        $em->flush($child2);
+
+        $em->clear();
+
+        $parent = $repository->find($uid);
+
+        // Test with a deleted page and a non deleted page
+        $this->assertTrue($parent->hasChildren());
+        $this->assertTrue($parent->hasChildren(false));
+    }
+
     /**
      * @covers BackBee\NestedNode\Page::setAltTitle
      */

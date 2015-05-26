@@ -1530,8 +1530,18 @@ class Page extends AbstractNestedNode implements RenderableInterface, DomainObje
      * @Serializer\VirtualProperty
      * @Serializer\Type("boolean")
      */
-    public function hasChildren()
+    public function hasChildren($ignoreDeleted = true)
     {
+        if ($ignoreDeleted) {
+            foreach ($this->getChildren() as $child) {
+                if (!($child->getState() & self::STATE_DELETED)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return parent::hasChildren();
     }
 
