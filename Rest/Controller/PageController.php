@@ -354,6 +354,10 @@ class PageController extends AbstractRestController
         }
 
         $entity_patcher = new EntityPatcher(new RightManager($this->getSerializer()->getMetadataFactory()));
+        $entity_patcher->getRightManager()->addAuthorizationMapping($page, array(
+            'publishing' => array('replace'),
+            'archiving' => array('replace')
+        ));
 
         $this->patchStateOperation($page, $operations);
         $this->patchSiblingAndParentOperation($page, $operations);
