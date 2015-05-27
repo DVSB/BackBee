@@ -25,9 +25,8 @@ namespace BackBee\Security;
 
 use BackBee\Installer\Annotation as BB;
 use Doctrine\Common\Collections\ArrayCollection;
-use JMS\Serializer\Annotation as Serializer;
-
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * User object in BackBee5.
@@ -40,10 +39,12 @@ use Doctrine\ORM\Mapping as ORM;
  * @Serializer\ExclusionPolicy("all")
  * @ORM\Entity(repositoryClass="BackBee\Security\Repository\UserRepository")
  * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="UNI_LOGIN",columns={"login"})})
+ * @ORM\HasLifecycleCallbacks
  * @BB\Fixtures(qty=20)
  */
 class User implements ApiUserInterface
 {
+
     const PASSWORD_NOT_PICKED = 0;
     const PASSWORD_PICKED = 1;
     /**
@@ -241,11 +242,10 @@ class User implements ApiUserInterface
      * Stringify the user object.
      *
      * @return string
-     * @codeCoverageIgnore
      */
     public function __toString()
     {
-        return trim($this->_firstname.' '.$this->_lastname.' ('.$this->_login.')');
+        return trim($this->_firstname . ' ' . $this->_lastname . ' (' . $this->_login . ')');
     }
 
     /**
@@ -257,7 +257,7 @@ class User implements ApiUserInterface
     {
         $serialized = new \stdClass();
         $serialized->username = $this->_login;
-        $serialized->commonname = trim($this->_firstname.' '.$this->_lastname);
+        $serialized->commonname = trim($this->_firstname . ' ' . $this->_lastname);
 
         return json_encode($serialized);
     }
@@ -464,6 +464,7 @@ class User implements ApiUserInterface
 
     /**
      * @return array()
+     * @codeCoverageIgnore
      */
     public function getRoles()
     {
@@ -490,6 +491,7 @@ class User implements ApiUserInterface
     /**
      * Is the user activated?
      * @return boolean
+     * @codeCoverageIgnore
      */
     public function isActivated()
     {
@@ -501,6 +503,7 @@ class User implements ApiUserInterface
      */
     public function eraseCredentials()
     {
+        
     }
 
     /**
@@ -560,13 +563,12 @@ class User implements ApiUserInterface
      * @param bool $api_key_enabled
      *
      * @return \BackBee\Security\User
-     * @codeCoverageIgnore
      */
     public function setApiKeyEnabled($api_key_enabled)
     {
         $this->_api_key_enabled = (bool) $api_key_enabled;
 
-        return $this;
+        return $this->generateKeysOnNeed();
     }
 
     /**
@@ -581,7 +583,7 @@ class User implements ApiUserInterface
 
     /**
      *
-     * @param  bool $api_key_enabled
+     * @param  bool $state
      * @return \BackBee\Security\User
      * @codeCoverageIgnore
      */
@@ -598,6 +600,10 @@ class User implements ApiUserInterface
      */
     private function generateApiPublicKey()
     {
+        if (null === $this->_api_key_private) {
+            return $this->generateRandomApiKey()->getApiKeyPublic();
+        }
+
         return sha1($this->_created->format(\DateTime::ATOM) . $this->_api_key_private);
     }
 
@@ -623,4 +629,57 @@ class User implements ApiUserInterface
     {
         return ($public_key === $this->generateApiPublicKey());
     }
+
+    /**
+     * Generate API keys on apiKeyEnabled change
+     * @return \BackBee\Security\User
+     */
+    protected function generateKeysOnNeed()
+    {
+        if ($this->getApiKeyEnabled() && null === $this->getApiKeyPrivate()) {
+            $this->generateRandomApiKey();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return the creation date of this user
+     * @return \DateTime
+     * @codeCoverageIgnore
+     */
+    public function getCreated()
+    {
+        return $this->_created;
+    }
+
+    /**
+     * Return the last modification date of this user
+     * @return \DateTime
+     * @codeCoverageIgnore
+     */
+    public function getModified()
+    {
+        return $this->_modified;
+    }
+
+    /**
+     * Call after the user has been deserialized
+     * @Serializer\PostDeserialize
+     * @codeCoverageIgnore
+     */
+    protected function postDeserialize()
+    {
+        $this->generateKeysOnNeed();
+    }
+
+    /**
+     * Update last modification date on pre-update
+     * @ORM\PreUpdate
+     */
+    public function updateModified()
+    {
+        $this->_modified = new \DateTime();
+    }
+
 }
