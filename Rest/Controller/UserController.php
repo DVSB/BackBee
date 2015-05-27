@@ -272,6 +272,7 @@ class UserController extends AbstractRestController
             ], 400);
         }
 
+        $user->setRawPassword($password);
         $encoderFactory = $this->getContainer()->get('security.context')->getEncoderFactory();
 
         if ($encoderFactory && $encoder = $encoderFactory->getEncoder($user)) {
@@ -286,7 +287,6 @@ class UserController extends AbstractRestController
 
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
-
 
         $event = new Event($user);
         $this->getApplication()->getEventDispatcher()->dispatch('rest.user.creation', $event);
