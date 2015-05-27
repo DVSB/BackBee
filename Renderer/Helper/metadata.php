@@ -63,8 +63,7 @@ class metadata extends AbstractHelper
                 foreach ($meta as $attribute => $value) {
                     if (false !== strpos($meta->getName(), 'keyword') && 'content' === $attribute) {
                         $keywords = explode(',', $value);
-                        $objects = $this->getRenderer()->getKeywordObjects($keywords);
-                        foreach ($objects as $object) {
+                        foreach ($this->getKeywordObjects($keywords) as $object) {
                             $value = trim(str_replace($object->getUid(), $object->getKeyWord(), $value), ',');
                         }
                     }
@@ -76,5 +75,23 @@ class metadata extends AbstractHelper
         }
 
         return $result;
+    }
+
+    /**
+     * Returns KeyWord entities with provided array.
+     *
+     * @param  array  $keywords
+     * @return array
+     */
+    private function getKeywordObjects(array $keywords)
+    {
+        $keywords = (array) $keywords;
+
+        return $this->getRenderer()
+            ->getApplication()
+            ->getEntityManager()
+            ->getRepository('BackBee\NestedNode\KeyWord')
+            ->getKeywordsFromElements($keywords)
+        ;
     }
 }

@@ -1053,8 +1053,8 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         return $adapter->renderTemplate(
             $this->template_file,
             $dirs,
-            array_merge($this->getParam(), $this->getDefaultParams()),
-            $this->getAssignedVars()
+            $this->getParam(),
+            array_merge($this->getAssignedVars(), $this->getBBVariable())
         );
     }
 
@@ -1063,13 +1063,15 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      *
      * @return array
      */
-    private function getDefaultParams()
+    private function getBBVariable()
     {
         return [
-            'app'     => $this->getApplication(),
-            'bbtoken' => $this->getApplication()->getBBUserToken(),
-            'request' => $this->getApplication()->getContainer()->get('request'),
-            'routing' => $this->getApplication()->getContainer()->get('routing'),
+            'bb' => [
+                'debug' => $this->getApplication()->isDebugMode(),
+                'token' => $this->getApplication()->getBBUserToken(),
+                'request' => $this->getApplication()->getRequest(),
+                'routing' => $this->getApplication()->getRouting(),
+            ],
         ];
     }
 }
