@@ -59,13 +59,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->root_folder = self::getRootFolder();
         $this->BackBee_folder = $this->root_folder.DIRECTORY_SEPARATOR.'BackBee';
         $this->repository_folder = $this->root_folder.DIRECTORY_SEPARATOR.'repository';
-
-        $BackBee_autoloader = new AutoLoader();
-
-        $BackBee_autoloader->setApplication($this->getBBApp())
-            ->register()
-            ->registerNamespace('BackBee\ClassContent\Element', __DIR__.'/../ClassContent/Element')
-        ;
     }
 
     public function getClassContentDir()

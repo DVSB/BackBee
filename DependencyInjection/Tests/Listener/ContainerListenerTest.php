@@ -23,11 +23,13 @@
 
 namespace BackBee\DependencyInjection\Tests\Listener;
 
-use org\bovigo\vfs\vfsStream;
 use BackBee\DependencyInjection\ContainerBuilder;
 use BackBee\DependencyInjection\Listener\ContainerListener;
 use BackBee\Event\Event;
 use BackBee\Tests\Mock\ManualBBApplication;
+use BackBee\Tests\TestKernel;
+
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Set of tests for BackBee\DependencyInjection\Listener\ContainerListener.
@@ -210,5 +212,10 @@ class ContainerListenerTest extends \PHPUnit_Framework_TestCase
         $application->setBase_Dir($base_directory);
 
         return $application;
+    }
+
+    public static function tearDownAfterClass()
+    {
+        TestKernel::getInstance()->getApplication()->resetStructure();
     }
 }

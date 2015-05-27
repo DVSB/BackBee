@@ -100,7 +100,12 @@ class RightManager
      */
     public function addAuthorizationMapping($entity, $mapping)
     {
-        $this->rights[get_class($entity)] = $mapping;
+        $classname = get_class($entity);
+        if (!isset($this->rights[$classname])) {
+            $this->buildRights($classname);
+        }
+
+        $this->rights[$classname] = array_merge($this->rights[$classname], $mapping);
 
         return $this;
     }

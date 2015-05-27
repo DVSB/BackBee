@@ -2,5 +2,8 @@
 
 require(__DIR__.'/../vendor/autoload.php');
 
-$unitTests = new BackBee\Tests\TestCase();
-$unitTests->initAutoload();
+$kernel = BackBee\Tests\TestKernel::getInstance();
+
+BackBee\Tests\BackBeeTestCase::$kernel = $kernel;
+BackBee\Tests\BackBeeTestCase::$app = $kernel->getApplication();
+BackBee\Tests\BackBeeTestCase::$em = $kernel->getApplication()->getEntityManager();

@@ -3,8 +3,9 @@
 namespace BackBee\NestedNode\Tests;
 
 use BackBee\NestedNode\Page;
+use BackBee\Site\Layout;
 use BackBee\Site\Site;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * This class tests these classes to validate the page's url rewrite process:
@@ -14,36 +15,47 @@ use BackBee\Tests\TestCase;
  *
  * @author Eric Chau <eric.chau@lp-digital.fr>
  */
-class PageUrlRewritingTest extends TestCase
+class PageUrlRewritingTest extends BackBeeTestCase
 {
-    private $app;
-    private $em;
+    private $urlGenerator;
     private $root;
 
-    public function setUp()
+    public function __construct($name = null, array $data = array(), $dataName = '')
     {
-        $this->app = $this->getApplication();
-        $this->em = $this->app->getEntityManager();
+        parent::__construct($name, $data, $dataName);
 
-        $this->initDb($this->app);
+        $this->urlGenerator = self::$app->getContainer()->get('rewriting.urlgenerator');
+    }
+
+    public static function setUpBeforeClass()
+    {
+        self::$kernel->resetDatabase();
 
         $site = new Site();
         $site->setLabel('foobar');
-        $this->em->persist($site);
-        $this->em->flush($site);
+        self::$em->persist($site);
+        self::$em->flush($site);
 
-        $this->root = $this->createRootPage();
-        $this->root->setSite($site);
+        $layout = self::$kernel->createLayout('foobar');
+        self::$em->persist($layout);
+        self::$em->flush($layout);
+    }
+
+    public function setUp()
+    {
+        self::$em->clear();
+
+        self::$kernel->resetDatabase([
+            self::$em->getClassMetadata('BackBee\NestedNode\Page'),
+        ]);
+
+        $this->root = self::$kernel->createRootPage('test_page_url_rewriting');
         $this->root->setUrl('/');
+        $this->root->setSite(self::$em->getRepository('BackBee\Site\Site')->findOneBy([]));
+        $this->root->setLayout(self::$em->getRepository('BackBee\Site\Layout')->findOneBy([]));
 
-        $layout = $this->root->getLayout();
-        $layout->setLabel('foobar');
-        $layout->setPath('/foobar');
-        $this->em->persist($layout);
-        $this->em->flush($layout);
-
-        $this->em->persist($this->root);
-        $this->em->flush($this->root);
+        self::$em->persist($this->root);
+        self::$em->flush($this->root);
     }
 
     public function testGenerateUrlOnNullOrEmpty()
@@ -53,8 +65,8 @@ class PageUrlRewritingTest extends TestCase
 
         $this->assertNull($page->getUrl(false));
 
-        $this->em->persist($page);
-        $this->em->flush($page);
+        self::$em->persist($page);
+        self::$em->flush($page);
 
         $this->assertEquals('/null', $page->getUrl());
 
@@ -63,15 +75,15 @@ class PageUrlRewritingTest extends TestCase
 
         $this->assertEquals('', $page->getUrl(false));
 
-        $this->em->persist($page);
-        $this->em->flush($page);
+        self::$em->persist($page);
+        self::$em->flush($page);
 
         $this->assertEquals('/empty-string', $page->getUrl());
     }
 
     public function testGenerateUniqueUrl()
     {
-        $this->assertTrue($this->app->getContainer()->get('rewriting.urlgenerator')->isPreserveUnicity());
+        $this->assertTrue($this->urlGenerator->isPreserveUnicity());
         $this->assertEquals('/backbee', $this->generatePage('backbee', null, true)->getUrl());
         $this->assertEquals('/backbee-1', $this->generatePage('backbee', null, true)->getUrl());
         $this->assertEquals('/backbee-2', $this->generatePage('backbee', null, true)->getUrl());
@@ -79,31 +91,31 @@ class PageUrlRewritingTest extends TestCase
 
     public function testReplaceOldDeletedUrl()
     {
-        $this->assertTrue($this->app->getContainer()->get('rewriting.urlgenerator')->isPreserveUnicity());
+        $this->assertTrue($this->urlGenerator->isPreserveUnicity());
         $pageToDelete = $this->generatePage('backbee', null, true);
         $otherPageToDelete = $this->generatePage('backbee', null, true);
         $this->assertEquals('/backbee', $pageToDelete->getUrl());
         $this->assertEquals('/backbee-1', $otherPageToDelete->getUrl());
         $this->assertEquals('/backbee-2', $this->generatePage('backbee', null, true)->getUrl());
 
-        $this->em->remove($pageToDelete);
-        $this->em->flush($pageToDelete);
+        self::$em->remove($pageToDelete);
+        self::$em->flush($pageToDelete);
 
-        $this->assertNull($this->em->getRepository('BackBee\NestedNode\Page')->findOneBy(['_url' => '/backbee']));
+        $this->assertNull(self::$em->getRepository('BackBee\NestedNode\Page')->findOneBy(['_url' => '/backbee']));
 
         $this->assertEquals('/backbee', $this->generatePage('backbee', null, true)->getUrl());
 
-        $this->em->remove($otherPageToDelete);
-        $this->em->flush($otherPageToDelete);
+        self::$em->remove($otherPageToDelete);
+        self::$em->flush($otherPageToDelete);
 
-        $this->assertNull($this->em->getRepository('BackBee\NestedNode\Page')->findOneBy(['_url' => '/backbee-1']));
+        $this->assertNull(self::$em->getRepository('BackBee\NestedNode\Page')->findOneBy(['_url' => '/backbee-1']));
 
         $this->assertEquals('/backbee-1', $this->generatePage('backbee', null, true)->getUrl());
     }
 
     public function testManualSetUrlAndPreserveUnicity()
     {
-        $this->assertTrue($this->app->getContainer()->get('rewriting.urlgenerator')->isPreserveUnicity());
+        $this->assertTrue($this->urlGenerator->isPreserveUnicity());
         $this->assertEquals('/foo/bar', $this->generatePage('backbee', '/foo/bar', true)->getUrl());
         $this->assertEquals('/foo/bar-1', $this->generatePage('backbee', '/foo/bar', true)->getUrl());
     }
@@ -115,41 +127,41 @@ class PageUrlRewritingTest extends TestCase
 
         $page->setTitle('LP Digital');
         $this->assertEquals('/backbee', $page->getUrl());
-        $this->em->flush($page);
+        self::$em->flush($page);
         $this->assertEquals('/lp-digital', $page->getUrl());
 
         $page->setTitle('foo bar');
         $this->assertEquals('/lp-digital', $page->getUrl());
-        $this->em->flush($page);
+        self::$em->flush($page);
         $this->assertEquals('/foo-bar', $page->getUrl());
     }
 
     public function testChangeUrlOfPageOnlineWithPreserveOnline()
     {
-        $this->assertTrue($this->app->getContainer()->get('rewriting.urlgenerator')->isPreserveOnline());
+        $this->assertTrue($this->urlGenerator->isPreserveOnline());
         $page = $this->generatePage('backbee', null, true);
         $page->setState(Page::STATE_OFFLINE);
         $this->assertEquals('/backbee', $page->getUrl());
 
         $page->setTitle('foo bar');
-        $this->em->flush($page);
+        self::$em->flush($page);
         $this->assertEquals('/foo-bar', $page->getUrl());
 
         // RewritingListener also detects if the previous page's state is equal to online or not to determine
         // if a very last autogenerate url is required
         $page->setState(Page::STATE_ONLINE);
         $page->setTitle('LP Digital');
-        $this->em->flush($page);
+        self::$em->flush($page);
         $this->assertEquals('/lp-digital', $page->getUrl());
 
         $page->setTitle('This is a test');
-        $this->em->flush($page);
+        self::$em->flush($page);
         $this->assertEquals('/lp-digital', $page->getUrl());
 
         // property preserveOnline only prevent RewritingListener and UrlGenerator to autogenerate url
         // but it's still possible to change manually the page url (no matters if preserveOnline is true or false)
         $page->setUrl('/nestednode-page');
-        $this->em->flush($page);
+        self::$em->flush($page);
         $this->assertEquals('/nestednode-page', $page->getUrl());
     }
 
@@ -162,8 +174,8 @@ class PageUrlRewritingTest extends TestCase
         $page->setUrl($url);
 
         if ($doPersist) {
-            $this->em->persist($page);
-            $this->em->flush($page);
+            self::$em->persist($page);
+            self::$em->flush($page);
         }
 
         return $page;

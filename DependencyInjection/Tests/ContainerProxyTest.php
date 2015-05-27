@@ -23,13 +23,16 @@
 
 namespace BackBee\DependencyInjection\Tests;
 
-use org\bovigo\vfs\vfsStream;
-use Symfony\Component\Yaml\Yaml;
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\DependencyInjection\ContainerProxy;
 use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBee\DependencyInjection\Util\ServiceLoader;
+use BackBee\Tests\TestKernel;
+
+use org\bovigo\vfs\vfsStream;
+
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Test for ContainerProxy.
@@ -155,10 +158,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     public function testGetParameter()
     {
         $dumper = new PhpArrayDumper($this->container);
-
-        // vfsStream::setup('directory', 0777, array(
-        //     'dump' => $dumper->dump(array('do_compile' => false))
-        // ));
 
         $container = new ContainerProxy();
         $container->init(unserialize($dumper->dump(array('do_compile' => false))));
@@ -383,5 +382,10 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         $container->init(unserialize($dumper->dump(array('do_compile' => true))));
 
         $this->assertTrue($container->isCompiled());
+    }
+
+    public static function tearDownAfterClass()
+    {
+        TestKernel::getInstance()->getApplication()->resetStructure();
     }
 }

@@ -23,13 +23,16 @@
 
 namespace BackBee\DependencyInjection\Tests;
 
-use org\bovigo\vfs\vfsStream;
-use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\ContainerBuilder;
 use BackBee\DependencyInjection\ContainerProxy;
 use BackBee\DependencyInjection\Dumper\PhpArrayDumper;
 use BackBee\Tests\Mock\ManualBBApplication;
+use BackBee\Tests\TestKernel;
+
+use org\bovigo\vfs\vfsStream;
+
+use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 
 /**
  * Set of tests for BackBee\DependencyInjection\ContainerBuilder.
@@ -308,5 +311,10 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
                 'BackBee\DependencyInjection\Exception\MissingBootstrapParametersException', $e
             );
         }
+    }
+
+    public static function tearDownAfterClass()
+    {
+        TestKernel::getInstance()->getApplication()->resetStructure();
     }
 }

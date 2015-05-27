@@ -24,9 +24,10 @@
 namespace BackBee\NestedNode\Tests\Repository;
 
 use BackBee\NestedNode\Page;
-use BackBee\NestedNode\Repository\PageRepository;
+use BackBee\NestedNode\Repository\PageQueryBuilder;
 use BackBee\Site\Layout;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
+
 
 /**
  * @category    BackBee
@@ -34,25 +35,39 @@ use BackBee\Tests\TestCase;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageQueryBuilderTest extends TestCase
+class PageQueryBuilderTest extends BackBeeTestCase
 {
-    /**
-     * @var \BackBee\TestUnit\Mock\MockBBApplication
-     */
-    private $application;
+    private static $previousDateFormat;
 
     /**
      * @var \BackBee\NestedNode\Repository\PageRepository
      */
-    private $repo;
+    private $repository;
+
+    public function __construct($name = null, array $data = array(), $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+
+        $this->repository = self::$em->getRepository('BackBee\NestedNode\Page');
+    }
+
+    public static function setUpBeforeClass()
+    {
+        self::$kernel->resetDatabase();
+
+        self::$previousDateFormat = PageQueryBuilder::$config['dateSchemeForPublishing'];
+
+        PageQueryBuilder::$config = array(
+            'dateSchemeForPublishing' => 'Y-m-d H:i:00',
+        );
+    }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageQueryBuilder::andIsOnline
      */
     public function testAndIsOnline()
     {
-        $q = $this->repo->createQueryBuilder('p')
-                ->andIsOnline();
+        $q = $this->repository->createQueryBuilder('p')->andIsOnline();
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
         $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p WHERE p._state IN (:states0) AND (p._publishing IS NULL OR p._publishing <= :now0) AND (p._archiving IS NULL OR p._archiving > :now0)', $q->getDql());
@@ -65,7 +80,7 @@ class PageQueryBuilderTest extends TestCase
      */
     public function testAndIsVisible()
     {
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsVisible();
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -80,7 +95,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndLayoutIs()
     {
         $layout = new Layout();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andLayoutIs($layout);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -94,7 +109,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndIsOnlineSiblingsOf()
     {
         $page = new Page();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsOnlineSiblingsOf($page);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -107,7 +122,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndIsPreviousOnlineSiblingOf()
     {
         $page = new Page();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsPreviousOnlineSiblingOf($page);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -120,7 +135,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndIsNextOnlineSiblingOf()
     {
         $page = new Page();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsNextOnlineSiblingOf($page);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -133,7 +148,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndIsVisibleSiblingsOf()
     {
         $page = new Page();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsVisibleSiblingsOf($page);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -146,7 +161,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndIsPreviousVisibleSiblingOf()
     {
         $page = new Page();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsPreviousVisibleSiblingOf($page);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -159,7 +174,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndIsNextVisibleSiblingOf()
     {
         $page = new Page();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andIsNextVisibleSiblingOf($page);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -171,7 +186,7 @@ class PageQueryBuilderTest extends TestCase
      */
     public function testAndStateIsIn()
     {
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andStateIsIn(Page::STATE_ONLINE);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -191,7 +206,7 @@ class PageQueryBuilderTest extends TestCase
      */
     public function testAndStateIsNotIn()
     {
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andStateIsNotIn(Page::STATE_ONLINE);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -211,7 +226,7 @@ class PageQueryBuilderTest extends TestCase
      */
     public function testAndStateIsLowerThan()
     {
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andStateIsLowerThan(Page::STATE_DELETED);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -225,7 +240,7 @@ class PageQueryBuilderTest extends TestCase
     public function testAndSiteIs()
     {
         $site = new \BackBee\Site\Site();
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andSiteIs($site);
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -238,7 +253,7 @@ class PageQueryBuilderTest extends TestCase
      */
     public function testAndTitleIsLike()
     {
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andTitleIsLike('test');
 
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
@@ -252,7 +267,7 @@ class PageQueryBuilderTest extends TestCase
     {
         $now = new \DateTime();
 
-        $q = $this->repo->createQueryBuilder('p')
+        $q = $this->repository->createQueryBuilder('p')
                 ->andSearchCriteria('fake');
         $this->assertInstanceOf('BackBee\NestedNode\Repository\PageQueryBuilder', $q);
         $this->assertEquals('SELECT p FROM BackBee\NestedNode\Page p', $q->getDql());
@@ -293,27 +308,17 @@ class PageQueryBuilderTest extends TestCase
      */
     public function setUp()
     {
-        $this->application = $this->getBBApp();
-        $em = $this->application->getEntityManager();
+        self::$em->clear();
 
-        $st = new \Doctrine\ORM\Tools\SchemaTool($em);
-        $st->createSchema(array($em->getClassMetaData('BackBee\NestedNode\Page')));
-
-        $this->_setRepo();
+        self::$kernel->resetDatabase([
+            self::$em->getClassMetaData('BackBee\NestedNode\Page'),
+        ]);
     }
 
-    /**
-     * Sets the NestedNode Repository.
-     *
-     * @return \BackBee\NestedNode\Tests\Repository\NestedNodeRepositoryTest
-     */
-    private function _setRepo()
+    public static function tearDownAfterClass()
     {
-        $this->repo = $this->application
-            ->getEntityManager()
-            ->getRepository('BackBee\NestedNode\Page')
-        ;
-
-        return $this;
+        PageQueryBuilder::$config = array(
+            'dateSchemeForPublishing' => self::$previousDateFormat,
+        );
     }
 }

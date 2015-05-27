@@ -28,7 +28,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use BackBee\Command\AclLoadCommand;
 use BackBee\Console\Console;
 use BackBee\Security\Group;
-use BackBee\Tests\TestCase;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * AclDbInitCommand Test.
@@ -40,19 +40,23 @@ use BackBee\Tests\TestCase;
  *
  * @coversDefaultClass \BackBee\Command\AclLoadCommand
  */
-class AclLoadCommandTest extends TestCase
+class AclLoadCommandTest extends BackBeeTestCase
 {
-    protected function setUp()
+    public function setUp()
     {
-        $this->bbapp = $this->getBBApp();
-        $this->initDb($this->bbapp);
-        $this->initAcl();
+        self::$em->clear();
 
-        $superAdminGroup = new Group();
-        $superAdminGroup->setName('Super Admin');
-        $this->bbapp->getEntityManager()->persist($superAdminGroup);
+        self::$kernel->resetDatabase([
+            self::$em->getClassMetadata('BackBee\Security\Group'),
+            self::$em->getClassMetadata('BackBee\Site\Site'),
+        ], true);
 
-        $this->getBBApp()->getEntityManager()->flush();
+        self::$kernel->resetAclSchema();
+
+        $group = new Group();
+        $group->setName('Super Admin');
+        self::$em->persist($group);
+        self::$em->flush();
     }
 
     /**
@@ -61,7 +65,7 @@ class AclLoadCommandTest extends TestCase
     public function testExecute()
     {
         // mock the Kernel or create one depending on your needs
-        $application = new Console($this->getBBApp());
+        $application = new Console(self::$app);
         $application->add(new AclLoadCommand());
 
         $command = $application->find('acl:load');
@@ -95,7 +99,7 @@ groups:
     public function testExecute_invalidFile()
     {
         // mock the Kernel or create one depending on your needs
-        $application = new Console($this->getBBApp());
+        $application = new Console(self::$app);
         $application->add(new AclLoadCommand());
 
         $command = $application->find('acl:load');
@@ -123,7 +127,7 @@ yml file',
     public function testExecute_fileNotFound()
     {
         // mock the Kernel or create one depending on your needs
-        $application = new Console($this->getBBApp());
+        $application = new Console(self::$app);
         $application->add(new AclLoadCommand());
 
         $command = $application->find('acl:load');
@@ -136,5 +140,10 @@ yml file',
                 'file' => $file,
             )
         );
+    }
+
+    public static function tearDownAfterClass()
+    {
+        self::$app->resetStructure();
     }
 }
