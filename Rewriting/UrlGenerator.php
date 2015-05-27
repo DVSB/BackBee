@@ -220,8 +220,8 @@ class UrlGenerator implements UrlGeneratorInterface
         }
 
         if (isset($this->schemes['_layout_']) && is_array($this->schemes['_layout_'])) {
-            if (array_key_exists($page->getlayout()->getUid(), $this->schemes['_layout_'])) {
-                return $this->doGenerate($this->schemes['_layout_'][$page->getlayout()->getUid()], $page);
+            if (array_key_exists($page->getLayout()->getUid(), $this->schemes['_layout_'])) {
+                return $this->doGenerate($this->schemes['_layout_'][$page->getLayout()->getUid()], $page);
             }
         }
 

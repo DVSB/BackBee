@@ -33,14 +33,13 @@ class getKeywordObjects extends AbstractHelper
 {
     public function __invoke($keywords)
     {
-        if (false === is_array($keywords)) {
-            $keywords = array($keywords);
-        }
+        $keywords = (array) $keywords;
 
         return $this->getRenderer()
-                ->getApplication()
-                ->getEntityManager()
-                ->getRepository('BackBee\NestedNode\KeyWord')
-                ->getKeywordsFromElements($keywords);
+            ->getApplication()
+            ->getEntityManager()
+            ->getRepository('BackBee\NestedNode\KeyWord')
+            ->getKeywordsFromElements($keywords)
+        ;
     }
 }
