@@ -7,7 +7,7 @@ parameters:
     bbapp.config.class: BackBee\Config\Config
     bbapp.logger.class: BackBee\Logging\Logger
     bbapp.logger_debug.class: BackBee\Logging\DebugStackLogger
-    bbapp.controller.class: BackBee\FrontController\FrontController
+    bbapp.controller.class: BackBee\Controller\FrontController
     bbapp.media.controller.class: BackBee\Controller\MediaController
     bbapp.resource.controller.class: BackBee\Controller\ResourceController
     bbapp.renderer.class: BackBee\Renderer\Renderer

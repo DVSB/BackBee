@@ -23,7 +23,7 @@
 
 namespace BackBee\Tests\Mock;
 
-use BackBee\FrontController\FrontController;
+use BackBee\Controller\FrontController;
 
 /**
  * @category    BackBee

@@ -26,7 +26,7 @@ namespace BackBee\Rest\Tests\EventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\Validation;
-use BackBee\FrontController\FrontController;
+use BackBee\Controller\FrontController;
 use BackBee\Rest\EventListener\PaginationListener;
 use BackBee\Rest\Tests\Fixtures\Controller\FixtureAnnotatedController;
 use BackBee\Tests\TestCase;

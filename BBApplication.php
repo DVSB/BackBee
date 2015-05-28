@@ -308,7 +308,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\FrontController\FrontController
+     * @return \BackBee\Controller\FrontController
      */
     public function getController()
     {

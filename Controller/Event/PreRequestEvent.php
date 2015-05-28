@@ -21,57 +21,39 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\FrontController\Event;
+namespace BackBee\Controller\Event;
 
 use BackBee\Event\Event;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Allows to execute logic before call of current request controller's action.
+ * Allows to execute logic after call of current request controller's action
+ * and before the response is send.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      e.chau <eric.chau@lp-digital.fr>
  */
-class PostResponseEvent extends Event
+class PreRequestEvent extends Event
 {
     /**
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * Create a new instance of PostResponseEvent.
+     * Create a new instance of PreRequestEvent.
      *
-     * @param Response $response
-     * @param Request  $request
+     * @param Request $request
      */
-    public function __construct(Response $response, Request $request)
+    public function __construct(Request $request)
     {
-        parent::__construct($response, $request);
-
-        $this->request = $request;
+        parent::__construct($request);
     }
 
     /**
-     * Response's getter.
-     *
-     * @return Response
-     */
-    public function getResponse()
-    {
-        return $this->getTarget();
-    }
-
-    /**
-     * Request's getter.
+     * Request getter.
      *
      * @return Request
      */
     public function getRequest()
     {
-        return $this->request;
+        return $this->getTarget();
     }
 }

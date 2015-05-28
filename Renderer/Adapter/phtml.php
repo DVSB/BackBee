@@ -23,6 +23,7 @@
 
 namespace BackBee\Renderer\Adapter;
 
+use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Renderer\AbstractRenderer;
 use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
@@ -146,7 +147,7 @@ class phtml extends AbstractRendererAdapter
             include $filename;
 
             return ob_get_clean();
-        } catch (\BackBee\FrontController\Exception\FrontControllerException $fe) {
+        } catch (FrontControllerException $fe) {
             ob_end_clean();
             throw $fe;
         } catch (Exception $e) {

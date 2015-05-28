@@ -21,7 +21,7 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\FrontController\Exception;
+namespace BackBee\Controller\Exception;
 
 use Symfony\Component\HttpFoundation\Request;
 use BackBee\Exception\BBException;
