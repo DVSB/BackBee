@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
 
@@ -230,12 +230,12 @@ abstract class AbstractRestController extends Controller implements RestControll
      *
      * @return boolean
      */
-    protected function granted($attributes, $object = null, $message = 'Access denied')
+    protected function granted($attributes, $object = null, $message = 'Permission denied')
     {
         $security_context = $this->getApplication()->getSecurityContext();
 
         if (null !== $security_context->getACLProvider() && false === parent::isGranted($attributes, $object)) {
-            throw new AccessDeniedException($message);
+            throw new InsufficientAuthenticationException($message);
         }
 
         return true;

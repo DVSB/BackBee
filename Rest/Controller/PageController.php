@@ -392,7 +392,7 @@ class PageController extends AbstractRestController
 
         $this->granted('EDIT', $page->getParent()); // user must have edit permission on parent
 
-        if (true === $page->isOnline()) {
+        if (true === $page->isOnline(true)) {
             $this->granted('PUBLISH', $page); // user must have publish permission on the page
         }
 
@@ -605,6 +605,10 @@ class PageController extends AbstractRestController
             } elseif ('/is_hidden' === $operation['path']) {
                 $isHiddenOp = $op;
             }
+        }
+
+        if ($page->isOnline(true)) {
+            $this->granted('PUBLISH', $page);
         }
 
         if (null !== $stateOp) {

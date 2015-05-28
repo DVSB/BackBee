@@ -334,8 +334,6 @@ class ClassContentController extends AbstractRestController
      */
     public function getDraftCollectionAction()
     {
-        $this->granted('VIEW', 'BackBee\ClassContent\Revision');
-
         $contents = $this->getEntityManager()
             ->getRepository('BackBee\ClassContent\Revision')
             ->getAllDrafts($this->getApplication()->getBBUserToken())
