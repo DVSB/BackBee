@@ -21,23 +21,23 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Command;
+namespace BackBee\Console\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use BackBee\Console\AbstractCommand;
-use BackBee\Utils\File\Dir;
 
 /**
- * Install BBApp assets.
+ * Install all bundles command.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class AssetsInstallCommand extends AbstractCommand
+class BundleInstallAllCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}
@@ -45,12 +45,13 @@ class AssetsInstallCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('assets:install')
-            ->setDescription('Updated bbapp')
+            ->setName('bundle:install_all')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
+            ->setDescription('Installs a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> install app assets:
+The <info>%command.name%</info> installs all bundles:
 
-   <info>php assets:install</info>
+   <info>php bundle:install_all MyBundle</info>
 EOF
             )
         ;
@@ -61,18 +62,21 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $force = $input->getOption('force');
+
         $bbapp = $this->getContainer()->get('bbapp');
 
-        $publicResourcesDir = $bbapp->getBaseDir().'/public/ressources';
-
-        $bbappResourcesDir = $bbapp->getBBDir().'/Resources';
-        $repoResourcesDir = $bbapp->getBaseRepository().'/Ressources';
-
-        Dir::copy($repoResourcesDir, $publicResourcesDir, 0755);
-        Dir::copy($bbappResourcesDir, $publicResourcesDir, 0755);
-
         foreach ($bbapp->getBundles() as $bundle) {
-            Dir::copy($bundle->getResourcesDir(), $publicResourcesDir, 0755);
+            $output->writeln('Installing bundle: '.$bundle->getId().'');
+
+            $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
+
+            if ($force) {
+                $output->writeln('<info>Running install</info>');
+                $bundle->install();
+            }
+
+            $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
         }
     }
 }

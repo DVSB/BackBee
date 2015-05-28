@@ -21,23 +21,24 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Command;
+namespace BackBee\Console\Command;
 
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use BackBee\Console\AbstractCommand;
-use BackBee\Utils\File\Dir;
 
 /**
- * Clears cache.
+ * Install BBApp assets.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class CacheClearCommand extends AbstractCommand
+class AclLoadCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}
@@ -45,15 +46,14 @@ class CacheClearCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('cache:clear')
-            ->setDefinition(array(
-            ))
-            ->setDescription('Clears application cache')
+            ->setName('acl:load')
+            ->addArgument('file', InputArgument::REQUIRED, 'File')
+            ->setDescription('Initialize ACL tables')
+            ->addOption('truncate', 't', InputOption::VALUE_NONE, 'If set, truncates the acl tables')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> command clears the application cache for a given environment
-and debug mode:
+The <info>%command.name%</info> loads acl DB tables:
 
-<info>php %command.full_name% --env=dev</info>
+   <info>php acl:load</info>
 EOF
             )
         ;
@@ -65,22 +65,17 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $bbapp = $this->getContainer()->get('bbapp');
-        $output->writeln(sprintf('Clearing the cache for the <info>%s</info> environment with debug <info>%s</info>', $bbapp->getEnvironment(), var_export($bbapp->isDebugMode(), true)));
 
-        $cacheDir = $this->getContainer()->getParameter("bbapp.cache.dir");
+        $file = $input->getArgument('file');
 
-        $oldCacheDir = $cacheDir.'_old';
-
-        if (file_exists($oldCacheDir)) {
-            Dir::delete($oldCacheDir);
+        if (!file_exists($file)) {
+            throw new \InvalidArgumentException(sprintf('File not found: %s', $file));
         }
 
-        Dir::move($cacheDir, $oldCacheDir);
+        $output->writeln(sprintf('<info>Processing file: %s</info>', $file));
 
-        mkdir($cacheDir);
+        $loader = $bbapp->getContainer()->get('security.acl_loader_yml');
 
-        if (file_exists($oldCacheDir)) {
-            Dir::delete($oldCacheDir);
-        }
+        $loader->load(file_get_contents($file));
     }
 }

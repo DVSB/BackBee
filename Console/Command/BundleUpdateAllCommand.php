@@ -21,9 +21,8 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Command;
+namespace BackBee\Console\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,14 +30,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use BackBee\Console\AbstractCommand;
 
 /**
- * Update bundle command.
+ * Update all bundles command.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleUpdateCommand extends AbstractCommand
+class BundleUpdateAllCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}
@@ -46,14 +45,13 @@ class BundleUpdateCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('bundle:update')
-            ->addArgument('name', InputArgument::REQUIRED, 'A bundle name')
+            ->setName('bundle:update_all')
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
             ->setDescription('Updates a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> updates a bundle:
+The <info>%command.name%</info> updates all bundles:
 
-   <info>php bundle:update MyBundle</info>
+   <info>php bundle:update_all </info>
 EOF
             )
         ;
@@ -64,29 +62,22 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $name = strtr($input->getArgument('name'), '/', '\\');
-
         $force = $input->getOption('force');
 
         $bbapp = $this->getContainer()->get('bbapp');
 
-        $bundle = $bbapp->getBundle($name);
-        /* @var $bundle \BackBee\Bundle\AbstractBundle */
+        foreach ($bbapp->getBundles() as $bundle) {
+            $output->writeln('Updating bundle: '.$bundle->getId().'');
 
-        if (null === $bundle) {
-            throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
+            $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
+
+            if ($force) {
+                $output->writeln('<info>Running update</info>');
+
+                $bundle->update();
+            }
+
+            $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
         }
-
-        $output->writeln('Updating bundle: '.$bundle->getId().'');
-
-        $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
-
-        if ($force) {
-            $output->writeln('<info>Running update</info>');
-
-            $bundle->update();
-        }
-
-        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
 }
