@@ -106,7 +106,7 @@ interface ApplicationInterface
     public function getDataDir();
 
     /**
-     * @return BackBee\FrontController\FrontController
+     * @return BackBee\Controller\FrontController
      */
     public function getController();
 

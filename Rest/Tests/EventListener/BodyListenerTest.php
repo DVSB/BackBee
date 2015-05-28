@@ -25,7 +25,7 @@ namespace BackBee\Rest\Tests\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use BackBee\FrontController\FrontController;
+use BackBee\Controller\FrontController;
 use BackBee\Rest\Encoder\ContainerEncoderProvider;
 use BackBee\Rest\EventListener\BodyListener;
 use BackBee\Tests\TestCase;

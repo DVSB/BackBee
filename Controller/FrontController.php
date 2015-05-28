@@ -21,11 +21,11 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\FrontController;
+namespace BackBee\Controller;
 
 use BackBee\BBApplication;
 use BackBee\Event\PageFilterEvent;
-use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\NestedNode\Page;
 use BackBee\Routing\Matcher\UrlMatcher;
 use BackBee\Routing\RequestContext;

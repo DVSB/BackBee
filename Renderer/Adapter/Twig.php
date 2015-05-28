@@ -23,6 +23,7 @@
 
 namespace BackBee\Renderer\Adapter;
 
+use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Renderer\AbstractRenderer;
 use BackBee\Renderer\AbstractRendererAdapter;
 use BackBee\Renderer\Exception\RendererException;
@@ -180,7 +181,7 @@ class Twig extends AbstractRendererAdapter
             $params['this'] = $this;
             $params = array_merge($params, $vars);
             $render = $this->twig->render($filename, $params);
-        } catch (\BackBee\FrontController\Exception\FrontControllerException $fe) {
+        } catch (FrontControllerException $fe) {
             throw $fe;
         } catch (\Exception $e) {
             throw new RendererException(

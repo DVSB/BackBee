@@ -25,7 +25,7 @@ namespace BackBee\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 use BackBee\BBApplication;
-use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Util\MimeType;
 use BackBee\Utils\File\File;
 

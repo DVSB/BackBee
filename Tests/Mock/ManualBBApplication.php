@@ -222,7 +222,7 @@ class ManualBBApplication implements ApplicationInterface
     }
 
     /**
-     * @return BackBee\FrontController\FrontController
+     * @return BackBee\Controller\FrontController
      */
     public function getController()
     {

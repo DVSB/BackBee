@@ -25,7 +25,7 @@ namespace BackBee\Rest\Tests\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
-use BackBee\FrontController\FrontController;
+use BackBee\Controller\FrontController;
 use BackBee\Rest\EventListener\ExceptionListener;
 use BackBee\Security\Exception\SecurityException;
 use BackBee\Tests\TestCase;

@@ -31,7 +31,7 @@ use Symfony\Component\Security\Core\Exception\AccountStatusException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use BackBee\Event\Listener\AbstractPathEnabledListener;
-use BackBee\FrontController\Exception\FrontControllerException;
+use BackBee\Controller\Exception\FrontControllerException;
 use BackBee\Security\Exception\SecurityException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 

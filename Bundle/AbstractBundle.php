@@ -366,7 +366,7 @@ abstract class AbstractBundle implements BundleInterface
     /**
      * Returns the associated callback if "controller name/action name" couple is valid.
      *
-     * @param string $controllerName the controller name (ex.: BackBee\FrontController\FrontController => front)
+     * @param string $controllerName the controller name (ex.: BackBee\Controller\FrontController => front)
      * @param string $actionName     the action name (ex.: FrontController::defaultAction => default)
      *
      * @return callable|null the callback if there is one associated to "controller name/action name" couple, else null
