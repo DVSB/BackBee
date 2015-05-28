@@ -42,7 +42,7 @@ class Console extends ConsoleApplication
     /**
      * @var BBApplication
      */
-    private $_application;
+    private $application;
     private $commandsRegistered = false;
 
     /**
@@ -52,11 +52,12 @@ class Console extends ConsoleApplication
      */
     public function __construct(BBApplication $application = null)
     {
-        $this->_application = $application;
+        $this->application = $application;
 
         parent::__construct('BackBee', BBApplication::VERSION.($application->isDebugMode() ? '/debug' : ''));
 
-        $this->getDefinition()->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $this->_application->getEnvironment()));
+        $this->getDefinition()->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $this->application->getEnvironment()));
+        $this->getDefinition()->addOption(new InputOption('--app', '-a', InputOption::VALUE_REQUIRED, 'The BackBee application classname.', get_class($this->application)));
         $this->getDefinition()->addOption(new InputOption('--no-debug', null, InputOption::VALUE_NONE, 'Switches off debug mode.'));
     }
 
@@ -67,7 +68,7 @@ class Console extends ConsoleApplication
      */
     public function getApplication()
     {
-        return $this->_application;
+        return $this->application;
     }
 
     /**
