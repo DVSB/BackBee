@@ -21,11 +21,11 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Command\Tests;
+namespace BackBee\Console\Tests\Command;
 
 use org\bovigo\vfs\vfsStream;
 use Symfony\Component\Console\Tester\CommandTester;
-use BackBee\Command\AclLoadCommand;
+use BackBee\Console\Command\AclLoadCommand;
 use BackBee\Console\Console;
 use BackBee\Security\Group;
 use BackBee\Tests\BackBeeTestCase;

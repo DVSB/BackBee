@@ -867,10 +867,10 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function registerCommands(Console $console)
     {
-        if (is_dir($dir = $this->getBBDir().'/Command')) {
+        if (is_dir($dir = $this->getBBDir().'/Console/Command')) {
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
-            $ns = 'BackBee\\Command';
+            $ns = 'BackBee\\Console\\Command';
 
             foreach ($finder as $file) {
                 if ($relativePath = $file->getRelativePath()) {

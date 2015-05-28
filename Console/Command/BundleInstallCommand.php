@@ -21,7 +21,7 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Command;
+namespace BackBee\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,14 +31,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use BackBee\Console\AbstractCommand;
 
 /**
- * Install BBApp assets.
+ * Install bundle command.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class AclLoadCommand extends AbstractCommand
+class BundleInstallCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}
@@ -46,14 +46,14 @@ class AclLoadCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('acl:load')
-            ->addArgument('file', InputArgument::REQUIRED, 'File')
-            ->setDescription('Initialize ACL tables')
-            ->addOption('truncate', 't', InputOption::VALUE_NONE, 'If set, truncates the acl tables')
+            ->setName('bundle:install')
+            ->addArgument('name', InputArgument::REQUIRED, 'A bundle name')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
+            ->setDescription('Installs a bundle')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> loads acl DB tables:
+The <info>%command.name%</info> installs a bundle:
 
-   <info>php acl:load</info>
+   <info>php bundle:install MyBundle</info>
 EOF
             )
         ;
@@ -64,18 +64,28 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $name = strtr($input->getArgument('name'), '/', '\\');
+
+        $force = $input->getOption('force');
+
         $bbapp = $this->getContainer()->get('bbapp');
 
-        $file = $input->getArgument('file');
+        $bundle = $bbapp->getBundle($name);
+        /* @var $bundle \BackBee\Bundle\AbstractBundle */
 
-        if (!file_exists($file)) {
-            throw new \InvalidArgumentException(sprintf('File not found: %s', $file));
+        if (null === $bundle) {
+            throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
         }
 
-        $output->writeln(sprintf('<info>Processing file: %s</info>', $file));
+        $output->writeln('Installing bundle: '.$bundle->getId().'');
 
-        $loader = $bbapp->getContainer()->get('security.acl_loader_yml');
+        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
 
-        $loader->load(file_get_contents($file));
+        if ($force) {
+            $output->writeln('<info>Running install</info>');
+            $bundle->install();
+        }
+
+        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
 }

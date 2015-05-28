@@ -21,24 +21,23 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Command;
+namespace BackBee\Console\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use BackBee\Console\AbstractCommand;
+use BackBee\Utils\File\Dir;
 
 /**
- * Install bundle command.
+ * Clears cache.
  *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BundleInstallCommand extends AbstractCommand
+class CacheClearCommand extends AbstractCommand
 {
     /**
      * {@inheritdoc}
@@ -46,14 +45,15 @@ class BundleInstallCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('bundle:install')
-            ->addArgument('name', InputArgument::REQUIRED, 'A bundle name')
-            ->addOption('force', null, InputOption::VALUE_NONE, 'The install SQL will be executed against the DB')
-            ->setDescription('Installs a bundle')
+            ->setName('cache:clear')
+            ->setDefinition(array(
+            ))
+            ->setDescription('Clears application cache')
             ->setHelp(<<<EOF
-The <info>%command.name%</info> installs a bundle:
+The <info>%command.name%</info> command clears the application cache for a given environment
+and debug mode:
 
-   <info>php bundle:install MyBundle</info>
+<info>php %command.full_name% --env=dev</info>
 EOF
             )
         ;
@@ -64,28 +64,23 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $name = strtr($input->getArgument('name'), '/', '\\');
-
-        $force = $input->getOption('force');
-
         $bbapp = $this->getContainer()->get('bbapp');
+        $output->writeln(sprintf('Clearing the cache for the <info>%s</info> environment with debug <info>%s</info>', $bbapp->getEnvironment(), var_export($bbapp->isDebugMode(), true)));
 
-        $bundle = $bbapp->getBundle($name);
-        /* @var $bundle \BackBee\Bundle\AbstractBundle */
+        $cacheDir = $this->getContainer()->getParameter("bbapp.cache.dir");
 
-        if (null === $bundle) {
-            throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
+        $oldCacheDir = $cacheDir.'_old';
+
+        if (file_exists($oldCacheDir)) {
+            Dir::delete($oldCacheDir);
         }
 
-        $output->writeln('Installing bundle: '.$bundle->getId().'');
+        Dir::move($cacheDir, $oldCacheDir);
 
-        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
+        mkdir($cacheDir);
 
-        if ($force) {
-            $output->writeln('<info>Running install</info>');
-            $bundle->install();
+        if (file_exists($oldCacheDir)) {
+            Dir::delete($oldCacheDir);
         }
-
-        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
 }
