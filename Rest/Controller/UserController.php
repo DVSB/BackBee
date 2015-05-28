@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\Security\Acl\Domain\ObjectIdentity;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
 
@@ -68,11 +68,11 @@ class UserController extends AbstractRestController
     public function getCollectionAction(Request $request)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to access');
+            throw new InsufficientAuthenticationException('You must be authenticated to access');
         }
 
         if (!$this->isGranted('VIEW', new ObjectIdentity('class', get_class($this->getUser())))) {
-            throw new AccessDeniedException(sprintf('You are not authorized to view users'));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to view users'));
         }
 
         $group = $request->query->get('groups', null);
@@ -97,7 +97,7 @@ class UserController extends AbstractRestController
     public function getCurrentAction()
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to access');
+            throw new InsufficientAuthenticationException('You must be authenticated to access');
         }
 
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $this->getUser()->getId());
@@ -113,7 +113,7 @@ class UserController extends AbstractRestController
     public function getAction($id)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to delete users');
+            throw new InsufficientAuthenticationException('You must be authenticated to delete users');
         }
 
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
@@ -123,7 +123,7 @@ class UserController extends AbstractRestController
         }
 
         if (!$this->isGranted('VIEW', $user)) {
-            throw new AccessDeniedException(sprintf('You are not authorized to view user with id %s', $id));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         return new Response($this->formatItem($user), 200, ['Content-Type' => 'application/json']);
@@ -137,11 +137,11 @@ class UserController extends AbstractRestController
     public function deleteAction($id)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to delete users');
+            throw new InsufficientAuthenticationException('You must be authenticated to delete users');
         }
 
         if (intval($id) === $this->getUser()->getId()) {
-            throw new AccessDeniedException('You can remove the user of your current session.');
+            throw new InsufficientAuthenticationException('You can remove the user of your current session.');
         }
 
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
@@ -151,7 +151,7 @@ class UserController extends AbstractRestController
         }
 
         if (!$this->isGranted('DELETE', $user)) {
-            throw new AccessDeniedException(sprintf('You are not authorized to delete user with id %s', $id));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to delete user with id %s', $id));
         }
 
         $this->getEntityManager()->remove($user);
@@ -193,7 +193,7 @@ class UserController extends AbstractRestController
     public function putAction($id, Request $request)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to view users');
+            throw new InsufficientAuthenticationException('You must be authenticated to view users');
         }
 
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
@@ -203,7 +203,7 @@ class UserController extends AbstractRestController
         }
 
         if (!$this->isGranted('EDIT', $user)) {
-            throw new AccessDeniedException(sprintf('You are not authorized to view user with id %s', $id));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to view user with id %s', $id));
         }
 
         $user = $this->deserializeEntity($request->request->all(), $user);
@@ -240,7 +240,7 @@ class UserController extends AbstractRestController
     public function postAction(Request $request)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to view users');
+            throw new InsufficientAuthenticationException('You must be authenticated to view users');
         }
 
         $userExists = $this->getApplication()
@@ -255,7 +255,7 @@ class UserController extends AbstractRestController
         $user = new User();
 
         if (!$this->isGranted('CREATE', new ObjectIdentity('class', get_class($user)))) {
-            throw new AccessDeniedException(sprintf('You are not authorized to create users'));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to create users'));
         }
 
         $user = $this->deserializeEntity($request->request->all(), $user);
@@ -298,7 +298,7 @@ class UserController extends AbstractRestController
     public function patchAction($id, Request $request)
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw new AccessDeniedException('You must be authenticated to view users');
+            throw new InsufficientAuthenticationException('You must be authenticated to view users');
         }
         $actionFound = false;
 
@@ -345,7 +345,7 @@ class UserController extends AbstractRestController
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
 
         if (!$this->isGranted('EDIT', $user)) {
-            throw new AccessDeniedException(sprintf('You are not authorized to edit user with id %s', $id));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to edit user with id %s', $id));
         }
 
         $operation = reset($operations);
@@ -362,7 +362,7 @@ class UserController extends AbstractRestController
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
 
         if (!$this->isGranted('EDIT', $user)) {
-            throw new AccessDeniedException(sprintf('You are not authorized to edit user with id %s', $id));
+            throw new InsufficientAuthenticationException(sprintf('You are not authorized to edit user with id %s', $id));
         }
 
         $operations = $this->flattenPatchRequest($operations);
@@ -389,7 +389,7 @@ class UserController extends AbstractRestController
     private function patchUserIdentity($id, $operations)
     {
         if ($this->getUser()->getId() != $id) {
-            throw new AccessDeniedException('Identity can only be changed by its owner.');
+            throw new InsufficientAuthenticationException('Identity can only be changed by its owner.');
         }
 
         $operations = $this->flattenPatchRequest($operations);
@@ -425,7 +425,7 @@ class UserController extends AbstractRestController
     private function patchUserPassword($id, $operations)
     {
         if ($this->getUser()->getId() != $id) {
-            throw new AccessDeniedException('Password can only be changed by its owner.');
+            throw new InsufficientAuthenticationException('Password can only be changed by its owner.');
         }
 
         $user = $this->getEntityManager()->find(get_class($this->getUser()), $id);
