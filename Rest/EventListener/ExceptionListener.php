@@ -29,6 +29,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccountStatusException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\FrontController\Exception\FrontControllerException;
 use BackBee\Security\Exception\SecurityException;
@@ -92,7 +93,7 @@ class ExceptionListener extends AbstractPathEnabledListener
             }
             // keep the HTTP status code
             $event->getResponse()->setStatusCode($exception->getStatusCode());
-        } elseif ($exception instanceof AccountStatusException) {
+        } elseif ($exception instanceof AccountStatusException ||$exception instanceof InsufficientAuthenticationException) {
             // Forbidden access
             $this->setNewResponse($event, 403, $exception->getMessage());
         } elseif ($exception instanceof AuthenticationException || $exception instanceof AccessDeniedException) {
