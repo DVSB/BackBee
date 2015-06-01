@@ -91,19 +91,6 @@ class BodyListenerTest extends TestCase
 
     /**
      * @expectedException \Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException
-     * @expectedExceptionMessage Format of the request content was not recognized
-     *
-     * @covers ::onRequest
-     */
-    public function testOnRequest_noContentType()
-    {
-        $data = ['param' => 'value'];
-        $request = Request::create('test', "POST", [], [], [], [], json_encode($data));
-        $this->invokeOnRequest($request, true);
-    }
-
-    /**
-     * @expectedException \Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException
      * @expectedExceptionMessage Request body format 'html' not supported
      *
      * @covers ::onRequest

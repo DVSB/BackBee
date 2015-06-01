@@ -49,7 +49,7 @@ class Translator extends sfTranslator
 
         // retrieve default fallback from container and set it
         $fallback = $application->getContainer()->getParameter('translator.fallback');
-        $this->setFallbackLocale($fallback);
+        $this->setFallbackLocales([$fallback]);
 
         // xliff is recommended by Symfony so we register its loader as default one
         $this->addLoader('xliff', new XliffFileLoader());
