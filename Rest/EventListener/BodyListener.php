@@ -97,14 +97,6 @@ class BodyListener extends AbstractPathEnabledListener
                 ? $request->getRequestFormat()
                 : $request->getFormat($contentType);
 
-            if (!$format) {
-                if ($this->throwExceptionOnUnsupportedContentType) {
-                    throw new UnsupportedMediaTypeHttpException("Format of the request content was not recognized");
-                }
-
-                return;
-            }
-
             if ($format && !$this->encoderProvider->supports($format)) {
                 if ($this->throwExceptionOnUnsupportedContentType) {
                     throw new UnsupportedMediaTypeHttpException("Request body format '$format' not supported");
