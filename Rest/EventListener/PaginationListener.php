@@ -26,7 +26,7 @@ namespace BackBee\Rest\EventListener;
 use Metadata\MetadataFactory;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Validator\ConstraintViolationList;
-use Symfony\Component\Validator\Validator;
+use Symfony\Component\Validator\ValidatorInterface;
 
 use BackBee\Event\Listener\AbstractPathEnabledListener;
 use BackBee\Rest\Exception\ValidationException;
@@ -47,14 +47,14 @@ class PaginationListener extends AbstractPathEnabledListener
     private $metadataFactory;
 
     /**
-     * @var \Symfony\Component\Validator\Validator
+     * @var \Symfony\Component\Validator\ValidatorInterface
      */
     private $validator;
 
     /**
      * Constructor.
      */
-    public function __construct(MetadataFactory $metadataFactory, Validator $validator)
+    public function __construct(MetadataFactory $metadataFactory, ValidatorInterface $validator)
     {
         $this->metadataFactory = $metadataFactory;
         $this->validator = $validator;
