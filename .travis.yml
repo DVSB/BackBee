@@ -13,7 +13,7 @@ matrix:
 before_script:
   - phpenv config-add ./Tests/travis.php.ini
   - curl -s http://getcomposer.org/installer | php
-  - php composer.phar install  --dev --no-interaction --prefer-source
+  - php composer.phar install --no-interaction --prefer-source
 
 script:
   - ./vendor/bin/phpunit
