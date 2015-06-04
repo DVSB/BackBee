@@ -1003,10 +1003,13 @@ abstract class AbstractClassContent extends AbstractContent
 
         $value = null !== $this->getDraft() ? $this->getDraft()->getParam($key) : parent::getParam($key);
 
-        return null !== $value
-            ? Collection::array_merge_assoc_recursive($this->defaultParams[$key], $value)
-            : $this->defaultParams[$key]
-        ;
+        $params = $this->defaultParams[$key];
+
+        if ($value !== null) {
+            $params['value'] = $value['value'];
+        }
+
+        return $params;
     }
 
     /**
@@ -1033,13 +1036,15 @@ abstract class AbstractClassContent extends AbstractContent
     {
         $instanceParams = null !== $this->getDraft() ? $this->getDraft()->getAllParams() : parent::getAllParams();
         $params = [];
-        foreach ($instanceParams as $key => $value) {
-            if (isset($this->defaultParams[$key])) {
-                $params[$key] = $value;
+
+        foreach ($this->defaultParams as $key => $value) {
+            $params[$key] = $value;
+            if (isset($instanceParams[$key])) {
+                $params[$key]['value'] = $instanceParams[$key]['value'];
             }
         }
 
-        return Collection::array_merge_assoc_recursive($this->defaultParams, $params);
+        return $params;
     }
 
     /**
