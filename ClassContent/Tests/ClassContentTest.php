@@ -27,6 +27,7 @@ use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Image;
 use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Tests\Mock\MockContent;
+use BackBee\Tests\BackBeeTestCase;
 
 /**
  * @category    BackBee
@@ -35,7 +36,7 @@ use BackBee\ClassContent\Tests\Mock\MockContent;
  * @author      n.dufreche <nicolas.dufreche@lp-digital.fr>
  *              e.chau <eric.chau@lp-digital.fr>
  */
-class ClassContentTest extends \PHPUnit_Framework_TestCase
+class ClassContentTest extends BackBeeTestCase
 {
     private $content;
 
@@ -147,6 +148,42 @@ class ClassContentTest extends \PHPUnit_Framework_TestCase
         $this->assertNotSame(1234, $content->getParamValue('width'));
         $this->assertSame('1234', $content->getParamValue('width'));
         $this->assertNotEquals($defaultParams, $content->getAllParams());
+    }
+
+    public function testArrayGetParam()
+    {
+        self::$kernel->resetDatabase();
+
+        $user = self::$kernel->createAuthenticatedUser('content_test');
+
+        self::$em->persist($user);
+        self::$em->flush($user);
+
+        $contentManager = self::$app->getContainer()->get('classcontent.manager');
+        $contentManager->setBBUserToken(self::$app->getSecurityContext()->getToken());
+
+        $content = new MockContent();
+        self::$em->persist($content);
+        self::$em->flush($content);
+
+        $content->mockedDefineParam(
+            'foo',
+            [
+                'type'    => 'checkbox',
+                'label'   => 'Foo',
+                'options' => ['bar' => 'Bar'],
+                'value'   => ['bar']
+            ]
+        );
+
+        $this->assertSame($content->getDefaultParams(), $content->getAllParams());
+        $this->assertEquals($content->getParamValue('foo'), ['bar']);
+
+        $content->setParam('foo', []);
+        $this->assertEquals($content->getParamValue('foo'), []);
+
+        $content->setDraft(null);
+        $this->assertEquals($content->getParamValue('foo'), ['bar']);
     }
 
     /**
