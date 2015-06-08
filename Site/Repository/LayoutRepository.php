@@ -210,9 +210,12 @@ class LayoutRepository extends EntityRepository
     public function removeThumbnail(Layout $layout, BBApplication $app)
     {
         $thumbnailfile = $layout->getPicPath();
+        if (empty($thumbnail)) {
+            return true;
+        }
         File::resolveFilepath($thumbnailfile, null, array('include_path' => $app->getResourceDir()));
 
-        while (true === file_exists($thumbnailfile) && true === is_writable($thumbnailfile)) {
+        while (true === is_file($thumbnailfile) && true === is_writable($thumbnailfile)) {
             @unlink($thumbnailfile);
 
             $thumbnailfile = $layout->getPicPath();
