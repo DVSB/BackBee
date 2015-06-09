@@ -170,32 +170,34 @@ class NestedNodeRepository extends EntityRepository
     /**
      * Inserts a leaf node in a tree.
      *
-     * @param  \BackBee\NestedNode\AbstractNestedNode             $node   The node to be inserted
-     * @param  \BackBee\NestedNode\AbstractNestedNode             $parent The parent node
-     * @param int                                           The new left node of the inserted node
+     * @param  \BackBee\NestedNode\AbstractNestedNode             $node         The node to be inserted
+     * @param  \BackBee\NestedNode\AbstractNestedNode             $parent       The parent node
+     * @param  int                                                $newLeftNode  The new left node of the inserted node
+     * 
      * @return \BackBee\NestedNode\AbstractNestedNode             The inserted node
-     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the node is not a leaf or $parent is not flushed yet
+     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the node is an ancestor of $parent or $parent is not flushed yet
      */
-    protected function _insertNode(AbstractNestedNode $node, AbstractNestedNode $parent, $new_leftnode)
+    protected function _insertNode(AbstractNestedNode $node, AbstractNestedNode $parent, $newLeftNode)
     {
-        if (false === $node->isLeaf()) {
-            throw new InvalidArgumentException('Only a leaf can be inserted');
+        if ($parent->isDescendantOf($node, false)) {
+            throw new InvalidArgumentException('Cannot insert node in itself or one of its descendants');
         }
 
-        if ($node === $parent) {
-            throw new InvalidArgumentException('Cannot insert node in itself');
+        if (false === $this->_em->contains($parent)) {
+            throw new InvalidArgumentException('Cannot insert in a non managed node');
         }
 
-        $this->_detachOrPersistNode($node)
-                ->_refreshExistingNode($parent);
+        $this->_detachOrPersistNode($node);
 
-        $node->setLeftnode($new_leftnode)
-                ->setRightnode($node->getLeftnode() + 1)
+        $newRightNode = $newLeftNode + $node->getWeight() - 1;
+        $node->setLeftnode($newLeftNode)
+
+                ->setRightnode($newRightNode)
                 ->setLevel($parent->getLevel() + 1)
                 ->setParent($parent)
                 ->setRoot($parent->getRoot());
 
-        $this->shiftRlValues($node, $node->getLeftnode(), 2);
+        $this->shiftRlValues($node, $node->getLeftnode(), $node->getWeight());
 
         $this->_em->refresh($parent);
 
@@ -702,8 +704,8 @@ class NestedNodeRepository extends EntityRepository
      * Shift part of a tree.
      *
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
-     * @param  int                                                 $first
-     * @param  ont                                                 $delta
+     * @param  integer                                                    $first
+     * @param  integer                                                    $delta
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $target
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
      */

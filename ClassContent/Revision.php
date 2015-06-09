@@ -394,9 +394,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Return the item at index.
      *
-     * @param int $index
+     * @param  integer              $index
      *
-     * @return the item or NULL if $index is out of bounds
+     * @return AbstractClassContent                     The item or null if $index is out of bounds
      *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */

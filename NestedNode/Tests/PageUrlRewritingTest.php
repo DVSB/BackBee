@@ -46,6 +46,7 @@ class PageUrlRewritingTest extends BackBeeTestCase
         self::$em->clear();
 
         self::$kernel->resetDatabase([
+            self::$em->getClassMetadata('BackBee\NestedNode\Section'),
             self::$em->getClassMetadata('BackBee\NestedNode\Page'),
         ]);
 

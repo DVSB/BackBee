@@ -28,7 +28,6 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 use BackBee\BBApplication;
-use BackBee\NestedNode\AbstractNestedNode;
 use BackBee\Renderer\Event\RendererEvent;
 use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
@@ -724,10 +723,10 @@ abstract class AbstractRenderer implements RendererInterface
     /**
      * @codeCoverageIgnore
      *
-     * @param  AbstractNestedNode $node
+     * @param  Page $node
      * @return AbstractRenderer
      */
-    public function setNode(AbstractNestedNode $node)
+    public function setNode(Page $node)
     {
         $this->_node = $node;
 

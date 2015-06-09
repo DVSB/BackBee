@@ -60,11 +60,14 @@ class PageListenerTest extends BackBeeTestCase
         self::$em->persist($state2);
         self::$em->flush($state2);
 
+        $root = self::$kernel->createPage('root_test');
+        $root->setLayout($layout);
+        self::$em->persist($root);
+        self::$em->flush($root);
+        
         $page = self::$kernel->createPage('workflow_test');
-        $page->setLayout($layout);
-        $page->getParent()->setLayout($layout);
-        self::$em->persist($page->getParent());
-        self::$em->flush($page->getParent());
+        $page->setParent($root)
+                ->setLayout($layout);
         self::$em->persist($page);
         self::$em->flush($page);
     }

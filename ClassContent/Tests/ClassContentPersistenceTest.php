@@ -49,7 +49,12 @@ class ClassContentPersistenceTest extends BackBeeTestCase
 
         self::$contentManager = self::$app->getContainer()->get('classcontent.manager');
         self::$contentManager->setBBUserToken(self::$app->getSecurityContext()->getToken());
+    }
 
+    public static function tearDownAfterClass()
+    {
+        self::$contentManager->setBBUserToken(null);
+        self::$app->getSecurityContext()->setToken(null);
     }
 
     public function setUp()

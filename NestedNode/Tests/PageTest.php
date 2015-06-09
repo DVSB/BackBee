@@ -26,6 +26,8 @@ namespace BackBee\NestedNode\Tests;
 use BackBee\ClassContent\ContentSet;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
+use BackBee\NestedNode\PageRevision;
+use BackBee\NestedNode\Section;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Tests\BackBeeTestCase;
@@ -39,6 +41,7 @@ use BackBee\Workflow\State;
  */
 class PageTest extends BackBeeTestCase
 {
+
     /**
      * @var \Datetime
      */
@@ -55,12 +58,19 @@ class PageTest extends BackBeeTestCase
     public function test__construct()
     {
         $page = new Page();
-
-        $this->assertInstanceOf('BackBee\ClassContent\ContentSet', $page->getContentSet());
-        $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $page->getRevisions());
+        $this->assertNotNull($page->getUid());
+        $this->assertEquals(0, $page->getLevel());
+        $this->assertEquals(0, $page->getPosition());
         $this->assertEquals(Page::STATE_HIDDEN, $page->getState());
         $this->assertFalse($page->isStatic());
         $this->assertEquals(Page::DEFAULT_TARGET, $page->getTarget());
+        $this->assertInstanceOf('\DateTime', $page->getCreated());
+        $this->assertInstanceOf('\DateTime', $page->getModified());
+        $this->assertInstanceOf('BackBee\ClassContent\ContentSet', $page->getContentSet());
+        $this->assertInstanceOf('Doctrine\Common\Collections\ArrayCollection', $page->getRevisions());
+        $this->assertInstanceOf('BackBee\NestedNode\Section', $page->getSection());
+        $this->assertTrue($page->hasMainSection());
+        $this->assertEquals($page->getUid(), $page->getSection()->getUid());
     }
 
     /**
@@ -70,6 +80,8 @@ class PageTest extends BackBeeTestCase
     {
         $this->assertEquals('title', $this->page->getTitle());
         $this->assertEquals('url', $this->page->getUrl());
+        $this->assertEquals('root', $this->page->getUid());
+        $this->assertEquals('root', $this->page->getSection()->getUid());
 
         $pagef = new Page('test', 'not an array');
         $this->assertNull($pagef->getTitle());
@@ -82,34 +94,33 @@ class PageTest extends BackBeeTestCase
     public function test__clone()
     {
         $child = new Page('child', array('title' => 'child', 'url' => 'url'));
-        $child->setRoot($this->page)
-                ->setParent($this->page)
-                ->setLeftnode(2)
-                ->setRightnode(3)
-                ->setState(Page::STATE_ONLINE);
-
+        $revision = new PageRevision();
+        $child->setSection($this->page->getSection())
+                ->setState(Page::STATE_ONLINE)
+                ->getRevisions()
+                ->add($revision);
         $clone = clone $child;
         $this->assertNotEquals($child->getContentSet(), $clone->getContentSet());
         $this->assertNotEquals($child->getUid(), $clone->getUid());
-        $this->assertEquals(1, $clone->getLeftnode());
-        $this->assertEquals(2, $clone->getRightnode());
-        $this->assertEquals(0, $clone->getLevel());
-        $this->assertEquals($this->current_time, $clone->getCreated());
-        $this->assertEquals($this->current_time, $clone->getModified());
-        $this->assertNull($clone->getParent());
-        $this->assertEquals($clone, $clone->getRoot());
-        $this->assertEquals(Page::STATE_OFFLINE, $clone->getState());
+        $this->assertEquals(1, $clone->getPosition());
+        $this->assertEquals(1, $clone->getLevel());
+        $this->assertGreaterThanOrEqual($clone->getCreated()->getTimestamp(), $child->getCreated()->getTimestamp());
+        $this->assertGreaterThanOrEqual($clone->getModified()->getTimestamp(), $child->getModified()->getTimestamp());
+        $this->assertNull($clone->getMainSection());
+        $this->assertEquals(Page::STATE_HIDDEN, $clone->getState());
         $this->assertFalse($clone->isStatic());
         $this->assertEquals($child->getTitle(), $clone->getTitle());
-        $this->assertEquals($child->getUrl(), $clone->getUrl());
-        $this->assertTrue(is_array($clone->cloning_datas));
-        $this->assertTrue(isset($clone->cloning_datas['pages']));
-        $this->assertTrue(isset($clone->cloning_datas['pages'][$child->getUid()]));
-        $this->assertEquals($clone, $clone->cloning_datas['pages'][$child->getUid()]);
-
+        $this->assertEquals(null, $clone->getUrl());
+        $this->assertTrue(is_array($clone->cloningData));
+        $this->assertTrue(isset($clone->cloningData['pages']));
+        $this->assertTrue(isset($clone->cloningData['pages'][$child->getUid()]));
+        $this->assertEquals($clone, $clone->cloningData['pages'][$child->getUid()]);
+        $this->assertEquals(0, $clone->getRevisions()->count());
         $clone2 = clone $this->page;
-        $this->assertEquals($this->page->getLayout(), $clone2->getLayout());
-        $this->assertNotEquals($this->page->getContentSet(), $clone2->getContentSet());
+        $this->assertNotEquals($this->page->getMainSection(), $clone2->getMainSection());
+        $this->assertEquals($clone2->getSection(), $clone2->getMainSection());
+        $this->assertEquals(0, $clone2->getPosition());
+        $this->assertEquals(0, $clone2->getLevel());
     }
 
     /**
@@ -193,12 +204,14 @@ class PageTest extends BackBeeTestCase
             'left' => $this->page->getLeftnode(),
             'right' => $this->page->getRightnode(),
             'level' => $this->page->getLevel(),
+            'position' => $this->page->getPosition(),
         );
 
         $this->assertEquals($params, $this->page->getParam());
         $this->assertEquals($this->page->getLeftnode(), $this->page->getParam('left'));
         $this->assertEquals($this->page->getRightnode(), $this->page->getParam('right'));
         $this->assertEquals($this->page->getLevel(), $this->page->getParam('level'));
+        $this->assertEquals($this->page->getPosition(), $this->page->getParam('position'));
         $this->assertNull($this->page->getParam('unknown'));
     }
 
@@ -207,19 +220,22 @@ class PageTest extends BackBeeTestCase
      */
     public function testIsScheduled()
     {
-        $this->assertFalse($this->page->isScheduled());
+        $page = new Page();
+        $page->setParent($this->page);
 
-        $this->page->setPublishing(new \DateTime());
-        $this->page->setArchiving();
-        $this->assertTrue($this->page->isScheduled());
+        $this->assertFalse($page->isScheduled());
 
-        $this->page->setPublishing();
-        $this->page->setArchiving(new \DateTime());
-        $this->assertTrue($this->page->isScheduled());
+        $page->setPublishing(new \DateTime());
+        $page->setArchiving();
+        $this->assertTrue($page->isScheduled());
 
-        $this->page->setPublishing(new \DateTime());
-        $this->page->setArchiving(new \DateTime());
-        $this->assertTrue($this->page->isScheduled());
+        $page->setPublishing();
+        $page->setArchiving(new \DateTime());
+        $this->assertTrue($page->isScheduled());
+
+        $page->setPublishing(new \DateTime());
+        $page->setArchiving(new \DateTime());
+        $this->assertTrue($page->isScheduled());
     }
 
     /**
@@ -227,13 +243,16 @@ class PageTest extends BackBeeTestCase
      */
     public function testIsVisble()
     {
-        $this->assertFalse($this->page->isVisible());
+        $page = new Page();
+        $page->setParent($this->page);
 
-        $this->page->setState(Page::STATE_ONLINE);
-        $this->assertTrue($this->page->isVisible());
+        $this->assertFalse($page->isVisible());
 
-        $this->page->setState(Page::STATE_ONLINE & Page::STATE_HIDDEN);
-        $this->assertFalse($this->page->isVisible());
+        $page->setState(Page::STATE_ONLINE);
+        $this->assertTrue($page->isVisible());
+
+        $page->setState(Page::STATE_ONLINE & Page::STATE_HIDDEN);
+        $this->assertFalse($page->isVisible());
     }
 
     /**
@@ -241,34 +260,31 @@ class PageTest extends BackBeeTestCase
      */
     public function testIsOnline()
     {
-        $this->assertFalse($this->page->isOnline());
-        $this->assertFalse($this->page->isOnline(true));
+        $page = new Page();
+        $page->setParent($this->page);
 
-        $this->page->setState(Page::STATE_ONLINE);
-        $this->assertTrue($this->page->isOnline());
-        $this->assertTrue($this->page->isOnline(true));
+        $this->assertFalse($page->isOnline());
+        $this->assertFalse($page->isOnline(true));
 
-        $this->page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
-        $this->assertTrue($this->page->isOnline());
-        $this->assertTrue($this->page->isOnline(true));
+        $page->setState(Page::STATE_ONLINE);
+        $this->assertTrue($page->isOnline());
+        $this->assertTrue($page->isOnline(true));
 
-        $this->page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN + Page::STATE_DELETED);
-        $this->assertFalse($this->page->isOnline());
-        $this->assertFalse($this->page->isOnline(true));
+        $page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $this->assertTrue($page->isOnline());
+        $this->assertTrue($page->isOnline(true));
 
-        $yesterday = new \DateTime('yesterday');
+        $page->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN + Page::STATE_DELETED);
+        $this->assertFalse($page->isOnline());
+        $this->assertFalse($page->isOnline(true));
+
         $tomorrow = new \DateTime('tomorrow');
 
-        $this->page->setState(Page::STATE_ONLINE)
+        $page->setState(Page::STATE_ONLINE)
                 ->setPublishing($tomorrow)
                 ->setArchiving();
-        $this->assertFalse($this->page->isOnline());
-        $this->assertTrue($this->page->isOnline(true));
-
-        $this->page->setPublishing()
-                ->setArchiving($tomorrow);
-        $this->assertTrue($this->page->isOnline());
-        $this->assertTrue($this->page->isOnline(true));
+        $this->assertFalse($page->isOnline());
+        $this->assertTrue($page->isOnline(true));
     }
 
     /**
@@ -276,10 +292,13 @@ class PageTest extends BackBeeTestCase
      */
     public function testIsDeleted()
     {
-        $this->assertFalse($this->page->isDeleted());
+        $page = new Page();
+        $page->setParent($this->page);
 
-        $this->page->setState($this->page->getState() + Page::STATE_DELETED);
-        $this->assertTrue($this->page->isDeleted());
+        $this->assertFalse($page->isDeleted());
+
+        $page->setState($page->getState() + Page::STATE_DELETED);
+        $this->assertTrue($page->isDeleted());
     }
 
     /**
@@ -344,67 +363,6 @@ class PageTest extends BackBeeTestCase
         $this->assertEquals($column, $child->getContentSet()->last()->first());
     }
 
-    public function testHasChildren()
-    {
-        $repository = self::$em->getRepository('BackBee\NestedNode\Page');
-
-        self::$kernel->resetDatabase();
-
-        $site = new Site(null, array('label' => 'Site 1'));
-        self::$em->persist($site);
-        self::$em->flush($site);
-
-        $layout = self::$kernel->createLayout('test_has_children');
-        self::$em->persist($layout);
-        self::$em->flush($layout);
-
-        $uid = 'testhaschildrenpage';
-        $parent = new Page($uid, array('title' => 'page'));
-        $parent->setLayout($layout);
-        $parent->setSite($site);
-        self::$em->persist($parent);
-        self::$em->flush($parent);
-
-        // Test without children
-        $this->assertFalse(false, $parent->hasChildren());
-        $this->assertFalse(false, $parent->hasChildren(false));
-
-        $child1 = new Page(null, array('title' => 'title 1'));
-        $child1->setLayout($layout);
-        $child1->setParent($parent);
-        $child1->setState(Page::STATE_DELETED);
-
-        $repository->insertNodeAsFirstChildOf($child1, $parent);
-
-        self::$em->persist($child1);
-        self::$em->flush($child1);
-
-        self::$em->clear();
-
-        $parent = $repository->find($uid);
-
-        // Test with a non deleted page
-        $this->assertFalse($parent->hasChildren());
-        $this->assertTrue($parent->hasChildren(false));
-
-        $child2 = new Page(null, array('title' => 'title 2'));
-        $child2->setLayout($parent->getLayout());
-        $child2->setParent($parent);
-
-        $repository->insertNodeAsFirstChildOf($child2, $parent);
-
-        self::$em->persist($child2);
-        self::$em->flush($child2);
-
-        self::$em->clear();
-
-        $parent = $repository->find($uid);
-
-        // Test with a deleted page and a non deleted page
-        $this->assertTrue($parent->hasChildren());
-        $this->assertTrue($parent->hasChildren(false));
-    }
-
     /**
      * @covers BackBee\NestedNode\Page::setAltTitle
      */
@@ -467,8 +425,11 @@ class PageTest extends BackBeeTestCase
      */
     public function testSetState()
     {
-        $this->assertEquals($this->page, $this->page->setState(Page::STATE_DELETED));
-        $this->assertEquals(Page::STATE_DELETED, $this->page->getState());
+        $page = new Page();
+        $page->setParent($this->page);
+
+        $this->assertEquals($page, $page->setState(Page::STATE_DELETED));
+        $this->assertEquals(Page::STATE_DELETED, $page->getState());
     }
 
     /**
@@ -476,22 +437,13 @@ class PageTest extends BackBeeTestCase
      */
     public function testSetPublishing()
     {
-        $this->assertEquals($this->page, $this->page->setPublishing($this->current_time));
-        $this->assertEquals($this->current_time, $this->page->getPublishing());
-        $this->assertEquals($this->page, $this->page->setPublishing(null));
-        $this->assertNull($this->page->getPublishing());
-    }
+        $page = new Page();
+        $page->setParent($this->page);
 
-    /**
-     * @expectedException     \LogicException
-     * @expectedExceptionMessage Root page is already published.
-     */
-    public function testSetPublishingOnRootPagesFails()
-    {
-        $rootPage = self::$kernel->createRootPage();
-        // first publication
-        $rootPage->setPublishing(new \DateTime());
-        $rootPage->setPublishing(new \DateTime()); // forbidden
+        $this->assertEquals($page, $page->setPublishing($this->current_time));
+        $this->assertEquals($this->current_time, $page->getPublishing());
+        $this->assertEquals($page, $page->setPublishing(null));
+        $this->assertNull($page->getPublishing());
     }
 
     /**
@@ -500,7 +452,10 @@ class PageTest extends BackBeeTestCase
      */
     public function testSetPublishingWithADateBeforeTodayFails()
     {
-        $this->page->setPublishing(new \DateTime('NOW -1 day'));
+        $page = new Page();
+        $page->setParent($this->page);
+
+        $page->setPublishing(new \DateTime('NOW -1 day'));
     }
 
     /**
@@ -508,10 +463,13 @@ class PageTest extends BackBeeTestCase
      */
     public function testSetArchiving()
     {
-        $this->assertEquals($this->page, $this->page->setArchiving($this->current_time));
-        $this->assertEquals($this->current_time, $this->page->getArchiving());
-        $this->assertEquals($this->page, $this->page->setArchiving(null));
-        $this->assertNull($this->page->getArchiving());
+        $page = new Page();
+        $page->setParent($this->page);
+
+        $this->assertEquals($page, $page->setArchiving($this->current_time));
+        $this->assertEquals($this->current_time, $page->getArchiving());
+        $this->assertEquals($page, $page->setArchiving(null));
+        $this->assertNull($page->getArchiving());
     }
 
     /**
@@ -530,7 +488,10 @@ class PageTest extends BackBeeTestCase
      */
     public function testSetArchivingWithADateBeforeTodayFails()
     {
-        $this->page->setArchiving(new \DateTime('NOW -1 day'));
+        $page = new Page();
+        $page->setParent($this->page);
+
+        $page->setArchiving(new \DateTime('NOW -1 day'));
     }
 
     /**
@@ -539,8 +500,11 @@ class PageTest extends BackBeeTestCase
      */
     public function testSetArchivingWithADateBeforePublicationDateFails()
     {
-        $this->page->setPublishing(new \DateTime());
-        $this->page->setArchiving($this->page->getPublishing()->modify('-1 hour'));
+        $page = new Page();
+        $page->setParent($this->page);
+
+        $page->setPublishing(new \DateTime());
+        $page->setArchiving($page->getPublishing()->modify('-1 hour'));
     }
 
     /**
@@ -563,6 +527,52 @@ class PageTest extends BackBeeTestCase
         $this->assertEquals($state, $this->page->getWorkflowState());
         $this->assertEquals($this->page, $this->page->setWorkflowState(null));
         $this->assertNull($this->page->getWorkflowState());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setLevel
+     */
+    public function testSetLevel()
+    {
+        $this->assertEquals($this->page, $this->page->setLevel(10));
+        $this->assertEquals(10, $this->page->getLevel());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setLevel
+     * @expectedException BackBee\Exception\InvalidArgumentException
+     */
+    public function testSetNonNumericLevel()
+    {
+        $this->page->setLevel('test');
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setPosition
+     */
+    public function testSetPosition()
+    {
+        $this->assertEquals($this->page, $this->page->setPosition(10));
+        $this->assertEquals(10, $this->page->getPosition());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setPosition
+     * @expectedException BackBee\Exception\InvalidArgumentException
+     */
+    public function testSetNonNumericPosition()
+    {
+        $this->page->setPosition('test');
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setPosition
+     */
+    public function testSetModified()
+    {
+        $now = new \Datetime();
+        $this->assertEquals($this->page, $this->page->setModified($now));
+        $this->assertEquals($now, $this->page->getModified());
     }
 
     /**
@@ -732,27 +742,251 @@ class PageTest extends BackBeeTestCase
     }
 
     /**
+     * @covers BackBee\NestedNode\Page::hasMainSection()
+     */
+    public function testHasMainSection()
+    {
+        $this->assertTrue($this->page->hasMainSection());
+        $page = new Page();
+        $section = new Section();
+        $page->setSection($section);
+        $this->assertFalse($page->hasMainSection());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setMainSection()
+     */
+    public function testSetMainSection()
+    {
+        $section = new Section('new_section');
+        $section->setLevel(10);
+        $this->page->setMainSection($section);
+        $this->assertEquals($section, $this->page->getMainSection());
+        $this->assertEquals($section, $this->page->getSection());
+        $this->assertEquals(0, $this->page->getPosition());
+        $this->assertEquals(10, $this->page->getLevel());
+        $this->assertEquals($this->page, $section->getPage());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setSection()
+     */
+    public function testSetSection()
+    {
+        $section = new Section('new_section');
+        $section->setLevel(10);
+        $this->page->setSection($section);
+        $this->assertNull($this->page->getMainSection());
+        $this->assertEquals($section, $this->page->getSection());
+        $this->assertEquals(1, $this->page->getPosition());
+        $this->assertEquals(11, $this->page->getLevel());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::getSection()
+     */
+    public function testGetSection()
+    {
+        $this->assertEquals($this->page->getMainSection(), $this->page->getSection());
+        $page = new Page('test');
+        $this->assertEquals($page->getMainSection(), $page->getSection());
+        $this->assertEquals('test', $page->getSection()->getUid());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::isLeaf()
+     */
+    public function testIsLeaf()
+    {
+        $this->assertFalse($this->page->isLeaf());
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertTrue($child->isLeaf());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::isAncestorOf()
+     */
+    public function testIsAncestorOf()
+    {
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertFalse($child->isAncestorOf($child));
+        $this->assertTrue($child->isAncestorOf($child, false));
+        $this->assertFalse($child->isAncestorOf($this->page));
+        $this->assertTrue($this->page->isAncestorOf($child));
+        $this->assertFalse($this->page->isAncestorOf($this->page));
+        $this->assertTrue($this->page->isAncestorOf($this->page, false));
+        $child2 = new Page('child2');
+        $child2->setSection($this->page->getSection());
+        $this->assertFalse($child->isAncestorOf($child2));
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::isAncestorOf()
+     */
+    public function testIsDescendantOf()
+    {
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertFalse($child->isDescendantOf($child));
+        $this->assertTrue($child->isDescendantOf($child, false));
+        $this->assertTrue($child->isDescendantOf($this->page));
+        $this->assertFalse($this->page->isDescendantOf($this->page));
+        $this->assertTrue($this->page->isDescendantOf($this->page, false));
+        $child2 = new Page('child2');
+        $child2->setSection($this->page->getSection());
+        $this->assertFalse($child->isDescendantOf($child2));
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::getRoot()
+     */
+    public function testGetRoot()
+    {
+        $this->assertEquals($this->page, $this->page->getRoot());
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals($this->page, $child->getRoot());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::isRoot()
+     */
+    public function testIsRoot()
+    {
+        $this->assertTrue($this->page->isRoot());
+        $subsection = new Section('sub-section');
+        $subsection->setRoot($this->page->getSection())
+                ->setParent($this->page->getSection());
+        $child = new Page('child', array('main_section' => $subsection));
+        $this->assertFalse($child->isRoot());
+        $subchild = new Page('child');
+        $subchild->setSection($child->getSection());
+        $this->assertFalse($subchild->isRoot());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setParent()
+     */
+    public function testSetParent()
+    {
+        $child1 = new Page('child1');
+        $child1->setSection($this->page->getSection());
+        $child1->setParent($this->page);
+        $this->assertEquals($this->page, $child1->getParent());
+        $this->assertEquals($this->page->getSection(), $child1->getSection());
+        $child2 = new Page('child2');
+        $child2->setParent($this->page);
+        $this->assertEquals($this->page, $child2->getParent());
+        $this->assertEquals($this->page->getSection(), $child2->getSection());
+        $subsection = new Section('sub-section');
+        $subsection->setParent($this->page->getSection());
+        $child3 = new Page('child3', array('main_section' => $subsection));
+        $child3->setParent($this->page);
+        $this->assertEquals($this->page, $child3->getParent());
+        $this->assertEquals($subsection, $child3->getSection());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::setParent()
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testSetParentWithLeaf()
+    {
+        $child1 = new Page('child1');
+        $child2 = new Page('child2');
+        $child1->setParent($this->page);
+        $child2->setParent($child1);
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::getParent()
+     */
+    public function testGetParent()
+    {
+        $this->assertNull($this->page->getParent());
+        $subsection = new Section('sub-section');
+        $subsection->setRoot($this->page->getSection())
+                ->setParent($this->page->getSection());
+        $child = new Page('child', array('main_section' => $subsection));
+        $this->assertEquals($this->page, $child->getParent());
+        $subchild = new Page('child');
+        $subchild->setSection($child->getSection());
+        $this->assertEquals($child, $subchild->getParent());
+    }
+
+    /**
+     * @covers BackBee\NestedNode\Page::getLeftnode()
+     * @covers BackBee\NestedNode\Page::getRightnode()
+     */
+    public function testGetNode()
+    {
+        $this->assertEquals(1, $this->page->getLeftnode());
+        $this->assertEquals(2, $this->page->getRightnode());
+        $child = new Page('child');
+        $child->setSection($this->page->getSection());
+        $this->assertEquals(1, $child->getLeftnode());
+        $this->assertEquals(2, $child->getRightnode());
+    }
+
+    /**
      * Restrictions on Root page
      * => A root page can't be archived;
      * => A root page can't be published in the future;
      * => A root page can't be put offline.
+     * @expectedException \LogicException
      */
     public function testRootPageCantBeArchived()
     {
-        $rootPage = self::$kernel->createPage();
-        $rootPage->setArchiving(new \Datetime());
+        $this->page->setArchiving(new \Datetime());
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRootPageCantBePublished()
     {
-        $rootPage = self::$kernel->createPage();
-        $rootPage->setPublishing(new \Datetime());
+        $this->page->setPublishing(new \Datetime());
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRootPageCantBePutOffline()
     {
-        $rootPage = self::$kernel->createPage();
-        $rootPage->setState(Page::STATE_ONLINE);
+        $this->page->setState(Page::STATE_OFFLINE);
+    }
+
+    /**
+     * Test cascade Doctrine annotations for entity
+     */
+    public function testDoctrineCascades()
+    {
+        self::$kernel->resetDatabase();
+        $site = new Site('site-test', ['label' => 'site-test']);
+        $layout = self::$kernel->createLayout('layout-test', 'layout-test');
+        self::$em->persist($site);
+        self::$em->persist($layout);
+        self::$em->flush();
+
+        $root = new Page('root', ['title' => 'root']);
+        $root->setSite($site)
+                ->setLayout($layout);
+
+        // Persist cascade on Page::_mainsection and Page::_contentset
+        self::$em->persist($root);
+        $this->assertTrue(self::$em->getUnitOfWork()->isScheduledForInsert($root));
+        $this->assertTrue(self::$em->getUnitOfWork()->isScheduledForInsert($root->getMainSection()));
+        $this->assertTrue(self::$em->getUnitOfWork()->isScheduledForInsert($root->getContentSet()));
+        self::$em->flush($root);
+
+        // Remove cascade on Page::_mainsection and Page::_contentset
+        self::$em->remove($root);
+        $this->assertTrue(self::$em->getUnitOfWork()->isScheduledForDelete($root));
+        $this->assertTrue(self::$em->getUnitOfWork()->isScheduledForDelete($root->getContentSet()));
+        $this->assertTrue(self::$em->getUnitOfWork()->isScheduledForDelete($root->getMainSection()));
+        self::$em->flush();
     }
 
     /**
@@ -761,6 +995,7 @@ class PageTest extends BackBeeTestCase
     public function setUp()
     {
         $this->current_time = new \Datetime();
-        $this->page = self::$kernel->createPage();
+        $this->page = self::$kernel->createPage('root');
     }
+
 }

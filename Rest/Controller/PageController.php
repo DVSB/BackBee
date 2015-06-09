@@ -240,10 +240,14 @@ class PageController extends AbstractRestController
             $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
             $this->granted('CREATE', $page);
 
-            $this->getEntityManager()->persist($page);
+            if (null !== $page->getParent()) {
+                $this->getEntityManager()
+                        ->getRepository('BackBee\NestedNode\Page')
+                        ->insertNodeAsFirstChildOf($page, $page->getParent());
+            }
 
+            $this->getEntityManager()->persist($page);
             $this->getEntityManager()->flush($page);
-            $this->getPageRepository()->updateTreeNatively($page->getRoot()->getUid());
         } catch (\Exception $e) {
             return $this->createResponse('Internal server error: '.$e->getMessage(), 500);
         }
@@ -426,8 +430,14 @@ class PageController extends AbstractRestController
         // user must have view permission on chosen layout
         $this->granted('VIEW', $source->getLayout());
 
-        if (null !== $source->getParent()) {
-            $this->granted('EDIT', $source->getParent());
+        if (null !== $sibling) {
+            $parent = $sibling->getParent();
+        } elseif (null === $parent) {
+            $parent = $source->getParent();
+        }
+
+        if (null !== $parent) {
+            $this->granted('EDIT', $parent);
         } else {
             $this->granted('EDIT', $this->getApplication()->getSite());
         }
@@ -435,25 +445,17 @@ class PageController extends AbstractRestController
         $page = $this->getPageRepository()->duplicate(
             $source,
             $request->request->get('title'),
-            null,
-            false,
+            $parent,
+            true,
             $this->getApplication()->getBBUserToken()
         );
 
-        // Reset cloned page url is needed to not bypass rewriting url
-        // @see https://github.com/backbee/BackBee/issues/352
-        $page->setUrl(null);
-
-        if (null !== $sibling) {
-            $this->granted('EDIT', $sibling->getParent());
-            $this->getPageRepository()->moveAsPrevSiblingOf($page, $sibling);
-        } elseif (null !== $parent) {
-            $this->granted('EDIT', $parent);
-            $this->getPageRepository()->moveAsLastChildOf($page, $parent);
-        }
-
         $this->getApplication()->getEntityManager()->persist($page);
         $this->getApplication()->getEntityManager()->flush();
+
+        if (null !== $sibling) {
+            $this->getPageRepository()->moveAsPrevSiblingOf($page, $sibling);
+        }
 
         return $this->createJsonResponse(null, 201, [
             'Location' => $this->getApplication()->getRouting()->getUrlByRouteName(
@@ -477,6 +479,16 @@ class PageController extends AbstractRestController
     private function getPageRepository()
     {
         return $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
+    }
+
+    /**
+     * Getter for section entity repository.
+     *
+     * @return \BackBee\NestedNode\Repository\SectionRepository
+     */
+    private function getSectionRepository()
+    {
+        return $this->getEntityManager()->getRepository('BackBee\NestedNode\Section');
     }
 
     /**
@@ -526,29 +538,32 @@ class PageController extends AbstractRestController
      */
     private function doClassicGetCollection(Request $request, $start, $count, Page $parent = null)
     {
-        $qb = $this->getPageRepository()->createQueryBuilder('p');
-        if (null === $parent) {
-            $qb->andSiteIs($this->getApplication()->getSite());
-        } else {
-            $this->granted('VIEW', $parent);
-        }
+        $qb = $this->getPageRepository()
+                    ->createQueryBuilder('p');
+        
+        $order_by = [
+            '_position' => 'ASC',
+            '_leftnode' => 'ASC',
+        ];
 
-        $qb = $qb->andParentIs($parent);
-
-        $order_by = array();
         if (null !== $request->query->get('order_by', null)) {
             foreach ($request->query->get('order_by') as $key => $value) {
                 if ('_' !== $key[0]) {
-                    $key = '_'.$key;
+                    $key = '_' . $key;
                 }
 
                 $order_by[$key] = $value;
             }
-        } else {
-            $order_by['_leftnode'] = 'asc';
         }
 
-        $qb->orderByMultiple($order_by);
+        if (null === $parent) {
+            $qb->andSiteIs($this->getApplication()->getSite())
+                    ->andParentIs(null);
+        } else {
+            $this->granted('VIEW', $parent);
+
+            $qb->andIsDescendantOf($parent, true, 1, $order_by, $count, $start);
+        }
 
         if (null !== $state = $request->query->get('state', null)) {
             $qb->andStateIsIn((array) $state);

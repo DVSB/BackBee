@@ -148,14 +148,12 @@ final class TestKernel
     public function createPage($uid = null)
     {
         $page = $this->createRootPage($uid);
-        $page->setParent($this->createRootPage());
-
         return $page;
     }
 
-    public function createLayout($label)
+    public function createLayout($label, $uid = null)
     {
-        $layout = new Layout();
+        $layout = new Layout($uid);
         $layout->setLabel($label);
         $layout->setPath('/'.$label);
         $layout->setDataObject($this->getDefaultLayoutZones());

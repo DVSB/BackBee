@@ -114,18 +114,21 @@ class ClassContentRepository extends EntityRepository
     public function updateRootContentSetByPage(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet, BBUserToken $userToken)
     {
         $em = $this->_em;
-        $q = $this->createQueryBuilder("c");
-        $results = $q->leftJoin("c._pages", "p")
-            ->leftJoin("c._subcontent", "subcontent")
-            ->where("subcontent = :contentToReplace")
-            ->andWhere("p._leftnode > :cpageLeftnode")
-            ->andWhere("p._rightnode < :cpageRightnode")
-            ->setParameters(array(
-                "contentToReplace" => $oldContentSet,
-                "cpageLeftnode"    => $page->getLeftnode(),
-                "cpageRightnode"   => $page->getRightnode(),
-            ))
-            ->getQuery()->getResult()
+        $q = $this->createQueryBuilder('c');
+        $results = $q->leftJoin('c._pages', 'p')
+                        ->leftJoin('p._section', 'sp')
+                        ->leftJoin('c._subcontent', 'subcontent')
+                        ->where('subcontent = :contentToReplace')
+                        ->andWhere('sp._root = :cpageRoot')
+                        ->andWhere('sp._leftnode > :cpageLeftnode')
+                        ->andWhere('sp._rightnode < :cpageRightnode')
+                        ->setParameters([
+                            'contentToReplace' => $oldContentSet,
+                            'cpageRoot' => $page->getSection()->getRoot(),
+                            'cpageLeftnode' => $page->getLeftnode(),
+                            'cpageRightnode' => $page->getRightnode(),
+                        ])
+                        ->getQuery()->getResult()
         ;
 
         if ($results) {
@@ -245,20 +248,29 @@ class ClassContentRepository extends EntityRepository
             if (false === empty($parentnode)) {
                 $nodes = $this->_em->getRepository('BackBee\NestedNode\Page')->findBy(array('_uid' => $parentnode));
                 if (count($nodes) != 0) {
-                    $has_page_joined = true;
-                    $query = 'SELECT c.uid FROM page p USE INDEX(IDX_SELECT_PAGE) LEFT JOIN content c ON c.node_uid=p.uid';
-                    $pageSelection = array();
-                    foreach ($nodes as $node) {
-                        if (true === $recursive) {
-                            $pageSelection[] = '(p.root_uid="'.$node->getRoot()->getUid().'" AND p.leftnode BETWEEN '.$node->getLeftnode().' AND '.$node->getRightnode().')';
-                        } else {
-                            $pageSelection[] = '(p.parent_uid="'.$node->getUid().'")';
+                    $subquery = $this->getEntityManager()
+                            ->getRepository('BackBee\NestedNode\Section')
+                            ->createQueryBuilder('s')
+                            ->select('s._uid');
+
+                    $qOR = $subquery->expr()->orX();
+                    if (true === $recursive) {
+                        foreach ($nodes as $node) {
+                            $qAND = $subquery->expr()->andX();
+                            $qAND->add($subquery->expr()->eq('s._root', $subquery->expr()->literal($node->getSection()->getRoot()->getUid())));
+                            $qAND->add($subquery->expr()->between('s._leftnode', $node->getLeftnode(), $node->getRightnode()));
+                            $qOR->add($qAND);
+                        }
+                    } else {
+                        foreach ($nodes as $node) {
+                            $qOR->add($subquery->expr()->eq('s._parent', $subquery->expr()->literal($node->getSection()->getUid())));
                         }
                     }
 
-                    if (count($pageSelection) != 0) {
-                        $where[] = '('.implode(' OR ', $pageSelection).')';
-                    }
+                    $subquery->andWhere($qOR);
+
+                    $query = 'SELECT c.uid FROM page p LEFT JOIN content c ON c.node_uid = p.uid';
+                    $where[] = 'p.section_uid IN ('.$subquery->getQuery()->getSQL().')';
 
                     if (true === $limitToOnline) {
                         $where[] = 'p.state IN (1, 3)';
@@ -268,15 +280,7 @@ class ClassContentRepository extends EntityRepository
                         $where[] = 'p.state < 4';
                     }
 
-                    if (true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
-                        $orderby[] = 'p.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } elseif (true === property_exists('BackBee\ClassContent\AbstractClassContent', '_'.$selector['orderby'][0])) {
-                        $orderby[] = 'c.'.$selector['orderby'][0].' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    } else {
-                        $join[] = 'LEFT JOIN indexation isort ON c.uid  = isort.content_uid';
-                        $where[] = 'isort.field = "'.$selector['orderby'][0].'"';
-                        $orderby[] = 'isort.value'.' '.(count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
-                    }
+                    $has_page_joined = true;
                 }
             }
         }
@@ -512,16 +516,17 @@ class ClassContentRepository extends EntityRepository
         $rsm->addFieldResult('c', 'uid', '_uid');
         $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
         $sql .= " LEFT JOIN page as p ON p.contentset = sc.parent_uid";
+        $sql .= " LEFT JOIN section as sp ON p.section_uid = sp.uid";
         $sql .= " where p.uid = :selectedNodeUid";
-        $sql .= " AND p.root_uid = :selectedPageRoot";
-        $sql .= " AND p.leftnode >= :selectedPageLeftnode";
-        $sql .= " AND p.rightnode <= :selectedPageRightnode";
+        $sql .= " AND sp.root_uid = :selectedPageRoot";
+        $sql .= " AND sp.leftnode >= :selectedPageLeftnode";
+        $sql .= " AND sp.rightnode <= :selectedPageRightnode";
         if ($online) {
             $sql .= " AND p.state IN(:selectedPageState)";
         }
         $query = $this->_em->createNativeQuery($sql, $rsm);
         $query->setParameters(array(
-            "selectedPageRoot" => $selectedNode->getRoot(),
+            "selectedPageRoot" => $selectedNode->getSection()->getRoot(),
             "selectedNodeUid" => $selectedNode->getUid(),
             "selectedPageLeftnode" => $selectedNode->getLeftnode(),
             "selectedPageRightnode" => $selectedNode->getRightnode(), ));

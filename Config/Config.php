@@ -588,7 +588,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
 
         foreach ($ymlFiles as &$file) {
             $name = basename($file);
-            if (true === in_array(substr($name, 0, strpos($name, '.')), $this->yml_names_to_ignore)) {
+            if (true === in_array(substr($name, 0, strrpos($name, '.')), $this->yml_names_to_ignore)) {
                 $file = null;
             }
         }

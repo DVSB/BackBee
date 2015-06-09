@@ -31,16 +31,32 @@ use BackBee\Site\Site;
 use Doctrine\ORM\EntityManager;
 
 /**
- * @author e.chau <eric.chau@lp-digital.fr>
+ * Builder utilty class for Page
+ *
+ * @category    BackBee
+ *
+ * @copyright   Lp digital system
+ * @author      e.chau <eric.chau@lp-digital.fr>
  */
 class PageBuilder
 {
+    /**
+     * Page will not be persisted
+     */
     const NO_PERSIST = 0;
+
+    /**
+     * Page will be persister as first child of its parent
+     */
     const PERSIST_AS_FIRST_CHILD = 1;
+
+    /**
+     * Page will be persister as last child of its parent
+     */
     const PERSIST_AS_LAST_CHILD = 2;
 
     /**
-     * @var Doctrine\ORM\EntityManager
+     * @var \Doctrine\ORM\EntityManager
      */
     private $em;
 
@@ -72,35 +88,35 @@ class PageBuilder
     /**
      * @var string
      */
-    private $alt_title;
+    private $altTitle;
 
     /**
-     * @var BackBee\Site\Site
+     * @var \BackBee\Site\Site
      */
     private $site;
 
     /**
-     * @var BackBee\NestedNode\Page
+     * @var \BackBee\NestedNode\Page
      */
     private $root;
 
     /**
-     * BackBee\NestedNode\Page.
+     * @var \BackBee\NestedNode\Page
      */
     private $parent;
 
     /**
-     * @var BackBee\Site\Layout
+     * @var \BackBee\Site\Layout
      */
     private $layout;
 
     /**
-     * @var BackBee\ClassContent\AbstractClassContent
+     * @var \BackBee\ClassContent\AbstractClassContent
      */
     private $itemToPushInMainZone;
 
     /**
-     * @var array of BackBee\ClassContent\AbstractClassContent
+     * @var \BackBee\ClassContent\AbstractClassContent[]
      */
     private $elements;
 
@@ -130,10 +146,16 @@ class PageBuilder
     private $persist;
 
     /**
+     * Is the built page a section?
+     *
+     * @var boolean
+     */
+    private $isSection = false;
+
+    /**
      * PageBuilder constructor.
      *
-     * @param EntityManager $em the entity manager
-     * @return PageBuilder instance
+     * @param EntityManager         $em                 The entity manager
      */
     public function __construct(EntityManager $em)
     {
@@ -143,13 +165,14 @@ class PageBuilder
     }
 
     /**
-     * return Page instance.
+     * Returns the built page instance.
      *
-     * @return Page return a Page instance object
+     * @return Page                                     The built page.
      */
     public function getPage()
     {
         if (null === $this->site || null === $this->layout || null === $this->title) {
+            $this->reset();
             throw new \Exception("Required data missing");
         }
 
@@ -157,13 +180,10 @@ class PageBuilder
         $page->setTitle($this->title);
         $page->setSite($this->site);
 
-        if (null !== $this->root) {
-            $page->setRoot($this->root);
+        if (null !== $this->parent) {
+            $page->setParent($this->insureParentIsSection($this->parent));
         }
 
-        if (null !== $this->parent) {
-            $page->setParent($this->parent);
-        }
         $page->setLayout($this->layout, $this->itemToPushInMainZone);
 
         if (null !== $this->url) {
@@ -178,8 +198,8 @@ class PageBuilder
             $page->setTarget($this->target);
         }
 
-        if (null !== $this->alt_title) {
-            $page->setAltTitle($this->alt_title);
+        if (null !== $this->altTitle) {
+            $page->setAltTitle($this->altTitle);
         }
 
         if (null !== $this->state) {
@@ -200,11 +220,14 @@ class PageBuilder
 
         $pageContentSet = $page->getContentSet();
         $this->updateContentRevision($pageContentSet);
+        while ($column = $pageContentSet->next()) {
+            $this->updateContentRevision($column);
+        }
 
         if (0 < count($this->elements)) {
             foreach ($this->elements as $e) {
                 $column = $pageContentSet->item($e['content_set_position']);
-                if (true === $e['set_main_node']) {
+                if ($e['set_main_node']) {
                     $e['content']->setMainNode($page);
                 }
 
@@ -214,10 +237,6 @@ class PageBuilder
             $pageContentSet->rewind();
         }
 
-        while ($column = $pageContentSet->next()) {
-            $this->updateContentRevision($column);
-        }
-
         $this->doPersistIfValid($page);
 
         $this->reset();
@@ -225,25 +244,59 @@ class PageBuilder
         return $page;
     }
 
+    /**
+     * Saves $parent with section if need
+     *
+     * @param  Page                 $parent
+     *
+     * @return Page
+     */
+    private function insureParentIsSection(Page $parent)
+    {
+        if (!$parent->hasMainSection()) {
+            $this->em->getRepository('BackBee\NestedNode\Page')->saveWithSection($parent);
+            $this->em->flush($parent);
+        }
+
+        return $parent;
+    }
+
+    /**
+     * Resets the builder
+     *
+     * @return PageBuilder                              The reseted builder instance.
+     */
     private function reset()
     {
         $this->uid = null;
         $this->title = null;
+        $this->altTitle = null;
+        $this->redirect = null;
+        $this->target = null;
         $this->url = null;
         $this->site = null;
         $this->root = null;
         $this->parent = null;
         $this->layout = null;
         $this->elements = array();
+        $this->itemToPushInMainZone = null;
+        $this->createdAt = null;
         $this->publishedAt = null;
+        $this->archiving = null;
         $this->state = null;
         $this->persist = null;
+        $this->isSection = false;
+
+        return $this;
     }
 
     /**
-     * Set an unique identifier for the Page.
+     * Sets an unique identifier for the page.
      *
-     * @return PageBuilder the Page builder instance
+     * @param  string               $uid                The unique identifier to be set.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setUid($uid)
     {
@@ -253,9 +306,10 @@ class PageBuilder
     }
 
     /**
-     * Get the uid.
+     * Gets the unique identifier of the page.
      *
-     * @return int
+     * @return string
+     * @codeCoverageIgnore
      */
     public function getUid()
     {
@@ -263,9 +317,12 @@ class PageBuilder
     }
 
     /**
-     * Set the title.
+     * Sets the title.
      *
-     * @return PageBuilder Returns the instance of PageBuilder
+     * @param  string               $title              The title to be set.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setTitle($title)
     {
@@ -275,9 +332,10 @@ class PageBuilder
     }
 
     /**
-     * Get the title.
+     * Gets the title.
      *
      * @return string
+     * @codeCoverageIgnore
      */
     public function getTitle()
     {
@@ -285,9 +343,11 @@ class PageBuilder
     }
 
     /**
-     * Set the Page Builder url.
+     * Sets the url.
      *
-     * @return PageBuilder Returns PageBuilder instance
+     * @param  string               $url                The url to be set.
+     *
+     * @return PageBuilder                              The builder instance.
      */
     public function setUrl($url)
     {
@@ -297,9 +357,10 @@ class PageBuilder
     }
 
     /**
-     * Get the url.
+     * Gets the url.
      *
      * @return string
+     * @codeCoverageIgnore
      */
     public function getUrl()
     {
@@ -307,9 +368,12 @@ class PageBuilder
     }
 
     /**
-     * Set the Site.
+     * Sets the site.
      *
-     * @return PageBuilder Returns PageBuilder instance
+     * @param  Site                 $site               The site to be set.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setSite(Site $site)
     {
@@ -319,9 +383,10 @@ class PageBuilder
     }
 
     /**
-     * Get the Site.
+     * Gets the Site.
      *
      * @return Site
+     * @codeCoverageIgnore
      */
     public function getSite()
     {
@@ -329,15 +394,18 @@ class PageBuilder
     }
 
     /**
-     * Set the Root Page.
+     * Sets the root page.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @param Page                  $root               The root page to be set.
+     * @param boolean               $isChild            Optional, if true sets also the parent of the page to $root (false by default).
+     *
+     * @return PageBuilder                              The builder instance.
      */
-    public function setRoot(Page $root, $isRoot = false)
+    public function setRoot(Page $root, $isChild = false)
     {
         $this->root = $root;
 
-        if (true === $isRoot) {
+        if (true === $isChild) {
             $this->setParent($root);
         }
 
@@ -345,9 +413,10 @@ class PageBuilder
     }
 
     /**
-     * Get the Root Page.
+     * Gets the root page.
      *
-     * @return Page the root Page of a Site
+     * @return Page
+     * @codeCoverageIgnore
      */
     public function getRoot()
     {
@@ -355,9 +424,38 @@ class PageBuilder
     }
 
     /**
-     * [getPage description].
+     * Is the built page a section?
      *
-     * @return [type] [description]
+     * @param  boolean              $isSection
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
+     */
+    public function isSection($isSection = true)
+    {
+        $this->isSection = (true === $isSection);
+
+        return $this;
+    }
+
+    /**
+     * Is the built page will be a section?
+     *
+     * @return boolean
+     * @codeCoverageIgnore
+     */
+    public function willBeSection()
+    {
+        return $this->isSection;
+    }
+
+    /**
+     * Sets the parent of the page.
+     *
+     * @param  Page                 $parent             The parent page to be set.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setParent(Page $parent)
     {
@@ -367,9 +465,10 @@ class PageBuilder
     }
 
     /**
-     * Get the Parent Page.
+     * Gets the parent of the page.
      *
      * @return Page
+     * @codeCoverageIgnore
      */
     public function getParent()
     {
@@ -377,9 +476,13 @@ class PageBuilder
     }
 
     /**
-     * Set a Layout instance.
+     * Sets a layout instance.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @param  Layout                       $layout             The layout to be set.
+     * @param  AbstractClassContent|null    $toPushInMainZone   Optional, content be pushed in main zone.
+     *
+     * @return PageBuilder                                      The builder instance.
+     * @codeCoverageIgnore
      */
     public function setLayout(Layout $layout, AbstractClassContent $toPushInMainZone = null)
     {
@@ -390,9 +493,10 @@ class PageBuilder
     }
 
     /**
-     * Get the Layout instance.
+     * Gets the layout instance.
      *
      * @return Layout
+     * @codeCoverageIgnore
      */
     public function getLayout()
     {
@@ -400,9 +504,12 @@ class PageBuilder
     }
 
     /**
-     * Set the state of a Site.
+     * Set the state of the page.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @param  integer              $state              The state to be set.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setState($state)
     {
@@ -412,9 +519,21 @@ class PageBuilder
     }
 
     /**
-     * Set a Page online and visible.
+     * Gets the state.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @return integer
+     * @codeCoverageIgnore
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * Set the page online and visible.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function putOnlineAndVisible()
     {
@@ -422,9 +541,10 @@ class PageBuilder
     }
 
     /**
-     * Set a Page online and hidden.
+     * Set the page online and hidden.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function putOnlineAndHidden()
     {
@@ -432,37 +552,49 @@ class PageBuilder
     }
 
     /**
-     * Push a Class Content into a Page.
+     * Push a content into a page.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @param AbstractClassContent  $element            The content to be pushed.
+     * @param boolean               $setMainNode        Optional, is the main node to be set? (false by deault).
+     * @param integer               $contentSetPos      Optional, the column index in which to push content (0 by default).
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function pushElement(AbstractClassContent $element, $setMainNode = false, $contentSetPos = 0)
     {
-        $this->elements[] = array(
+        $this->elements[] = [
             'content'               => $element,
-            'set_main_node'         => $setMainNode,
+            'set_main_node'         => (true === $setMainNode),
             'content_set_position'  => $contentSetPos,
-        );
+        ];
 
         return $this;
     }
 
     /**
-     * Add a Class Content into a Page.
+     * Add a content into a page.
      *
-     * @return PageBuilder Returns a PageBuilder instance
+     * @param AbstractClassContent  $element            The content to be add.
+     * @param integer|null          $index              Optional, if provided replace content at index $index.
+     * @param boolean               $setMainNode        Optional, is the main node to be set? (false by deault).
+     * @param integer               $contentSetPos      Optional, the column index in which to push content (0 by default).
+     *
+     * @return PageBuilder                              The builder instance.
+     *
+     * @throws \InvalidArgumentException                Raises if $index does not exist.
      */
     public function addElement(AbstractClassContent $element, $index = null, $setMainNode = false, $contentSetPos = 0)
     {
         if (null !== $index) {
             $index = intval($index);
-            if (false === array_key_exists($index, $this->elements)) {
-                throw new \Exception();
+            if (!array_key_exists($index, $this->elements)) {
+                throw new \InvalidArgumentException();
             }
 
             $this->elements[$index] = array(
                 'content'               => $element,
-                'set_main_node'         => $setMainNode,
+                'set_main_node'         => (true === $setMainNode),
                 'content_set_position'  => $contentSetPos,
             );
         } else {
@@ -473,20 +605,22 @@ class PageBuilder
     }
 
     /**
-     * Get a Class Content from a Page.
+     * Gets a content from the page.
      *
-     * @param int $index the index in elements array of a Page
-     * @return ClassContent|null the selected content if found, else null
+     * @param integer               $index              The index in elements array of the page.
+     *
+     * @return AbstractClassContent|null
      */
     public function getElement($index)
     {
-        return (true === array_key_exists((int) $index, $this->elements) ? $this->elements[$index] : null);
+        return (array_key_exists((int) $index, $this->elements) ? $this->elements[$index] : null);
     }
 
     /**
-     * Get the Class Contents.
+     * Gets the contents array.
      *
-     * @return array<ClassContent>
+     * @return AbstractClassContent[]
+     * @codeCoverageIgnore
      */
     public function elements()
     {
@@ -494,9 +628,10 @@ class PageBuilder
     }
 
     /**
-     * Empty the array.
+     * Empties the contents array.
      *
-     * @return PageBuilder Returns the PageBuilder instance
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function clearElements()
     {
@@ -505,16 +640,29 @@ class PageBuilder
         return $this;
     }
 
+    /**
+     * Updates states and revision number of the content.
+     *
+     * @param AbstractClassContent  $content            The content to be updated.
+     * @param integer               $revision           Optional, the revision number (1 by default).
+     * @param integer               $state              Optional, The state (STATE_NORMAL by default).
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
+     */
     private function updateContentRevision(AbstractClassContent $content, $revision = 1, $state = AbstractClassContent::STATE_NORMAL)
     {
-        $content->setRevision($revision);
-        $content->setState($state);
+        $content->setRevision((int) $revision);
+        $content->setState((int) $state);
+
+        return $this;
     }
 
     /**
      * Gets the value of publishedAt.
      *
      * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getPublishedAt()
     {
@@ -524,9 +672,10 @@ class PageBuilder
     /**
      * Sets the value of publishedAt.
      *
-     * @param \DateTime $publishedAt the published at
+     * @param \DateTime|null        $publishedAt        Optional, the published at.
      *
-     * @return self
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function publishedAt(\DateTime $publishedAt = null)
     {
@@ -538,7 +687,10 @@ class PageBuilder
     /**
      * Alias of publishedAt.
      *
-     * @see self::publishedAt
+     * @param \DateTime|null        $publishing         Optional, the published at.
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setPublishing(\DateTime $publishing = null)
     {
@@ -549,6 +701,7 @@ class PageBuilder
      * Gets the value of createdAt.
      *
      * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getCreatedAt()
     {
@@ -558,9 +711,10 @@ class PageBuilder
     /**
      * Sets the value of createdAt.
      *
-     * @param \DateTime $createdAt the created at
+     * @param \DateTime             $createdAt          The created at datetime.
      *
-     * @return self
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function createdAt(\DateTime $createdAt)
     {
@@ -573,6 +727,7 @@ class PageBuilder
      * Gets the value of archiving.
      *
      * @return \DateTime
+     * @codeCoverageIgnore
      */
     public function getArchiving()
     {
@@ -582,9 +737,10 @@ class PageBuilder
     /**
      * Sets the value of archiving.
      *
-     * @param \DateTime $archiving the created at
+     * @param \DateTime|null        $archiving          Optional, the archiving datetime.
      *
-     * @return self
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setArchiving(\DateTime $archiving = null)
     {
@@ -597,6 +753,7 @@ class PageBuilder
      * Gets the value of target.
      *
      * @return string
+     * @codeCoverageIgnore
      */
     public function getTarget()
     {
@@ -606,11 +763,12 @@ class PageBuilder
     /**
      * Sets the value of target.
      *
-     * @param string $target the target
+     * @param  string|null          $target             Optional, the target.
      *
-     * @return self
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
-    public function setTarget($target)
+    public function setTarget($target = null)
     {
         $this->target = $target;
 
@@ -621,6 +779,7 @@ class PageBuilder
      * Gets the value of redirect.
      *
      * @return string
+     * @codeCoverageIgnore
      */
     public function getRedirect()
     {
@@ -630,11 +789,12 @@ class PageBuilder
     /**
      * Sets the value of redirect.
      *
-     * @param string $redirect the redirect
+     * @param  string|null          $redirect           Optional, the redirect.
      *
-     * @return self
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
-    public function setRedirect($redirect)
+    public function setRedirect($redirect = null)
     {
         $this->redirect = $redirect;
 
@@ -642,51 +802,60 @@ class PageBuilder
     }
 
     /**
-     * Gets the value of alt_title.
+     * Gets the value of altTitle.
      *
      * @return string
+     * @codeCoverageIgnore
      */
     public function getAltTitle()
     {
-        return $this->alt_title;
+        return $this->altTitle;
     }
 
     /**
-     * Sets the value of alt_title.
+     * Sets the value of the alternative title.
      *
-     * @param string $alt_title the alt_title
+     * @param  string|null          $altTitle           Optional, the alternative title.
      *
-     * @return self
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
-    public function setAltTitle($alt_title)
+    public function setAltTitle($altTitle = null)
     {
-        $this->alt_title = $alt_title;
+        $this->altTitle = $altTitle;
 
         return $this;
     }
 
     /**
-     * Sets the persist mode;
-     * /!\ if you set a valid persist mode (SELF::INSERT_AS_FIRST_CHILD or SELF::INSERT_AS_LAST_CHILD),
-     * this page will be persist for you, it also modified the left and right node of the tree.
+     * Sets the persist mode.
      *
-     * @param integer $mode
+     * /!\ if you set a valid persist mode (SELF::INSERT_AS_FIRST_CHILD or SELF::INSERT_AS_LAST_CHILD),
+     * this page will be persist for you, it also will modifie the left and right node of the tree.
+     *
+     * @param integer               $mode               Either SELF::NO_PERSIST, SELF::INSERT_AS_FIRST_CHILD or
+     *                                                  SELF::INSERT_AS_LAST_CHILD
+     *
+     * @return PageBuilder                              The builder instance.
+     * @codeCoverageIgnore
      */
     public function setPersistMode($mode)
     {
         $this->persist = $mode;
+
+        return $this;
     }
 
     /**
-     * Call.
+     * Persists the page is need and valid
      *
-     * @param Page $page [description]
-     *
-     * @return [type] [description]
+     * @param  Page                 $page               The page to be built.
      */
     private function doPersistIfValid(Page $page)
     {
         if (null === $page->getParent()) {
+            // If root, only persist
+            $this->em->persist($page);
             return;
         }
 
@@ -697,8 +866,9 @@ class PageBuilder
             $method = 'insertNodeAsLastChildOf';
         }
 
-        if (false === empty($method)) {
-            $this->em->getRepository('BackBee\NestedNode\Page')->$method($page, $page->getParent());
+        if (!empty($method)) {
+            $this->em->getRepository('BackBee\NestedNode\Page')->$method($page, $page->getParent(), $this->isSection);
+            $this->em->persist($page);
         }
     }
 }
