@@ -882,22 +882,8 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function getMode()
     {
-        $rendermode = null;
-
-        if (is_array($this->getParam('rendermode'))) {
-            $rendermode = (array) $this->getParam('rendermode');
-            $rendermode = array_pop($rendermode);
-
-            if (isset($rendermode['rendertype'])) {
-                switch ($rendermode['rendertype']) {
-                    case 'select':
-                        $rendermode = $rendermode['selected'];
-                        break;
-                }
-            }
-        }
-
-        return $rendermode;
+        $rendermode = $this->getParamValue('rendermode');
+        return (is_array($rendermode)) ? reset($rendermode) : null;
     }
 
     /**
