@@ -212,4 +212,41 @@ class ClassContentListener
             $application->warning('Unable to delete file: '.$e->getMessage());
         }
     }
+
+    public static function onPostCall(Event $event)
+    {
+        $response = $event->getResponse();
+        if ($response->headers->get('content-type') === 'text/html') {
+            return;
+        }
+
+        $application = $event->getApplication();
+        $renderer = $application->getRenderer();
+        $content = json_decode($response->getContent());
+
+        $result = false;
+        if ($content instanceof \StdClass) {
+            if (isset($content->type) && isset($content->parameters)) {
+                if (isset($content->parameters->rendermode)) {
+                    $result = true;
+                }
+            }
+        }
+
+        if (!$result) {
+            return;
+        }
+
+        $rendermodeParam = $content->parameters->rendermode;
+        $classname =  AbstractClassContent::getClassnameByContentType($content->type);
+
+        $modes = ['default' => 'Default mode'];
+        foreach ($renderer->getAvailableRenderMode(new $classname()) as $mode) {
+            $modes[$mode] = ucfirst(str_replace('_', ' ', $mode));
+        }
+
+        $rendermodeParam->options = $modes;
+
+        $response->setContent(json_encode($content));
+    }
 }
