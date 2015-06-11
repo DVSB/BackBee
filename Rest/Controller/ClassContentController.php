@@ -162,8 +162,8 @@ class ClassContentController extends AbstractRestController
 
         $response = null;
         if (in_array('text/html', $request->getAcceptableContentTypes())) {
-            if (null !== $this->getEntityFromAttributes('page')) {
-                $this->getApplication()->getRenderer()->getCurrentPage($page);
+            if (null !== $page = $this->getEntityFromAttributes('page')) {
+                $this->getApplication()->getRenderer()->setCurrentPage($page);
             }
 
             $mode = $request->query->get('mode', null);
