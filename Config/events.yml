@@ -28,6 +28,10 @@ classcontent.postrender:
     listeners:
         - [@cache.listener, onPostRenderContent]
 
+rest.controller.classcontentcontroller.getAction.postcall:
+  listeners:
+    - [BackBee\ClassContent\Listener\ClassContentListener, onPostCall]
+
 element.file.postremove:
     listeners:
         - [BackBee\ClassContent\Listener\ClassContentListener, onRemoveElementFile]
