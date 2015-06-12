@@ -60,7 +60,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     const CONFIG_FILE = 'config';
 
     /**
-     * System extention config file.
+     * System extension config file.
      *
      * @var string
      */
@@ -141,9 +141,11 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Class constructor.
      *
-     * @param string                                 $basedir   The base directory in which look for config files
-     * @param \BackBee\Cache\AbstractCache           $cache     Optional cache system
-     * @param \BackBee\DependencyInjection\Container $container
+     * @param string                                 $basedir       The base directory in which look for config files
+     * @param \BackBee\Cache\AbstractCache           $cache         Optional cache system
+     * @param \BackBee\DependencyInjection\Container $container     The BackBee Container
+     * @param boolean                                $debug         The debug mode
+     * @param array                                  $yml_to_ignore List of yaml filename to ignore form loading/parsing process
      */
     public function __construct($basedir, AbstractCache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
     {
@@ -201,6 +203,13 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
         return $this;
     }
 
+    /**
+     * Set the cache used for the configuration
+     *
+     * @param \BackBee\Cache\AbstractCache $cache
+     *
+     * @return \BackBee\Config\Config
+     */
     public function setCache(AbstractCache $cache)
     {
         $this->cache = $cache;
@@ -231,17 +240,17 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     }
 
     /**
-     * Returns, if exists, the raw parameter section, NULL otherwise.
+     * Returns, if exists, the raw parameter section, null otherwise.
      *
      * @param string $section
      *
-     * @return mixed|NULL
+     * @return mixed|null
      */
     public function getRawSection($section = null)
     {
         if (null === $section) {
             return $this->raw_parameters;
-        } elseif (true === array_key_exists($section, $this->raw_parameters)) {
+        } elseif (array_key_exists($section, $this->raw_parameters)) {
             return $this->raw_parameters[$section];
         }
 
@@ -350,15 +359,10 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      */
     public function sectionHasKey($section, $key)
     {
-        if (
-            isset($this->raw_parameters[$section])
+        return (isset($this->raw_parameters[$section])
             && is_array($this->raw_parameters[$section])
             && array_key_exists($key, $this->raw_parameters[$section])
-        ) {
-            return true;
-        }
-
-        return false;
+        );
     }
 
     /**
@@ -378,7 +382,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
             $this->raw_parameters[$section] = $config;
         }
 
-        if (true === array_key_exists($section, $this->parameters)) {
+        if (array_key_exists($section, $this->parameters)) {
             unset($this->parameters[$section]);
         }
 
@@ -404,9 +408,9 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
         }
 
         if (
-            false === empty($this->environment)
+            !empty($this->environment)
             && false === strpos($this->environment, $basedir)
-            && true === file_exists($basedir.DIRECTORY_SEPARATOR.$this->environment)
+            && is_dir($basedir.DIRECTORY_SEPARATOR.$this->environment)
         ) {
             $this->extend($basedir.DIRECTORY_SEPARATOR.$this->environment, $overwrite);
         }
@@ -492,7 +496,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
         }
 
         $parameters = @\unserialize($cached_parameters);
-        if (false === is_array($parameters)) {
+        if (!is_array($parameters)) {
             return false;
         }
 
@@ -564,7 +568,6 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Returns an array of YAML files in the directory.
      *
-     * @param string $basedir
      * @param string $basedir The base directory
      *
      * @return array
@@ -573,24 +576,24 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      */
     private function getYmlFiles($basedir)
     {
-        $yml_files = File::getFilesByExtension($basedir, self::EXTENSION);
+        $ymlFiles = File::getFilesByExtension($basedir, self::EXTENSION);
 
-        $default_file = $basedir.DIRECTORY_SEPARATOR.self::CONFIG_FILE.'.'.self::EXTENSION;
+        $defaultFile = $basedir.DIRECTORY_SEPARATOR.self::CONFIG_FILE.'.'.self::EXTENSION;
 
-        if (true === file_exists($default_file) && 1 < count($yml_files)) {
+        if (is_file($defaultFile) && 1 < count($ymlFiles)) {
             // Ensure that config.yml is the first one
-            $yml_files = array_diff($yml_files, array($default_file));
-            array_unshift($yml_files, $default_file);
+            $ymlFiles = array_diff($ymlFiles, array($defaultFile));
+            array_unshift($ymlFiles, $defaultFile);
         }
 
-        foreach ($yml_files as &$file) {
+        foreach ($ymlFiles as &$file) {
             $name = basename($file);
             if (true === in_array(substr($name, 0, strpos($name, '.')), $this->yml_names_to_ignore)) {
                 $file = null;
             }
         }
 
-        return array_filter($yml_files);
+        return array_filter($ymlFiles);
     }
 
     /**
@@ -598,7 +601,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      *
      * @param string $basedir The base directory
      *
-     * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory cannont be read
+     * @throws \BackBee\Config\Exception\InvalidBaseDirException Occurs if the base directory can't be read
      */
     private function loadFromBaseDir($basedir, $overwrite = false)
     {
@@ -617,7 +620,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     private function loadFromFile($filename, $overwrite = false)
     {
         try {
-            $yamlDatas = Yaml::parse($filename);
+            $yamlDatas = Yaml::parse(file_get_contents($filename));
 
             if (is_array($yamlDatas)) {
                 if (true === $this->debug) {
@@ -627,7 +630,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
                 if (self::CONFIG_FILE.'.'.self::EXTENSION === basename($filename) ||
                     self::CONFIG_FILE.'.'.$this->environment.'.'.self::EXTENSION === basename($filename)) {
                     foreach ($yamlDatas as $component => $config) {
-                        if (false === is_array($config)) {
+                        if (!is_array($config)) {
                             $this->container->get('logger')->error('Bad configuration, array expected, given : '.$config);
                         }
                         $this->setSection($component, $config, $overwrite);
@@ -658,6 +661,8 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Replace services and container parameters keys by their values for the provided section.
      *
+     * @param string|null $section The selected configuration section, can be null
+     *
      * @return array
      */
     private function compileParameters($section = null)
@@ -666,13 +671,13 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
             return $this->compileAllParameters();
         }
 
-        if (false === array_key_exists($section, $this->raw_parameters)) {
+        if (!array_key_exists($section, $this->raw_parameters)) {
             return;
         }
 
-        if (false === array_key_exists($section, $this->parameters)) {
+        if (!array_key_exists($section, $this->parameters)) {
             $value = $this->raw_parameters[$section];
-            if (true === is_array($value)) {
+            if (is_array($value)) {
                 array_walk_recursive($value, array($this->container, 'getContainerValues'));
             } else {
                 $this->container->getContainerValues($value);

@@ -35,19 +35,17 @@ use BackBee\Config\Config;
 interface PersistorInterface
 {
     /**
-     * [__construct description].
      *
-     * @param ApplicationInterface $application [description]
+     * @param ApplicationInterface $application The BackBee application instance
      */
     public function __construct(ApplicationInterface $application);
 
     /**
-     * [persist description].
      *
-     * @param [type] $key    [description]
-     * @param array  $config [description]
+     * @param \BackBee\Config\Config $config    The BackBee configuration instance
+     * @param array  $config_to_persist The configuration to perist
      *
-     * @return [type] [description]
+     * @return boolean returns true if persisting operation succeed
      */
     public function persist(Config $config, array $config_to_persist);
 }

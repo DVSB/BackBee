@@ -54,7 +54,7 @@ class File implements PersistorInterface
     public function persist(Config $config, array $configToPersist)
     {
         try {
-            $success = @file_put_contents(
+            $success = file_put_contents(
                 $this->getConfigDumpRightDirectory($config->getBaseDir()).DIRECTORY_SEPARATOR.'config.yml',
                 Yaml::dump($configToPersist)
             );
