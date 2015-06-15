@@ -191,8 +191,8 @@ class ClassContentController extends AbstractRestController
     public function postAction($type, Request $request)
     {
         $classname = AbstractClassContent::getClassnameByContentType($type);
-        $this->granted('CREATE', $classname);
         $content = new $classname();
+        $this->granted('CREATE', $content);
 
         $this->getEntityManager()->persist($content);
         $content->setDraft($this->getClassContentManager()->getDraft($content, true));
