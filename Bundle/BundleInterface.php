@@ -40,6 +40,7 @@ interface BundleInterface extends ObjectIdentifiableInterface, \JsonSerializable
      */
     const BUNDLE_SERVICE_ID_PATTERN = 'bundle.%bundle_name%';
     const CONFIG_SERVICE_ID_PATTERN = '%bundle_service_id%.config';
+    const BUNDLE_ADMIN_URL_PATTERN = '/bundle/%bundle_id%/%controller_id%/%action_id%';
 
     /**
      * Config directories names.

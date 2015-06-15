@@ -30,6 +30,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use BackBee\Bundle\AbstractBundleController;
+use BackBee\Bundle\BundleControllerResolver;
 use BackBee\Bundle\BundleInterface;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Patcher\EntityPatcher;
@@ -136,23 +138,28 @@ class BundleController extends AbstractRestController
     /**
      * This method is the front controller of every bundles exposed actions.
      *
-     * @param string $bundle_name     name of bundle we want to reach its exposed actions
-     * @param string $controller_name controller name
-     * @param string $action_name     name of exposed action we want to reach
-     * @param string $parameters      optionnal, action's parameters
+     * @param string $bundleName     name of bundle we want to reach its exposed actions
+     * @param string $controllerName controller name
+     * @param string $actionName     name of exposed action we want to reach
+     * @param string $parameters     optionnal, action's parameters
+     *
+     * @return Response              Bundle Controller Response
      */
-    public function accessBundleExposedRoutesAction($bundle_name, $controller_name, $action_name, $parameters)
+    public function accessBundleExposedRoutesAction($bundleName, $controllerName, $actionName, $parameters)
     {
-        $bundle = $this->getBundleById($bundle_name);
-        if (null === $callback = $bundle->getExposedActionCallback($controller_name, $action_name)) {
-            throw new NotFoundHttpException('Not found');
+        $bundle = $this->getBundleById($bundleName);
+
+        $controller = (new BundleControllerResolver($this->getApplication()))->resolve($bundleName, $controllerName);
+
+        if ($controller instanceof AbstractBundleController) {
+            $controller->setBundle($bundle);
         }
 
         if (false === empty($parameters)) {
             $parameters = array_filter(explode('/', $parameters));
         }
 
-        $response = call_user_func_array($callback, $parameters);
+        $response = call_user_func_array([$controller, $actionName], (array)$parameters);
 
         return is_object($response) && $response instanceof Response
             ? $response

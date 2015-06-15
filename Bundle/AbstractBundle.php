@@ -308,6 +308,13 @@ abstract class AbstractBundle implements BundleInterface
             ;
         }
 
+        if (false !== property_exists($obj, 'admin_entry_point')) {
+            $entrieDefinition = explode('.', $obj->admin_entry_point);
+            $controller = $entrieDefinition[0];
+            $action = isset($entrieDefinition[1]) ? $entrieDefinition[1] : 'index';
+            $obj->admin_entry_point = (new BundleControllerResolver($this->application))->resolveBaseAdminUrl($obj->id, $controller, $action);
+        }
+
         $obj->exposed_actions = $this->getExposedActionsMapping();
 
         return $obj;

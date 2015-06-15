@@ -25,6 +25,7 @@ parameters:
     bbapp.console.command: bin/console.php
 
     bbapp.rest_api.path: /rest/
+    bbapp.rest_api.version: 1
 
     bbapp.dbal.logger.profiling.class: BackBee\Logging\DebugStackLogger
 
