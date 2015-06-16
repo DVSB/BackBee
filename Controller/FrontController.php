@@ -31,6 +31,7 @@ use BackBee\Routing\Matcher\UrlMatcher;
 use BackBee\Routing\RequestContext;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -302,11 +303,13 @@ class FrontController implements HttpKernelInterface
             if ((null === $this->application->getBBUserToken()) || ((null !== $this->application->getBBUserToken()) && (true === $redirect_page))) {
                 $redirect = $this->application->getRenderer()->getUri($redirect);
 
-                header('Cache-Control: no-store, no-cache, must-revalidate');
-                header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
-                header('Status: 301 Moved Permanently', false, 301);
-                header('Location: '.$redirect);
-                exit();
+                $response = new RedirectResponse($redirect, 301, [
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate',
+                    'Expires' => 'Thu, 01 Jan 1970 00:00:00 GMT',
+                    ]
+                );
+
+                $this->send($response);
             }
         }
 
@@ -501,7 +504,7 @@ class FrontController implements HttpKernelInterface
      *
      * @acces private
      *
-     * @param Response $response The repsonse to filter then send
+     * @param Response $response The response to filter then send
      * @param integer  $type     The type of the request
      *                           (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      */
@@ -515,7 +518,7 @@ class FrontController implements HttpKernelInterface
 
         $response->send();
         $this->response = $response;
-        exit(0);
+        $this->application->stop();
     }
 
     /**

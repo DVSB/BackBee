@@ -199,7 +199,7 @@ class Ftp
                 }
 
                 if ($sleepBetweenRetries > 0) {
-                    sleep($sleepBetweenRetries);
+                    usleep(1000 * $sleepBetweenRetries);
                 }
 
                 $this->reconnect();
