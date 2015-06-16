@@ -53,7 +53,7 @@ class Registry implements PersistorInterface
      */
     public function persist(Config $config, array $configToPersist)
     {
-        if (true === array_key_exists('override_site', $configToPersist)) {
+        if (array_key_exists('override_site', $configToPersist)) {
             $configToPersist = array(
                 'override_site' => $configToPersist['override_site'],
             );

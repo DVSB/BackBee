@@ -108,7 +108,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
                 'bar'  => 'foo',
                 'back' => 'bee',
             ),
-        ));
+        ), 'test config extend with environment fails');
 
         // test config extend with environment and with yml filename ignore
         $config = new Config($this->test_base_dir);
@@ -127,7 +127,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
                 'bar'  => 'foo',
                 'back' => 'bee',
             ),
-        ));
+        ), 'test config extend with environment and with yml filename ignore fails');
 
         // prepare test extend with and withtout override
         $config = new Config($this->test_base_dir);
