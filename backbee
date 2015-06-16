@@ -16,10 +16,11 @@ use BackBee\Console\Console;
 use Symfony\Component\Console\Input\ArgvInput;
 
 $input = new ArgvInput();
+$context = $input->getParameterOption(array('--context', '-c'), null);
 $env = $input->getParameterOption(array('--env', '-e'), null);
 $app = $input->getParameterOption(array('--app', '-a'), 'BackBee\BBApplication');
 
-$bbapp = new $app(null, $env);
+$bbapp = new $app($context, $env);
 
 $console = new Console($bbapp);
-$console->run($input); 
+$console->run($input);
