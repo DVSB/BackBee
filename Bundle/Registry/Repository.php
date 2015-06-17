@@ -146,8 +146,8 @@ class Repository extends EntityRepository
 
     public function count($descriminator = null)
     {
-        if (is_null($identifier)) {
-            $identifier = $this->getEntityName();
+        if (null === $descriminator) {
+            $descriminator = $this->getEntityName();
         }
 
         $sql = 'SELECT count(*) as count FROM registry AS br WHERE br.%s = "%s"';
@@ -163,7 +163,7 @@ class Repository extends EntityRepository
 
     public function findAllEntities($identifier = null)
     {
-        if (is_null($identifier)) {
+        if (null === $identifier) {
             $identifier = $this->getEntityName();
         }
         $sql = 'SELECT * FROM registry AS r WHERE r.key = "identifier" AND (r.type = :identifier OR r.scope = :identifier) ORDER BY r.id';
