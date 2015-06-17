@@ -1061,12 +1061,15 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
         // annotations require custom autoloading
         AnnotationRegistry::registerAutoloadNamespaces([
-            'Symfony\Component\Validator\Constraint' => $this->getVendorDir().'/symfony/validator/',
-            'JMS\Serializer\Annotation'              => $this->getVendorDir().'/jms/serializer/src/',
+            'JMS\Serializer\Annotation' => $this->getVendorDir().'/jms/serializer/src/',
         ]);
 
         AnnotationRegistry::registerLoader(function ($classname) {
             if (0 === strpos($classname, 'BackBee')) {
+                return class_exists($classname);
+            }
+
+            if (0 === strpos($classname, 'Symfony\Component\Validator\Constraints')) {
                 return class_exists($classname);
             }
 
