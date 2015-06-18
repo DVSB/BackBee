@@ -99,9 +99,14 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
      * The optional listener classname.
      *
      * @var string
-     * @ORM\Column(type="string", name="listener")
+     * @ORM\Column(type="string", name="listener", nullable=true)
      */
     protected $_listener;
+
+    /**
+     * @var ListenerInterface
+     */
+    protected $listenerInstance;
 
     /**
      * State's constructor.
@@ -111,13 +116,13 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
      */
     public function __construct($uid = null, array $options = array())
     {
-        $this->_uid = (null === $uid) ? md5(uniqid('', true)) : $uid;
+        $this->_uid = $uid ?: md5(uniqid('', true)) ;
 
-        if (true === array_key_exists('code', $options)) {
+        if (isset($options['code'])) {
             $this->setCode($options['code']);
         }
 
-        if (true === array_key_exists('label', $options)) {
+        if (isset($options['label'])) {
             $this->setLabel($options['label']);
         }
     }
@@ -155,8 +160,8 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
      */
     public function setCode($code)
     {
-        if (false === Numeric::isInteger($code)) {
-            throw new InvalidArgumentException('The code of a workflow state has to be an integer');
+        if (!is_int($code)) {
+            throw new InvalidArgumentException('The code of a workflow state has to be an integer.');
         }
 
         $this->_code = $code;
@@ -198,6 +203,21 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
     }
 
     /**
+     * Creates an instance of the listener based on the provided namespace and return it or null
+     * if listener namespace is not setted.
+     *
+     * @return null|ListenerInterface
+     */
+    public function getListenerInstance()
+    {
+        if (null !== $this->_listener && null === $this->listenerInstance) {
+            $this->listenerInstance = new $this->_listener();
+        }
+
+        return $this->listenerInstance;
+    }
+
+    /**
      * Sets the label.
      *
      * @param type $label
@@ -229,14 +249,29 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
     /**
      * Sets the optional listener classname.
      *
-     * @param string $listener
-     *
-     * @return \BackBee\Workflow\State
-     * @codeCoverageIgnore
+     * @param mixed $listener The listener; it must implement BackBee\Workflow\ListenerInterface
+     * @return self
+     * @throws \InvalidArgumentException if provided listener is not type of null, object or string
+     * @throws \LogicException if provided listener does not implement BackBee\Workflow\ListenerInterface
      */
     public function setListener($listener = null)
     {
-        $this->_listener = $listener;
+        if (null !== $listener && !is_object($listener) && !is_string($listener)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Workflow state listener must be type of null, object or string, %s given.',
+                gettype($listener)
+            ));
+        }
+
+        if (null !== $listener && !is_subclass_of($listener, 'BackBee\Workflow\ListenerInterface')) {
+            throw new \LogicException(sprintf(
+                'Workflow state listener must implement %s.',
+                'BackBee\Workflow\ListenerInterface'
+            ));
+        }
+
+        $this->_listener = is_object($listener) ? get_class($listener) : $listener;
+        $this->listenerInstance = null;
 
         return $this;
     }
@@ -251,7 +286,7 @@ class State extends AbstractObjectIdentifiable implements \JsonSerializable
      */
     public function getLayoutUid()
     {
-        return null !== $this->getLayout() ? $this->getLayout()->getUid() : null;
+        return $this->getLayout() ? $this->getLayout()->getUid() : null;
     }
 
     /**

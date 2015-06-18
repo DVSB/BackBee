@@ -24,6 +24,9 @@
 namespace BackBee\Workflow\Listener;
 
 use BackBee\Event\Event;
+use BackBee\NestedNode\Page;
+
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
  * Listener to page events.
@@ -33,7 +36,7 @@ use BackBee\Event\Event;
  * @copyright   Lp digital system
  * @author      d.Bensid <djoudi.bensid@lp-digital.fr>
  */
-class pageListener
+class PageListener
 {
     /**
      * Occur on nestednode.page.preupdate events.
@@ -47,41 +50,30 @@ class pageListener
         $page = $event->getTarget();
         $eventArgs = $event->getEventArgs();
 
-        if (!is_a($page, 'BackBee\NestedNode\Page')) {
-            return;
-        }
-
-        if (is_a($eventArgs, 'Doctrine\ORM\Event\PreUpdateEventArgs')) {
+        if ($eventArgs instanceof PreUpdateEventArgs) {
             if ($eventArgs->hasChangedField('_workflow_state')) {
                 $old = $eventArgs->getOldValue('_workflow_state');
                 $new = $eventArgs->getNewValue('_workflow_state');
 
-                if (null !== $new && null !== $new->getListener()) {
-                    $new->getListener()->arrivedInState($event);
+                if (null !== $new && null !== $listener = $new->getListenerInstance()) {
+                    $listener->switchOnState($event);
                 }
-                if (null !== $old && null !== $old->getListener()) {
-                    $old->getListener()->outInState($event);
+
+                if (null !== $old && null !== $listener = $old->getListenerInstance()) {
+                    $listener->switchOffState($event);
                 }
             }
 
             if ($eventArgs->hasChangedField('_state')) {
-                if (!($eventArgs->getOldValue('_state') & \BackBee\NestedNode\Page::STATE_ONLINE) &&
-                        $eventArgs->getNewValue('_state') & \BackBee\NestedNode\Page::STATE_ONLINE) {
+                if (
+                    !($eventArgs->getOldValue('_state') & Page::STATE_ONLINE)
+                    && $eventArgs->getNewValue('_state') & Page::STATE_ONLINE
+                ) {
                     $event->getDispatcher()->triggerEvent('putonline', $page);
-
-                    if (null === $page->getPublishing()) {
-                        $em = $event->getApplication()
-                                ->getEntityManager();
-
-                        $datetime = new \DateTime();
-                        $page->setPublishing($datetime);
-                        $page->setModified($datetime);
-
-                        $em->getUnitOfWork()
-                                ->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBee\NestedNode\Page'), $page);
-                    }
-                } elseif ($eventArgs->getOldValue('_state') & \BackBee\NestedNode\Page::STATE_ONLINE &&
-                        !($eventArgs->getNewValue('_state') & \BackBee\NestedNode\Page::STATE_ONLINE)) {
+                } elseif (
+                    $eventArgs->getOldValue('_state') & Page::STATE_ONLINE
+                    && !($eventArgs->getNewValue('_state') & Page::STATE_ONLINE)
+                ) {
                     $event->getDispatcher()->triggerEvent('putoffline', $page);
                 }
             }

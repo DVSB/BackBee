@@ -26,16 +26,15 @@ namespace BackBee\Workflow;
 use BackBee\Event\Event;
 
 /**
- * class for a renderer.
+ * Listener of workflow state must implement this interface to be valid.
  *
  * @category    BackBee
- *
  * @copyright   Lp digital system
  * @author      d.Bensid <djoudi.bensid@lp-digital.fr>
  */
-interface WorkflowListenerInterface
+interface ListenerInterface
 {
-    public function arrivedInState(Event $event);
+    public function switchOnState(Event $event);
 
-    public function outInState(Event $event);
+    public function switchOffState(Event $event);
 }
