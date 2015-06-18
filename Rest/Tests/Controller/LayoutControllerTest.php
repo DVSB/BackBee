@@ -77,7 +77,6 @@ class LayoutControllerTest extends RestTestCase
             ->setCode(2)
             ->setLabel('Layout 1 state')
             ->setLayout($this->siteLayout)
-            ->setListener('stdClass')
         ;
 
         $this->em->persist($state);
