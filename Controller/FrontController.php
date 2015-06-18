@@ -310,6 +310,7 @@ class FrontController implements HttpKernelInterface
                 );
 
                 $this->send($response);
+                $this->application->stop();
             }
         }
 
