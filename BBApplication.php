@@ -894,7 +894,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
             $finder = new Finder();
             $finder->files()->name('*Command.php')->in($dir);
-            $ns = $bundle->getNamespace().'\\Command';
+            $ns = (new \ReflectionClass($bundle))->getNamespaceName().'\\Command';
 
             foreach ($finder as $file) {
                 if ($relativePath = $file->getRelativePath()) {
