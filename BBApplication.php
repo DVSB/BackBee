@@ -489,12 +489,12 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     public function getConfigDir()
     {
-        return $this->getRepository().'/'.'Config';
+        return $this->getRepository().DIRECTORY_SEPARATOR.'Config';
     }
 
     public function getBBConfigDir()
     {
-        return $this->getBaseRepository().'/'.'Config';
+        return $this->getBaseRepository().DIRECTORY_SEPARATOR.'Config';
     }
 
     /**
@@ -1112,24 +1112,24 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
             return;
         }
 
-        if (null === $doctrine_config = $this->getConfig()->getRawSection('doctrine')) {
+        if (null === $doctrineConfig = $this->getConfig()->getRawSection('doctrine')) {
             throw new BBException('None database configuration found');
         }
 
-        if (!array_key_exists('dbal', $doctrine_config)) {
+        if (!isset($doctrineConfig['dbal'])) {
             throw new BBException('None dbal configuration found');
         }
 
-        if (!array_key_exists('proxy_ns', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['proxy_ns'] = 'Proxies';
+        if (!isset($doctrineConfig['dbal']['proxy_ns'])) {
+            $doctrineConfig['dbal']['proxy_ns'] = 'Proxies';
         }
 
-        if (!array_key_exists('proxy_dir', $doctrine_config['dbal'])) {
-            $doctrine_config['dbal']['proxy_dir'] = $this->getCacheDir().'/'.'Proxies';
+        if (!isset($doctrineConfig['dbal']['proxy_dir'])) {
+            $doctrineConfig['dbal']['proxy_dir'] = $this->getCacheDir().'/'.'Proxies';
         }
 
-        if (array_key_exists('orm', $doctrine_config)) {
-            $doctrine_config['dbal']['orm'] = $doctrine_config['orm'];
+        if (isset($doctrineConfig['orm'])) {
+            $doctrineConfig['dbal']['orm'] = $doctrineConfig['orm'];
         }
 
         // Init ORM event
@@ -1139,7 +1139,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         $this->container->setDefinition('doctrine.event_manager', $definition);
 
         try {
-            $logger_id = 'logging';
+            $loggerId = 'logging';
 
             if ($this->isDebugMode()) {
                 // doctrine data collector
@@ -1147,17 +1147,16 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
                     'default',
                     $this->getContainer()->get('doctrine.dbal.logger.profiling')
                 );
-                $logger_id = 'doctrine.dbal.logger.profiling';
+                $loggerId = 'doctrine.dbal.logger.profiling';
             }
 
             $definition = new Definition('Doctrine\ORM\EntityManager', [
-                $doctrine_config['dbal'],
-                new Reference($logger_id),
+                $doctrineConfig['dbal'],
+                new Reference($loggerId),
                 new Reference('doctrine.event_manager'),
                 new Reference('service_container'),
             ]);
-            $definition->setFactoryClass('BackBee\Util\Doctrine\EntityManagerCreator');
-            $definition->setFactoryMethod('create');
+            $definition->setFactory(['BackBee\Util\Doctrine\EntityManagerCreator', 'create']);
             $this->container->setDefinition('em', $definition);
 
             $this->debug(sprintf('%s(): Doctrine EntityManager initialized', __METHOD__));

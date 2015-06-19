@@ -48,119 +48,100 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
 {
     const RANDOM_SERVICE_NEW_SIZE_VALUE = 42;
 
-    /**
-     * [$container description].
-     *
-     * @var [type]
-     */
     private $container;
-
-    /**
-     * [$services_yml_array description].
-     *
-     * @var array
-     */
-    private $services_array;
 
     /**
      * setup the environment for test.
      */
     public function setUp()
     {
-        $this->services_yml_array = array(
-            'parameters' => array(
+        $servicesYmlArray = [
+            'parameters' => [
                 'service.class' => 'BackBee\DependencyInjection\Tests\RandomService',
                 'size_one'      => 300,
                 'size_two'      => 8000,
                 'size_three'    => 44719,
-            ),
-            'services'   => array(
-                'service_one' => array(
+            ],
+            'services'   => [
+                'service_one' => [
                     'class'     => '%service.class%',
-                    'arguments' => array('%size_two%'),
-                ),
-                'service_two' => array(
+                    'arguments' => ['%size_two%'],
+                ],
+                'service_two' => [
                     'class'     => '%service.class%',
-                    'calls'     => array(
-                        array('setSize', array('%size_three%')),
-                    ),
-                    'tags'  => array(
-                        array('name' => 'dumpable'),
-                    ),
-                ),
-                'service_three' => array(
+                    'calls'     => [
+                        ['setSize', ['%size_three%']],
+                    ],
+                    'tags'  => [
+                        ['name' => 'dumpable'],
+                    ],
+                ],
+                'service_three' => [
                     'class'     => '%service.class%',
-                    'calls'     => array(
-                        array('setClassProxy', array('')),
-                    ),
-                    'tags'  => array(
-                        array('name' => 'dumpable'),
-                    ),
-                ),
-                'service_four' => array(
+                    'calls'     => [
+                        ['setClassProxy', ['']],
+                    ],
+                    'tags'  => [
+                        ['name' => 'dumpable'],
+                    ],
+                ],
+                'service_four' => [
                     'class' => '%service.class%',
-                    'tags'  => array(
-                        array('name' => 'foo'),
-                        array('name' => 'bar'),
-                    ),
-                ),
-                'service_five' => array(
+                    'tags'  => [
+                        ['name' => 'foo'],
+                        ['name' => 'bar'],
+                    ],
+                ],
+                'service_five' => [
                     'synthetic' => true,
-                ),
-                'service_six' => array(
+                ],
+                'service_six' => [
                     'class'  => '%service.class%',
                     'public' => false,
-                ),
-                'service_seven' => array(
+                ],
+                'service_seven' => [
                     'class'        => '%service.class%',
                     'scope'        => 'prototype',
                     'file'         => '/foo/bar',
-                    'configurator' => array('@service_six', 'getSize'),
-                ),
-                'service_eight' => array(
-                    'class'          => '%service.class%',
-                    'factory_class'  => '/foo/bar/ServiceFactory',
-                    'factory_method' => 'get',
-                ),
-                'service_nine' => array(
-                    'class'           => '%service.class%',
-                    'factory_service' => 'service_zero',
-                    'factory_method'  => 'get',
-                ),
-                'service_ten' => array(
+                    'configurator' => ['@service_six', 'getSize'],
+                ],
+                'service_eight' => [
+                    'class'   => '%service.class%',
+                    'factory' => ['\DateTime', 'getLastErrors'],
+                ],
+                'service_nine' => [
+                    'class'   => '%service.class%',
+                    'factory' => ['@service_zero', 'get'],
+                ],
+                'service_ten' => [
                     'abstract' => true,
-                    'calls'    => array(
-                        array('setSize', array(8)),
-                    ),
-                ),
-                'service_eleven' => array(
+                    'calls'    => [
+                        ['setSize', [8]],
+                    ],
+                ],
+                'service_eleven' => [
                     'class'  => '%service.class%',
                     'parent' => 'service_ten',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
 
         $this->container = new Container();
 
-        vfsStream::setup('directory', 0777, array(
-            'services.yml' => Yaml::dump($this->services_yml_array),
-        ));
+        vfsStream::setup('directory', 0777, [
+            'services.yml' => Yaml::dump($servicesYmlArray),
+        ]);
 
         ServiceLoader::loadServicesFromYamlFile($this->container, vfsStream::url('directory'));
-
         $this->container->get('service_two')->setSize(self::RANDOM_SERVICE_NEW_SIZE_VALUE);
-        // $this->container->get('service_three');
     }
 
-    /**
-     * @covers ::__construct
-     */
     public function testGetParameter()
     {
         $dumper = new PhpArrayDumper($this->container);
 
         $container = new ContainerProxy();
-        $container->init(unserialize($dumper->dump(array('do_compile' => false))));
+        $container->init(unserialize($dumper->dump(['do_compile' => false])));
 
         $this->assertEquals($this->container->getParameterBag()->all(), $container->getParameterBag()->all());
 
@@ -168,15 +149,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::get
-     * @covers ::tryLoadDefinitionFromRaw
-     * @covers ::tryRestoreDumpableService
-     * @covers ::buildDefinition
-     * @covers ::setDefinitionClass
-     * @covers ::setDefinitionArguments
-     * @covers ::convertArgument
-     *
      * @depends testGetParameter
      */
     public function testGet(ContainerInterface $container)
@@ -192,14 +164,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::get
-     * @covers ::tryLoadDefinitionFromRaw
-     * @covers ::tryRestoreDumpableService
-     * @covers ::setDefinitionTags
-     * @covers ::setDefinitionMethodCalls
-     * @covers ::convertArgument
-     *
      * @depends testGet
      */
     public function testTryRestoreDumpableService(ContainerInterface $container)
@@ -228,10 +192,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::has
-     * @covers ::tryLoadDefinitionFromRaw
-     *
      * @depends testTryRestoreDumpableService
      */
     public function testHas(ContainerInterface $container)
@@ -255,10 +215,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::hasDefinition
-     * @covers ::tryLoadDefinitionFromRaw
-     *
      * @depends testHas
      */
     public function testHasDefinition(ContainerInterface $container)
@@ -282,20 +238,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers ::__construct
-     * @covers ::getDefinition
-     * @covers ::tryLoadDefinitionFromRaw
-     * @covers ::buildDefinition
-     * @covers ::setDefinitionTags
-     * @covers ::setDefinitionProperties
-     * @covers ::setDefinitionFactoryClass
-     * @covers ::setDefinitionFactoryService
-     * @covers ::setDefinitionFactoryMethod
-     * @covers ::setDefinitionConfigurator
-     * @covers ::convertArgument
-     *
-     * @covers ::loadRawDefinitions
-     *
      * @depends testHasDefinition
      */
     public function testGetDefinition(ContainerInterface $container)
@@ -331,10 +273,13 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('getSize', $configurator[1]);
 
         // Test restoration of service factory class, factory service and factory method
-        $this->assertEquals($container->getDefinition('service_eight')->getFactoryClass(), '/foo/bar/ServiceFactory');
-        $this->assertEquals($container->getDefinition('service_eight')->getFactoryMethod(), 'get');
-        $this->assertEquals($container->getDefinition('service_nine')->getFactoryService(), 'service_zero');
-        $this->assertEquals($container->getDefinition('service_nine')->getFactoryMethod(), 'get');
+        $factory = $container->getDefinition('service_eight')->getFactory();
+        $this->assertEquals('\DateTime', $factory[0]);
+        $this->assertEquals('getLastErrors', $factory[1]);
+
+        $factory = $container->getDefinition('service_nine')->getFactory();
+        $this->assertEquals('service_zero', $factory[0]->__toString());
+        $this->assertEquals('get', $factory[1]);
 
         // Test restoration of service with parent (without compilation)
         $this->assertTrue($container->hasDefinition('service_ten'));
@@ -361,9 +306,6 @@ class ContainerProxyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($parent_method_calls, $container->getDefinition('service_eleven')->getMethodCalls());
     }
 
-    /**
-     * @covers ::isCompiled
-     */
     public function testIsCompiled()
     {
         // test that ContainerProxy::isCompiled return false value

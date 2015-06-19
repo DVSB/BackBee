@@ -58,7 +58,7 @@ class BootstrapResolver
      *
      * @var string
      */
-    private $base_dir;
+    private $baseDir;
 
     /**
      * application's context.
@@ -77,13 +77,13 @@ class BootstrapResolver
     /**
      * BootstrapResolver's constructor.
      *
-     * @param string $base_dir    base directory from where we define in which directory to look into
+     * @param string $baseDir     base directory from where we define in which directory to look into
      * @param string $context     application's context
      * @param string $environment application's environment
      */
-    public function __construct($base_dir, $context, $environment)
+    public function __construct($baseDir, $context, $environment)
     {
-        $this->base_dir = $base_dir;
+        $this->baseDir = $baseDir;
         $this->context = null === $context ? BBApplication::DEFAULT_CONTEXT : $context;
         $this->environment = null === $environment ? BBApplication::DEFAULT_ENVIRONMENT : $environment;
     }
@@ -98,24 +98,24 @@ class BootstrapResolver
      */
     public function getBootstrapParameters()
     {
-        $bootstrap_filepath = null;
+        $bootstrapFilepath = null;
 
-        $directories = BootstrapDirectory::getDirectories($this->base_dir, $this->context, $this->environment);
+        $directories = BootstrapDirectory::getDirectories($this->baseDir, $this->context, $this->environment);
         foreach ($directories as $directory) {
-            $bootstrap_filepath = $directory.DIRECTORY_SEPARATOR.self::BOOTSTRAP_FILENAME;
-            if (true === is_file($bootstrap_filepath) && true === is_readable($bootstrap_filepath)) {
+            $bootstrapFilepath = $directory.DIRECTORY_SEPARATOR.self::BOOTSTRAP_FILENAME;
+            if (is_file($bootstrapFilepath) && is_readable($bootstrapFilepath)) {
                 break;
             }
 
-            $bootstrap_filepath = null;
+            $bootstrapFilepath = null;
         }
 
-        if (null === $bootstrap_filepath) {
+        if (null === $bootstrapFilepath) {
             throw new BootstrapFileNotFoundException($directories);
         }
 
-        $parameters = Yaml::parse($bootstrap_filepath);
-        $parameters['bootstrap_filepath'] = $bootstrap_filepath;
+        $parameters = Yaml::parse(file_get_contents($bootstrapFilepath));
+        $parameters['bootstrap_filepath'] = $bootstrapFilepath;
 
         return $parameters;
     }

@@ -80,8 +80,7 @@ services:
 
     request:
         class: %bbapp.request.class%
-        factory_class: %bbapp.request.class%
-        factory_method: createFromGlobals
+        factory: [%bbapp.request.class%, createFromGlobals]
 
     controller:
         class:      %bbapp.controller.class%
@@ -235,8 +234,7 @@ services:
 
     doctrine.connection.default:
         class: Doctrine\DBAL\Connection
-        factory_service: em
-        factory_method: getConnection
+        factory: [@em, getConnection]
 
     doctrine:
         class: BackBee\Doctrine\Registry

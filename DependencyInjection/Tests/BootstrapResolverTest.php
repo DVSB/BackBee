@@ -40,62 +40,15 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
      *
      * @var string
      */
-    private $resources_base_dir;
+    private $resourcesBaseDir;
 
     /**
      * define the test resources directory.
      */
     public function setUp()
     {
-        $this->resources_base_dir = __DIR__.'/BootstrapResolverTest_Resources';
+        $this->resourcesBaseDir = __DIR__.'/BootstrapResolverTest_Resources';
     }
-
-    /**
-     * Test BootstrapResolver::getBootstrapPotentialsDirectories(), the number and the order of
-     * directory this method returns.
-     */
-    /*public function testGetBootstrapPotentialsDirectories()
-    {
-        $context = 'api';
-        $environment = 'preprod';
-
-        // test WITHOUT context and WITHOUT environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, null, null);
-        $directories = array(
-            0 => __DIR__ . DIRECTORY_SEPARATOR . 'Config'
-        );
-
-        $this->assertEquals($directories, $bootstrap_resolver->getBootstrapPotentialsDirectories());
-
-        // test WITHOUT context and WITH environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, null, $environment);
-        $directories = array(
-            0 => __DIR__ . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $environment,
-            1 => __DIR__ . DIRECTORY_SEPARATOR . 'Config'
-        );
-
-        $this->assertEquals($directories, $bootstrap_resolver->getBootstrapPotentialsDirectories());
-
-        // test WITH context and WITHOUT environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, $context, null);
-        $directories = array(
-            0 => implode(DIRECTORY_SEPARATOR, array(__DIR__, $context, 'Config')),
-            1 => __DIR__ . DIRECTORY_SEPARATOR . 'Config'
-        );
-
-        $this->assertEquals($directories, $bootstrap_resolver->getBootstrapPotentialsDirectories());
-
-        // test WITH context and WITH environment
-        $bootstrap_resolver = new BootstrapResolver(__DIR__, $context, $environment);
-        $directories = array(
-            0 => implode(DIRECTORY_SEPARATOR, array(__DIR__, $context, 'Config', $environment)),
-            1 => implode(DIRECTORY_SEPARATOR, array(__DIR__, $context, 'Config')),
-            2 => __DIR__ . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . $environment,
-            3 => __DIR__ . DIRECTORY_SEPARATOR . 'Config'
-        );
-
-        $this->assertEquals($directories, $bootstrap_resolver->getBootstrapPotentialsDirectories());
-    }*/
 
     /**
      * test raise of BootstrapFileNotFoundException by providing wrong base directory to BootstrapResolver's
@@ -103,7 +56,7 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
      */
     public function testRaiseBootstrapFileNotFoundException()
     {
-        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir.'/Config', null, null);
+        $bootstrap_resolver = new BootstrapResolver($this->resourcesBaseDir.'/Config', null, null);
 
         try {
             $bootstrap_resolver->getBootstrapParameters();
@@ -123,45 +76,45 @@ class BootstrapResolverTest extends \PHPUnit_Framework_TestCase
         $environment = 'preprod';
 
         // test to get bootstrap parameters WITHOUT context and WITHOUT environment
-        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, null, null);
+        $bootstrap_resolver = new BootstrapResolver($this->resourcesBaseDir, null, null);
         $this->assertEquals(
             array(
                 'context'            => 'default',
                 'environment'        => '',
-                'bootstrap_filepath' => $this->resources_base_dir.'/Config/bootstrap.yml',
+                'bootstrap_filepath' => $this->resourcesBaseDir.'/Config/bootstrap.yml',
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
 
         // test to get bootstrap parameters WITH context and WITH environment
-        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, $context, $environment);
+        $bootstrap_resolver = new BootstrapResolver($this->resourcesBaseDir, $context, $environment);
         $this->assertEquals(
             array(
                 'context'            => 'api',
                 'environment'        => 'preprod',
-                'bootstrap_filepath' => $this->resources_base_dir.'/api/Config/preprod/bootstrap.yml',
+                'bootstrap_filepath' => $this->resourcesBaseDir.'/api/Config/preprod/bootstrap.yml',
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
 
         // test to get bootstrap parameters WITH context and WITHOUT environment
-        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, $context, null);
+        $bootstrap_resolver = new BootstrapResolver($this->resourcesBaseDir, $context, null);
         $this->assertEquals(
             array(
                 'context'            => 'api',
                 'environment'        => '',
-                'bootstrap_filepath' => $this->resources_base_dir.'/api/Config/bootstrap.yml',
+                'bootstrap_filepath' => $this->resourcesBaseDir.'/api/Config/bootstrap.yml',
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );
 
         // test to get bootstrap parameters WITHOUT context and WITH environment
-        $bootstrap_resolver = new BootstrapResolver($this->resources_base_dir, null, $environment);
+        $bootstrap_resolver = new BootstrapResolver($this->resourcesBaseDir, null, $environment);
         $this->assertEquals(
             array(
                 'context'            => 'default',
                 'environment'        => 'preprod',
-                'bootstrap_filepath' => $this->resources_base_dir.'/Config/preprod/bootstrap.yml',
+                'bootstrap_filepath' => $this->resourcesBaseDir.'/Config/preprod/bootstrap.yml',
             ),
             $bootstrap_resolver->getBootstrapParameters()
         );

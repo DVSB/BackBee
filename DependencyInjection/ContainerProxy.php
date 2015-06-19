@@ -41,45 +41,45 @@ class ContainerProxy extends Container
      *
      * @var array
      */
-    private $raw_definitions;
+    private $rawDefinitions;
 
     /**
      * raw definitions id provided by container dump array (keys of container dump array services).
      *
      * @var array
      */
-    private $raw_definitions_id;
+    private $rawDefinitionsId;
 
     /**
      * shows if the container has been compiled before being dump or not.
      *
      * @var boolean
      */
-    private $already_compiled;
+    private $alreadyCompiled;
 
     /**
      * ContainerProxy's constructor;.
      *
-     * @param array $container_dump the container dump from where we can restore entirely the container
+     * @param array $containerDump the container dump from where we can restore entirely the container
      */
-    public function init(array $container_dump = array())
+    public function init(array $containerDump = [])
     {
-        if (0 < count($container_dump)) {
-            $this->raw_definitions = $container_dump['services'];
+        if (0 < count($containerDump)) {
+            $this->rawDefinitions = $containerDump['services'];
 
-            if (true === isset($container_dump['parameters'])) {
-                $this->getParameterBag()->add($container_dump['parameters']);
+            if (isset($containerDump['parameters'])) {
+                $this->getParameterBag()->add($containerDump['parameters']);
             }
 
-            if (true === isset($container_dump['aliases'])) {
-                $this->addAliases($container_dump['aliases']);
+            if (isset($containerDump['aliases'])) {
+                $this->addAliases($containerDump['aliases']);
             }
 
-            $this->already_compiled = $container_dump['is_compiled'];
-        } elseif (true === $this->hasParameter('services_dump') && true === $this->hasParameter('is_compiled')) {
-            $this->raw_definitions = unserialize($this->getParameter('services_dump'));
+            $this->alreadyCompiled = $containerDump['is_compiled'];
+        } elseif ($this->hasParameter('services_dump') && $this->hasParameter('is_compiled')) {
+            $this->rawDefinitions = unserialize($this->getParameter('services_dump'));
             $this->getParameterBag()->remove('services_dump');
-            $this->already_compiled = $this->getParameter('is_compiled');
+            $this->alreadyCompiled = $this->getParameter('is_compiled');
             $this->getParameterBag()->remove('is_compiled');
         } else {
             throw new \InvalidArgumentException(
@@ -87,7 +87,7 @@ class ContainerProxy extends Container
             );
         }
 
-        $this->raw_definitions_id = array_keys($this->raw_definitions);
+        $this->rawDefinitionsId = array_keys($this->rawDefinitions);
         $this->is_restored = true;
     }
 
@@ -98,7 +98,7 @@ class ContainerProxy extends Container
      */
     public function isCompiled()
     {
-        return $this->already_compiled;
+        return $this->alreadyCompiled;
     }
 
     /**
@@ -106,13 +106,13 @@ class ContainerProxy extends Container
      */
     public function set($id, $service, $scope = self::SCOPE_CONTAINER)
     {
-        $definition = true === $this->hasDefinition($id) ? $this->getDefinition($id) : null;
-        if (null !== $definition && true === $definition->isSynthetic()) {
+        $definition = $this->hasDefinition($id) ? $this->getDefinition($id) : null;
+        if (null !== $definition && $definition->isSynthetic()) {
             foreach ($definition->getMethodCalls() as $method) {
-                $arguments = array();
+                $arguments = [];
                 foreach ($method[1] as $argument) {
-                    if (true === is_object($argument) && true === ($argument instanceof Reference)) {
-                        if (false === $this->has($argument->__toString())) {
+                    if ($argument instanceof Reference) {
+                        if (!$this->has($argument->__toString())) {
                             continue;
                         }
 
@@ -122,7 +122,7 @@ class ContainerProxy extends Container
                     $arguments[] = $argument;
                 }
 
-                call_user_func_array(array($service, $method[0]), $arguments);
+                call_user_func_array([$service, $method[0]], $arguments);
             }
         }
 
@@ -180,11 +180,11 @@ class ContainerProxy extends Container
     private function tryLoadDefinitionFromRaw($id)
     {
         $definition = null;
-        if (is_string($id) && is_array($this->raw_definitions_id) && in_array($id, $this->raw_definitions_id)) {
-            $this->setDefinition($id, $definition = $this->buildDefinition($this->raw_definitions[$id]));
-            $this->raw_definitions_id = array_flip($this->raw_definitions_id);
-            unset($this->raw_definitions_id[$id]);
-            $this->raw_definitions_id = array_flip($this->raw_definitions_id);
+        if (is_string($id) && is_array($this->rawDefinitionsId) && in_array($id, $this->rawDefinitionsId)) {
+            $this->setDefinition($id, $definition = $this->buildDefinition($this->rawDefinitions[$id]));
+            $this->rawDefinitionsId = array_flip($this->rawDefinitionsId);
+            unset($this->rawDefinitionsId[$id]);
+            $this->rawDefinitionsId = array_flip($this->rawDefinitionsId);
         }
 
         return $definition;
@@ -195,7 +195,7 @@ class ContainerProxy extends Container
      */
     private function loadRawDefinitions()
     {
-        foreach ($this->raw_definitions_id as $id) {
+        foreach ($this->rawDefinitionsId as $id) {
             $this->tryLoadDefinitionFromRaw($id);
         }
     }
@@ -210,21 +210,19 @@ class ContainerProxy extends Container
     private function buildDefinition(array $array)
     {
         $definition = null;
-        if (true === array_key_exists('parent', $array)) {
+        if (isset($array['parent'])) {
             $definition = new DefinitionDecorator($array['parent']);
         } else {
             $definition = new Definition();
         }
 
-        if (true === array_key_exists('synthetic', $array)) {
+        if (isset($array['synthetic'])) {
             $definition->setSynthetic($array['synthetic']);
         }
 
         $this->setDefinitionClass($definition, $array);
         $this->setDefinitionArguments($definition, $array);
-        $this->setDefinitionFactoryClass($definition, $array);
-        $this->setDefinitionFactoryService($definition, $array);
-        $this->setDefinitionFactoryMethod($definition, $array);
+        $this->setDefinitionFactory($definition, $array);
         $this->setDefinitionTags($definition, $array);
         $this->setDefinitionMethodCalls($definition, $array);
         $this->setDefinitionProperties($definition, $array);
@@ -262,41 +260,20 @@ class ContainerProxy extends Container
     }
 
     /**
-     * Set the definition factory class into definition object if it exists.
+     * Set the definition factory into definition object if it exists.
      *
      * @param Definition $definition definition object to hydrate
      * @param array      $array      raw definition datas
      */
-    private function setDefinitionFactoryClass(Definition $definition, array $array)
+    private function setDefinitionFactory(Definition $definition, array $array)
     {
-        if (true === array_key_exists('factory_class', $array)) {
-            $definition->setFactoryClass($array['factory_class']);
-        }
-    }
+        if (isset($array['factory'])) {
+            $factory = [];
+            foreach ($array['factory'] as $argument) {
+                $factory[] = $this->convertArgument($argument);
+            }
 
-    /**
-     * Set the definition factory service into definition object if it exists.
-     *
-     * @param Definition $definition definition object to hydrate
-     * @param array      $array      raw definition datas
-     */
-    private function setDefinitionFactoryService(Definition $definition, array $array)
-    {
-        if (true === array_key_exists('factory_service', $array)) {
-            $definition->setFactoryService($array['factory_service']);
-        }
-    }
-
-    /**
-     * Set the definition factory method into definition object if it exists.
-     *
-     * @param Definition $definition definition object to hydrate
-     * @param array      $array      raw definition datas
-     */
-    private function setDefinitionFactoryMethod(Definition $definition, array $array)
-    {
-        if (true === array_key_exists('factory_method', $array)) {
-            $definition->setFactoryMethod($array['factory_method']);
+            $definition->setFactory($factory);
         }
     }
 
@@ -309,7 +286,7 @@ class ContainerProxy extends Container
      */
     private function convertArgument($argument)
     {
-        if (true === is_string($argument) && 0 < strlen($argument) && '@' === $argument[0]) {
+        if (is_string($argument) && 0 < strlen($argument) && '@' === $argument[0]) {
             $argument = new Reference(substr($argument, 1));
         }
 
@@ -324,8 +301,8 @@ class ContainerProxy extends Container
      */
     private function setDefinitionTags(Definition $definition, array $array)
     {
-        if (true === array_key_exists('tags', $array)) {
-            if (false === is_array($array['tags'])) {
+        if (isset($array['tags'])) {
+            if (!is_array($array['tags'])) {
                 throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s".', $id));
             }
 
@@ -341,7 +318,7 @@ class ContainerProxy extends Container
                 unset($tag['name']);
 
                 foreach ($tag as $attribute => $value) {
-                    if (false === is_scalar($value)) {
+                    if (!is_scalar($value)) {
                         throw new InvalidArgumentException(sprintf(
                             'A "tags" attribute must be of a scalar-type for service "%s", tag "%s".',
                             $id,
@@ -363,10 +340,10 @@ class ContainerProxy extends Container
      */
     private function setDefinitionMethodCalls(Definition $definition, array $array)
     {
-        if (true === array_key_exists('calls', $array)) {
+        if (isset($array['calls'])) {
             foreach ($array['calls'] as $call) {
-                $args = array();
-                if (true === isset($call[1])) {
+                $args = [];
+                if (isset($call[1])) {
                     foreach ($call[1] as $arg) {
                         $args[] = $this->convertArgument($arg);
                     }
@@ -385,9 +362,9 @@ class ContainerProxy extends Container
      */
     private function setDefinitionConfigurator(Definition $definition, array $array)
     {
-        if (true === array_key_exists('configurator', $array)) {
+        if (isset($array['configurator'])) {
             $configurator = $array['configurator'];
-            if (true === is_array($configurator)) {
+            if (is_array($configurator)) {
                 $configurator[0] = $this->convertArgument($configurator[0]);
             }
 
@@ -403,19 +380,19 @@ class ContainerProxy extends Container
      */
     private function setDefinitionProperties(Definition $definition, array $array)
     {
-        if (true === array_key_exists('public', $array)) {
+        if (isset($array['public'])) {
             $definition->setPublic($array['public']);
         }
 
-        if (true === array_key_exists('abstract', $array)) {
+        if (isset($array['abstract'])) {
             $definition->setAbstract($array['abstract']);
         }
 
-        if (true === array_key_exists('scope', $array)) {
+        if (isset($array['scope'])) {
             $definition->setScope($array['scope']);
         }
 
-        if (true === array_key_exists('file', $array)) {
+        if (isset($array['file'])) {
             $definition->setFile($array['file']);
         }
     }
