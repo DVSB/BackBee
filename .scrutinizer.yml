@@ -1,6 +1,7 @@
 filter:
     excluded_paths:
         - 'vendor/*'
+        - 'Tests/*'
 
 before_commands:
     - 'composer install --no-interaction --no-scripts'
@@ -60,4 +61,4 @@ tools:
 
 build_failure_conditions:
     - 'elements.rating(<= D).new.exists'
-    - 'issues.severity(>= MINOR).new.exists'
+    - 'issues.severity(>= MAJOR).new.exists'
