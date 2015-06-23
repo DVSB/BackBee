@@ -344,7 +344,7 @@ class Yaml extends AbstractClassWrapper
             }
 
             try {
-                $yamlDatas = parserYaml::parse($this->_path);
+                $yamlDatas = parserYaml::parse(file_get_contents($this->_path));
             } catch (ParseException $e) {
                 throw new ClassWrapperException($e->getMessage());
             }
