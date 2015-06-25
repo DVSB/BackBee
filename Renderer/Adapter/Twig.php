@@ -39,48 +39,47 @@ use BackBee\Renderer\Exception\RendererException;
 class Twig extends AbstractRendererAdapter
 {
     /**
-     * @var BackBee\Renderer\Adapter\TwigLoaderFilesystem
-     */
-    private $loader;
-
-    /**
-     * @var Twig_Environment
-     */
-    private $twig;
-
-    /**
      * Extensions to include in searching file.
      *
      * @var array
      */
-    protected $extensions = array(
+    protected $extensions = [
         '.twig',
         '.html.twig',
         '.xml.twig',
-    );
+    ];
+
+    /**
+     * @var \Twig_Environment
+     */
+    protected $twig;
+
+    /**
+     * @var TwigLoaderFilesystem
+     */
+    private $loader;
 
     /**
      * Twig adapter constructor.
      *
      * @param AbstractRenderer $renderer
      */
-    public function __construct(AbstractRenderer $renderer)
+    public function __construct(AbstractRenderer $renderer, array $config = [])
     {
-        parent::__construct($renderer);
+        parent::__construct($renderer, $config);
 
-        $this->loader = new TwigLoaderFilesystem(array());
+        $this->loader = new TwigLoaderFilesystem([]);
 
         $application = $this->renderer->getApplication();
 
-        $this->twig = new \Twig_Environment($this->loader);
+        $this->twig = new \Twig_Environment($this->loader, $config);
 
-        if (true === $application->isDebugMode()) {
+        if ($application->isDebugMode() || (isset($config['debug']) && true === $config['debug'])) {
             $this->twig->enableDebug();
             $this->twig->addExtension(new \Twig_Extension_Debug());
-        } elseif (false === $application->isClientSAPI()) {
+        } elseif ($application->isClientSAPI()) {
             $this->twig->enableAutoReload();
-            $cache_directory = $application->getCacheDir().DIRECTORY_SEPARATOR.'twig';
-            $this->setTwigCache($cache_directory);
+            $this->setTwigCache($application->getCacheDir().DIRECTORY_SEPARATOR.'twig');
         }
     }
 
@@ -97,29 +96,27 @@ class Twig extends AbstractRendererAdapter
     /**
      * Set Twig cache directory.
      *
-     * @param string $cacheDirectory
+     * @param string $cacheDir
      */
-    public function setTwigCache($cacheDirectory)
+    public function setTwigCache($cacheDir)
     {
-        if (
-            false === is_dir($cacheDirectory)
-            && (false === is_writable(dirname($cacheDirectory)) || false === @mkdir($cacheDirectory, 0755))
-        ) {
+        if (!is_dir($cacheDir) && (!is_writable(dirname($cacheDir)) || false === @mkdir($cacheDir, 0755))) {
             throw new RendererException(
-                sprintf('Unable to create twig cache "%s"', $cacheDirectory),
+                sprintf('Unable to create twig cache "%s"', $cacheDir),
                 RendererException::RENDERING_ERROR
             );
         }
 
-        if (false === is_writable($cacheDirectory)) {
+        if (!is_writable($cacheDir)) {
             throw new RendererException(
-                sprintf('Twig cache "%s" is not writable', $cacheDirectory),
+                sprintf('Twig cache "%s" is not writable', $cacheDir),
                 RendererException::RENDERING_ERROR
             );
         }
 
-        $this->twig->setCache($cacheDirectory);
+        $this->twig->setCache($cacheDir);
     }
+
     /**
      * @see BackBee\Renderer\RendererAdapterInterface::getManagedFileExtensions()
      */
@@ -173,7 +170,7 @@ class Twig extends AbstractRendererAdapter
      *
      * @return string
      */
-    public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
+    public function renderTemplate($filename, array $templateDir, array $params = [], array $vars = [])
     {
         $this->addDirPathIntoLoaderIfNotExists($templateDir);
         $render = '';
@@ -185,7 +182,9 @@ class Twig extends AbstractRendererAdapter
             throw $fe;
         } catch (\Exception $e) {
             throw new RendererException(
-                $e->getMessage().' in '.$filename, RendererException::RENDERING_ERROR, $e
+                sprintf('%s in %s.', $e->getMessage(), $filename),
+                RendererException::RENDERING_ERROR,
+                $e
             );
         }
 

@@ -48,7 +48,10 @@ class phtml extends AbstractRendererAdapter
      *
      * @var array
      */
-    protected $includeExtensions = array('.phtml', '.php');
+    protected $includeExtensions = [
+        '.phtml',
+        '.php',
+    ];
 
     /**
      * @var array
@@ -61,14 +64,14 @@ class phtml extends AbstractRendererAdapter
     private $vars;
 
     /**
-     * @param AbstractRenderer $renderer [description]
+     * @param AbstractRenderer $renderer
      */
-    public function __construct(AbstractRenderer $renderer)
+    public function __construct(AbstractRenderer $renderer, array $config = [])
     {
-        parent::__construct($renderer);
+        parent::__construct($renderer, $config);
 
-        $this->params = array();
-        $this->vars = array();
+        $this->params = [];
+        $this->vars = [];
     }
 
     /**
@@ -131,7 +134,7 @@ class phtml extends AbstractRendererAdapter
         return is_readable($filename);
     }
 
-    public function renderTemplate($filename, array $templateDir, array $params = array(), array $vars = array())
+    public function renderTemplate($filename, array $templateDir, array $params = [], array $vars = [])
     {
         foreach ($params as $key => $v) {
             $this->setParam($key, $v);
@@ -168,13 +171,13 @@ class phtml extends AbstractRendererAdapter
      */
     public function assign($var, $value = null)
     {
-        if (true === is_string($var)) {
+        if (is_string($var)) {
             $this->vars[$var] = $value;
 
             return $this;
         }
 
-        if (true === is_array($var)) {
+        if (is_array($var)) {
             foreach ($var as $key => $value) {
                 $this->vars[$key] = $value;
             }
@@ -192,13 +195,13 @@ class phtml extends AbstractRendererAdapter
      */
     public function setParam($param, $value = null)
     {
-        if (true === is_string($param)) {
+        if (is_string($param)) {
             $this->params[$param] = $value;
 
             return $this;
         }
 
-        if (true === is_array($param)) {
+        if (is_array($param)) {
             foreach ($param as $key => $value) {
                 $this->params[$key] = $value;
             }

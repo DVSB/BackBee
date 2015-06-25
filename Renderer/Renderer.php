@@ -59,41 +59,41 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      * Contains every RendererAdapterInterface added by user
      * @var ParameterBag
      */
-    private $renderer_adapters;
+    private $rendererAdapters;
 
     /**
      * Contains every extensions that Renderer can manage thanks to registered RendererAdapterInterface
      * @var ParameterBag
      */
-    private $manageable_ext;
+    private $manageableExt;
 
     /**
      * key of the default adapter to use when there is a conflict.
      *
      * @var string
      */
-    private $default_adapter;
+    private $defaultAdapter;
 
     /**
      * The file path to the template.
      *
      * @var string
      */
-    private $template_file;
+    private $templateFile;
 
     /**
      * define if renderer has been restored by container or not.
      *
      * @var boolean
      */
-    private $is_restored;
+    private $isRestored;
 
     /**
      * contains every external resources of current page (js and css).
      *
      * @var ParameterBag
      */
-    private $external_resources;
+    private $externalResources;
 
     /**
      * Constructor.
@@ -105,19 +105,15 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function __construct(BBApplication $application = null, $config = null, $autoloadRendererApdater = true)
     {
         parent::__construct($application, $config);
-        $this->renderer_adapters = new ParameterBag();
-        $this->manageable_ext = new ParameterBag();
-        $this->external_resources = new ParameterBag();
+        $this->rendererAdapters = new ParameterBag();
+        $this->manageableExt = new ParameterBag();
+        $this->externalResources = new ParameterBag();
 
         if (null !== $application && true === $autoloadRendererApdater) {
-            $rendererConfig = $this->getApplication()->getConfig()->getRendererConfig();
-            $adapters = (array) $rendererConfig['adapter'];
-            foreach ($adapters as $adapter) {
-                $this->addRendererAdapter(new $adapter($this));
-            }
+            $this->autoloadAdapters();
         }
 
-        $this->is_restored = false;
+        $this->isRestored = false;
     }
 
     /**
@@ -127,7 +123,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function updatesAfterClone()
     {
         $this->updateHelpers();
-        foreach ($this->renderer_adapters->all() as $ra) {
+        foreach ($this->rendererAdapters->all() as $ra) {
             $ra->onNewRenderer($this);
         }
 
@@ -143,13 +139,13 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function addRendererAdapter(RendererAdapterInterface $rendererAdapter)
     {
         $key = $this->getRendererAdapterKey($rendererAdapter);
-        if (!$this->renderer_adapters->has($key)) {
-            $this->renderer_adapters->set($key, $rendererAdapter);
+        if (!$this->rendererAdapters->has($key)) {
+            $this->rendererAdapters->set($key, $rendererAdapter);
             $this->addManagedExtensions($rendererAdapter);
         }
 
-        if (null === $this->default_adapter) {
-            $this->default_adapter = $key;
+        if (null === $this->defaultAdapter) {
+            $this->defaultAdapter = $key;
         }
     }
 
@@ -178,8 +174,8 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function defaultAdapter($adapterKey)
     {
         $exists = false;
-        if (in_array($adapterKey, $this->renderer_adapters->keys())) {
-            $this->default_adapter = $adapterKey;
+        if (in_array($adapterKey, $this->rendererAdapters->keys())) {
+            $this->defaultAdapter = $adapterKey;
             $exists = true;
         }
 
@@ -193,7 +189,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     public function getDefaultAdapterExt()
     {
-        $managedExt = $this->renderer_adapters->get($this->default_adapter)->getManagedFileExtensions();
+        $managedExt = $this->rendererAdapters->get($this->defaultAdapter)->getManagedFileExtensions();
 
         return array_shift($managedExt);
     }
@@ -205,7 +201,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     public function getAdapter($key)
     {
-        return $this->renderer_adapters->get($key);
+        return $this->rendererAdapters->get($key);
     }
 
     /**
@@ -215,7 +211,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     public function getAdapters()
     {
-        return $this->renderer_adapters->all();
+        return $this->rendererAdapters->all();
     }
 
     /**
@@ -321,9 +317,9 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     public function partial($template = null, $params = null)
     {
-        $this->template_file = $template;
-        File::resolveFilepath($this->template_file, null, array('include_path' => $this->_scriptdir));
-        if (!is_file($this->template_file) || !is_readable($this->template_file)) {
+        $this->templateFile = $template;
+        File::resolveFilepath($this->templateFile, null, array('include_path' => $this->_scriptdir));
+        if (!is_file($this->templateFile) || !is_readable($this->templateFile)) {
             throw new RendererException(sprintf(
                 'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
             ), RendererException::SCRIPTFILE_ERROR);
@@ -346,18 +342,18 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function error($errorCode, $title = null, $message = null, $trace = null)
     {
         $found = false;
-        foreach ($this->manageable_ext->keys() as $ext) {
-            $this->template_file = 'error'.DIRECTORY_SEPARATOR.$errorCode.$ext;
-            if (true === $this->isValidTemplateFile($this->template_file, true)) {
+        foreach ($this->manageableExt->keys() as $ext) {
+            $this->templateFile = 'error'.DIRECTORY_SEPARATOR.$errorCode.$ext;
+            if (true === $this->isValidTemplateFile($this->templateFile, true)) {
                 $found = true;
                 break;
             }
         }
 
         if (!$found) {
-            foreach ($this->manageable_ext->keys() as $ext) {
-                $this->template_file = 'error'.DIRECTORY_SEPARATOR.'default'.$ext;
-                if (true === $this->isValidTemplateFile($this->template_file)) {
+            foreach ($this->manageableExt->keys() as $ext) {
+                $this->templateFile = 'error'.DIRECTORY_SEPARATOR.'default'.$ext;
+                if (true === $this->isValidTemplateFile($this->templateFile)) {
                     $found = true;
                     break;
                 }
@@ -454,7 +450,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     public function getTemplatesByPattern($pattern)
     {
         $templates = array();
-        foreach ($this->manageable_ext->keys() as $ext) {
+        foreach ($this->manageableExt->keys() as $ext) {
             $templates = array_merge($templates, parent::getTemplatesByPattern($pattern.$ext));
         }
 
@@ -471,7 +467,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     {
         $modes = parent::getAvailableRenderMode($object);
         foreach ($modes as &$mode) {
-            $mode = str_replace($this->manageable_ext->keys(), '', $mode);
+            $mode = str_replace($this->manageableExt->keys(), '', $mode);
         }
 
         return array_unique($modes);
@@ -586,7 +582,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         $this->_scriptdir = $dump['template_directories'];
         $this->_layoutdir = $dump['layout_directories'];
 
-        $this->is_restored = true;
+        $this->isRestored = true;
     }
 
     /**
@@ -594,7 +590,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     public function isRestored()
     {
-        return $this->is_restored;
+        return $this->isRestored;
     }
 
     /**
@@ -609,17 +605,17 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     protected function getLayoutFile(Layout $layout)
     {
         $layoutfile = $layout->getPath();
-        if (null === $layoutfile && 0 < $this->manageable_ext->count()) {
+        if (null === $layoutfile && 0 < $this->manageableExt->count()) {
             $adapter = null;
-            if (null !== $this->default_adapter && null !== $adapter = $this->renderer_adapters->get($this->default_adapter)) {
+            if (null !== $this->defaultAdapter && null !== $adapter = $this->rendererAdapters->get($this->defaultAdapter)) {
                 $extensions = $adapter->getManagedFileExtensions();
             } else {
-                $extensions = $this->manageable_ext->keys();
+                $extensions = $this->manageableExt->keys();
             }
 
             if (0 === count($extensions)) {
                 throw new RendererException(
-                        'Declared adapter(s) (count:'.$this->renderer_adapters->count().') is/are not able to manage '.
+                        'Declared adapter(s) (count:'.$this->rendererAdapters->count().') is/are not able to manage '.
                         'any file extensions at moment.'
                 );
             }
@@ -638,8 +634,31 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     protected function updatesAfterUnset()
     {
         $this->updateHelpers();
-        foreach ($this->renderer_adapters->all() as $ra) {
+        foreach ($this->rendererAdapters->all() as $ra) {
             $ra->onRestorePreviousRenderer($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Autoloads every declared renderer adapters into application config.
+     *
+     * @return self
+     */
+    private function autoloadAdapters()
+    {
+        $rendererConfig = $this->getApplication()->getConfig()->getRendererConfig();
+        $adapters = (array) $rendererConfig['adapter'];
+        foreach ($adapters as $adapter) {
+            $classname = $adapter;
+            $adapterConfig = [];
+            if (is_array($adapter)) {
+                $classname = isset($adapter['class']) ? $adapter['class'] : null;
+                $adapterConfig = isset($adapter['config']) && is_array($adapter['config']) ? $adapter['config'] : [];
+            }
+
+            $this->addRendererAdapter(new $classname($this, $adapterConfig));
         }
 
         return $this;
@@ -654,15 +673,15 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     private function addExternalResources($type, $href)
     {
         $resources = array();
-        if ($this->external_resources->has($type)) {
-            $resources = $this->external_resources->get($type);
+        if ($this->externalResources->has($type)) {
+            $resources = $this->externalResources->get($type);
         }
 
         if (!in_array($href, $resources)) {
             $resources[] = $href;
         }
 
-        $this->external_resources->set($type, $resources);
+        $this->externalResources->set($type, $resources);
     }
 
     /**
@@ -674,11 +693,11 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     private function insertExternalResources()
     {
         $header_render = '';
-        foreach ($this->external_resources->get(self::CSS_LINK, array()) as $href) {
+        foreach ($this->externalResources->get(self::CSS_LINK, array()) as $href) {
             $header_render .= $this->generateStylesheetTag($href);
         }
 
-        foreach ($header_js = $this->external_resources->get(self::HEADER_JS, array()) as $src) {
+        foreach ($header_js = $this->externalResources->get(self::HEADER_JS, array()) as $src) {
             $header_render .= $this->generateJavascriptTag($src);
         }
 
@@ -687,7 +706,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         }
 
         $footer_render = '';
-        $footer_js = array_diff($this->external_resources->get(self::FOOTER_JS, array()), $header_js);
+        $footer_js = array_diff($this->externalResources->get(self::FOOTER_JS, array()), $header_js);
         foreach ($footer_js as $src) {
             $footer_render .= $this->generateJavascriptTag($src);
         }
@@ -696,9 +715,9 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $this->setRender(str_replace('</body>', "$footer_render</body>", $this->getRender()));
         }
 
-        $this->external_resources->remove(self::CSS_LINK);
-        $this->external_resources->remove(self::HEADER_JS);
-        $this->external_resources->remove(self::FOOTER_JS);
+        $this->externalResources->remove(self::CSS_LINK);
+        $this->externalResources->remove(self::HEADER_JS);
+        $this->externalResources->remove(self::FOOTER_JS);
 
         return $this;
     }
@@ -750,12 +769,12 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         $key = $this->getRendererAdapterKey($rendererAdapter);
         foreach ($rendererAdapter->getManagedFileExtensions() as $ext) {
             $rendererAdapters = array($key);
-            if ($this->manageable_ext->has($ext)) {
-                $rendererAdapters = $this->manageable_ext->get($ext);
+            if ($this->manageableExt->has($ext)) {
+                $rendererAdapters = $this->manageableExt->get($ext);
                 $rendererAdapters[] = $key;
             }
 
-            $this->manageable_ext->set($ext, $rendererAdapters);
+            $this->manageableExt->set($ext, $rendererAdapters);
         }
     }
 
@@ -770,8 +789,8 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     private function getRightAdapter(array $adapters)
     {
         $adapter = null;
-        if (1 < count($adapters) && in_array($this->default_adapter, $adapters)) {
-            $adapter = $this->default_adapter;
+        if (1 < count($adapters) && in_array($this->defaultAdapter, $adapters)) {
+            $adapter = $this->defaultAdapter;
         } else {
             $adapter = reset($adapters);
         }
@@ -796,14 +815,14 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         }
 
         $ext = '.'.$pieces[count($pieces) - 1];
-        $adaptersForExt = $this->manageable_ext->get($ext);
+        $adaptersForExt = $this->manageableExt->get($ext);
         if (!is_array($adaptersForExt) || 0 === count($adaptersForExt)) {
             return;
         }
 
         $adapter = $this->getRightAdapter($adaptersForExt);
 
-        return $this->renderer_adapters->get($adapter);
+        return $this->rendererAdapters->get($adapter);
     }
 
     /**
@@ -847,14 +866,14 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
         }
 
         // Check for a valid layout file
-        $this->template_file = $layoutFile;
-        if (null === $this->template_file) {
-            $this->template_file = $this->getLayoutFile($this->getCurrentPage()->getLayout());
+        $this->templateFile = $layoutFile;
+        if (null === $this->templateFile) {
+            $this->templateFile = $this->getLayoutFile($this->getCurrentPage()->getLayout());
         }
 
-        if (!$this->isValidTemplateFile($this->template_file, true)) {
+        if (!$this->isValidTemplateFile($this->templateFile, true)) {
             throw new RendererException(
-                sprintf('Unable to read layout %s.', $this->template_file), RendererException::LAYOUT_ERROR
+                sprintf('Unable to read layout %s.', $this->templateFile), RendererException::LAYOUT_ERROR
             );
         }
 
@@ -877,19 +896,19 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     {
         try {
             $mode = null !== $this->getMode() ? $this->getMode() : $this->_object->getMode();
-            $this->template_file = $template;
-            if (null === $this->template_file && null !== $this->_object) {
-                $this->template_file = $this->getTemplateFile($this->_object, $mode);
-                if (false === $this->template_file) {
-                    $this->template_file = $this->getTemplateFile($this->_object, $this->getMode());
+            $this->templateFile = $template;
+            if (null === $this->templateFile && null !== $this->_object) {
+                $this->templateFile = $this->getTemplateFile($this->_object, $mode);
+                if (false === $this->templateFile) {
+                    $this->templateFile = $this->getTemplateFile($this->_object, $this->getMode());
                 }
 
-                if (false === $this->template_file && false === $this->_ignoreIfRenderModeNotAvailable) {
-                    $this->template_file = $this->getTemplateFile($this->_object);
+                if (false === $this->templateFile && false === $this->_ignoreIfRenderModeNotAvailable) {
+                    $this->templateFile = $this->getTemplateFile($this->_object);
                 }
             }
 
-            if (false === $this->isValidTemplateFile($this->template_file)) {
+            if (false === $this->isValidTemplateFile($this->templateFile)) {
                 throw new RendererException(sprintf(
                         'Unable to find file \'%s\' in path (%s)', $template, implode(', ', $this->_scriptdir)
                 ), RendererException::SCRIPTFILE_ERROR);
@@ -985,13 +1004,13 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     private function getTemplateFile(RenderableInterface $object, $mode = null)
     {
-        $tmpStorage = $this->template_file;
+        $tmpStorage = $this->templateFile;
         $template = $this->getTemplatePath($object);
-        foreach ($this->manageable_ext->keys() as $ext) {
-            $this->template_file = $template.(null !== $mode ? '.'.$mode : '').$ext;
-            if ($this->isValidTemplateFile($this->template_file)) {
-                $filename = $this->template_file;
-                $this->template_file = $tmpStorage;
+        foreach ($this->manageableExt->keys() as $ext) {
+            $this->templateFile = $template.(null !== $mode ? '.'.$mode : '').$ext;
+            if ($this->isValidTemplateFile($this->templateFile)) {
+                $filename = $this->templateFile;
+                $this->templateFile = $tmpStorage;
 
                 return $filename;
             }
@@ -1036,22 +1055,22 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
      */
     private function renderTemplate($isPartial = false, $isLayout = false)
     {
-        $adapter = $this->determineWhichAdapterToUse($this->template_file);
+        $adapter = $this->determineWhichAdapterToUse($this->templateFile);
         $dirs = true === $isLayout ? $this->_layoutdir : $this->_scriptdir;
 
         if (null === $adapter) {
             throw new RendererException(sprintf(
-                'Unable to manage file \'%s\' in path (%s)', $this->template_file, implode(', ', $dirs)
+                'Unable to manage file \'%s\' in path (%s)', $this->templateFile, implode(', ', $dirs)
             ), RendererException::SCRIPTFILE_ERROR);
         }
 
-        $this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->template_file));
+        $this->getApplication()->debug(sprintf('Rendering file `%s`.', $this->templateFile));
         if (false === $isPartial) {
             $this->triggerEvent();
         }
 
         return $adapter->renderTemplate(
-            $this->template_file,
+            $this->templateFile,
             $dirs,
             $this->getParam(),
             array_merge($this->getAssignedVars(), $this->getBBVariable())
