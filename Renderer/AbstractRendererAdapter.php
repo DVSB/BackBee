@@ -46,7 +46,7 @@ abstract class AbstractRendererAdapter implements RendererAdapterInterface
      *
      * @param AbstractRenderer $renderer
      */
-    public function __construct(AbstractRenderer $renderer)
+    public function __construct(AbstractRenderer $renderer, array $config = [])
     {
         $this->renderer = $renderer;
     }

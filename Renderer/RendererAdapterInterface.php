@@ -40,7 +40,7 @@ interface RendererAdapterInterface
      *
      * @param AbstractRenderer $renderer
      */
-    public function __construct(AbstractRenderer $renderer);
+    public function __construct(AbstractRenderer $renderer, array $config = []);
 
     /**
      * Returns array that contains every single file's extension managed by this adapter.
