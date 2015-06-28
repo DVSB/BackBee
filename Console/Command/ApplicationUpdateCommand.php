@@ -41,7 +41,7 @@ use BackBee\Console\AbstractCommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BbappUpdateCommand extends AbstractCommand
+class ApplicationUpdateCommand extends AbstractCommand
 {
     
     /**
@@ -122,7 +122,7 @@ EOF
     }
 
     /**
-     * Checks against the db if section feature is already available for version > 1.1
+     * Checks the db if section feature is already available for version > 1.1
      * @throws \BBException                 Raises if section features is not available
      */
     private function checkBeforeUpdate()
