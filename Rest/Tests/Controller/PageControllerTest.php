@@ -67,6 +67,8 @@ class PageControllerTest extends RestTestCase
         $this->getContainer()->set('site', $this->site);
         self::$restUser = $this->createAuthUser('page_admin');
         $this->group_id = self::$restUser->getGroups()[0]->getId();
+        
+        $this->em->flush();
     }
 
     private function getController()
@@ -77,39 +79,6 @@ class PageControllerTest extends RestTestCase
         return $controller;
     }
 
-    public function testGetAction()
-    {
-        // create pages
-        $now = new \DateTime();
-
-        $homePage = new Page();
-        $homePage
-            ->setTitle('Home Page')
-            ->setState(Page::STATE_ONLINE)
-            ->setSite($this->site)
-            ->setPublishing($now)
-        ;
-
-
-        $this->em->persist($homePage);
-
-        $this->em->flush();
-
-        $this->getAclManager()->insertOrUpdateObjectAce(
-            $homePage,
-            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
-            MaskBuilder::MASK_VIEW
-        );
-
-        // no filters - should return current site root page
-        $response = $this->sendRequest(self::requestGet('/rest/1/page/'. $homePage->getUid()));
-        $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
-        $pageProperties = json_decode($response->getContent(), true);
-        $this->assertInternalType('array', $pageProperties);
-        $this->assertCount(24, $pageProperties);
-        $this->assertEquals($homePage->getUid(), $pageProperties['uid']);
-        $this->assertEquals($now->getTimestamp(), $pageProperties['publishing']);
-    }
 
     /**
      * @covers ::postAction
@@ -170,7 +139,6 @@ class PageControllerTest extends RestTestCase
         $em->persist($rootPage);
         $em->flush();
 
-
         // create page
         $clonePage = (new Page())
             ->setTitle('Page Title')
@@ -183,17 +151,21 @@ class PageControllerTest extends RestTestCase
         $em->flush();
 
         $this->getAclManager()->insertOrUpdateObjectAce(
+            new ObjectIdentity('all', 'BackBee\NestedNode\Page'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            ['VIEW', 'CREATE']
+        )->insertOrUpdateObjectAce(
             $rootPage,
             new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             ['VIEW', 'EDIT']
         )->insertOrUpdateObjectAce(
             $layout,
             new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
-            ['VIEW', 'EDIT']
+            ['VIEW']
         )->insertOrUpdateObjectAce(
             $this->site,
             new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
-            ['VIEW', 'EDIT']
+            ['VIEW']
         );
 
         $response = $this->sendRequest(self::requestPost('/rest/1/page/'.$clonePage->getUid().'/clone', [
@@ -330,19 +302,30 @@ class PageControllerTest extends RestTestCase
             ->setSite($this->site)
         ;
         $this->em->persist($homePage);
-        $this->em->persist($deletedPage);
-        $this->em->persist($offlinePage);
-        $this->em->persist($onlinePage);
-        $this->em->persist($onlinePage2);
-
+        $this->em->flush($homePage);
+        
         $repo = $this->em->getRepository('BackBee\NestedNode\Page');
-
         $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
+        $this->em->persist($deletedPage);
+        $this->em->flush($deletedPage);
+        $this->em->refresh($homePage);
+        
         $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
-        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage);
+        $this->em->persist($offlinePage);
+        $this->em->flush($offlinePage);
+        $this->em->refresh($homePage);
+        
+        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage, true);
+        $this->em->persist($onlinePage);
+        $this->em->flush($onlinePage);
+        $this->em->refresh($homePage);
+        $this->em->refresh($onlinePage);
+        
         $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
-
-        $this->em->flush();
+        $this->em->persist($onlinePage2);
+        $this->em->flush($onlinePage2);
+        $this->em->refresh($homePage);
+        $this->em->refresh($onlinePage);
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $homePage,
@@ -364,7 +347,9 @@ class PageControllerTest extends RestTestCase
         $res2 = json_decode($response2->getContent(), true);
         $this->assertInternalType('array', $res2);
         $this->assertCount(3, $res2);
-        // $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
+        $this->assertEquals($onlinePage->getUid(), $res2[0]['uid']);
+        $this->assertEquals($offlinePage->getUid(), $res2[1]['uid']);
+        $this->assertEquals($deletedPage->getUid(), $res2[2]['uid']);
 
         // filter by state = offline
         $response3 = $this->sendRequest(self::requestGet('/rest/1/page', array(
@@ -377,6 +362,38 @@ class PageControllerTest extends RestTestCase
         $this->assertInternalType('array', $res3);
         $this->assertCount(1, $res3);
         $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
+    }
+
+    public function testGetAction()
+    {
+        // create pages
+        $now = new \DateTime();
+
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Home Page')
+            ->setState(Page::STATE_ONLINE)
+            ->setSite($this->site)
+            ->setModified($now)
+        ;
+
+        $this->em->persist($homePage);
+        $this->em->flush($homePage);
+
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            MaskBuilder::MASK_VIEW
+        );
+
+        // no filters - should return current site root page
+        $response = $this->sendRequest(self::requestGet('/rest/1/page/'. $homePage->getUid()));
+        $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
+        $pageProperties = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $pageProperties);
+        $this->assertCount(23, $pageProperties);
+        $this->assertEquals($homePage->getUid(), $pageProperties['uid']);
+        $this->assertEquals($now->getTimestamp(), $pageProperties['modified']);
     }
 
     protected function tearDown()

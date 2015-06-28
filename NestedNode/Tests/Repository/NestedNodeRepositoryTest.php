@@ -214,10 +214,10 @@ class NestedNodeRepositoryTest extends BackBeeTestCase
      * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_insertNode
      * @expectedException \BackBee\Exception\InvalidArgumentException
      */
-    public function test_insertNodeNotLeaf()
+    public function test_insertParentAsChild()
     {
         $child1 = $this->repository->find('d-child1');
-        $child2 = $this->repository->find('d-child2');
+        $child2 = $this->repository->find('d-subchild1');
 
         $this->repository->insertNodeAsFirstChildOf($child1, $child2);
     }

@@ -23,6 +23,8 @@
 
 namespace BackBee\Console\Command;
 
+use BackBee\BBApplication;
+use BackBee\Exception\BBException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,8 +41,15 @@ use BackBee\Console\AbstractCommand;
  * @copyright   Lp digital system
  * @author      k.golovin
  */
-class BbappUpdatelCommand extends AbstractCommand
+class ApplicationUpdateCommand extends AbstractCommand
 {
+    
+    /**
+     * The current entity manager
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $em;
+
     /**
      * {@inheritdoc}
      */
@@ -67,9 +76,11 @@ EOF
         $force = $input->getOption('force');
 
         $bbapp = $this->getContainer()->get('bbapp');
-        $em = $this->getContainer()->get('em');
+        $this->em = $this->getContainer()->get('em');
 
-        $em->getConfiguration()->getMetadataDriverImpl()->addPaths(array(
+        $this->checkBeforeUpdate();
+
+        $this->em->getConfiguration()->getMetadataDriverImpl()->addPaths([
             $bbapp->getBBDir().'/Bundle',
             $bbapp->getBBDir().'/Cache/DAO',
             $bbapp->getBBDir().'/ClassContent',
@@ -78,40 +89,65 @@ EOF
             $bbapp->getBBDir().'/NestedNode',
             $bbapp->getBBDir().'/Security',
             $bbapp->getBBDir().'/Site',
-            $bbapp->getBBDir().'/Site/Metadata',
             $bbapp->getBBDir().'/Stream/ClassWrapper',
             $bbapp->getBBDir().'/Util/Sequence/Entity',
             $bbapp->getBBDir().'/Workflow',
-        ));
+        ]);
 
-        $sqls = $this->getUpdateQueries($em);
+        $this->em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths([
+            $bbapp->getBBDir().'/ClassContent/Tests',
+            $bbapp->getBBDir().'/NestedNode/Tests',
+            $bbapp->getBBDir().'/Security/Tests',
+            $bbapp->getBBDir().'/Util/Tests',
+        ]);
+
+        if (is_dir($bbapp->getBBDir().'/vendor')) {
+            $this->em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths([$bbapp->getBBDir().'/vendor']);
+        }
+
+        $sqls = $this->getUpdateQueries();
 
         if ($force) {
             $output->writeln('<info>Running update</info>');
 
-            $metadata = $em->getMetadataFactory()->getAllMetadata();
-            $schema = new SchemaTool($em);
+            $metadata = $this->em->getMetadataFactory()->getAllMetadata();
+            $schema = new SchemaTool($this->em);
 
-            $em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=0');
+            $this->em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=0');
             $schema->updateSchema($metadata, true);
-            $em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=1');
+            $this->em->getConnection()->executeQuery('SET FOREIGN_KEY_CHECKS=1');
         }
 
         $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
     }
 
     /**
+     * Checks the db if section feature is already available for version > 1.1
+     * @throws \BBException                 Raises if section features is not available
+     */
+    private function checkBeforeUpdate()
+    {
+        if (0 <= version_compare(BBApplication::VERSION, '1.1')) {
+            $schemaManager = $this->em->getConnection()->getSchemaManager();
+            $pageName = $this->em->getClassMetadata('BackBee\NestedNode\Page')->getTableName();
+            $sectionName = $this->em->getClassMetadata('BackBee\NestedNode\Section')->getTableName();
+
+            if (false === $schemaManager->tablesExist($sectionName) && true === $schemaManager->tablesExist($pageName)) {
+                throw new BBException(sprintf('Table `%s` does not exist. Perhaps you should launch bbapp:upgradeToPageSection command before.', $sectionName));
+            }
+        }
+    }
+
+    /**
      * Get update queries.
      *
-     * @param EntityManager $em
-     *
-     * @return String[]
+     * @return string[]
      */
-    protected function getUpdateQueries(EntityManager $em)
+    protected function getUpdateQueries()
     {
-        $schema = new SchemaTool($em);
+        $schema = new SchemaTool($this->em);
 
-        $metadatas = $em->getMetadataFactory()->getAllMetadata();
+        $metadatas = $this->em->getMetadataFactory()->getAllMetadata();
         $sqls = $schema->getUpdateSchemaSql($metadatas, true);
 
         return $sqls;

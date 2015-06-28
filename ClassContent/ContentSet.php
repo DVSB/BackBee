@@ -276,9 +276,9 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     /**
      * Return the item at index.
      *
-     * @param int $index
+     * @param  integer              $index
      *
-     * @return the item or NULL if $index is out of bounds
+     * @return AbstractClassContent                     The item or null if $index is out of bounds
      */
     public function item($index)
     {

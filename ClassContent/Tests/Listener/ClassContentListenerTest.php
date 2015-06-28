@@ -71,6 +71,12 @@ class ClassContentListenerTest extends BackBeeTestCase
         self::$renderer = self::$app->getRenderer();
     }
 
+    public static function tearDownAfterClass()
+    {
+        self::$contentManager->setBBUserToken(null);
+        self::$app->getSecurityContext()->setToken(null);
+    }
+
     public function setUp()
     {
         $scriptDir = self::$app->getBBDir() . DIRECTORY_SEPARATOR .

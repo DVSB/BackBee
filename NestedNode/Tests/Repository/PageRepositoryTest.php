@@ -23,11 +23,8 @@
 
 namespace BackBee\NestedNode\Tests\Repository;
 
-use BackBee\ClassContent\ContentSet;
 use BackBee\NestedNode\Page;
 use BackBee\NestedNode\Repository\PageQueryBuilder;
-use BackBee\NestedNode\Repository\PageRepository;
-use BackBee\NestedNode\Tests\Mock\MockNestedNode;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Tests\BackBeeTestCase;
@@ -40,6 +37,7 @@ use BackBee\Tests\BackBeeTestCase;
  */
 class PageRepositoryTest extends BackBeeTestCase
 {
+
     private static $previousDateFormat;
 
     /**
@@ -57,31 +55,21 @@ class PageRepositoryTest extends BackBeeTestCase
         parent::__construct($name, $data, $dataName);
 
         $this->repository = self::$em->getRepository('BackBee\NestedNode\Page');
-
-
     }
 
     public static function setUpBeforeClass()
     {
-        self::$kernel->resetDatabase();
+        self::$kernel->resetDatabase(null, true);
 
-        $site = new Site(null, [
-            'label' => 'site-test',
-        ]);
+        $site = new Site('site-test', ['label' => 'site-test']);
+        $layout = self::$kernel->createLayout('layout-test', 'layout-test');
         self::$em->persist($site);
-        self::$em->flush($site);
-
-        $layout = self::$kernel->createLayout('layout_test');
         self::$em->persist($layout);
-        self::$em->flush($layout);
+        self::$em->flush();
 
         self::$previousDateFormat = PageQueryBuilder::$config['dateSchemeForPublishing'];
-
-        PageQueryBuilder::$config = array(
-            'dateSchemeForPublishing' => 'Y-m-d H:i:s',
-        );
+        PageQueryBuilder::$config = ['dateSchemeForPublishing' => 'Y-m-d H:i:s'];
     }
-
 
     /**
      * Sets up the fixture.
@@ -91,54 +79,110 @@ class PageRepositoryTest extends BackBeeTestCase
         self::$em->clear();
 
         self::$kernel->resetDatabase([
-            self::$em->getClassMetadata('BackBee\NestedNode\Page'),
+            self::$em->getClassMetaData('BackBee\ClassContent\AbstractClassContent'),
+            self::$em->getClassMetaData('BackBee\ClassContent\Indexes\IdxContentContent'),
+            self::$em->getClassMetaData('BackBee\ClassContent\Indexes\IdxSiteContent'),
+            self::$em->getClassMetaData('BackBee\ClassContent\Indexes\OptContentByModified'),
+            self::$em->getClassMetaData('BackBee\NestedNode\Page'),
+            self::$em->getClassMetaData('BackBee\NestedNode\Section'),
         ]);
 
-        $this->root = new Page('root', array('title' => 'root', 'url' => 'url-root'));
-        $this->root
-            ->setSite(self::$em->getRepository('BackBee\Site\Site')->findOneBy([]))
-            ->setLayout(self::$em->getRepository('BackBee\Site\Layout')->findOneBy([]))
-        ;
+        $site = self::$em->find('BackBee\Site\Site', 'site-test');
+        $layout = self::$em->find('BackBee\Site\Layout', 'layout-test');
+        
+        $this->root = new Page('root', ['title' => 'root']);
+        $this->root->setSite($site)
+                ->setLayout($layout);
 
         self::$em->persist($this->root);
         self::$em->flush();
 
-        $child1 = $this->repository->insertNodeAsFirstChildOf(new Page('child1', array('title' => 'child1', 'url' => 'url-child1')), $this->root);
-        self::$em->flush($child1);
-
-        $child2 = $this->repository->insertNodeAsFirstChildOf(new Page('child2', array('title' => 'child2', 'url' => 'url-child2')), $this->root);
-        self::$em->flush($child2);
-
-        $child3 = $this->repository->insertNodeAsFirstChildOf(new Page('child3', array('title' => 'child3', 'url' => 'url-child3')), $this->root);
-        self::$em->flush($child3);
-
+        /**
+         * Create mock tree:
+         * root
+         *  |- section2
+         *  |- section1
+         *  |      |- page2
+         *  |      |- page1
+         *  |- page3
+         */
+        $section1 = $this->addPage('section1', $layout, $this->root, true);
+        $this->addPage('section2', $layout, $this->root, true);
+        $this->addPage('page1', $layout, $section1);
+        $this->addPage('page2', $layout, $section1);
+        $this->addPage('page3', $layout, $this->root);
         self::$em->refresh($this->root);
-        self::$em->refresh($child1);
-        self::$em->refresh($child2);
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::createQueryBuilder
+     * Add a new page in mock tree
+     * @param  string                   $uid
+     * @param  \BackBee\Site\Layout     $layout
+     * @param  \BackBee\NestedNode\Page $parent
+     * @param  boolean                  $section If TRUE, the page is inserted with a section
+     * @return \BackBee\NestedNode\Page
      */
-    public function testCreateQueryBuilder()
+    private function addPage($uid, Layout $layout, Page $parent, $section = false)
     {
-        $this->assertInstanceOf('BackBee\NestedNode\Repository\PageRepository', $this->repository);
+        $page = new Page($uid, array('title' => $uid));
+        $page->setLayout($layout);
+        $this->repository->insertNodeAsFirstChildOf($page, $parent, $section);
+        self::$em->persist($page);
+        self::$em->flush($page);
+
+        foreach ($this->repository->findAll() as $node) {
+            self::$em->refresh($node);
+        }
+
+        return $page;
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::findBy
      */
-    public function testGetOnlineDescendants()
+    public function testFindBy()
     {
-        $this->assertEquals(array(), $this->repository->getOnlineDescendants($this->root));
+        $this->assertEquals(array($this->root), $this->repository->findBy(array('_title' => 'root')));
+        $this->assertEquals(6, count($this->repository->findBy(array('_site' => $this->root->getSite()))));
+        $this->assertEquals(array($this->root), $this->repository->findBy(array('_title' => 'root'), array('_leftnode' => 'ASC'), 1, 0));
+    }
 
-        $child1 = $this->repository->find('child1');
-        $child1->setState(Page::STATE_ONLINE);
-        $child2 = $this->repository->find('child2');
-        $child2->setState(Page::STATE_ONLINE);
-        self::$em->flush();
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::findOneBy
+     */
+    public function testFindOneBy()
+    {
+        $this->assertEquals($this->root, $this->repository->findOneBy(array('_title' => 'root')));
+        $this->assertEquals($this->root, $this->repository->findOneBy(array('_title' => 'root'), array('_leftnode' => 'ASC')));
+    }
 
-        $this->assertEquals(array($child2, $child1), $this->repository->getOnlineDescendants($this->root));
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getAncestor
+     */
+    public function testGetAncestor()
+    {
+        $page1 = $this->repository->find('page1');
+        $section1 = $this->repository->find('section1');
+
+        $this->assertEquals($this->root, $this->repository->getAncestor($page1));
+        $this->assertEquals($this->root, $this->repository->getAncestor($page1, 0));
+        $this->assertEquals($section1, $this->repository->getAncestor($page1, 1));
+        $this->assertEquals($page1, $this->repository->getAncestor($page1, 2));
+        $this->assertNull($this->repository->getAncestor($page1, 3));
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getAncestors
+     */
+    public function testGetAncestors()
+    {
+        $page1 = $this->repository->find('page1');
+        $section1 = $this->repository->find('section1');
+
+        $this->assertEquals(array($this->root, $section1), $this->repository->getAncestors($page1));
+        $this->assertEquals(array($section1), $this->repository->getAncestors($page1, 1));
+        $this->assertEquals(array($section1, $page1), $this->repository->getAncestors($page1, 1, true));
+        $this->assertEquals(array(), $this->repository->getAncestors($page1, 3));
     }
 
     /**
@@ -146,33 +190,30 @@ class PageRepositoryTest extends BackBeeTestCase
      */
     public function testGetOnlinePrevSibling()
     {
-        $child1 = $this->repository->find('child1');
-        $this->assertNull($this->repository->getOnlinePrevSibling($child1));
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
 
-        $child2 = $this->repository->find('child2');
-        $child2->setState(Page::STATE_ONLINE);
-        self::$em->flush($child2);
+        $this->assertNull($this->repository->getOnlinePrevSibling($section1));
+        $this->assertNull($this->repository->getOnlinePrevSibling($section2));
+        $this->assertNull($this->repository->getOnlinePrevSibling($page1));
+        $this->assertNull($this->repository->getOnlinePrevSibling($page2));
+        $this->assertNull($this->repository->getOnlinePrevSibling($page3));
 
-        $this->assertEquals($child2, $this->repository->getOnlinePrevSibling($child1));
-        $this->assertNull($this->repository->getOnlinePrevSibling($child2));
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineSiblings
-     */
-    public function testGetOnlineSiblings()
-    {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
-
-        $this->assertEquals(array(), $this->repository->getOnlineSiblings($child2));
-
-        $child1->setState(Page::STATE_ONLINE);
-        $child3->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $section2->setState(Page::STATE_ONLINE);
+        $section1->setState(Page::STATE_ONLINE);
+        $page1->setState(Page::STATE_ONLINE);
+        $page2->setState(Page::STATE_ONLINE);
+        $page3->setState(Page::STATE_ONLINE);
         self::$em->flush();
 
-        $this->assertEquals(array($child3, $child1), $this->repository->getOnlineSiblings($child2));
+        $this->assertEquals($section2, $this->repository->getOnlinePrevSibling($section1));
+        $this->assertNull($this->repository->getOnlinePrevSibling($section2));
+        $this->assertEquals($page2, $this->repository->getOnlinePrevSibling($page1));
+        $this->assertNull($this->repository->getOnlinePrevSibling($page2));
+        $this->assertEquals($section1, $this->repository->getOnlinePrevSibling($page3));
     }
 
     /**
@@ -180,17 +221,30 @@ class PageRepositoryTest extends BackBeeTestCase
      */
     public function testGetOnlineSiblingsByLayout()
     {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
 
-        $this->assertEquals(array(), $this->repository->getOnlineSiblingsByLayout($child2, $this->root->getLayout()));
+        $this->assertEquals(array(), $this->repository->getOnlineSiblingsByLayout($section1, $this->root->getLayout()));
+        $this->assertEquals(array(), $this->repository->getOnlineSiblingsByLayout($section2, $this->root->getLayout()));
+        $this->assertEquals(array(), $this->repository->getOnlineSiblingsByLayout($page1, $this->root->getLayout()));
+        $this->assertEquals(array(), $this->repository->getOnlineSiblingsByLayout($page2, $this->root->getLayout()));
+        $this->assertEquals(array(), $this->repository->getOnlineSiblingsByLayout($page3, $this->root->getLayout()));
 
-        $child1->setLayout($this->root->getLayout())->setState(Page::STATE_ONLINE);
-        $child3->setLayout($this->root->getLayout())->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $section2->setState(Page::STATE_ONLINE);
+        $section1->setState(Page::STATE_ONLINE);
+        $page1->setState(Page::STATE_ONLINE);
+        $page2->setState(Page::STATE_ONLINE);
+        $page3->setState(Page::STATE_ONLINE);
         self::$em->flush();
 
-        $this->assertEquals(array($child3, $child1), $this->repository->getOnlineSiblingsByLayout($child2, $this->root->getLayout()));
+        $this->assertEquals(array($section2, $page3), $this->repository->getOnlineSiblingsByLayout($section1, $this->root->getLayout(), false, array('_position' => 'ASC', '_leftnode' => 'ASC')));
+        $this->assertEquals(array($section1, $page3), $this->repository->getOnlineSiblingsByLayout($section2, $this->root->getLayout(), false, array('_position' => 'ASC', '_leftnode' => 'ASC')));
+        $this->assertEquals(array($page2), $this->repository->getOnlineSiblingsByLayout($page1, $this->root->getLayout(), false, array('_position' => 'ASC', '_leftnode' => 'ASC')));
+        $this->assertEquals(array($page1), $this->repository->getOnlineSiblingsByLayout($page2, $this->root->getLayout(), false, array('_position' => 'ASC', '_leftnode' => 'ASC')));
+        $this->assertEquals(array($section2, $section1), $this->repository->getOnlineSiblingsByLayout($page3, $this->root->getLayout(), false, array('_position' => 'ASC', '_leftnode' => 'ASC')));
     }
 
     /**
@@ -198,303 +252,452 @@ class PageRepositoryTest extends BackBeeTestCase
      */
     public function testGetOnlineNextSibling()
     {
-        $child2 = $this->repository->find('child2');
-        $this->assertNull($this->repository->getOnlineNextSibling($child2));
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
 
-        $child1 = $this->repository->find('child1');
-        $child1->setState(Page::STATE_ONLINE);
-        self::$em->flush($child1);
+        $this->assertNull($this->repository->getOnlineNextSibling($section1));
+        $this->assertNull($this->repository->getOnlineNextSibling($section2));
+        $this->assertNull($this->repository->getOnlineNextSibling($page1));
+        $this->assertNull($this->repository->getOnlineNextSibling($page2));
+        $this->assertNull($this->repository->getOnlineNextSibling($page3));
 
-        $this->assertEquals($child1, $this->repository->getOnlineNextSibling($child2));
-        $this->assertNull($this->repository->getOnlineNextSibling($child1));
+        $section2->setState(Page::STATE_ONLINE);
+        $section1->setState(Page::STATE_ONLINE);
+        $page1->setState(Page::STATE_ONLINE);
+        $page2->setState(Page::STATE_ONLINE);
+        $page3->setState(Page::STATE_ONLINE);
+        self::$em->flush();
+
+        $this->assertEquals($page3, $this->repository->getOnlineNextSibling($section1));
+        $this->assertEquals($section1, $this->repository->getOnlineNextSibling($section2));
+        $this->assertNull($this->repository->getOnlineNextSibling($page1));
+        $this->assertEquals($page1, $this->repository->getOnlineNextSibling($page2));
+        $this->assertNull($this->repository->getOnlineNextSibling($page3));
     }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsFirstChildOf
-     * @expectedException BackBee\Exception\InvalidArgumentException
-     */
-    public function testInsertNodeAsFirstChildOfWithWrongNode()
-    {
-        $mock = new MockNestedNode('fake');
-        $this->repository->insertNodeAsFirstChildOf($mock, $this->root);
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsFirstChildOf
-     * @expectedException BackBee\Exception\InvalidArgumentException
-     */
-    public function testInsertNodeAsFirstChildOfWithWrongParent()
-    {
-        $mock = new MockNestedNode('fake');
-        $this->repository->insertNodeAsFirstChildOf(new Page('test'), $mock);
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsFirstChildOf
-     */
-    public function testInsertNodeAsFirstChildOf()
-    {
-        $new_child = new Page('new-child', array('title' => 'new-child', 'url' => 'url-new-child'));
-        $this->repository->insertNodeAsFirstChildOf($new_child, $this->root);
-        $this->assertEquals($this->root->getSite(), $new_child->getSite());
-    }
-
-    /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsLastChildOf
-     * @expectedException BackBee\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNode
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getMaxPosition
      */
-    public function testInsertNodeAsLastChildOfWithWrongNode()
+    public function testInsertNode()
     {
-        $mock = new \BackBee\NestedNode\Tests\Mock\MockNestedNode('fake');
-        $this->repository->insertNodeAsLastChildOf($mock, $this->root);
+        $newpage1 = new Page('new-page1', array('title' => 'new-page1'));
+        $newpage1->setLayout(new Layout());
+        $this->repository->insertNodeAsFirstChildOf($newpage1, $this->root);
+
+        foreach ($this->repository->findAll() as $node) {
+            self::$em->refresh($node);
+        }
+
+        $page3 = $this->repository->find('page3');
+
+        $this->assertFalse($newpage1->hasMainSection());
+        $this->assertEquals($this->root, $newpage1->getParent());
+        $this->assertEquals(1, $newpage1->getLevel());
+        $this->assertEquals(1, $newpage1->getPosition());
+        $this->assertEquals(6, $this->root->getRightnode());
+        $this->assertEquals(2, $page3->getPosition());
+
+        $section2 = $this->repository->find('section2');
+        $newpage2 = new Page('new-page2', array('title' => 'new-page2'));
+        $newpage2->setLayout(new Layout());
+        $this->repository->insertNodeAsLastChildOf($newpage2, $section2, true);
+
+        foreach ($this->repository->findAll() as $node) {
+            self::$em->refresh($node);
+        }
+
+        $this->assertTrue($newpage2->hasMainSection());
+        $this->assertEquals($section2, $newpage2->getParent());
+        $this->assertEquals(2, $newpage2->getLevel());
+        $this->assertEquals(0, $newpage2->getPosition());
+        $this->assertEquals(3, $newpage2->getLeftnode());
+        $this->assertEquals(4, $newpage2->getRightnode());
+        $this->assertEquals(2, $section2->getLeftnode());
+        $this->assertEquals(5, $section2->getRightnode());
+        $this->assertEquals(8, $this->root->getRightnode());
+
+        $section1 = $this->repository->find('section1');
+        $newpage3 = new Page('new-page3', array('title' => 'new-page3'));
+        $newpage3->setLayout(new Layout());
+
+        $this->repository->insertNodeAsLastChildOf($newpage3, $section1, false);
+        foreach ($this->repository->findAll() as $node) {
+            self::$em->refresh($node);
+        }
+
+        $this->assertEquals(3, $newpage3->getPosition());
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNode
      * @expectedException BackBee\Exception\InvalidArgumentException
      */
-    public function testInsertNodeAsLastChildOfWithWrongParent()
+    public function testInsertNodeInNonSection()
     {
-        $mock = new \BackBee\NestedNode\Tests\Mock\MockNestedNode('fake');
-        $this->repository->insertNodeAsLastChildOf(new Page('test'), $mock);
+        $page1 = $this->repository->find('page1');
+        $newpage = new Page('new-page', array('title' => 'new-page'));
+        $newpage->setLayout(new Layout());
+        $this->repository->insertNode($newpage, $page1, 1);
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::insertNodeAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getDescendants
+
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
-    public function testInsertNodeAsLastChildOf()
+    public function testGetDescendants()
     {
-        $new_child = new Page('new-child', array('title' => 'new-child', 'url' => 'url-new-child'));
-        $this->repository->insertNodeAsLastChildOf($new_child, $this->root);
-        $this->assertEquals($this->root->getSite(), $new_child->getSite());
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
+
+        $this->assertEquals(array(), $this->repository->getDescendants($page1));
+        $this->assertEquals(array($page3, $section2, $section1, $page2, $page1), $this->repository->getDescendants($this->root));
+        $this->assertEquals(array($section2, $section1, $page3), $this->repository->getDescendants($this->root, 1));
+        $this->assertEquals(array($page3, $section2, $section1, $page2, $page1), $this->repository->getDescendants($this->root, 2));
+        $this->assertEquals(array($this->root, $page3, $section2, $section1, $page2, $page1), $this->repository->getDescendants($this->root, 2, true));
+        $this->assertEquals(array($this->root, $page3, $section2, $section1, $page2, $page1), $this->repository->getDescendants($this->root, 2, true, array()));
+        $this->assertEquals(array($page1, $page2, $page3, $this->root, $section1, $section2), $this->repository->getDescendants($this->root, 2, true, array('_title' => 'ASC')));
+        $this->assertEquals(array($this->root, $section1, $section2), $this->repository->getDescendants($this->root, 2, true, array('_title' => 'ASC'), false, null, null, true));
+
+        $result = $this->repository->getDescendants($this->root, 2, true, array(), true, 1, 2);
+        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $result);
+        $this->assertEquals(6, $result->count());
+        $this->assertEquals(2, $result->getIterator()->count());
+        $this->assertEquals(1, $result->getQuery()->getFirstResult());
+        $this->assertEquals(2, $result->getQuery()->getMaxResults());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
+     */
+    public function testGetOnlineDescendants()
+    {
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
+
+        $this->root->setState(Page::STATE_ONLINE);
+        $section2->setState(Page::STATE_ONLINE);
+        $section1->setState(Page::STATE_ONLINE);
+        $page1->setState(Page::STATE_ONLINE);
+        $page2->setState(Page::STATE_ONLINE);
+        $page3->setState(Page::STATE_ONLINE);
+        self::$em->flush();
+
+        $this->assertEquals(array(), $this->repository->getOnlineDescendants($page1));
+        $this->assertEquals(array($page3, $section2, $section1, $page2, $page1), $this->repository->getOnlineDescendants($this->root));
+        $this->assertEquals(array($section2, $section1, $page3), $this->repository->getOnlineDescendants($this->root, 1));
+        $this->assertEquals(array($page3, $section2, $section1, $page2, $page1), $this->repository->getOnlineDescendants($this->root, 2));
+        $this->assertEquals(array($this->root, $page3, $section2, $section1, $page2, $page1), $this->repository->getOnlineDescendants($this->root, 2, true));
+        $this->assertEquals(array($this->root, $page3, $section2, $section1, $page2, $page1), $this->repository->getOnlineDescendants($this->root, 2, true, array()));
+        $this->assertEquals(array($page1, $page2, $page3, $this->root, $section1, $section2), $this->repository->getOnlineDescendants($this->root, 2, true, array('_title' => 'ASC')));
+        $this->assertEquals(array($this->root, $section1, $section2), $this->repository->getOnlineDescendants($this->root, 2, true, array('_title' => 'ASC'), false, null, null, true));
+
+        $result = $this->repository->getOnlineDescendants($this->root, 2, true, array(), true, 1, 2);
+        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $result);
+        $this->assertEquals(6, $result->count());
+        $this->assertEquals(2, $result->getIterator()->count());
+        $this->assertEquals(1, $result->getQuery()->getFirstResult());
+        $this->assertEquals(2, $result->getQuery()->getMaxResults());
     }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::getVisibleDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
     public function testGetVisibleDescendants()
     {
-        $child1 = $this->repository->find('child1');
-        $child3 = $this->repository->find('child3');
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
 
-        $this->assertEquals(array(), $this->repository->getVisibleDescendants($this->root));
-
-        $new_child = new Page('new-child', array('title' => 'new-child', 'url' => 'url-new-child'));
-        $this->repository->insertNodeAsLastChildOf($new_child, $child3);
-
-        $child1->setState(Page::STATE_ONLINE);
-        $child3->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
-        $new_child->setState(Page::STATE_ONLINE);
-
-        self::$em->flush();
-        self::$em->refresh($child1);
-        self::$em->refresh($this->root);
-
-        $this->assertEquals(array($new_child, $child1), $this->repository->getVisibleDescendants($this->root));
-        $this->assertEquals(array($child1), $this->repository->getVisibleDescendants($this->root, 1));
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getVisibleSiblings
-     */
-    public function testGetVisibleSiblings()
-    {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
-
-        $this->assertEquals(array(), $this->repository->getVisibleSiblings($child2));
-
-        $child1->setState(Page::STATE_ONLINE);
-        $child3->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $this->root->setState(Page::STATE_ONLINE);
+        $section2->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $section1->setState(Page::STATE_ONLINE);
+        $page1->setState(Page::STATE_ONLINE);
+        $page2->setState(Page::STATE_ONLINE + Page::STATE_HIDDEN);
+        $page3->setState(Page::STATE_ONLINE);
         self::$em->flush();
 
-        $this->assertEquals(array($child1), $this->repository->getVisibleSiblings($child2));
-    }
+        $this->assertEquals(array(), $this->repository->getVisibleDescendants($page1));
+        $this->assertEquals(array($page3, $section1, $page1), $this->repository->getVisibleDescendants($this->root));
+        $this->assertEquals(array($section1, $page3), $this->repository->getVisibleDescendants($this->root, 1));
+        $this->assertEquals(array($page3, $section1, $page1), $this->repository->getVisibleDescendants($this->root, 2));
+        $this->assertEquals(array($this->root, $page3, $section1, $page1), $this->repository->getVisibleDescendants($this->root, 2, true));
+        $this->assertEquals(array($this->root, $page3, $section1, $page1), $this->repository->getVisibleDescendants($this->root, 2, true, array()));
+        $this->assertEquals(array($page1, $page3, $this->root, $section1), $this->repository->getVisibleDescendants($this->root, 2, true, array('_title' => 'ASC')));
+        $this->assertEquals(array($this->root, $section1), $this->repository->getVisibleDescendants($this->root, 2, true, array('_title' => 'ASC'), false, null, null, true));
 
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getVisiblePrevSibling
-     */
-    public function testGetVisiblePrevSibling()
-    {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
+        $result = $this->repository->getVisibleDescendants($this->root, 2, true, array(), true, 1, 2);
 
-        $this->assertNull($this->repository->getVisiblePrevSibling($child1));
-
-        $child2->setState(Page::STATE_ONLINE);
-        self::$em->flush();
-
-        $this->assertEquals($child2, $this->repository->getVisiblePrevSibling($child1));
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageInTree
-     */
-    public function testMovePageInTree()
-    {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
-
-        $this->assertEquals($child3, $this->repository->movePageInTree($child3, $this->root));
-        $this->assertEquals(6, $child3->getLeftnode());
-
-        $this->assertEquals($child1, $this->repository->movePageInTree($child1, $this->root, $child2->getUid()));
-        $this->assertEquals(2, $child1->getLeftnode());
-
-        $this->assertEquals($child2, $this->repository->movePageInTree($child2, $this->root, $this->root->getUid()));
-        $this->assertEquals(6, $child2->getLeftnode());
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::replaceRootContentSet
-     */
-    public function testReplaceRootContentSet()
-    {
-        $newContentSet = new ContentSet();
-        $this->assertEquals($newContentSet, $this->repository->replaceRootContentSet($this->root, $this->root->getContentSet()->last(), $newContentSet));
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getVisibleNextSibling
-     */
-    public function testGetVisibleNextSibling()
-    {
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
-
-        $this->assertNull($this->repository->getVisibleNextSibling($child3));
-
-        $child2->setState(Page::STATE_ONLINE);
-        self::$em->flush();
-
-        $this->assertEquals($child2, $this->repository->getVisibleNextSibling($child3));
+        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $result);
+        $this->assertEquals(4, $result->count());
+        $this->assertEquals(2, $result->getIterator()->count());
+        $this->assertEquals(1, $result->getQuery()->getFirstResult());
+        $this->assertEquals(2, $result->getQuery()->getMaxResults());
     }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::getNotDeletedDescendants
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getOrderingDescendants
      */
-    public function testgetNotDeletedDescendants()
+    public function testGetNotDeletedDescendants()
     {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
 
-        $this->assertEquals(array($child3, $child2, $child1), $this->repository->getNotDeletedDescendants($this->root));
-        $this->assertEquals(array(), $this->repository->getNotDeletedDescendants($this->root, 0));
-        $this->assertEquals(array($this->root, $child3, $child2, $child1), $this->repository->getNotDeletedDescendants($this->root, null, true));
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->getNotDeletedDescendants($this->root, null, false, array('field' => '_title')));
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->getNotDeletedDescendants($this->root, null, false, array('field' => 'title')));
-        $this->assertEquals(array($child3, $child2, $child1), $this->repository->getNotDeletedDescendants($this->root, null, false, array('field' => '_title', 'sort' => 'desc')));
-        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $this->repository->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true));
-        $this->assertEquals(3, $this->repository->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true)->count());
-        $this->assertEquals(2, $this->repository->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true, 1)->getIterator()->count());
-        $this->assertEquals(1, $this->repository->getNotDeletedDescendants($this->root, null, false, array('_leftnode' => 'asc'), true, 1, 1)->getIterator()->count());
-        $this->assertEquals(array($this->root), $this->repository->getNotDeletedDescendants($this->root, null, true, array('_leftnode' => 'asc'), false, 0, 25, true));
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
+
+        $section2->setState(Page::STATE_DELETED);
+        $page2->setState(Page::STATE_DELETED);
+        self::$em->flush();
+
+        $this->assertEquals(array(), $this->repository->getNotDeletedDescendants($page1));
+        $this->assertEquals(array($page3, $section1, $page1), $this->repository->getNotDeletedDescendants($this->root));
+        $this->assertEquals(array($section1, $page3), $this->repository->getNotDeletedDescendants($this->root, 1));
+        $this->assertEquals(array($page3, $section1, $page1), $this->repository->getNotDeletedDescendants($this->root, 2));
+        $this->assertEquals(array($this->root, $page3, $section1, $page1), $this->repository->getNotDeletedDescendants($this->root, 2, true));
+        $this->assertEquals(array($this->root, $page3, $section1, $page1), $this->repository->getNotDeletedDescendants($this->root, 2, true, array()));
+        $this->assertEquals(array($page1, $page3, $this->root, $section1), $this->repository->getNotDeletedDescendants($this->root, 2, true, array('_title' => 'ASC')));
+        $this->assertEquals(array($this->root, $section1), $this->repository->getNotDeletedDescendants($this->root, 2, true, array('_title' => 'ASC'), false, null, null, true));
+
+        $result = $this->repository->getNotDeletedDescendants($this->root, 2, true, array(), true, 1, 2);
+        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $result);
+        $this->assertEquals(4, $result->count());
+        $this->assertEquals(2, $result->getIterator()->count());
+        $this->assertEquals(1, $result->getQuery()->getFirstResult());
+        $this->assertEquals(2, $result->getQuery()->getMaxResults());
     }
 
     /**
-     * @ExpectedException \LogicalException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsChildOf
      */
-    public function testGetRoot()
+    public function testMoveAsFirstChidOf()
     {
-        $this->assertEquals($this->root, $this->repository->getRoot($this->root->getSite()));
-        $this->assertEquals($this->root, $this->repository->getRoot($this->root->getSite(), array(Page::STATE_HIDDEN)));
-        $this->assertEquals($this->root, $this->repository->getRoot());
-        $this->assertNull($this->repository->getRoot($this->root->getSite(), array(Page::STATE_ONLINE)));
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page3 = $this->repository->find('page3');
+
+        $this->assertEquals($page3, $this->repository->moveAsFirstChildOf($page3, $section1));
+        $this->assertEquals($section1, $page3->getParent());
+        $this->assertEquals(1, $page3->getPosition());
+        $this->assertEquals(2, $page3->getLevel());
+        self::$em->refresh($section1);
+        self::$em->flush($page3);
+
+        $this->assertEquals($section1, $this->repository->moveAsFirstChildOf($section1, $section2));
+        self::$em->refresh($section2);
+        self::$em->refresh($page3);
+
+        $this->assertEquals($section2, $section1->getParent());
+        $this->assertEquals(2, $section1->getLevel());
+        $this->assertEquals(3, $section1->getLeftnode());
+        $this->assertEquals(4, $section1->getRightnode());
+        $this->assertEquals(2, $section2->getLeftnode());
+        $this->assertEquals(5, $section2->getRightnode());
+        $this->assertEquals(3, $page3->getLevel());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsFirstChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testMoveAsFirstChidOfNonSection()
+    {
+        $section1 = $this->repository->find('section1');
+        $page1 = $this->repository->find('page1');
+
+        $this->repository->moveAsFirstChildOf($section1, $page1);
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsChildOf
+     */
+    public function testMoveAsLastChidOf()
+    {
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+
+        $this->assertEquals($page2, $this->repository->moveAsLastChildOf($page2, $section2));
+        self::$em->refresh($section2);
+        self::$em->refresh($page1);
+        self::$em->flush($page2);
+
+        $this->assertEquals($section2, $page2->getParent());
+        $this->assertEquals(1, $page2->getPosition());
+        $this->assertEquals(2, $page2->getLevel());
+        $this->assertEquals(1, $page1->getPosition());
+
+        $this->assertEquals($section2, $this->repository->moveAsFirstChildOf($section2, $section1));
+        self::$em->refresh($section1);
+        self::$em->refresh($page1);
+        self::$em->refresh($page2);
+
+        $this->assertEquals($section1, $section2->getParent());
+        $this->assertEquals(2, $section2->getLevel());
+        $this->assertEquals(3, $section2->getLeftnode());
+        $this->assertEquals(4, $section2->getRightnode());
+        $this->assertEquals(2, $section1->getLeftnode());
+        $this->assertEquals(5, $section1->getRightnode());
+        $this->assertEquals(3, $page2->getLevel());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsLastChildOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsChildOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testMoveAsLastChildOfNonSection()
+    {
+        $section1 = $this->repository->find('section1');
+        $page1 = $this->repository->find('page1');
+
+        $this->repository->moveAsLastChildOf($section1, $page1);
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsPrevSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
+     */
+    public function testMoveAsPrevSiblingOf()
+    {
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
+
+        $this->assertEquals($page3, $this->repository->moveAsPrevSiblingOf($page3, $page1));
+        self::$em->refresh($page1);
+        self::$em->refresh($page2);
+        self::$em->flush($page3);
+
+        $this->assertEquals($section1, $page3->getParent());
+        $this->assertEquals(2, $page3->getLevel());
+        $this->assertEquals(1, $page2->getPosition());
+        $this->assertEquals(2, $page3->getPosition());
+        $this->assertEquals(3, $page1->getPosition());
+
+        $this->assertEquals($section2, $this->repository->moveAsPrevSiblingOf($section2, $section1));
+        self::$em->refresh($section1);
+        self::$em->flush($section2);
+
+        $this->assertEquals(1, $this->root->getLeftnode());
+        $this->assertEquals(6, $this->root->getRightnode());
+        $this->assertEquals(2, $section2->getLeftnode());
+        $this->assertEquals(3, $section2->getRightnode());
+        $this->assertEquals(4, $section1->getLeftnode());
+        $this->assertEquals(5, $section1->getRightnode());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsNextSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
+     */
+    public function testMoveAsNextSiblingOf()
+    {
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
+
+        $this->assertEquals($page3, $this->repository->moveAsNextSiblingOf($page3, $page2));
+        self::$em->refresh($page1);
+        self::$em->refresh($page2);
+        self::$em->flush($page3);
+
+        $this->assertEquals($section1, $page3->getParent());
+        $this->assertEquals(2, $page3->getLevel());
+        $this->assertEquals(1, $page2->getPosition());
+        $this->assertEquals(2, $page3->getPosition());
+        $this->assertEquals(3, $page1->getPosition());
+
+        $this->assertEquals($section1, $this->repository->moveAsNextSiblingOf($section1, $section2));
+        self::$em->refresh($section2);
+        self::$em->flush($section1);
+
+        $this->assertEquals(1, $this->root->getLeftnode());
+        $this->assertEquals(6, $this->root->getRightnode());
+        $this->assertEquals(2, $section2->getLeftnode());
+        $this->assertEquals(3, $section2->getRightnode());
+        $this->assertEquals(4, $section1->getLeftnode());
+        $this->assertEquals(5, $section1->getRightnode());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveAsSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testMoveAsSiblingOfRoot()
+    {
+        $section1 = $this->repository->find('section1');
+
+        $this->repository->moveAsPrevSiblingOf($section1, $this->root);
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testMoveNonSectionAsSiblingOfSection()
+    {
+        $section1 = $this->repository->find('section1');
+        $page1 = $this->repository->find('page1');
+
+        $this->repository->moveAsPrevSiblingOf($page1, $section1);
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testMoveSectionAsSiblingOfNonSection()
+    {
+        $section1 = $this->repository->find('section1');
+        $page1 = $this->repository->find('page1');
+
+        $this->repository->moveAsPrevSiblingOf($section1, $page1);
     }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::getRoot
      */
-    public function testGetRootException()
+    public function testGetRoot()
     {
-        $site = new \BackBee\Site\Site();
-        $site->setLabel('multi site')->setServerName('multi site');
-        self::$em->persist($site);
-        self::$em->flush($site);
-
-        $this->repository->getRoot();
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getOnlineChildren
-     */
-    public function testGetOnlineChildren()
-    {
-        $this->assertEquals(array(), $this->repository->getOnlineChildren($this->root));
-
-        $child1 = $this->repository->find('child1');
-        $child3 = $this->repository->find('child3');
-        $child1->setState(Page::STATE_ONLINE);
-        $child3->setState(Page::STATE_ONLINE);
-        self::$em->flush();
-
-        $this->assertEquals(array($child3, $child1), $this->repository->getOnlineChildren($this->root));
-        $this->assertEquals(array($child3), $this->repository->getOnlineChildren($this->root, 1));
-        $this->assertEquals(array($child1, $child3), $this->repository->getOnlineChildren($this->root, null, array('_title')));
-        $this->assertEquals(array($child3, $child1), $this->repository->getOnlineChildren($this->root, null, array('_title', 'desc')));
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::getChildren
-     */
-    public function testGetChildren()
-    {
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
-
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->getChildren($this->root));
-        $this->assertEquals(array($child3, $child2, $child1), $this->repository->getChildren($this->root, '_leftnode'));
-        $this->assertEquals(array($child3, $child2, $child1), $this->repository->getChildren($this->root, '_title', 'desc'));
-        $this->assertInstanceOf('Doctrine\ORM\Tools\Pagination\Paginator', $this->repository->getChildren($this->root, '_title', 'desc', array('start' => 0, 'limit' => 2)));
-        $this->assertEquals(3, $this->repository->getChildren($this->root, '_title', 'desc', array('start' => 0, 'limit' => 2))->count());
-        $this->assertEquals(1, $this->repository->getChildren($this->root, '_title', 'desc', array('start' => 1, 'limit' => 1))->getIterator()->count());
-
-        $child1->setState(Page::STATE_ONLINE);
-        $child3->setState(Page::STATE_ONLINE);
-        self::$em->flush();
-
-        $this->assertEquals(array($child1, $child3), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(Page::STATE_ONLINE)));
-
-        $tomorrow = new \DateTime('tomorrow');
-        $yesterday = new \DateTime('yesterday');
-
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(), array('beforePubdateField' => $tomorrow->getTimestamp())));
-        $this->assertEquals(array(), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(), array('beforePubdateField' => $yesterday->getTimestamp())));
-        $this->assertEquals(array(), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(), array('afterPubdateField' => $tomorrow->getTimestamp())));
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(), array('afterPubdateField' => $yesterday->getTimestamp())));
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(), array('searchField' => 'child')));
-        $this->assertEquals(array($child1), $this->repository->getChildren($this->root, '_title', 'asc', array(), array(), array('searchField' => '1')));
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::countChildren
-     */
-    public function testCountChildren()
-    {
-        $child1 = $this->repository->find('child1');
-        $child3 = $this->repository->find('child3');
-
-        $this->assertEquals(3, $this->repository->countChildren($this->root));
-
-        $child1->setState(Page::STATE_ONLINE);
-        $child3->setState(Page::STATE_ONLINE);
-        self::$em->flush();
-
-        $this->assertEquals(2, $this->repository->countChildren($this->root, array(Page::STATE_ONLINE)));
-
-        $tomorrow = new \DateTime('tomorrow');
-        $yesterday = new \DateTime('yesterday');
-
-        $this->assertEquals(3, $this->repository->countChildren($this->root, array(), array('beforePubdateField' => $tomorrow->getTimestamp())));
-        $this->assertEquals(0, $this->repository->countChildren($this->root, array(), array('beforePubdateField' => $yesterday->getTimestamp())));
-        $this->assertEquals(0, $this->repository->countChildren($this->root, array(), array('afterPubdateField' => $tomorrow->getTimestamp())));
-        $this->assertEquals(3, $this->repository->countChildren($this->root, array(), array('afterPubdateField' => $yesterday->getTimestamp())));
-        $this->assertEquals(3, $this->repository->countChildren($this->root, array(), array('searchField' => 'child')));
-        $this->assertEquals(1, $this->repository->countChildren($this->root, array(), array('searchField' => '1')));
+        $this->assertEquals($this->root, $this->repository->getRoot($this->root->getSite()));
+        $this->assertEquals($this->root, $this->repository->getRoot($this->root->getSite(), array(Page::STATE_HIDDEN)));
+        $this->assertNull($this->repository->getRoot($this->root->getSite(), array(Page::STATE_ONLINE)));
     }
 
     /**
@@ -502,152 +705,248 @@ class PageRepositoryTest extends BackBeeTestCase
      */
     public function testToTrash()
     {
-        $this->assertEquals(4, $this->repository->toTrash($this->root));
+        $section1 = $this->repository->find('section1');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
 
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
+        $this->assertEquals(1, $this->repository->toTrash($page3));
+        $this->assertEquals(Page::STATE_DELETED, $page3->getState());
 
-        self::$em->refresh($this->root);
-        self::$em->refresh($child1);
-        self::$em->refresh($child2);
-        self::$em->refresh($child3);
-
-        $this->assertEquals(Page::STATE_DELETED, $this->root->getState());
-        $this->assertEquals(Page::STATE_DELETED, $child1->getState());
-        $this->assertEquals(Page::STATE_DELETED, $child2->getState());
-        $this->assertEquals(Page::STATE_DELETED, $child3->getState());
+        $this->assertEquals(3, $this->repository->toTrash($section1));
+        self::$em->refresh($section1);
+        self::$em->refresh($page1);
+        self::$em->refresh($page2);
+        $this->assertEquals(Page::STATE_DELETED, $section1->getState());
+        $this->assertEquals(Page::STATE_DELETED, $page1->getState());
+        $this->assertEquals(Page::STATE_DELETED, $page2->getState());
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::likeAPage
+     * @covers \BackBee\NestedNode\Repository\PageRepository::copy
      */
-    public function testLikeAPage()
+    public function testCopy()
     {
-        $this->assertNull($this->repository->likeAPage());
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
 
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child3 = $this->repository->find('child3');
+        $new_page1 = $this->invokeMethod($this->repository, 'copy', array($page1));
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_page1);
+        $this->assertTrue(self::$em->contains($new_page1));
+        $this->assertFalse($new_page1->hasMainSection());
+        $this->assertEquals('page1', $new_page1->getTitle());
+        $this->assertEquals($page1->getParent(), $new_page1->getParent());
 
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->likeAPage('child'));
-        $this->assertEquals(array($child1, $child2, $child3), $this->repository->likeAPage('child', array()));
-        $this->assertEquals(array($child2, $child3), $this->repository->likeAPage('child', array(1, 2)));
-        $this->assertEquals(array($child2, $child3), $this->repository->likeAPage('child', array(1)));
+        $new_page2 = $this->invokeMethod($this->repository, 'copy', array($page1, 'new_title'));
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_page2);
+        $this->assertEquals('new_title', $new_page2->getTitle());
+
+        $new_page3 = $this->invokeMethod($this->repository, 'copy', array($page1, 'new_title', $section2));
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_page3);
+        $this->assertEquals($section2, $new_page3->getParent());
+
+        $new_section = $this->invokeMethod($this->repository, 'copy', array($section1, 'new_section', $this->root));
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $new_section);
+        $this->assertTrue($new_section->hasMainSection());
+        $this->assertEquals($this->root->getSection(), $new_section->getSection()->getParent());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::copy
+     * @expectedException \BackBee\Exception\InvalidArgumentException
+     */
+    public function testCopyDeletedPage()
+    {
+        $page1 = $this->repository->find('page1');
+        $page1->setState(Page::STATE_DELETED);
+
+        $this->invokeMethod($this->repository, 'copy', array($page1));
     }
 
     /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::duplicate
-     * @covers \BackBee\NestedNode\Repository\PageRepository::_copy
      */
     public function testDuplicate()
     {
-        $child1 = $this->repository->find('child1');
-
-        // Duplicate a page with a new title and a new parent
-        $child5 = $this->repository->duplicate($child1, 'child5', $this->root);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $child5);
-        $this->assertEquals('child5', $child5->getTitle());
-        $this->assertEquals($this->root, $child5->getParent());
-
-        // Duplicate a page not recursively to one of its descendant
-        $child4 = $this->repository->duplicate($child5, null, $child1, false);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $child4);
-        $this->assertEquals('child5', $child4->getTitle());
-        $this->assertEquals($child1, $child4->getParent());
-        $this->assertTrue($child5->isLeaf());
-    }
-
-    /**
-     * @expectedException \LogicException
-     */
-    public function testDuplicateOnRoot()
-    {
         // Duplicate a root not recursively to new a one
-        $root2 = $this->repository->duplicate($this->root, null, null, false);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $root2);
-        $this->assertNull($root2->getParent());
-        $this->assertTrue($root2->isLeaf());
+        $clone1 = $this->repository->duplicate($this->root, null, null, false);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $clone1);
+        $this->assertNull($clone1->getParent());
+        $this->assertEquals('root', $clone1->getTitle());
+        $this->assertTrue($clone1->hasMainSection());
+        $this->assertEquals(1, $clone1->getLeftnode());
+        $this->assertEquals(2, $clone1->getRightnode());
+        $this->assertNotEquals($this->root->getContentSet(), $clone1->getContentSet());
+
+        // Duplicate a root not recursively to one of its descendant
+        $section1 = $this->repository->find('section1');
+        $clone2 = $this->repository->duplicate($this->root, null, $section1, false);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $clone2);
+        $this->assertEquals($section1, $clone2->getParent());
+        $this->assertTrue($clone2->hasMainSection());
+
+        // Duplicate a section not recursively to another one
+        $section2 = $this->repository->find('section2');
+        $section3 = $this->repository->duplicate($section2, null, $section1, false);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $section3);
+        $this->assertEquals($section1, $section3->getParent());
+        $this->assertTrue($section3->hasMainSection());
+
+        // Duplicate a page in a section with a new title
+        $page3 = $this->repository->find('page3');
+        $page4 = $this->repository->duplicate($page3, 'page4', $section1, false);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $page4);
+        $this->assertEquals($section1, $page4->getParent());
+        $this->assertFalse($page4->hasMainSection());
+        $this->assertEquals('page4', $page4->getTitle());
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicate
-     * @covers \BackBee\NestedNode\Repository\PageRepository::_copy_recursively
+     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicateRecursively
+     * @covers \BackBee\NestedNode\Repository\PageRepository::updateMainNodePostCloning
+     * @covers \BackBee\NestedNode\Repository\PageRepository::updateRelatedPostCloning
      */
     public function testDuplicateRecursively()
     {
-        // Duplicate a page with a new title and a new parent
-        $child1 = $this->repository->find('child1');
-        $child2 = $this->repository->find('child2');
-        $child5 = $this->repository->duplicate($child1, 'child5', $child2, true);
-        self::$em->persist($child5);
+        // Initialize some mainnodes and circular related links
+        $descendants = $this->repository->getDescendants($this->root, null, true);
+        foreach ($descendants as $child) {
+            $child->getContentSet()->first()->setMainNode($child);
+        }
+        $page1 = $this->repository->find('page1');
+        $page3 = $this->repository->find('page3');
+        $page1->getContentSet()->first()->push($page3->getContentSet()->first());
+        $page3->getContentSet()->first()->push($page1->getContentSet()->first());
         self::$em->flush();
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $child5);
-        $this->assertEquals('child5', $child5->getTitle());
-        $this->assertEquals($child2, $child5->getParent());
 
-        $this->assertEquals(1, count($this->repository->getDescendants($child2)));
+        // Recursively duplicate a tree
+        $clone1 = $this->repository->duplicate($this->root);
+        $this->assertInstanceOf('BackBee\NestedNode\Page', $clone1);
+        $this->assertNull($clone1->getParent());
+        $this->assertEquals('root', $clone1->getTitle());
+        $this->assertTrue($clone1->hasMainSection());
 
-        // Duplicate children except deleted ones
-        $child5->setState(Page::STATE_DELETED);
-
-        $copyChild2 = $this->repository->duplicate($child2);
-        self::$em->persist($copyChild2);
-        self::$em->flush();
-        $this->assertEquals(0, count($this->repository->getDescendants($copyChild2)));
-    }
-
-    /**
-     * @expectedException \LogicException
-     */
-    public function testDuplicateRecursivelyOnRoot()
-    {
-        // Recursively duplicate a root to a new one
-        $root2 = $this->repository->duplicate($this->root);
-        $this->assertInstanceOf('BackBee\NestedNode\Page', $root2);
-        $this->assertEquals('root', $root2->getTitle());
-        $this->assertEquals($this->root->getLayout(), $root2->getLayout());
-        $this->assertNull($root2->getParent());
-
-        $descendants = $this->repository->getDescendants($this->root);
-        $new_descendants = $this->repository->getDescendants($root2);
+        $new_descendants = $this->repository->getDescendants($clone1, null, true);
         $this->assertEquals(count($descendants), count($new_descendants));
 
+        $new_page1 = $new_page3 = null;
         for ($i = 0; $i < count($descendants); $i++) {
+            self::$em->refresh($new_descendants[$i]);
             $this->assertEquals($descendants[$i]->getTitle(), $new_descendants[$i]->getTitle());
+            $this->assertEquals($descendants[$i]->hasMainSection(), $new_descendants[$i]->hasMainSection());
+            $this->assertEquals($descendants[$i]->getLeftnode(), $new_descendants[$i]->getLeftnode());
+            $this->assertEquals($descendants[$i]->getRightnode(), $new_descendants[$i]->getRightnode());
+            $this->assertEquals($descendants[$i]->getPosition(), $new_descendants[$i]->getPosition());
+            $this->assertEquals($descendants[$i]->getLevel(), $new_descendants[$i]->getLevel());
+            $this->assertEquals($new_descendants[$i], $new_descendants[$i]->getContentSet()->first()->getMainNode());
+
+            if ('page1' === $new_descendants[$i]->getTitle()) {
+                $new_page1 = $new_descendants[$i];
+            } elseif ('page3' === $new_descendants[$i]->getTitle()) {
+                $new_page3 = $new_descendants[$i];
+            }
         }
+        $this->assertEquals($new_page1->getContentSet()->first()->last()->getUid(), $new_page3->getContentSet()->first()->getUid());
+        $this->assertEquals($new_page3->getContentSet()->first()->last()->getUid(), $new_page1->getContentSet()->first()->getUid());
+
+        // Duplicate children except deleted ones
+        $section1 = $this->repository->find('section1');
+        $section1->setState(Page::STATE_DELETED);
+        $clone2 = $this->repository->duplicate($this->root);
+        $this->assertEquals(count($this->repository->getDescendants($this->root)) - 3, count($this->repository->getDescendants($clone2)));
     }
 
     /**
-     * @expectedException \LogicException
-     */
-    public function testDuplicateWithTokenOnRoot()
-    {
-        $token = new \BackBee\Security\Token\BBUserToken();
-        $token->setUser(new \BackBee\Security\User('user'));
-
-        $root2 = $this->repository->duplicate($this->root, null, null, true, $token);
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::_copy
-     * @expectedException \LogicException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicateRecursively
+     * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function testDuplicatePageIn0neOfItsDescendants()
     {
-        $child1 = $this->repository->find('child1');
-        $this->repository->duplicate($this->root, null, $child1);
+        $section1 = $this->repository->find('section1');
+
+        $this->repository->duplicate($this->root, null, $section1);
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::duplicate
-     * @expectedException \BackBee\Exception\InvalidArgumentException
+     * @covers \BackBee\NestedNode\Repository\PageRepository::saveWithSection
      */
-    public function testDuplicateDeletedPage()
+    public function testSaveWithSection()
     {
-        $page = self::$kernel->createPage();
-        $page->setState(Page::STATE_HIDDEN + Page::STATE_DELETED);
-        $this->repository->duplicate($page);
+        $this->assertEquals($this->root, $this->repository->saveWithSection($this->root));
+
+        $page2 = $this->repository->find('page2');
+        $this->assertEquals($page2, $this->repository->saveWithSection($page2));
+        self::$em->flush();
+        self::$em->refresh($page2);
+
+        $this->assertTrue($page2->hasMainSection());
+        $this->assertEquals(0, $page2->getPosition());
+        $this->assertEquals(2, $page2->getLevel());
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::shiftPosition
+     */
+    public function testShiftPosition()
+    {
+        $this->assertEquals($this->repository, $this->invokeMethod($this->repository, 'shiftPosition', array($this->root, 1)));
+        $this->assertEquals(0, $this->root->getPosition());
+
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        self::$em->refresh($page1);
+        self::$em->refresh($page2);
+
+        $this->assertEquals($this->repository, $this->invokeMethod($this->repository, 'shiftPosition', array($page2, 1)));
+        $this->assertEquals(2, $page2->getPosition());
+
+        self::$em->refresh($page1);
+        $this->assertEquals(3, $page1->getPosition());
+        $this->assertEquals($this->repository, $this->invokeMethod($this->repository, 'shiftPosition', array($page2, 1, true)));
+        $this->assertEquals(2, $page2->getPosition());
+
+        self::$em->refresh($page1);
+        $this->assertEquals(4, $page1->getPosition());
+    }
+
+    public function testShiftLevel()
+    {
+        $section1 = $this->repository->find('section1');
+        $section2 = $this->repository->find('section2');
+        $page1 = $this->repository->find('page1');
+        $page2 = $this->repository->find('page2');
+        $page3 = $this->repository->find('page3');
+
+        $this->assertEquals($this->repository, $this->invokeMethod($this->repository, 'shiftLevel', array($page3, 1, true)));
+        self::$em->refresh($page3);
+        $this->assertEquals(1, $page3->getLevel());
+
+        $this->assertEquals($this->repository, $this->invokeMethod($this->repository, 'shiftLevel', array($page3, 1, false)));
+        self::$em->refresh($page3);
+        $this->assertEquals(2, $page3->getLevel());
+
+        $this->invokeMethod($this->repository, 'shiftLevel', array($this->root, 2));
+        foreach ($this->repository->findAll() as $node) {
+            self::$em->refresh($node);
+        }
+        $this->assertEquals(2, $this->root->getLevel());
+        $this->assertEquals(3, $section1->getLevel());
+        $this->assertEquals(3, $section2->getLevel());
+        $this->assertEquals(4, $page1->getLevel());
+        $this->assertEquals(4, $page2->getLevel());
+        $this->assertEquals(4, $page3->getLevel());
+
+        $this->invokeMethod($this->repository, 'shiftLevel', array($this->root, -2, true));
+        foreach ($this->repository->findAll() as $node) {
+            self::$em->refresh($node);
+        }
+        $this->assertEquals(2, $this->root->getLevel());
+        $this->assertEquals(1, $section1->getLevel());
+        $this->assertEquals(1, $section2->getLevel());
+        $this->assertEquals(2, $page1->getLevel());
+        $this->assertEquals(2, $page2->getLevel());
+        $this->assertEquals(2, $page3->getLevel());
     }
 
     public static function tearDownAfterClass()

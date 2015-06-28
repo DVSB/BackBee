@@ -274,16 +274,15 @@ class UrlGenerator implements UrlGeneratorInterface
         if (preg_match('#(.*)\/$#', $baseUrl, $matches)) {
             $baseUrl = $matches[1].'-%d/';
             $existings = $pageRepository->createQueryBuilder('p')
-                ->where('p._root = :root')
-                ->setParameter('root', $page->getRoot())
-                ->andWhere('p._url LIKE :url')
-                ->setParameter('url', $matches[1].'%/')
-                ->getQuery()
-                ->getResult()
+                    ->andRootIs($page->getRoot())
+                    ->andWhere('p._url LIKE :url')
+                    ->setParameter('url', $matches[1] . '%/')
+                    ->getQuery()
+                    ->getResult()
             ;
         } else {
             $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
-                'SELECT uid FROM page WHERE `root_uid` = :root AND url REGEXP :regex',
+                'SELECT p.uid FROM page p LEFT JOIN section s ON s.uid = p.section_uid WHERE s.root_uid = :root AND p.url REGEXP :regex',
                 [
                     'regex' => $url.'(-[0-9]+)?$',
                     'root'  => $page->getRoot()->getUid(),

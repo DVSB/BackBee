@@ -449,10 +449,10 @@ abstract class AbstractClassContent extends AbstractContent
 
         if (
             null !== $origin_page
-            && is_array($origin_page->cloning_datas)
-            && array_key_exists('contents', $origin_page->cloning_datas)
+            && is_array($origin_page->cloningData)
+            && array_key_exists('contents', $origin_page->cloningData)
         ) {
-            $origin_page->cloning_datas['contents'][$this->getUid()] = $clone;
+            $origin_page->cloningData['contents'][$this->getUid()] = $clone;
         }
 
         if (!($this instanceof ContentSet)) {

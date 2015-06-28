@@ -184,6 +184,9 @@ class ClassContentTest extends BackBeeTestCase
 
         $content->setDraft(null);
         $this->assertEquals($content->getParamValue('foo'), ['bar']);
+        
+        $contentManager->setBBUserToken(null);
+        self::$app->getSecurityContext()->setToken(null);
     }
 
     /**

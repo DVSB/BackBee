@@ -23,14 +23,14 @@
 
 namespace BackBee\NestedNode\Repository;
 
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Exception;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\ContentSet;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\NestedNode\AbstractNestedNode;
 use BackBee\NestedNode\Page;
+use BackBee\NestedNode\Section;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
@@ -43,15 +43,15 @@ use BackBee\Site\Site;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class PageRepository extends NestedNodeRepository
+class PageRepository extends EntityRepository
 {
     /**
      * Creates a new Page QueryBuilder instance that is prepopulated for this entity name.
      *
-     * @param string $alias   the alias to use
-     * @param string $indexBy optional, the index to use for the query
+     * @param string                $alias              The alias to use.
+     * @param string                $indexBy            Optional, the index to use for the query.
      *
-     * @return \BackBee\NestedNode\Repository\PageQueryBuilder
+     * @return PageQueryBuilder                         The page query builder for this repository.
      */
     public function createQueryBuilder($alias, $indexBy = null)
     {
@@ -61,518 +61,968 @@ class PageRepository extends NestedNodeRepository
     }
 
     /**
-     * Returns the online descendants of $page.
+     * Finds entities by a set of criteria with automatic join on section if need due to retro-compatibility.
      *
-     * @param \BackBee\NestedNode\Page $page        the page to look for
-     * @param int                      $depth       optional, limit to $depth number of generation
-     * @param boolean                  $includeNode optional, include $page in results if TRUE (false by default)
+     * @param  array                $criteria           An array of criteria ( field => value ).
+     * @param  array|null           $orderBy            Optional, an array of ordering criteria ( [field => direction] ).
+     * @param  integer|null         $limit              Optional, the max number of results.
+     * @param  integer|null         $offset             Optional, The starting index of results.
      *
-     * @return \BackBee\NestedNode\Page[]
+     * @return Page[]                                   An array of matching pages.
      */
-    public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false)
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
     {
-        $q = $this->createQueryBuilder('p')
-            ->andIsDescendantOf($page, !$includeNode)
-            ->andIsOnline()
-            ->orderBy('p._leftnode', 'asc')
-        ;
-
-        if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
+        if (
+                false === PageQueryBuilder::hasJoinCriteria($criteria) &&
+                false === PageQueryBuilder::hasJoinCriteria($orderBy)
+        ) {
+            return parent::findBy($criteria, $orderBy, $limit, $offset);
         }
 
-        return $q->getQuery()->getResult();
+        $query = $this->createQueryBuilder('p')
+                        ->addSearchCriteria($criteria);
+
+        if (false === empty($orderBy)) {
+            $query->addMultipleOrderBy($orderBy);
+        }
+
+        return $query->setMaxResults($limit)
+                        ->setFirstResult($offset)
+                        ->getQuery()
+                        ->getResult();
+    }
+
+    /**
+     * Finds a single entity by a set of criteria with automatic join on section if need due to retro-compatibility.
+     *
+     * @param  array                $criteria           An array of criteria.
+     * @param  array|null           $orderBy            Optional, an array of ordering criteria.
+     *
+     * @return object|null                              The page instance or null if the entity can not be found.
+     */
+    public function findOneBy(array $criteria, array $orderBy = null)
+    {
+        if (
+                false === PageQueryBuilder::hasJoinCriteria($criteria) &&
+                false === PageQueryBuilder::hasJoinCriteria($orderBy)
+        ) {
+            return parent::findOneBy($criteria, $orderBy);
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->addSearchCriteria($criteria);
+
+        if (false === empty($orderBy)) {
+            $query->addMultipleOrderBy($orderBy);
+        }
+
+        return $query->getQuery()
+                        ->getOneOrNullResult();
+    }
+
+    /**
+     * Returns the ancestor at level $level of the provided page.
+     *
+     * @param  Page                 $page               The page to look for ancestor.
+     * @param  integer              $level              Optional, the level of the ancestor (0 by default, ie root).
+     *
+     * @return Page|null                                The page instance or null if the entity can not be found.
+     */
+    public function getAncestor(Page $page, $level = 0)
+    {
+        if ($page->getLevel() < $level) {
+            return;
+        }
+
+        if ($page->getLevel() === $level) {
+            return $page;
+        }
+
+        return $this->createQueryBuilder('p')
+                        ->andIsAncestorOf($page, false, $level)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+    }
+
+    /**
+     * Returns the ancestors of the provided page.
+     *
+     * @param  Page                 $page               The page to look for ancestors.
+     * @param  integer|null         $depth              Optional, limits results to ancestors from $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include the node itsef to results if true (false by default).
+     *
+     * @return Page[]                                   An array of matching ancestors.
+     */
+    public function getAncestors(Page $page, $depth = null, $includeNode = false)
+    {
+        $q = $this->createQueryBuilder('p')
+                ->andIsAncestorOf($page, !$includeNode, null === $depth ? null : $page->getLevel() - $depth);
+
+        $results = $q->orderBy($q->getSectionAlias().'._leftnode', 'asc')
+                ->getQuery()
+                ->getResult();
+
+        if (true === $includeNode && false === $page->hasMainSection()) {
+            $results[] = $page;
+        }
+
+        return $results;
     }
 
     /**
      * Returns the previous online sibling of $page.
      *
-     * @param \BackBee\NestedNode\Page $page the page to look for
+     * @param  Page                 $page               The page to look for previous sibling
      *
-     * @return \BackBee\NestedNode\Page|NULL
+     * @return Page|null                                The previous page or null if the entity can not be found.
      */
     public function getOnlinePrevSibling(Page $page)
     {
-        return $this->createQueryBuilder('p')
-            ->andIsPreviousOnlineSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $query = $this->createQueryBuilder('p')
+                ->andIsSiblingsOf($page, true, ['_leftnode' => 'DESC', '_position' => 'DESC'], 1, 0)
+                ->andIsOnline();
+
+        if (true === $page->hasMainSection()) {
+            $query->andIsSection()
+                    ->andWhere($query->getSectionAlias().'._leftnode < :leftnode')
+                    ->setParameter('leftnode', $page->getLeftnode());
+        } else {
+            $qOR = $query->expr()->orX();
+            $qOR->add('p._section != p')
+                    ->add($query->getSectionAlias().'._parent = :parent');
+
+            $query->andWhere('p._position < :position')
+                    ->andWhere($qOR)
+                    ->setParameter('position', $page->getPosition())
+                    ->setParameter('parent', $page->getParent()->getSection());
+        }
+
+        return $query->getQuery()
+                        ->getOneOrNullResult();
     }
 
     /**
-     * Returns the online siblings of the provided page.
+     * Returns the online siblings having layout $layout of the provided page.
      *
-     * @param \BackBee\NestedNode\Page $page        the page to look for
-     * @param boolean                  $includeNode optional, include $page in results if TRUE (false by default)
-     * @param array                    $order       optional, the ordering criteria ( array($field => $sort) )
-     * @param int                      $limit       optional, the maximum number of results
-     * @param int                      $start       optional, the first result index (0 by default)
+     * @param  Page                 $page               The page to look for siblings having $layout.
+     * @param  Layout               $layout             The layout to look for.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
+     * @param  array|null           $order              Optional, the ordering criteria ( [field => $sort] ).
+     * @param  integer|null         $limit              Optional, the maximum number of results.
+     * @param  integer              $start              Optional, the first result index (0 by default).
      *
-     * @return \BackBee\NestedNode\Page[]
-     */
-    public function getOnlineSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
-     * Returns the onlne siblings having layout $layout of the provided page.
-     *
-     * @param \BackBee\NestedNode\Page $page        the page to look for
-     * @param \BackBee\Site\Layout     $layout      the layout to look for
-     * @param boolean                  $includeNode optional, include $page in results if TRUE (false by default)
-     * @param array                    $order       optional, the ordering criteria ( array($field => $sort) )
-     * @param int                      $limit       optional, the maximum number of results
-     * @param int                      $start       optional, the first result index (0 by default)
-     *
-     * @return \BackBee\NestedNode\Page[]
+     * @return Page[]                                   An array of matching siblings.
      */
     public function getOnlineSiblingsByLayout(Page $page, Layout $layout, $includeNode = false, $order = null, $limit = null, $start = 0)
     {
         return $this->createQueryBuilder('p')
-            ->andIsOnlineSiblingsOf($page, !$includeNode, $order, $limit, $start)
-            ->andLayoutIs($layout)
-            ->getQuery()
-            ->getResult()
-        ;
+                        ->andIsSiblingsOf($page, !$includeNode, $order, $limit, $start)
+                        ->andIsOnline()
+                        ->andWhere('p._layout = :layout')
+                        ->setParameter('layout', $layout)
+                        ->andWhere('p._level = :level')
+                        ->setParameter('level', $page->getLevel())
+                        ->getQuery()
+                        ->getResult();
     }
 
     /**
      * Returns the next online sibling of $page.
      *
-     * @param \BackBee\NestedNode\Page $page the page to look for
+     * @param  Page                 $page               The page to look for next sibling.
      *
-     * @return \BackBee\NestedNode\Page|NULL
+     * @return Page|null                                The next page or null if the entity can not be found.
      */
     public function getOnlineNextSibling(Page $page)
     {
-        return $this->createQueryBuilder('p')
-            ->andIsNextOnlineSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $query = $this->createQueryBuilder('p');
+
+        if (true === $page->hasMainSection()) {
+            $query->andWhere($query->getSectionAlias().'._leftnode >= :leftnode')
+                    ->orWhere('p._section IN (:sections)')
+                    ->setParameter('leftnode', $page->getLeftnode())
+                    ->setParameter('sections', [$page->getSection(), $page->getSection()->getParent()]);
+        } else {
+            $query->andWhere('p._position > :position')
+                    ->setParameter('position', $page->getPosition());
+        }
+
+        return $query->andIsSiblingsOf($page, true, ['_position' => 'ASC', '_leftnode' => 'ASC'], 1, 0)
+                        ->andIsOnline()
+                        ->getQuery()
+                        ->getOneOrNullResult();
     }
 
     /**
-     * Inserts a leaf page in a tree as first child of the provided parent page.
+     * Inserts a page in a tree at first position.
      *
-     * @param \BackBee\NestedNode\Page $page   the page to be inserted
-     * @param \BackBee\NestedNode\Page $parent the parent page
+     * @param  Page                 $page               The page to be inserted.
+     * @param  Page                 $parent             The parent node.
+     * @param  boolean              $section            If true, the page is inserted with a section (false by default).
      *
-     * @return \BackBee\NestedNode\Page the inserted page
-     *
-     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
-     *                                                     or if $page or $parent are not an instance of Page
+     * @return Page                                     The inserted page.
      */
-    public function insertNodeAsFirstChildOf(AbstractNestedNode $page, AbstractNestedNode $parent)
+    public function insertNodeAsFirstChildOf(Page $page, Page $parent, $section = false)
     {
-        if (false === ($page instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($page)));
-        }
-
-        if (false === ($parent instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($parent)));
-        }
-
-        $page = parent::insertNodeAsFirstChildOf($page, $parent);
-
-        return $page->setSite($parent->getSite());
+        return $this->insertNode($page, $parent, 1, $section);
     }
 
     /**
-     * Inserts a leaf page in a tree as last child of the provided parent node.
+     * Inserts a page in a tree at last position.
      *
-     * @param \BackBee\NestedNode\Page $page   the page to be inserted
-     * @param \BackBee\NestedNode\Page $parent the parent page
+     * @param  Page                 $page               The page to be inserted.
+     * @param  Page                 $parent             The parent node.
+     * @param  boolean              $section            If true, the page is inserted with a section (false by default).
      *
-     * @return \BackBee\NestedNode\Page the inserted page
-     *
-     * @throws \BackBee\Exception\InvalidArgumentException Occurs if the page is not a leaf or $parent is not flushed yet
-     *                                                     or if $page or $parent are not an instance of Page
+     * @return Page                                     The inserted page.
      */
-    public function insertNodeAsLastChildOf(AbstractNestedNode $page, AbstractNestedNode $parent)
+    public function insertNodeAsLastChildOf(Page $page, Page $parent, $section = false)
     {
-        if (false === ($page instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($page)));
+        return $this->insertNode($page, $parent, $this->getMaxPosition($parent) + 1, $section);
+    }
+
+    /**
+     * Inserts a page in a tree.
+     *
+     * @param  Page                 $page               The page to be inserted.
+     * @param  Page                 $parent             The parent node.
+     * @param  integer              $position           The position of the inserted page
+     * @param  boolean              $section            If true, the page is inserted with a section (false by default).
+     *
+     * @return Page                                     The inserted page.
+     *
+     * @throws InvalidArgumentException                 Raises if parent page is not a section.
+     */
+    public function insertNode(Page $page, Page $parent, $position, $section = false)
+    {
+        if (!$parent->hasMainSection()) {
+            throw new InvalidArgumentException('Parent page is not a section.');
         }
 
-        if (false === ($parent instanceof Page)) {
-            throw new InvalidArgumentException(sprintf('Waiting for \BackBee\NestedNode\Page get %s', get_class($parent)));
+        $current_parent = $page->getSection();
+        $page->setParent($parent)
+                ->setPosition($position)
+                ->setLevel($parent->getSection()->getLevel() + 1);
+
+        if (true === $section) {
+            $page = $this->saveWithSection($page, $current_parent);
+        } else {
+            $this->shiftPosition($page, 1, true);
         }
 
-        $page = parent::insertNodeAsLastChildOf($page, $parent);
+        return $page;
+    }
 
-        return $page->setSite($parent->getSite());
+    /**
+     * Returns default ordering criteria for descendants if none provided.
+     *
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  array                $order              Optional, the ordering criteria ( [] by default ).
+     *
+     * @return array                                    If none ordering criteria provided and only one descendant generation is requested
+     *                                                  the result will be array['_position' => 'ASC', '_leftnode' => 'ASC']
+     *                                                  If none ordering criteria provided and several generations requested the result
+     *                                                  will be array['_leftnode' => 'ASC', '_level' => 'ASC', '_position' => 'ASC']
+     *                                                  elsewhere $order.
+     */
+    private function getOrderingDescendants($depth = null, $order = [])
+    {
+        if (1 === $depth && true === empty($order)) {
+            $order = [
+                '_position' => 'ASC',
+                '_leftnode' => 'ASC',
+            ];
+        } elseif (true === empty($order)) {
+            $order = [
+                '_leftnode' => 'ASC',
+                '_level' => 'ASC',
+                '_position' => 'ASC',
+            ];
+        }
+
+        return $order;
+    }
+
+    /**
+     * Returns the descendants of $page.
+     *
+     * @param  Page                 $page               The page to look for descendants.
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
+     * @param  array                $order              Optional, the ordering criteria ( [] by default ).
+     * @param  boolean              $paginate           Optional, if true return a paginator rather than an array (false by default).
+     * @param  integer              $start              Optional, if paginated set the first result index (0 by default).
+     * @param  integer              $limit              Optional, if paginated set the maxmum number of results (25 by default).
+     * @param  boolean              $limitToSection     Optional, limit to descendants having child (false by default).
+     * @param  string|null          $state              Optional, either 'visible', 'online', 'not-deleted' or empty.
+     *
+     * @return Page[]|Paginator                         The matching pages if $paginate is false, a Paginator elsewhere.
+     */
+    private function getDescendantsWithState(Page $page, $depth = null, $includeNode = false, $order = [], $paginate = false, $start = 0, $limit = 25, $limitToSection = false, $state = null)
+    {
+        if (true === $page->isLeaf()) {
+            return [];
+        }
+
+        $query = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, !$includeNode, $depth, $this->getOrderingDescendants($depth, $order), (true === $paginate) ? $limit : null, $start, $limitToSection);
+
+        switch ($state) {
+            case 'onine':
+                $query->andIsOnline();
+                break;
+            case 'visible':
+                $query->andIsVisible();
+                break;
+            case 'not-deleted':
+                $query->andIsNotDeleted();
+                break;
+        }
+
+        if (true === $paginate) {
+            return new Paginator($query);
+        }
+
+        return $query->getQuery()->getResult();
+    }
+
+    /**
+     * Returns the descendants of $page.
+     *
+     * @param  Page                 $page               The page to look for descendants.
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
+     * @param  array                $order              Optional, the ordering criteria ( [] by default ).
+     * @param  boolean              $paginate           Optional, if true return a paginator rather than an array (false by default).
+     * @param  integer              $start              Optional, if paginated set the first result index (0 by default).
+     * @param  integer              $limit              Optional, if paginated set the maxmum number of results (25 by default).
+     * @param  boolean              $limitToSection     Optional, limit to descendants having child (false by default).
+     *
+     * @return Page[]|Paginator                         The matching pages if $paginate is false, a Paginator elsewhere.
+     */
+    public function getDescendants(Page $page, $depth = null, $includeNode = false, $order = [], $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
+    {
+        return $this->getDescendantsWithState($page, $depth, $includeNode, $order, $paginate, $start, $limit, $limitToSection);
+    }
+
+    /**
+     * Returns the online descendants of $page.
+     *
+     * @param  Page                 $page               The page to look for descendants.
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
+     * @param  array                $order              Optional, the ordering criteria ( [] by default ).
+     * @param  boolean              $paginate           Optional, if true return a paginator rather than an array (false by default).
+     * @param  integer              $start              Optional, if paginated set the first result index (0 by default).
+     * @param  integer              $limit              Optional, if paginated set the maxmum number of results (25 by default).
+     * @param  boolean              $limitToSection     Optional, limit to descendants having child (false by default).
+     *
+     * @return Page[]|Paginator                         The matching pages if $paginate is false, a Paginator elsewhere.
+     */
+    public function getOnlineDescendants(Page $page, $depth = null, $includeNode = false, $order = [], $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
+    {
+        return $this->getDescendantsWithState($page, $depth, $includeNode, $order, $paginate, $start, $limit, $limitToSection, 'online');
     }
 
     /**
      * Returns the visible (ie online and not hidden) descendants of $page.
      *
-     * @param \BackBee\NestedNode\Page $page        the page to look for
-     * @param int                      $depth       optional, limit to $depth number of generation
-     * @param boolean                  $includeNode optional, include $page in results if TRUE (false by default)
+     * @param  Page                 $page               The page to look for descendants.
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
+     * @param  array                $order              Optional, the ordering criteria ( [] by default ).
+     * @param  boolean              $paginate           Optional, if true return a paginator rather than an array (false by default).
+     * @param  integer              $start              Optional, if paginated set the first result index (0 by default).
+     * @param  integer              $limit              Optional, if paginated set the maxmum number of results (25 by default).
+     * @param  boolean              $limitToSection     Optional, limit to descendants having child (false by default).
      *
-     * @return \BackBee\NestedNode\Page[]
+     * @return Page[]|Paginator                         The matching pages if $paginate is false, a Paginator elsewhere.
      */
-    public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false)
+    public function getVisibleDescendants(Page $page, $depth = null, $includeNode = false, $order = [], $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
     {
-        $q = $this->createQueryBuilder('p')
-            ->andIsDescendantOf($page, !$includeNode)
-            ->andIsVisible()
-            ->orderBy('p._leftnode', 'asc')
-        ;
-
-        if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
-        }
-
-        return $q->getQuery()->getResult();
+        return $this->getDescendantsWithState($page, $depth, $includeNode, $order, $paginate, $start, $limit, $limitToSection, 'visible');
     }
 
     /**
-     * Returns the visible (ie online and not hidden) siblings of the provided page.
+     * Returns the visible (ie online and not hidden) children of $page.
      *
-     * @param \BackBee\NestedNode\Page $page        the page to look for
-     * @param boolean                  $includeNode optional, include $page in results if TRUE (false by default)
-     * @param array                    $order       optional, the ordering criteria ( array($field => $sort) )
-     * @param int                      $limit       optional, the maximum number of results
-     * @param int                      $start       optional, the first result index (0 by default)
+     * @param  Page                 $page               The page to look for descendants.
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
      *
-     * @return \BackBee\NestedNode\Page[]
+     * @return Page[]                                   The matching pages if $paginate is false, a Paginator elsewhere.
+     *
+     * @deprecated
      */
-    public function getVisibleSiblings(Page $page, $includeNode = false, $order = null, $limit = null, $start = 0)
+    public function getVisibleDescendantsFromParent(Page $page, $depth = null, $includeNode = false)
     {
-        return $this->createQueryBuilder('p')
-            ->andIsVisibleSiblingsOf($page, !$includeNode, $order, $limit, $start)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-
-    /**
-     * Returns the previous visible (ie online and not hidden) sibling of $page.
-     *
-     * @param \BackBee\NestedNode\Page $page the page to look for
-     *
-     * @return \BackBee\NestedNode\Page|NULL
-     */
-    public function getVisiblePrevSibling(Page $page)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsPreviousVisibleSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-
-    /**
-     * Moves $page as child of $parent by default at last position or, optionaly, before node having uid = $next_uid.
-     *
-     * @param \BackBee\NestedNode\Page $page     the page to move
-     * @param \BackBee\NestedNode\Page $parent   the page parent to move in
-     * @param string                   $next_uid optional, the uid of the next sibling
-     *
-     * @return \BackBee\NestedNode\Page the moved page
-     */
-    public function movePageInTree(Page $page, Page $parent, $next_uid = null)
-    {
-        $next = ($next_uid !== null) ? $this->find($next_uid) : null;
-
-        if (null !== $next && $next->getParent() === $parent) {
-            return $this->moveAsPrevSiblingOf($page, $next);
-        }
-
-        return $this->moveAsLastChildOf($page, $parent);
-    }
-
-    /**
-     * Replaces the ContentSet of $page.
-     *
-     * @param \BackBee\NestedNode\Page         $page          the page to change
-     * @param \BackBee\ClassContent\ContentSet $oldContentSet the contentset to replace
-     * @param \BackBee\ClassContent\ContentSet $newContentSet the new contentset
-     *
-     * @return \BackBee\ClassContent\ContentSet the inserted contentset
-     */
-    public function replaceRootContentSet(Page $page, ContentSet $oldContentSet, ContentSet $newContentSet)
-    {
-        try {
-            $result = $page->replaceRootContentSet($oldContentSet, $newContentSet);
-
-            return $result;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Returns the previous visible sibling of $page.
-     *
-     * @param \BackBee\NestedNode\Page $page the page to look for
-     *
-     * @return \BackBee\NestedNode\Page|NULL
-     */
-    public function getVisibleNextSibling(Page $page)
-    {
-        return $this->createQueryBuilder('p')
-            ->andIsNextVisibleSiblingOf($page)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        return $this->getVisibleDescendants($page, 1, $includeNode);
     }
 
     /**
      * Returns the not deleted descendants of $page.
      *
-     * @param \BackBee\NestedNode\Page $page         the page to look for
-     * @param type                     $depth        optional, limit to $depth number of generation
-     * @param type                     $includeNode  optional, include $page in results if TRUE (false by default)
-     * @param type                     $order        optional, the ordering criteria ( array('_leftnode' => 'asc') by default )
-     * @param type                     $paginate     optional, if TRUE return a paginator rather than an array (false by default)
-     * @param type                     $firstresult  optional, if paginated set the first result index (0 by default)
-     * @param type                     $maxresults   optional, if paginated set the maxmum number of results (25 by default)
-     * @param type                     $having_child optional, limit to descendants having child (false by default)
+     * @param  Page                 $page               The page to look for descendants.
+     * @param  integer|null         $depth              Optional, limit to $depth number of generation.
+     * @param  boolean              $includeNode        Optional, include $page in results if true (false by default).
+     * @param  array                $order              Optional, the ordering criteria ( [] by default ).
+     * @param  boolean              $paginate           Optional, if true return a paginator rather than an array (false by default).
+     * @param  integer              $start              Optional, if paginated set the first result index (0 by default).
+     * @param  integer              $limit              Optional, if paginated set the maxmum number of results (25 by default).
+     * @param  boolean              $limitToSection     Optional, limit to descendants having child (false by default).
      *
-     * @return \Doctrine\ORM\Tools\Pagination\Paginator|\BackBee\NestedNode\Page[]
+     * @return Page[]|Paginator                         The matching pages if $paginate is false, a Paginator elsewhere.
      */
-    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, array $order = array('_leftnode' => 'asc'), $paginate = false, $firstresult = 0, $maxresults = 25, $having_child = false)
+    public function getNotDeletedDescendants(Page $page, $depth = null, $includeNode = false, $order = [], $paginate = false, $start = 0, $limit = 25, $limitToSection = false)
     {
-        if (true === array_key_exists('field', $order)) {
-            if ('_' !== substr($order['field'], 0, 1)) {
-                $order['field'] = '_'.$order['field'];
-            }
+        return $this->getDescendantsWithState($page, $depth, $includeNode, $order, $paginate, $start, $limit, $limitToSection, 'not-deleted');
+    }
 
-            $order = array($order['field'] => (true === array_key_exists('sort', $order) ? $order['sort'] : 'asc'));
+    /**
+     * Move page as first child of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     *
+     * @return Page                                     The moved page.
+     */
+    public function moveAsFirstChildOf(Page $page, Page $target)
+    {
+        return $this->moveAsChildOf($page, $target, true);
+    }
+
+    /**
+     * Move page as last child of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     *
+     * @return Page                                     The moved page.
+     */
+    public function moveAsLastChildOf(Page $page, Page $target)
+    {
+        return $this->moveAsChildOf($page, $target, false);
+    }
+
+    /**
+     * Move page as child of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     * @param  boolean              $asFirst            Move page as first child of $target if true (default), last child elsewhere.
+     *
+     * @return Page                                     The moved page.
+     *
+     * @throws InvalidArgumentException                 Raises if target page is not a section.
+     */
+    private function moveAsChildOf(Page $page, Page $target, $asFirst = true)
+    {
+        if (false === $target->hasMainSection()) {
+            throw new InvalidArgumentException('Cannot move page into a non-section page.');
         }
 
-        $q = $this->createQueryBuilder('p')
-            ->andIsDescendantOf($page, !$includeNode)
-            ->andStateIsLowerThan(Page::STATE_DELETED)
-            ->orderByMultiple($order)
-        ;
-
-        if (null !== $depth) {
-            $q->andLevelIsLowerThan($page->getLevel() + $depth);
+        if (false === $page->hasMainSection()) {
+            $this->movePageAsChildOf($page, $target, $asFirst);
+        } else {
+            $this->moveSectionAsChildOf($page, $target, $asFirst);
         }
 
-        if (true === $having_child) {
-            $q->andWhere('p._rightnode > (p._leftnode + 1)');
+        return $page->setParent($target)
+                        ->setLevel($target->getLevel() + 1);
+    }
+
+    /**
+     * Move a non-section page as child of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     * @param  boolean              $asFirst            Move page as first child of $target if true (default), last child elsewhere.
+     *
+     * @return Page                                     The moved page.
+     */
+    private function movePageAsChildOf(Page $page, Page $target, $asFirst = true)
+    {
+        if (true === $asFirst) {
+            return $this->shiftPosition($page, -1, true)
+                            ->insertNodeAsFirstChildOf($page, $target);
+        } else {
+            return $this->shiftPosition($page, -1, true)
+                            ->insertNodeAsLastChildOf($page, $target);
+        }
+    }
+
+    /**
+     * Move a section page as child of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     * @param  boolean              $asFirst            Move page as first child of $target if true (default), last child elsewhere.
+     *
+     * @return Page                                     The moved page.
+     */
+    private function moveSectionAsChildOf(Page $page, Page $target, $asFirst = true)
+    {
+        $delta = $target->getLevel() - $page->getLevel() + 1;
+        $this->shiftLevel($page, $delta);
+
+        if (true === $asFirst) {
+            $this->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Section')
+                    ->moveAsFirstChildOf($page->getSection(), $target->getSection());
+        } else {
+            $this->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Section')
+                    ->moveAsLastChildOf($page->getSection(), $target->getSection());
         }
 
-        if (false === $paginate) {
-            return $q->getQuery()->getResult();
+        return $page;
+    }
+
+    /**
+     * Move a page as previous sibling of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     *
+     * @return Page                                     The moved page.
+     */
+    public function moveAsPrevSiblingOf(Page $page, Page $target)
+    {
+        return $this->moveAsSiblingOf($page, $target, true);
+    }
+
+    /**
+     * Move a page as next sibling of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     *
+     * @return Page                                     The moved page.
+     */
+    public function moveAsNextSiblingOf(Page $page, Page $target)
+    {
+        return $this->moveAsSiblingOf($page, $target, false);
+    }
+
+    /**
+     * Move a page as sibling of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     * @param  boolean              $asPrevious         Move page as previous sibling of $target if true (default), next sibling elsewhere.
+     *
+     * @return Page                                     The moved page.
+     *
+     * @throws InvalidArgumentException                 Raises if $target is a root.
+     */
+    private function moveAsSiblingOf(Page $page, Page $target, $asPrevious = true)
+    {
+        if (null === $target->getParent()) {
+            throw new InvalidArgumentException('Cannot move a page as sibling of a root.');
         }
 
-        $q->setFirstResult($firstresult)
-          ->setMaxResults($maxresults)
-        ;
+        if (false === $page->hasMainSection()) {
+            $this->movePageAsSiblingOf($page, $target, $asPrevious);
+        } else {
+            $this->moveSectionAsSiblingOf($page, $target, $asPrevious);
+        }
 
-        return new Paginator($q, false);
+        return $page->setParent($target->getParent());
+    }
+
+    /**
+     * Move a non-section page as sibling of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     * @param  boolean              $asPrevious         Move page as previous sibling of $target if true (default), next sibling elsewhere.
+     *
+     * @return Page                                     The moved page.
+     *
+     * @throws InvalidArgumentException                 Raises if target page is a section.
+     */
+    private function movePageAsSiblingOf(Page $page, Page $target, $asPrevious = true)
+    {
+        if (true === $target->hasMainSection()) {
+            throw new InvalidArgumentException('Cannot move a non-section page as sibling of a section page.');
+        }
+
+        $this->shiftPosition($page, -1, true);
+        $this->_em->refresh($target);
+
+        if (true === $asPrevious) {
+
+            $page->setPosition($target->getPosition());
+            $this->shiftPosition($target, 1);
+        } else {
+            $page->setPosition($target->getPosition() + 1);
+            $this->shiftPosition($target, 1, true);
+        }
+
+        return $page;
+    }
+
+    /**
+     * Move a section page as sibling of $target.
+     *
+     * @param  Page                 $page               The page to be moved.
+     * @param  Page                 $target             The target page.
+     * @param  boolean              $asPrevious         Move page as previous sibling of $target if true (default), next sibling elsewhere.
+     *
+     * @return Page                                     The moved page.
+     *
+     * @throws InvalidArgumentException                 Raises if target page is a section.
+     */
+    private function moveSectionAsSiblingOf(Page $page, Page $target, $asPrevious = true)
+    {
+        if (false === $target->hasMainSection()) {
+            throw new InvalidArgumentException('Cannot move a section page as sibling of a non-section page.');
+        }
+
+        $delta = $page->getLevel() - $target->getLevel();
+        $this->shiftLevel($page, $delta);
+
+        if (true === $asPrevious) {
+            $this->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Section')
+                    ->moveAsPrevSiblingOf($page->getSection(), $target->getSection());
+        } else {
+            $this->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Section')
+                    ->moveAsNextSiblingOf($page->getSection(), $target->getSection());
+        }
+
+        return $page;
     }
 
     /**
      * Returns the root page for $site.
      *
-     * @param \BackBee\Site\Site $site             optional, the site to test
-     * @param array              $restrictedStates optional, limit to pages having provided states
+     * @param  Site                 $site               The site to test.
+     * @param  integer[]            $restrictedStates   Optional, limit to pages having provided states ( [] by default ).
      *
-     * @return \BackBee\NestedNode\Page|NULL
+     * @return Page|null                                The root instance or null if the entity can not be found.
      */
-    public function getRoot(Site $site = null, array $restrictedStates = array())
+    public function getRoot(Site $site, array $restrictedStates = [])
     {
         $q = $this->createQueryBuilder('p')
+                ->andSiteIs($site)
                 ->andParentIs(null)
+                ->orderby('p._position', 'asc')
                 ->setMaxResults(1);
-
-        if (null !== $site) {
-            $q->andSiteIs($site);
-        }
 
         if (0 < count($restrictedStates)) {
             $q->andStateIsIn($restrictedStates);
         }
 
-        $result = $q->getQuery()->getResult();
-
-        if (count($result) > 1) {
-            new \LogicException('PageRepository getRoot need site parameter because multisite detected', 500);
-        }
-
-        return array_pop($result);
+        return $q->getQuery()->getOneOrNullResult();
     }
 
     /**
      * Returns an array of online children of $page.
      *
-     * @param \BackBee\NestedNode\Page $page       the parent page
-     * @param int                      $maxResults optional, the maximum number of results
-     * @param array                    $order      optional, the ordering criteria (array('_leftnode', 'asc') by default)
+     * @param  Page                 $page               The parent page.
+     * @param  integer|null         $maxResults         Optional, the maximum number of results.
+     * @param  array                $order              Optional, the ordering criteria ( ['_leftnode', 'asc'] by default).
      *
-     * @return \BackBee\NestedNode\Page[]
+     * @return Page[]                                   An array of matching pages.
+     *
+     * @deprecated
      */
-    public function getOnlineChildren(Page $page, $maxResults = null, array $order = array('_leftnode', 'asc'))
+    public function getOnlineChildren(Page $page, $maxResults = null, array $order = ['_leftnode', 'asc'])
     {
-        $order = array_replace(array('_leftnode', 'asc'), $order);
-
-        $q = $this->createQueryBuilder('p')
-            ->andParentIs($page)
-            ->andIsOnline()
-            ->orderBy('p.'.$order[0], $order[1])
-        ;
-
-        if (null !== $maxResults) {
-            $q->setMaxResults($maxResults);
+        if (true === $page->isLeaf()) {
+            return [];
         }
 
-        return $q->getQuery()->getResult();
+        $query = $this->createQueryBuilder('p')
+                ->andIsOnline()
+                ->andIsDescendantOf($page, true, 1, $this->getOrderingDescendants(1, null), $maxResults, 0, false);
+
+        return $query->getQuery()->getResult();
     }
 
     /**
      * Returns an array of children of $page.
      *
-     * @param \BackBee\NestedNode\Page $page             the parent page
-     * @param string                   $order_sort       optional, the sort field, title by default
-     * @param string                   $order_dir        optional, the sort direction, asc by default
-     * @param string                   $paging           optional, the paging criteria: array('start' => xx, 'limit' => xx), empty by default
-     * @param array                    $restrictedStates optional, limit to pages having provided states, empty by default
-     * @param array                    $options          optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
-     *                                                   'afterPubdateField' => timestamp against page._modified,
-     *                                                   'searchField' => string to search for title
+     * @param  Page                 $page               The parent page.
+     * @param  string               $orderSort          Optional, the sort field, title by default.
+     * @param  string               $orderDir           Optional, the sort direction, asc by default.
+     * @param  string               $paging             Optional, the paging criteria: ['start' => xx, 'limit' => xx], empty by default.
+     * @param  integer[]            $restrictedStates   Optional, limit to pages having provided states, empty by default.
+     * @param  string[]             $options            Optional, the search criteria:
+     *                                                      * 'beforePubdateField'  => timestamp against page._modified,
+     *                                                      * 'afterPubdateField'   => timestamp against page._modified,
+     *                                                      * 'searchField'         => string to search for title
      *
-     * @return array|\Doctrine\ORM\Tools\Pagination\Paginator Returns Paginaor is paging criteria provided, array otherwise
+     * @return Page[]|Paginator                         Returns Paginaor is $paging criteria provided, array otherwise.
+     *
+     * @deprecated
      */
-    public function getChildren(Page $page, $order_sort = '_title', $order_dir = 'asc', $paging = array(), $restrictedStates = array(), $options = array())
+    public function getChildren(Page $page, $orderSort = '_title', $orderDir = 'asc', $paging = [], $restrictedStates = [], $options = [])
     {
-        $q = $this->createQueryBuilder('p')
-            ->andParentIs($page)
-            ->andSearchCriteria($restrictedStates, $options)
-            ->orderBy('p.'.$order_sort, $order_dir)
-        ;
-
-        if (is_array($paging) && array_key_exists('start', $paging) && array_key_exists('limit', $paging)) {
-            $q->setFirstResult($paging['start'])
-              ->setMaxResults($paging['limit'])
-            ;
-
-            return new Paginator($q, false);
+        if (true === $page->isLeaf()) {
+            return [];
         }
 
-        return $q->getQuery()->getResult();
+        $paginate = (is_array($paging) && array_key_exists('start', $paging) && array_key_exists('limit', $paging));
+
+        $query = $this->createQueryBuilder('p')
+                ->andIsDescendantOf($page, true, 1, [$orderSort => $orderDir], $paginate ? $paging['limit'] : null, $paginate ? $paging['start'] : 0, false)
+                ->andSearchCriteria($restrictedStates, $options);
+
+        if (true === $paginate) {
+            return new Paginator($query);
+        }
+
+        return $query->getQuery()->getResult();
     }
 
     /**
      * Returns count of children of $page.
      *
-     * @param \BackBee\NestedNode\Page $page             the parent page
-     * @param array                    $restrictedStates optional, limit to pages having provided states, empty by default
-     * @param array                    $options          optional, the search criteria: array('beforePubdateField' => timestamp against page._modified,
-     *                                                   'afterPubdateField' => timestamp against page._modified,
-     *                                                   'searchField' => string to search for title
+     * @param  Page                 $page               The parent page.
+     * @param  string               $orderSort          Optional, the sort field, title by default.
+     * @param  string               $orderDir           Optional, the sort direction, asc by default.
+     * @param  integer[]            $restrictedStates   Optional, limit to pages having provided states, empty by default.
+     * @param  string[]             $options            Optional, the search criteria:
+     *                                                      * 'beforePubdateField'  => timestamp against page._modified,
+     *                                                      * 'afterPubdateField'   => timestamp against page._modified,
+     *                                                      * 'searchField'         => string to search for title
      *
-     * @return int the children count
+     * @return integer                                  The children count.
+     *
+     * @deprecated
      */
-    public function countChildren(Page $page, $restrictedStates = array(), $options = array())
+    public function countChildren(Page $page, $orderSort = '_title', $orderDir = 'asc', $restrictedStates = [], $options = [])
     {
-        return $this->createQueryBuilder('p')
-            ->select("COUNT(p)")
-            ->andParentIs($page)
-            ->andSearchCriteria($restrictedStates, $options)
-            ->getQuery()
-            ->getSingleScalarResult()
-        ;
-    }
-
-    /**
-     * Set state of $page and is descendant to STATE_DELETED.
-     *
-     * @param \BackBee\NestedNode\Page $page the page to delete
-     *
-     * @return integer the number of page having their state changed
-     */
-    public function toTrash(Page $page)
-    {
-        return $this->createQueryBuilder('p')
-            ->update()
-            ->set('p._state', Page::STATE_DELETED)
-            ->andIsDescendantOf($page)
-            ->getQuery()
-            ->execute()
-        ;
-    }
-
-    /**
-     * Returns an array of pages having title like $wordSearch.
-     *
-     * @param string $wordsSearch the string to test against title page
-     * @param array  $limit       optional, the query limit restriction, array(0, 10) by default
-     *
-     * @return array|null
-     */
-    public function likeAPage($wordsSearch = "", array $limit = array(0, 10))
-    {
-        $limit = array_replace(array(0, 10), $limit);
-
-        if ('' === $wordsSearch) {
-            return;
+        if (true === $page->isLeaf()) {
+            return 0;
         }
 
         return $this->createQueryBuilder('p')
-            ->andTitleIsLike($wordsSearch)
-            ->setFirstResult($limit[0])
-            ->setMaxResults($limit[1])
-            ->getQuery()
-            ->getResult()
-        ;
+                        ->select("COUNT(p)")
+                        ->andIsDescendantOf($page, true, 1, [$orderSort => $orderDir], null, 0, false)
+                        ->andSearchCriteria($restrictedStates, $options)
+                        ->getQuery()
+                        ->getSingleScalarResult();
+    }
+
+    /**
+     * Sets state of $page and is descendant to STATE_DELETED.
+     *
+     * @param  Page                 $page               The page to delete.
+     *
+     * @return integer                                  The number of page having their state changed.
+     */
+    public function toTrash(Page $page)
+    {
+        if (true === $page->isLeaf()) {
+            $page->setState(Page::STATE_DELETED);
+            $this->getEntityManager()->flush($page);
+
+            return 1;
+        }
+
+        $subquery = $this->getEntityManager()
+                ->getRepository('BackBee\NestedNode\Section')
+                ->createQueryBuilder('n')
+                ->select('n._uid')
+                ->andIsDescendantOf($page->getSection());
+
+        return $this->createQueryBuilder('p')
+                        ->update()
+                        ->set('p._state', Page::STATE_DELETED)
+                        ->andWhere('p._section IN ('.$subquery->getDQL().')')
+                        ->setParameters($subquery->getParameters())
+                        ->getQuery()
+                        ->execute();
+    }
+
+    /**
+     * Copy a page to a new one.
+     *
+     * @param  Page                 $page               The page to be copied.
+     * @param  string|null          $title              Optional, the title of the copy, if null (default) the title of the copied page.
+     * @param  Page|null            $parent             Optional, the parent of the copy, if null (default) the parent of the copied page.
+     *
+     * @return Page                                     The copy of the page.
+     *
+     * @throws InvalidArgumentException                 Raises if the page is deleted.
+     */
+    private function copy(Page $page, $title = null, Page $parent = null)
+    {
+        if (Page::STATE_DELETED & $page->getState()) {
+            throw new InvalidArgumentException('Cannot duplicate a deleted page.');
+        }
+
+        // Cloning the page
+        $new_page = clone $page;
+        $new_page->setTitle((null === $title) ? $page->getTitle() : $title)
+                ->setLayout($page->getLayout());
+
+        // Setting the clone as first child of the parent
+        if (null !== $parent) {
+            $new_page = $this->insertNodeAsFirstChildOf($new_page, $parent, $new_page->hasMainSection());
+        }
+
+        // Persisting entities
+        $this->_em->persist($new_page);
+
+        return $new_page;
+    }
+
+    /**
+     * Replace subcontent of ContentSet by their clone if exist.
+     *
+     * @param  AbstractClassContent $content            The cloned content.
+     * @param  array                $cloningData        The cloned data array.
+     * @param  BBUserToken|null     $token              Optional, the BBuser token to allow the update of revisions if set.
+     *
+     * @return PageRepository
+     */
+    private function updateRelatedPostCloning(AbstractClassContent $content, array $cloningData, BBUserToken $token = null)
+    {
+        if (
+                $content instanceof ContentSet &&
+                true === array_key_exists('pages', $cloningData) &&
+                true === array_key_exists('contents', $cloningData) &&
+                0 < count($cloningData['pages']) &&
+                0 < count($cloningData['contents'])
+        ) {
+            // reading copied elements
+            $copied_pages = array_keys($cloningData['pages']);
+            $copied_contents = array_keys($cloningData['contents']);
+
+            // Updating subcontent if needed
+            foreach ($content as $subcontent) {
+                if (false === $this->_em->contains($subcontent)) {
+                    $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
+                }
+
+                if (
+                        null !== $subcontent->getMainNode() &&
+                        true === in_array($subcontent->getMainNode()->getUid(), $copied_pages) &&
+                        true === in_array($subcontent->getUid(), $copied_contents)
+                ) {
+                    // Loading draft for content
+                    if (
+                            null !== $token &&
+                            (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true))
+                        ) {
+                        $content->setDraft($draft);
+                    }
+                    $content->replaceChildBy($subcontent, $cloningData['contents'][$subcontent->getUid()]);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Update mainnode of the content if need during clonage.
+     *
+     * @param  AbstractClassContent $content            The cloned content.
+     * @param  array                $cloningPages       The cloned pages array.
+     * @param  BBUserToken|null     $token              Optional, the BBuser token to allow the update of revisions if set.
+     *
+     * @return PageRepository
+     */
+    private function updateMainNodePostCloning(AbstractClassContent $content, array $cloningPages, BBUserToken $token = null)
+    {
+        $mainnode = $content->getMainNode();
+
+        if (
+                null !== $mainnode &&
+                0 < count($cloningPages) &&
+                true === in_array($mainnode->getUid(), array_keys($cloningPages))
+            ) {
+            // Loading draft for content
+            if (
+                    null !== $token &&
+                    (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true))
+                ) {
+                $content->setDraft($draft);
+            }
+            $content->setMainNode($cloningPages[$mainnode->getUid()]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Duplicate a page and its descendants.
+     *
+     * @param  Page                 $page               The page to be duplicated.
+     * @param  string|null          $title              Optional, the title of the copy, if null (default) the title of the copied page.
+     * @param  Page|null            $parent             Optional, the parent of the copy, if null (default) the parent of the copied page.
+     *
+     * @return Page                                     The copy of the page.
+     *
+     * @throws InvalidArgumentException                 Raises if the page is recursively duplicated in itself.
+     */
+    private function duplicateRecursively(Page $page, $title = null, Page $parent = null)
+    {
+        if (null !== $parent && true === $parent->isDescendantOf($page)) {
+            throw new InvalidArgumentException('Cannot recursively duplicate a page in itself');
+        }
+
+        // Storing current children before clonage
+        $children = $this->getDescendants($page, 1);
+
+        // Cloning the page
+        $new_page = $this->copy($page, $title, $parent);
+        $this->_em->flush($new_page);
+
+        // Cloning children
+        foreach (array_reverse($children) as $child) {
+            if (!(Page::STATE_DELETED & $child->getState())) {
+                $new_child = $this->duplicateRecursively($child, null, $new_page);
+                $new_page->cloningData = array_merge_recursive($new_page->cloningData, $new_child->cloningData);
+            }
+        }
+
+        return $new_page;
     }
 
     /**
      * Duplicate a page and optionnaly its descendants.
      *
-     * @param \BackBee\NestedNode\Page $page      the page to duplicate
-     * @param string                   $title     optional, the title of the copy, by default the title of the copied page
-     * @param \BackBee\NestedNode\Page $parent    optional, the parent of the copy, by default the parent of the copied page
-     * @param boolean                  $recursive if true (default) duplicate recursively the descendants of the page
-     * @param \BackBee\Security\Token\BBUserToken           the BBuser token to allow the update of revisions
+     * @param  Page                 $page               The page to be duplicated.
+     * @param  string|null          $title              Optional, the title of the copy, if null (default) the title of the copied page.
+     * @param  Page|null            $parent             Optional, the parent of the copy, if null (default) the parent of the copied page.
+     * @param  boolean              $recursive          Optional, if true (by default) duplicates recursively the descendants of the page.
+     * @param  BBUserToken|null     $token              Optional, the BBuser token to allow the update of revisions if set.
      *
-     * @return \BackBee\NestedNode\Page the copy of the page
+     * @return Page                                     The copy of the page.
      *
-     * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
-     * @throws \LogicException occures if the page is Root
+     * @throws InvalidArgumentException                 Raises if the page is recursively duplicated in itself.
      */
     public function duplicate(Page $page, $title = null, Page $parent = null, $recursive = true, BBUserToken $token = null)
     {
-        if ($page->isRoot()) {
-            throw new \LogicException("A root page can't be duplicated.");
+        if (false === $recursive || false === $page->hasMainSection()) {
+            $new_page = $this->copy($page, $title, $parent);
+        } else {
+            // Recursive cloning
+            $new_page = $this->duplicateRecursively($page, $title, $parent);
         }
-
-        $newPage = true === $recursive
-            ? $this->copyRecursively($page, $title, $parent)
-            : $this->copy($page, $title, $parent)
-        ;
 
         // Finally updating contentset and mainnode
-        if (null !== $token) {
-            foreach ($newPage->cloning_datas['contents'] as $content) {
-                $this->updateRelatedPostCloning($content, $token, $newPage->cloning_datas)
-                     ->updateMainNodePostCloning($content, $token, $newPage->cloning_datas['pages'])
-                ;
-            }
+        foreach ($new_page->cloningData['contents'] as $content) {
+            $this->updateRelatedPostCloning($content, $new_page->cloningData, $token)
+                    ->updateMainNodePostCloning($content, $new_page->cloningData['pages'], $token);
         }
 
-        return $newPage;
+        return $new_page;
     }
 
     /**
      * Removes page with no contentset for $site.
      *
-     * @param \BackBee\Site\Site $site
-     * @codeCoverageIgnore
+     * @param Site                  $site
      *
+     * @deprecated
      */
     public function removeEmptyPages(Site $site)
     {
@@ -581,154 +1031,171 @@ class PageRepository extends NestedNodeRepository
             ->andWhere('p._contentset IS NULL')
             ->andWhere('p._site = :site')
             ->orderBy('p._leftnode', 'desc')
-            ->setParameter('site', $site)
-        ;
+            ->setParameter('site', $site);
+
         foreach ($q->getQuery()->execute() as $page) {
-            $this->delete($page);
-        }
-    }
-
-    /**
-     * Copy a page to a new one.
-     *
-     * @param \BackBee\NestedNode\Page $page   the page to copy
-     * @param string                   $title  optional, the title of the copy, by default the title of the page
-     * @param \BackBee\NestedNode\Page $parent optional, the parent of the copy, by default the parent of the page
-     *
-     * @return \BackBee\NestedNode\Page the copy of the page
-     *
-     * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted
-     */
-    private function copy(Page $page, $title = null, Page $parent = null)
-    {
-        if (Page::STATE_DELETED & $page->getState()) {
-            throw new InvalidArgumentException('Cannot duplicate a deleted page');
-        }
-
-        // Cloning the page
-        $newPage = clone $page;
-        $newPage->setTitle(null === $title ? $page->getTitle() : $title);
-
-        // Setting the layout if exists
-        if (null !== $page->getLayout()) {
-            $newPage->setLayout($page->getLayout());
-        }
-
-        // Setting the clone as first child of the parent if exists
-        if (null !== $parent || null !== $page->getParent()) {
-            $parent = (null === $parent) ? $page->getParent() : $parent;
-            $newPage = $this->insertNodeAsFirstChildOf($newPage, $parent);
-        }
-
-        return $newPage;
-    }
-
-    /**
-     * Copy recursively a page to a new one.
-     *
-     * @param \BackBee\NestedNode\Page $page   the page to copy
-     * @param string                   $title  optional, the title of the copy, by default the title of the page
-     * @param \BackBee\NestedNode\Page $parent optional, the parent of the copy, by default the parent of the page
-     *
-     * @return \BackBee\NestedNode\Page the copy of the page
-     *
-     * @throws \BackBee\Exception\InvalidArgumentException occures if the page is deleted or if the page is recursively duplicated in itself
-     */
-    private function copyRecursively(Page $page, $title = null, Page $parent = null)
-    {
-        if (null !== $parent && true === $parent->isDescendantOf($page)) {
-            throw new InvalidArgumentException('Cannot recursively duplicate a page in itself');
-        }
-
-        // Cloning the page
-        $new_page = $this->copy($page, $title, $parent);
-
-        // Storing current children before clonage
-        $children = array();
-        if (false === $page->isLeaf()) {
-            $children = $this->getDescendants($page, 1);
-        }
-        foreach (array_reverse($children) as $child) {
-            if (!(Page::STATE_DELETED & $child->getState())) {
-                $this->_em->refresh($new_page);
-                $new_child = $this->duplicate($child, null, $new_page, true, null);
-                $new_page->getChildren()->add($new_child);
-                $new_page->cloning_datas = array_merge_recursive($new_page->cloning_datas, $new_child->cloning_datas);
+            if ($page->hasMainSection()) {
+                $this->getEntityManager()
+                        ->getRepository('BackBee\NestedNode\Section')
+                        ->delete($page->getSection());
             }
+            $this->getEntityManager()->remove($page);
         }
-
-        return $new_page;
     }
 
     /**
-     * Replace subcontents of ContentSet by their clones if exist.
+     * Saves a page with a section and returns it.
      *
-     * @param  \BackBee\ClassContent\AbstractClassContent $content
-     * @param  \BackBee\Security\Token\BBUserToken           $token
-     * @param  array                                         $cloning_datas
-     * @return \BackBee\NestedNode\Repository\PageRepository
+     * @param  Page                 $page               The page to be saved with section.
+     * @param  Section|null         $currentParent      Optional, if provided the parent section of the new one.
+     *
+     * @return Page                                     The newly page with section.
      */
-    private function updateRelatedPostCloning(AbstractClassContent $content, BBUserToken $token, array $cloning_datas)
+    public function saveWithSection(Page $page, Section $currentParent = null)
     {
-        if (
-                false === ($content instanceof ContentSet) ||
-                false === array_key_exists('pages', $cloning_datas) ||
-                false === array_key_exists('contents', $cloning_datas) ||
-                0 === count($cloning_datas['pages']) ||
-                0 === count($cloning_datas['contents'])
-        ) {
+        if ($page->hasMainSection()) {
+            return $page;
+        }
+
+        if (false === $this->_em->contains($page)) {
+            $this->_em->persist($page);
+        }
+
+        $parent = $page->getSection();
+        if (null !== $currentParent && $this->_em->getUnitOfWork()->isScheduledForInsert($currentParent)) {
+            $this->_em->detach($currentParent);
+        }
+
+        $section = new Section($page->getUid(), ['page' => $page, 'site' => $page->getSite()]);
+
+        $this->getEntityManager()
+                ->getRepository('BackBee\NestedNode\Section')
+                ->insertNodeAsFirstChildOf($section, $parent);
+
+        return $page->setPosition(0)
+                    ->setLevel($section->getLevel());
+    }
+
+    /**
+     * Shift position values for pages siblings of and after $page by $delta.
+     *
+     * @param  Page                 $page               The page for which to shift position.
+     * @param  integer              $delta              The shift value of position.
+     * @param  boolean              $strict             Does $page is include (true) or not (false, by default).
+     *
+     * @return PageRepository
+     */
+    private function shiftPosition(Page $page, $delta, $strict = false)
+    {
+        if (true === $page->hasMainSection()) {
             return $this;
         }
 
-        // Reading copied elements
-        $copied_pages = array_keys($cloning_datas['pages']);
-        $copied_contents = array_keys($cloning_datas['contents']);
+        $query = $this->createQueryBuilder('p')
+                ->set('p._position', 'p._position + :delta_node')
+                ->andWhere('p._section = :section')
+                ->andWhere('p._position >= :position')
+                ->setParameters([
+                    'delta_node' => $delta,
+                    'section' => $page->getSection(),
+                    'position' => $page->getPosition(),
+                ]);
 
-        // Updating subcontent if needed
-        foreach ($content as $subcontent) {
-            if (false === $this->_em->contains($subcontent)) {
-                $subcontent = $this->_em->find(get_class($subcontent), $subcontent->getUid());
-            }
-
-            if (
-                    null === $subcontent->getMainNode() ||
-                    false === in_array($subcontent->getMainNode()->getUid(), $copied_pages) ||
-                    false === in_array($subcontent->getUid(), $copied_contents)
-            ) {
-                continue;
-            }
-
-            // Loading draft for content
-            if (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true)) {
-                $content->setDraft($draft);
-            }
-
-            $content->replaceChildBy($subcontent, $cloning_datas['contents'][$subcontent->getUid()]);
+        if (true === $strict) {
+            $query->andWhere('p != :page')
+                    ->setParameter('page', $page);
+        } else {
+            $page->setPosition($page->getPosition() + $delta);
         }
+
+        $query->update()
+                ->getQuery()
+                ->execute();
 
         return $this;
     }
 
     /**
-     * Update mainnode of the content if need.
+     * Shift level values for pages descendants of $page by $delta.
      *
-     * @param  \BackBee\ClassContent\AbstractClassContent           $content
-     * @param  \BackBee\Security\Token\BBUserToken           $token
-     * @param  array                                         $cloning_pages
-     * @return \BackBee\NestedNode\Repository\PageRepository
+     * @param  Page                 $page               The page for which to shift level.
+     * @param  integer              $delta              The shift value of position.
+     * @param  boolean              $strict             Does $page is include (true) or not (false, by default).
+     *
+     * @return PageRepository
      */
-    private function updateMainNodePostCloning(AbstractClassContent $content, BBUserToken $token, array $cloning_pages)
+    private function shiftLevel(Page $page, $delta, $strict = false)
     {
-        $mainnode = $content->getMainNode();
-        if (null !== $mainnode && true === in_array($mainnode->getUid(), array_keys($cloning_pages))) {
-            // Loading draft for content
-            if (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($content, $token, true)) {
-                $content->setDraft($draft);
-            }
-
-            $content->setMainNode($cloning_pages[$mainnode->getUid()]);
+        if (false === $page->hasMainSection() && true === $strict) {
+            return $this;
         }
 
+        $query = $this->createQueryBuilder('p')
+                ->update()
+                ->set('p._level', 'p._level + :delta');
+
+        if (true === $page->hasMainSection()) {
+            $subquery = $this->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Section')
+                    ->createQueryBuilder('n')
+                    ->select('n._uid')
+                    ->andIsDescendantOf($page->getSection());
+
+            $query->andWhere('p._section IN ('.$subquery->getDQL().')')
+                    ->setParameters($subquery->getParameters());
+
+            if (true === $strict) {
+                $query->andWhere('p <> :page')
+                        ->setParameter('page', $page);
+            }
+        } else {
+            $query->andWhere('p = :page')
+                    ->setParameter('page', $page);
+        }
+
+        $query->setParameter('delta', $delta)->getQuery()
+                ->execute();
+
         return $this;
+    }
+
+    /**
+     * Returns the maximum position of children of $page.
+     *
+     * @param  Page                 $page
+     *
+     * @return integer
+     */
+    private function getMaxPosition(Page $page)
+    {
+        if (false === $page->hasMainSection()) {
+            return 0;
+        }
+
+        $query = $this->createQueryBuilder('p');
+        $max = $query->select($query->expr()->max('p._position'))
+                ->andParentIs($page)
+                ->getQuery()
+                ->getResult(\Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
+
+        return (null === $max) ? 0 : $max;
+    }
+
+    /**
+     * Updates nodes information of a tree.
+     *
+     * @param  string               $nodeUid            The starting point in the tree.
+     * @param  integer              $leftNode           Optional, the first value of left node (1 by default).
+     * @param  integer              $level              Optional, the first value of level (0 by default).
+     *
+     * @return \StdClass
+     *
+     * @deprecated since version 1.1
+     */
+    public function updateTreeNatively($nodeUid, $leftNode = 1, $level = 0)
+    {
+        return $this->_em
+                        ->getRepository('BackBee\NestedNode\Section')
+                        ->updateTreeNatively($nodeUid, $leftNode, $level);
     }
 }

@@ -47,11 +47,18 @@ use BackBee\Util\Doctrine\DriverFeatures;
 class IndexationRepository extends EntityRepository
 {
     /**
-     * Is REPLACE command is supported.
+     * Is REPLACE command is supported?
      *
      * @var boolean
      */
-    private $_replace_supported;
+    private $replaceSupported;
+
+    /**
+     * Is multi values insertions command is supported?
+     * 
+     * @var boolean
+     */
+    private $multiValuesSupported;
 
     /**
      * Initializes a new EntityRepository.
@@ -63,7 +70,8 @@ class IndexationRepository extends EntityRepository
     {
         parent::__construct($em, $class);
 
-        $this->_replace_supported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+        $this->replaceSupported = DriverFeatures::replaceSupported($em->getConnection()->getDriver());
+        $this->multiValuesSupported = DriverFeatures::multiValuesSupported($em->getConnection()->getDriver());
     }
 
     /**
@@ -80,7 +88,7 @@ class IndexationRepository extends EntityRepository
         }
 
         $command = 'REPLACE';
-        if (false === $this->_replace_supported) {
+        if (!$this->replaceSupported) {
             // REPLACE command not supported, remove first then insert
             $this->removeOptContentTable($content);
             $command = 'INSERT';
@@ -212,18 +220,29 @@ class IndexationRepository extends EntityRepository
     {
         if (0 < count($content_uids)) {
             $command = 'REPLACE';
-            if (false === $this->_replace_supported) {
+            if (!$this->replaceSupported) {
                 // REPLACE command not supported, remove first then insert
                 $this->_removeIdxSiteContents($site_uid, $content_uids);
                 $command = 'INSERT';
             }
 
             $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxSiteContent');
-            $query = $command.' INTO '.$meta->getTableName().
-                    ' ('.$meta->getColumnName('site_uid').', '.$meta->getColumnName('content_uid').')'.
-                    ' VALUES ("'.$site_uid.'", "'.implode('"), ("'.$site_uid.'", "', $content_uids).'")';
 
-            $this->_em->getConnection()->executeQuery($query);
+            if (!$this->multiValuesSupported) {
+                foreach ($content_uids as $content_uid) {
+                    $query = $command . ' INTO ' . $meta->getTableName() .
+                            ' (' . $meta->getColumnName('site_uid') . ', ' . $meta->getColumnName('content_uid') . ')' .
+                            ' VALUES ("' . $site_uid . '", "' . $content_uid . '")';
+
+                    $this->_em->getConnection()->executeQuery($query);
+                }
+            } else {
+                $query = $command . ' INTO ' . $meta->getTableName() .
+                        ' (' . $meta->getColumnName('site_uid') . ', ' . $meta->getColumnName('content_uid') . ')' .
+                        ' VALUES ("' . $site_uid . '", "' . implode('"), ("' . $site_uid . '", "', $content_uids) . '")';
+
+                $this->_em->getConnection()->executeQuery($query);
+            }
         }
 
         return $this;
@@ -416,7 +435,7 @@ class IndexationRepository extends EntityRepository
     {
         if (0 < count($parent_uids)) {
             $command = 'REPLACE';
-            if (false === $this->_replace_supported) {
+            if (!$this->replaceSupported) {
                 // REPLACE command not supported, remove first then insert
                 $this->_removeIdxContentContents(array_keys($parent_uids));
                 $command = 'INSERT';

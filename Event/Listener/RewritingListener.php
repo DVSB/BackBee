@@ -27,7 +27,6 @@ use BackBee\BBApplication;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Event\Event;
 use BackBee\NestedNode\Page;
-use BackBee\Rewriting\UrlGeneratorInterface;
 
 /**
  * Listener to rewriting events.
@@ -82,7 +81,10 @@ class RewritingListener
         $application = $dispatcher->getApplication();
 
         if (self::updateUrl($application, $page, $maincontent)) {
-            foreach ($page->getChildren() as $descendant) {
+            $descendants = $application->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Page')
+                    ->getDescendants($page, 1);
+            foreach ($descendants as $descendant) {
                 self::updateUrl($application, $descendant);
             }
         }

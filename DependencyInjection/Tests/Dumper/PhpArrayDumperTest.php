@@ -243,7 +243,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
         $config_cache = null;
         $config_container = $this->container;
         $config_debug = false;
-        $config_yml_to_ignore = array('services');
+        $config_yml_to_ignore = array('services', '.formatter', '.scrutinizer', '.travis');
         $config_class_proxy = '\BackBee\Config\ConfigProxy';
 
         $config_definition = new Definition();
@@ -292,6 +292,7 @@ class PhpArrayDumperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($config_base_dir, $config_dump['basedir']);
 
         $this->assertTrue(array_key_exists('raw_parameters', $config_dump));
+
         $this->assertEquals(array('test' => $test), $config_dump['raw_parameters']);
 
         $this->assertTrue(array_key_exists('debug', $config_dump));
