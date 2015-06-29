@@ -522,7 +522,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return Logger
+     * @return \Psr\Log\LoggerInterface
      */
     public function getLogging()
     {
