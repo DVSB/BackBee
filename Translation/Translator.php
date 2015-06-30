@@ -57,11 +57,11 @@ class Translator extends sfTranslator
         // define in which directory we should looking at to find xliff files
         $dirToLookingAt = array(
             $application->getBBDir().DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'translations',
-            $application->getRepository().DIRECTORY_SEPARATOR.'Ressources'.DIRECTORY_SEPARATOR.'translations',
+            $application->getRepository().DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'translations',
         );
 
         if ($application->getRepository() !== $application->getBaseRepository()) {
-            $dirToLookingAt[] = $application->getBaseRepository().'Ressources'.DIRECTORY_SEPARATOR.'translations';
+            $dirToLookingAt[] = $application->getBaseRepository().'Resources'.DIRECTORY_SEPARATOR.'translations';
         }
 
         // loop in every directory we should looking at and load catalogue from file which match to the pattern
