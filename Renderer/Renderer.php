@@ -1086,10 +1086,11 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
     {
         return [
             'bb' => [
-                'debug' => $this->getApplication()->isDebugMode(),
-                'token' => $this->getApplication()->getBBUserToken(),
-                'request' => $this->getApplication()->getRequest(),
-                'routing' => $this->getApplication()->getRouting(),
+                'debug'      => $this->getApplication()->isDebugMode(),
+                'token'      => $this->getApplication()->getBBUserToken(),
+                'request'    => $this->getApplication()->getRequest(),
+                'routing'    => $this->getApplication()->getRouting(),
+                'translator' => $this->getApplication()->getContainer()->get('translator'),
             ],
         ];
     }
