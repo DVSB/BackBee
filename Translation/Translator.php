@@ -28,17 +28,17 @@ use Symfony\Component\Translation\Translator as sfTranslator;
 use BackBee\BBApplication;
 
 /**
- * Extends Symfony\Component\Translation\Translator to allow lazy load of BackBee catalogues.
+ * Extends Symfony\Component\Translation\Translator to allow lazy load of BackBee catalogs.
  *
  * @author e.chau <eric.chau@lp-digital.fr>
  */
 class Translator extends sfTranslator
 {
     /**
-     * Override Symfony\Component\Translation\Translator to lazy load every catalogues from:
+     * Override Symfony\Component\Translation\Translator to lazy load every catalogs from:
      *     - BackBee\Resources\translations
-     *     - PATH_TO_REPOSITORY\Ressources\translations
-     *     - PATH_TO_CONTEXT_REPOSITORY\Ressources\translations.
+     *     - PATH_TO_REPOSITORY\Resources\translations
+     *     - PATH_TO_CONTEXT_REPOSITORY\Resources\translations.
      *
      * @param BBApplication $application
      * @param string        $locale
@@ -64,7 +64,7 @@ class Translator extends sfTranslator
             $dirToLookingAt[] = $application->getBaseRepository().'Resources'.DIRECTORY_SEPARATOR.'translations';
         }
 
-        // loop in every directory we should looking at and load catalogue from file which match to the pattern
+        // loop in every directory we should looking at and load catalog from file which match to the pattern
         foreach ($dirToLookingAt as $dir) {
             if (true === is_dir($dir)) {
                 foreach (scandir($dir) as $filename) {
