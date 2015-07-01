@@ -62,7 +62,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * application's service container.
      *
-     * @var BackBee\DependencyInjection\ContainerInterface
+     * @var \BackBee\DependencyInjection\ContainerInterface
      */
     private $container;
 
@@ -241,7 +241,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * @param type $name
      *
-     * @return AbstractBundle
+     * @return \BackBee\Bundle\BundleInterface|null
      */
     public function getBundle($name)
     {
@@ -308,7 +308,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\Controller\FrontController
+     * @return \BackBee\Controller\FrontController|null
      */
     public function getController()
     {
@@ -316,7 +316,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\Routing\RouteCollection
+     * @return \BackBee\Routing\RouteCollection|null
      */
     public function getRouting()
     {
@@ -324,7 +324,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return AutoLoader
+     * @return AutoLoader|null
      */
     public function getAutoloader()
     {
@@ -423,7 +423,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\Cache\DAO\Cache
+     * @return \BackBee\Cache\DAO\Cache|null
      */
     public function getCacheControl()
     {
@@ -431,7 +431,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\AbstractCache|null
      */
     public function getBootstrapCache()
     {
@@ -458,7 +458,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * Get validator service.
      *
-     * @return \Symfony\Component\Validator\ValidatorInterface
+     * @return \Symfony\Component\Validator\ValidatorInterface|null
      */
     public function getValidator()
     {
@@ -487,11 +487,21 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         return $this->environment;
     }
 
+    /**
+     * get current configuration directory path
+     *
+     * @return string
+     */
     public function getConfigDir()
     {
         return $this->getRepository().'/'.'Config';
     }
 
+    /**
+     * get default configuration directory path
+     *
+     * @return string
+     */
     public function getBBConfigDir()
     {
         return $this->getBaseRepository().'/'.'Config';
@@ -514,7 +524,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return Dispatcher
+     * @return Dispatcher|null
      */
     public function getEventDispatcher()
     {
@@ -522,7 +532,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \Psr\Log\LoggerInterface
+     * @return \Psr\Log\LoggerInterface|null
      */
     public function getLogging()
     {
@@ -539,13 +549,18 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return Renderer\AbstractRenderer
+     * @return \Renderer\AbstractRenderer|null
      */
     public function getRenderer()
     {
         return $this->getContainer()->get('renderer');
     }
 
+    /**
+     * get current repository directory path
+     *
+     * @return string
+     */
     public function getRepository()
     {
         if (null === $this->repository) {
@@ -558,6 +573,11 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
         return $this->repository;
     }
 
+    /**
+     * get default repository directory path
+     *
+     * @return string
+     */
     public function getBaseRepository()
     {
         if (null === $this->baseRepository) {
@@ -595,7 +615,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @param string $dir
      *
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      */
     public function pushClassContentDir($dir)
     {
@@ -614,7 +634,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @param type $dir
      *
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      */
     public function unshiftClassContentDir($dir)
     {
@@ -669,7 +689,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @param string $dir
      *
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      */
     public function pushResourceDir($dir)
     {
@@ -688,7 +708,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @param type $dir
      *
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      */
     public function unshiftResourceDir($dir)
     {
@@ -707,7 +727,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      *
      * @param String $dir The new resource directory to add
      *
-     * @return \BackBee\BBApplication The current BBApplication
+     * @return ApplicationInterface The current BBApplication
      *
      * @throws BBException Occur on invalid path or invalid resource directories
      */
@@ -768,7 +788,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return BackBee\Rewriting\UrlGenerator
+     * @return \BackBee\Rewriting\UrlGenerator|null
      */
     public function getUrlGenerator()
     {
@@ -795,7 +815,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return BackBee\Security\SecurityContext
+     * @return \BackBee\Security\SecurityContext|null
      */
     public function getSecurityContext()
     {
@@ -803,7 +823,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return Site
+     * @return Site|null
      */
     public function getSite()
     {
@@ -863,7 +883,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      * * Commands are in the 'Command' sub-directory
      * * Commands extend Symfony\Component\Console\Command\Command
      *
-     * @param BackBee\Console\Console $console An Application instance
+     * @param \BackBee\Console\Console $console An Application instance
      */
     public function registerCommands(Console $console)
     {
@@ -971,7 +991,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * Initializes application's dependency injection container.
      *
-     * @return self
+     * @return ApplicationInterface
      */
     private function initContainer()
     {
@@ -981,7 +1001,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return self
+     * @return ApplicationInterface
      */
     private function initEnvVariables()
     {
@@ -1012,7 +1032,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      */
     private function initAutoloader()
     {
@@ -1052,6 +1072,8 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
 
     /**
      * register all annotations and init the AnnotationReader
+     *
+     * @return boolean
      */
     private function initAnnotationReader()
     {
@@ -1078,7 +1100,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      *
      * @throws BBException
      */
@@ -1102,7 +1124,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\BBApplication
+     * @return ApplicationInterface
      *
      * @throws BBException
      */
@@ -1171,7 +1193,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     /**
      * Loads every declared bundles into application.
      *
-     * @return self
+     * @return ApplicationInterface
      */
     private function initBundles()
     {
