@@ -107,7 +107,7 @@ class ClassContentController extends AbstractRestController
                 $contents = $this->getClassContentByCategory($categoryName, $start, $count);
             } else {
                 $classnames = $this->getClassContentManager()->getAllClassContentClassnames();
-                $contents = $this->findContentsByCriterias($classnames, $start, $count);
+                $contents = $this->findContentsByCriteria($classnames, $start, $count);
             }
 
             $data = $this->getClassContentManager()->jsonEncodeCollection($contents, $this->getFormatParam());
@@ -130,7 +130,7 @@ class ClassContentController extends AbstractRestController
     public function getCollectionByTypeAction($type, $start, $count)
     {
         $classname = AbstractClassContent::getClassnameByContentType($type);
-        $contents = $this->findContentsByCriterias((array) $classname, $start, $count);
+        $contents = $this->findContentsByCriteria((array) $classname, $start, $count);
         $response = $this->createJsonResponse($this->getClassContentManager()->jsonEncodeCollection(
             $contents,
             $this->getFormatParam()
@@ -567,7 +567,7 @@ class ClassContentController extends AbstractRestController
      */
     private function getClassContentByCategory($name, $start, $count)
     {
-        return $this->findContentsByCriterias($this->getClassContentClassnamesByCategory($name), $start, $count);
+        return $this->findContentsByCriteria($this->getClassContentClassnamesByCategory($name), $start, $count);
     }
 
     /**
@@ -645,6 +645,8 @@ class ClassContentController extends AbstractRestController
     /**
      * Find classcontents by provided classnames, criterias from request, provided start and count.
      *
+     * @deprecated since 1.1
+     *
      * @param array   $classnames
      * @param integer $start
      * @param integer $count
@@ -652,6 +654,20 @@ class ClassContentController extends AbstractRestController
      * @return null|Paginator
      */
     private function findContentsByCriterias(array $classnames, $start, $count)
+    {
+        return $this->findContentsByCriteria($classnames, $start, $count);
+    }
+
+    /**
+     * Find classcontents by provided classnames, criterias from request, provided start and count.
+     *
+     * @param array   $classnames
+     * @param integer $start
+     * @param integer $count
+     *
+     * @return null|Paginator
+     */
+    private function findContentsByCriteria(array $classnames, $start, $count)
     {
         $criterias = array_merge([
             'only_online' => false,
