@@ -387,6 +387,15 @@ bb.rest.layout.delete:
         version: \d+
         _method: DELETE
 
+bb.rest.site.get_collection:
+    pattern: /rest/{version}/site
+    defaults:
+        _action: getCollectionAction
+        _controller: BackBee\Rest\Controller\SiteController
+    requirements:
+        version: \d+
+        _method: GET
+
 bb.rest.classcontent.category.get:
     pattern: /rest/{version}/classcontent-category/{id}
     defaults:
