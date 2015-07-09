@@ -29,6 +29,7 @@ use Doctrine\ORM\Query\Expr;
 use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
+use BackBee\Site\Layout;
 
 /**
  * This class is responsible for building DQL query strings for Page.
@@ -134,6 +135,17 @@ class PageQueryBuilder extends QueryBuilder
         return $this->andWhere($this->getAlias().'._state IN ('.$this->expr()->literal(Page::STATE_ONLINE).','.$this->expr()->literal(Page::STATE_ONLINE + Page::STATE_HIDDEN).')')
                         ->andWhere($this->getAlias().'._publishing IS NULL OR '.$this->getAlias().'._publishing <= '.$this->expr()->literal(date(self::$config['dateSchemeForPublishing'], time())))
                         ->andWhere($this->getAlias().'._archiving IS NULL OR '.$this->getAlias().'._archiving > '.$this->expr()->literal(date(self::$config['dateSchemeForPublishing'], time())));
+    }
+
+    /**
+     * Add query part to select specific layouts pages.
+     *
+     * @param \BackBee\Site\Layout $layout The layout to look pages for
+     * @return PageQueryBuilder
+     */
+    public function andLayoutIs(Layout $layout)
+    {
+        return $this->andWhere($this->getAlias().'._layout = :layout')->setParameter('layout',  $layout);
     }
 
     /**
@@ -487,7 +499,7 @@ class PageQueryBuilder extends QueryBuilder
      * Try to retreive the root alias for this builder.
      *
      * @return string
-     * 
+     *
      * @throws BBException
      */
     public function getAlias()
