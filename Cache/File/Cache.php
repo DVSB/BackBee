@@ -27,7 +27,7 @@ use Psr\Log\LoggerInterface;
 
 use BackBee\Cache\AbstractCache;
 use BackBee\Cache\Exception\CacheException;
-use BackBee\Utils\String;
+use BackBee\Utils\StringUtils;
 
 /**
  * Filesystem cache adapter.
@@ -76,7 +76,7 @@ class Cache extends AbstractCache
         $this->cachedir = $this->_instance_options['cachedir'];
 
         if (null !== $this->getContext()) {
-            $this->cachedir .= DIRECTORY_SEPARATOR.String::toPath($this->getContext());
+            $this->cachedir .= DIRECTORY_SEPARATOR.StringUtils::toPath($this->getContext());
         }
 
         if (true === $this->_instance_options['cacheautogenerate'] && false === is_dir($this->cachedir)

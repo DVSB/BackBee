@@ -28,7 +28,7 @@ use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\AbstractContent;
 use BackBee\NestedNode\Page;
 use BackBee\Rewriting\Exception\RewritingException;
-use BackBee\Utils\String;
+use BackBee\Utils\StringUtils;
 
 /**
  * Utility class to generate page URL according config rules.
@@ -326,7 +326,7 @@ class UrlGenerator implements UrlGeneratorInterface
     {
         $replacement = [
             '$parent'   => $page->isRoot() ? '' : $page->getParent()->getUrl(false),
-            '$title'    => String::urlize($page->getTitle()),
+            '$title'    => StringUtils::urlize($page->getTitle()),
             '$datetime' => $page->getCreated()->format('ymdHis'),
             '$date'     => $page->getCreated()->format('ymd'),
             '$time'     => $page->getCreated()->format('His'),
@@ -339,7 +339,7 @@ class UrlGenerator implements UrlGeneratorInterface
                 $property = array_pop($property);
 
                 try {
-                    $replacement[$pattern] = String::urlize($content->$property);
+                    $replacement[$pattern] = StringUtils::urlize($content->$property);
                 } catch (\Exception $e) {
                     $replacement[$pattern] = '';
                 }
