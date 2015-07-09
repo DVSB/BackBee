@@ -39,7 +39,7 @@ use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
 use BackBee\Rest\Patcher\RightManager;
 use BackBee\Rest\Patcher\OperationSyntaxValidator;
-use BackBee\Utils\String;
+use BackBee\Utils\StringUtils;
 
 /**
  * Description of MediaFolderController
@@ -162,7 +162,7 @@ class MediaFolderController extends AbstractRestController
                 $mediaFolder->setTitle($title);
             } else {
                 $mediaFolder = new MediaFolder();
-                $mediaFolder->setUrl($request->request->get('url', String::urlize($title)));
+                $mediaFolder->setUrl($request->request->get('url', StringUtils::urlize($title)));
                 $mediaFolder->setTitle($title);
                 if (null === $parent) {
                     $parent = $this->getMediaFolderRepository()->getRoot();
