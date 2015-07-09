@@ -81,28 +81,29 @@ EOF
         $this->checkBeforeUpdate();
 
         $this->em->getConfiguration()->getMetadataDriverImpl()->addPaths([
-            $bbapp->getBBDir().'/Bundle',
-            $bbapp->getBBDir().'/Cache/DAO',
-            $bbapp->getBBDir().'/ClassContent',
-            $bbapp->getBBDir().'/ClassContent/Indexes',
-            $bbapp->getBBDir().'/Logging',
-            $bbapp->getBBDir().'/NestedNode',
-            $bbapp->getBBDir().'/Security',
-            $bbapp->getBBDir().'/Site',
-            $bbapp->getBBDir().'/Stream/ClassWrapper',
-            $bbapp->getBBDir().'/Util/Sequence/Entity',
-            $bbapp->getBBDir().'/Workflow',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Bundle',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Cache'.DIRECTORY_SEPARATOR.'DAO',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'ClassContent',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'ClassContent'.DIRECTORY_SEPARATOR.'Indexes',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Logging',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'NestedNode',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Security',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Site',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Stream'.DIRECTORY_SEPARATOR.'ClassWrapper',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Util'.DIRECTORY_SEPARATOR.'Sequence'.DIRECTORY_SEPARATOR.'Entity',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Workflow',
         ]);
 
         $this->em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths([
-            $bbapp->getBBDir().'/ClassContent/Tests',
-            $bbapp->getBBDir().'/NestedNode/Tests',
-            $bbapp->getBBDir().'/Security/Tests',
-            $bbapp->getBBDir().'/Util/Tests',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'ClassContent'.DIRECTORY_SEPARATOR.'Tests',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'NestedNode'.DIRECTORY_SEPARATOR.'Tests',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Security'.DIRECTORY_SEPARATOR.'Tests',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Util'.DIRECTORY_SEPARATOR.'Tests',
+            $bbapp->getBBDir().DIRECTORY_SEPARATOR.'Workflow'.DIRECTORY_SEPARATOR.'Tests',
         ]);
 
-        if (is_dir($bbapp->getBBDir().'/vendor')) {
-            $this->em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths([$bbapp->getBBDir().'/vendor']);
+        if (is_dir($bbapp->getBBDir().DIRECTORY_SEPARATOR.'vendor')) {
+            $this->em->getConfiguration()->getMetadataDriverImpl()->addExcludePaths([$bbapp->getBBDir().DIRECTORY_SEPARATOR.'vendor']);
         }
 
         $sqls = $this->getUpdateQueries();
