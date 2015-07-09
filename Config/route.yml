@@ -545,15 +545,15 @@ bb.rest.bundle.patch:
         _method: PATCH
 
 bb.rest.bundle.exposed_actions:
-    pattern: /rest/{version}/bundle/{bundle_name}/{controller_name}/{action_name}{parameters}
+    pattern: /rest/{version}/bundle/{bundleName}/{controllerName}/{actionName}{parameters}
     defaults:
         _action: accessBundleExposedRoutesAction
         _controller: BackBee\Rest\Controller\BundleController
     requirements:
         version: \d+
-        bundle_name: "[a-z]+"
-        controller_name: "[a-z]+"
-        action_name: "[a-z]+"
+        bundleName: "[a-z]+"
+        controllerName: "[a-z]+"
+        actionName: "[a-z]+"
         parameters: "^\/.+|"
 
 bb.rest.media_folder.get_collection:
