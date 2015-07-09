@@ -264,12 +264,13 @@ class UrlGenerator implements UrlGeneratorInterface
         }
 
         $pageRepository = $this->application->getEntityManager()->getRepository('BackBee\NestedNode\Page');
-        if (null === $pageRepository->findOneBy(['_url' => $url, '_root' => $page->getRoot()])) {
+        if (null === $pageRepository->findOneBy(['_url' => $url, '_root' => $page->getRoot(), '_state' => $page->getUndeletedStates()])) {
             return $url;
         }
 
         $baseUrl = $url.'-%d';
 
+        $matches = [];
         $existings = [];
         if (preg_match('#(.*)\/$#', $baseUrl, $matches)) {
             $baseUrl = $matches[1].'-%d/';
