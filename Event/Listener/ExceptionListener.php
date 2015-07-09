@@ -24,6 +24,7 @@
 namespace BackBee\Event\Listener;
 
 use BackBee\BBApplication;
+use Symfony\Component\Debug\ExceptionHandler;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -54,47 +55,34 @@ class ExceptionListener
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
-        $statusCode = method_exists($exception, 'getStatusCode') ? $exception->getStatusCode() : $exception->getCode();
+        $statusCode = $exception->getCode();
 
-        if($this->application->isDebugMode()){
-            return $this->createDebugResponse($event, $exception);
+        if ($this->application->isDebugMode()){
+            $this->response = (new \Symfony\Component\Debug\ExceptionHandler())->createResponse($exception);
         }
 
-        switch($statusCode) {
-            case 404:
-            case 500:
-                $parameterKey = "error.$statusCode";
-            break;
-            default:
-                $parameterKey = 'error.default';
+        if (!$this->application->isDebugMode()) {
+            switch($statusCode) {
+                case 404:
+                case 500:
+                    $parameterKey = "error.$statusCode";
+                break;
+                default:
+                    $parameterKey = 'error.default';
+            }
+
+            $parameter = $this->application->getContainer()->getParameter($parameterKey);
+            $view = $this->getErrorTemplate($parameter);
+
+            $this->response
+                ->setStatusCode($statusCode)
+                ->setContent($this->renderer->partial($view, ['error' => $exception]));
         }
-
-        $parameter = $this->application->getContainer()->getParameter($parameterKey);
-        $view = $this->getErrorTemplate($parameter);
-
-        $this->response
-            ->setStatusCode($statusCode)
-            ->setContent($this->renderer->partial($view, ['error' => $exception]));
 
         $event->setResponse($this->response);
+
         $filterEvent = new FilterResponseEvent($event->getKernel(), $event->getRequest(), $event->getRequestType(), $event->getResponse());
         $event->getDispatcher()->dispatch(KernelEvents::RESPONSE, $filterEvent);
-    }
-
-    /**
-     * Create a response from Symfony Debug component
-     */
-    private function createDebugResponse(GetResponseForExceptionEvent $event, \Exception $exception)
-    {
-        try {
-            if (!$event->hasResponse()) {
-                throw $exception;
-            }
-        } catch (\Exception $e) {
-            throw $e;
-        }
-
-        return;
     }
 
     /**
