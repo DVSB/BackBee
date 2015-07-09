@@ -34,7 +34,7 @@ use BackBee\Routing\RouteCollection;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Utils\File\File;
-use BackBee\Utils\String;
+use BackBee\Utils\StringUtils;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 
@@ -620,7 +620,7 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
                 );
             }
 
-            $layoutfile = String::toPath($layout->getLabel(), array('extension' => reset($extensions)));
+            $layoutfile = StringUtils::toPath($layout->getLabel(), array('extension' => reset($extensions)));
             $layout->setPath($layoutfile);
         }
 

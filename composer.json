@@ -64,7 +64,7 @@
         "jms/serializer": "0.16.0",
         "jms/metadata": "1.5.1",
         "willdurand/jsonp-callback-validator": "1.1.0",
-        "backbee/utils": "1.0"
+        "backbee/utils": "~2.0"
     },
     "bin": [
         "backbee"

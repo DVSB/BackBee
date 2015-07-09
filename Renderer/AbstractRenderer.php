@@ -33,7 +33,7 @@ use BackBee\Renderer\Exception\RendererException;
 use BackBee\Site\Layout;
 use BackBee\Site\Site;
 use BackBee\Utils\File\File;
-use BackBee\Utils\String;
+use BackBee\Utils\StringUtils;
 use BackBee\ClassContent\AbstractClassContent;
 
 /**
@@ -971,7 +971,7 @@ abstract class AbstractRenderer implements RendererInterface
         $layoutfile = $layout->getPath();
         if (null === $layoutfile && 0 < count($this->_includeExtensions)) {
             $ext = reset($this->_includeExtensions);
-            $layoutfile = String::toPath($layout->getLabel(), array('extension' => $ext));
+            $layoutfile = StringUtils::toPath($layout->getLabel(), array('extension' => $ext));
             $layout->setPath($layoutfile);
         }
 

@@ -287,7 +287,7 @@ class AclController extends AbstractRestController
 
             // convert values to booleans
             $permissions = array_map(function ($val) {
-                return \BackBee\Utils\String::toBoolean((string) $val);
+                return \BackBee\Utils\StringUtils::toBoolean((string) $val);
             }, $permissions);
 
             // remove false values
