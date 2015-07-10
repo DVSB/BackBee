@@ -43,6 +43,9 @@ use BackBee\Utils\File\File;
  */
 class RevisionListener
 {
+    /**
+     * @param Event $event
+     */
     public static function onRemoveContent(Event $event)
     {
         $content = $event->getTarget();
@@ -69,6 +72,11 @@ class RevisionListener
         }
     }
 
+    /**
+     * Occurs on classcontent.onflush events.
+     *
+     * @param Event $event
+     */
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
@@ -100,6 +108,11 @@ class RevisionListener
         }
     }
 
+    /**
+     * Occurs on revision.onflush events.
+     *
+     * @param Event $event
+     */
     public static function onFlushElementFile(Event $event)
     {
         $revision = $event->getTarget();
@@ -128,7 +141,6 @@ class RevisionListener
         $content->setParam('stat', json_encode(stat($moveFrom)));
 
         if ($content instanceof ElementImage) {
-
             list($width, $height) = getimagesize($moveFrom);
 
             $content->setParam('width', $width);
@@ -138,6 +150,11 @@ class RevisionListener
         $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $revision);
     }
 
+    /**
+     * Occurs on classcontent.onflush events.
+     *
+     * @param Event $event
+     */
     public static function onPostLoad(Event $event)
     {
         $revision = $event->getTarget();
@@ -161,7 +178,7 @@ class RevisionListener
                 $items = $stmt->fetchAll();
                 if ($items) {
                     foreach ($items as $item) {
-                        $content = $em->find($item["classname"], $item["content_uid"]);
+                        $content = $em->find(Revision::getFullClassname($item['classname']), $item['content_uid']);
                         if ($content) {
                             $revision->setContent($content);
                         }
@@ -173,6 +190,11 @@ class RevisionListener
         $revision->postLoad();
     }
 
+    /**
+     * Occurs on classcontent.prerender events.
+     *
+     * @param Event $event
+     */
     public static function onPrerenderContent(Event $event)
     {
         $dispatcher = $event->getDispatcher();

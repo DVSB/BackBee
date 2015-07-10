@@ -294,7 +294,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      */
     public function setClassname($classname)
     {
-        $this->_classname = $classname;
+        $this->_classname = $this->getShortClassname($classname);
 
         return $this->getContentInstance();
     }
@@ -349,7 +349,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Countable::count()
-     *
+     * @return int
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function count()
@@ -366,7 +366,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::current()
-     *
+     * @return AbstractContent
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function current()
@@ -394,9 +394,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Return the item at index.
      *
-     * @param  integer              $index
+     * @param  integer $index
      *
-     * @return AbstractClassContent                     The item or null if $index is out of bounds
+     * @return AbstractClassContent The item or null if $index is out of bounds
      *
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
@@ -418,7 +418,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::key()
-     *
+     * @return int
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function key()
@@ -435,7 +435,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * Return the last subcontent of the set.
-     *
+     * 
      * @return AbstractClassContent the last element
      */
     public function last()
@@ -445,7 +445,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::next()
-     *
+     * @return AbstractClassContent the next element
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function next()
@@ -482,9 +482,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     /**
      * Push one element onto the end of the set.
      *
-     * @param  AbstractClassContent         $var The pushed values
+     * @param  AbstractClassContent $var The pushed values
      *
-     * @return AbstractClassContent         the current instance content
+     * @return AbstractClassContent the current instance content
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function push(AbstractClassContent $var)
@@ -558,7 +558,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::valid()
-     *
+     * @return boolean
      * @throws ClassContentException Occurs if the attached content is not a ContentSet
      */
     public function valid()

@@ -48,8 +48,6 @@ class ClassContentListener
      * Add discriminator values to class MetaData when a content class is loaded
      * Occur on classcontent.include events.
      *
-     * @access public
-     *
      * @param Event $event
      */
     public static function onInclude(Event $event)
@@ -57,9 +55,10 @@ class ClassContentListener
         $dispatcher = $event->getDispatcher();
         if (null !== $dispatcher->getApplication()) {
             $em = $dispatcher->getApplication()->getEntityManager();
-            $discriminatorValue = get_class($event->getTarget());
-            foreach (class_parents($discriminatorValue) as $classname) {
-                $em->getClassMetadata($classname)->addDiscriminatorMapClass($discriminatorValue, $discriminatorValue);
+            $shortClassname = AbstractClassContent::getShortClassname($event->getTarget());
+            $fullClassname = AbstractClassContent::getFullClassname($event->getTarget());
+            foreach (class_parents($fullClassname) as $classname) {
+                $em->getClassMetadata($classname)->addDiscriminatorMapClass($shortClassname, $fullClassname);
 
                 if ('BackBee\ClassContent\AbstractClassContent' === $classname) {
                     break;
@@ -68,6 +67,11 @@ class ClassContentListener
         }
     }
 
+    /**
+     * Occurs on classcontent.onflush events.
+     * 
+     * @param Event $event
+     */
     public static function onFlushContent(Event $event)
     {
         $content = $event->getTarget();
@@ -104,6 +108,10 @@ class ClassContentListener
         }
     }
 
+    /**
+     * @param AbstractClassContent $content
+     * @param ApplicationInterface $application
+     */
     public static function handleContentMainnode(AbstractClassContent $content, $application)
     {
         if (!isset($content) && $content->isElementContent()) {
@@ -185,6 +193,11 @@ class ClassContentListener
         $content->updateDraft($lastCommitted);
     }
 
+    /**
+     * Occurs on element.file.postremove events.
+     * 
+     * @param Event $event
+     */
     public static function onRemoveElementFile(Event $event)
     {
         $dispatcher = $event->getDispatcher();
@@ -210,6 +223,11 @@ class ClassContentListener
         }
     }
 
+    /**
+     * Occurs on rest.controller.classcontentcontroller.getAction.postcall events.
+     * 
+     * @param Event $event
+     */
     public static function onPostCall(Event $event)
     {
         $response = $event->getResponse();

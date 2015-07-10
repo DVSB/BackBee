@@ -24,6 +24,7 @@
 namespace BackBee\ClassContent;
 
 use BackBee\ClassContent\Exception\UnknownPropertyException;
+use BackBee\Exception\BBException;
 use BackBee\NestedNode\Page;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -93,8 +94,8 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
                 $type = key($dataEntry);
             }
 
-            if (0 === strpos($type, 'BackBee\ClassContent')) {
-                class_exists($type);
+            if ($type !== 'scalar' && $type !== 'array') {
+                self::getFullClassname($type);
             }
         }
 
@@ -104,33 +105,38 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     /**
      * Alternative recursive clone method, created because of problems related to doctrine clone method.
      *
-     * @param \BackBee\NestedNode\Page $origin_page
+     * @param \BackBee\NestedNode\Page $originPage
      *
      * @return \BackBee\ClassContent\ContentSet
      */
-    public function createClone(Page $origin_page = null)
+    public function createClone(Page $originPage = null)
     {
-        $clone = parent::createClone($origin_page);
+        $clone = parent::createClone($originPage);
 
         $zones = array();
-        $mainnode_uid = null;
+        $mainNodeUid = null;
 
-        if (null !== $origin_page) {
-            $mainnode_uid = $origin_page->getUid();
-            if ($origin_page->getContentSet()->getUid() === $this->getUid()) {
-                $zones = $origin_page->getLayout()->getZones();
+        if (null !== $originPage) {
+            $mainNodeUid = $originPage->getUid();
+            if ($originPage->getContentSet()->getUid() === $this->getUid()) {
+                $zones = $originPage->getLayout()->getZones();
             }
         }
 
         foreach ($this as $subcontent) {
-            if (!is_null($subcontent)) {
-                if ($this->getProperty('clonemode') === 'none' || ($this->key() < count($zones) && $zones[$this->key()]->defaultClassContent === 'inherited') || (null !== $subcontent->getMainNode() && $subcontent->getMainNode()->getUid() !== $mainnode_uid)
-                ) {
-                    $clone->push($subcontent);
-                } else {
-                    $new_subcontent = $subcontent->createClone($origin_page);
-                    $clone->push($new_subcontent);
-                }
+            if (!($subcontent instanceof AbstractClassContent)) {
+                continue;
+            }
+
+            if (
+                $this->getProperty('clonemode') === 'none'
+                || ($this->key() < count($zones) && $zones[$this->key()]->defaultClassContent === 'inherited')
+                || (null !== $subcontent->getMainNode() && $subcontent->getMainNode()->getUid() !== $mainNodeUid)
+            ) {
+                $clone->push($subcontent);
+            } else {
+                $newSubcontent = $subcontent->createClone($originPage);
+                $clone->push($newSubcontent);
             }
         }
 
@@ -143,17 +149,18 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     public function clear()
     {
         if (null !== $this->getDraft()) {
-            return $this->getDraft()->clear();
+            $this->getDraft()->clear();
+        } else {
+            $this->_subcontent->clear();
+            $this->subcontentmap = array();
+            $this->_data = array();
+            $this->index = 0;
         }
-
-        $this->_subcontent->clear();
-        $this->subcontentmap = array();
-        $this->_data = array();
-        $this->index = 0;
     }
 
     /**
      * @see Countable::count()
+     * @return int
      * @codeCoverageIgnore
      */
     public function count()
@@ -163,6 +170,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::current()
+     * @return AbstractContent
      * @codeCoverageIgnore
      */
     public function current()
@@ -187,7 +195,8 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
      * only the value but also the type must match.
      * For objects this means reference equality.
      *
-     * @param mixed $element The element to search for.
+     * @param mixed   $element     The element to search for.
+     * @param boolean $useIntIndex If TRUE, use integer key
      *
      * @return mixed The key/index of the element or FALSE if the element was not found.
      */
@@ -211,6 +220,14 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
         return array_search($element, $this->_data, true);
     }
 
+    /**
+     * Returns the index of the content of $element
+     *
+     * @param AbstractClassContent $element
+     * @param boolean              $useIntIndex
+     *
+     * @return integer|boolean
+     */
     public function indexOfByUid($element, $useIntIndex = false)
     {
         if ($element instanceof AbstractClassContent) {
@@ -218,7 +235,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
             $index = 0;
             foreach ($this->getData() as $key => $content) {
                 if ($content instanceof AbstractClassContent && $element->getUid() === $content->getUid()) {
-                    $index = ($useIntIndex) ? $key : $index;
+                    $index = ($useIntIndex) ? (int) $key : $index;
 
                     return $index;
                 }
@@ -232,14 +249,19 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     }
 
     /**
-     * @param int                                 $index
-     * @param \BackBee\ClassContent\AbstractClassContent $contentSet
+     * Replaces element at $index by $contenSet
+     *
+     * @param int                  $index
+     * @param AbstractClassContent $contentSet
+     *
+     * @return boolean              Always true
+     * @throw  BBException          Raises if $index is not an integer
      */
     public function replaceChildAtBy($index, AbstractClassContent $contentSet)
     {
         $index = (isset($index) && is_int($index)) ? $index : false;
         if (is_bool($index)) {
-            throw new \BackBee\Exception\BBException(__METHOD__." index  parameter must be an integer");
+            throw new BBException(__METHOD__.' index  parameter must be an integer');
         }
         $newContentsetArr = array();
 
@@ -259,9 +281,12 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     }
 
     /**
-     * @param \BackBee\ClassContent\AbstractClassContent $prevContentSet
-     * @param \BackBee\ClassContent\AbstractClassContent $nextContentSet
-     *                                                            Replace prevContentSet by nextContentSet
+     * Replaces $prevContentSet by $nextContentSet
+     *
+     * @param AbstractClassContent $prevContentSet
+     * @param AbstractClassContent $nextContentSet
+     *
+     * @return boolean
      */
     public function replaceChildBy(AbstractClassContent $prevContentSet, AbstractClassContent $nextContentSet)
     {
@@ -276,7 +301,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     /**
      * Return the item at index.
      *
-     * @param  integer              $index
+     * @param  integer $index
      *
      * @return AbstractClassContent                     The item or null if $index is out of bounds
      */
@@ -295,6 +320,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::key()
+     * @return int
      * @codeCoverageIgnore
      */
     public function key()
@@ -315,6 +341,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::next()
+     * @return AbstractContent
      * @codeCoverageIgnore
      */
     public function next()
@@ -449,6 +476,7 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
 
     /**
      * @see Iterator::valid()
+     * @return boolean
      * @codeCoverageIgnore
      */
     public function valid()
@@ -465,8 +493,8 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     /**
      * Return the data of this content.
      *
-     * @param $var string The element to be return, if NULL, all datas are returned
-     * @param $forceArray Boolean Force the return as array
+     * @param  string  $var        The element to be return, if NULL, all datas are returned
+     * @param  Boolean $forceArray Force the return as array
      *
      * @return mixed Could be either NULL or one or array of scalar, array, AbstractClassContent instance
      * @throws \BackBee\AutoLoader\Exception\ClassNotFoundException Occurs if the class of a subcontent can not be loaded
@@ -529,28 +557,30 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     protected function setOptions($options = null)
     {
         if (null !== $options) {
-            $options = (array) $options;
-            if (true === array_key_exists('label', $options)) {
-                $this->_label = $options['label'];
-            }
+            return $this;
+        }
 
-            if (true === array_key_exists('maxentry', $options)) {
-                $this->_maxentry = intval($options['maxentry']);
-            }
+        $options = (array) $options;
+        if (true === array_key_exists('label', $options)) {
+            $this->_label = $options['label'];
+        }
 
-            if (true === array_key_exists('minentry', $options)) {
-                $this->_minentry = intval($options['minentry']);
-            }
+        if (true === array_key_exists('maxentry', $options)) {
+            $this->_maxentry = intval($options['maxentry']);
+        }
 
-            if (true === array_key_exists('accept', $options)) {
-                $this->_accept = (array) $options['accept'];
-            }
+        if (true === array_key_exists('minentry', $options)) {
+            $this->_minentry = intval($options['minentry']);
+        }
 
-            if (true === array_key_exists('default', $options)) {
-                $options['default'] = (array) $options['default'];
-                foreach ($options['default'] as $value) {
-                    $this->push($value);
-                }
+        if (true === array_key_exists('accept', $options)) {
+            $this->_accept = array_map(['BackBee\ClassContent\AbstractContent', 'getShortClassname'], (array) $options['accept']);
+        }
+
+        if (true === array_key_exists('default', $options)) {
+            $options['default'] = (array) $options['default'];
+            foreach ($options['default'] as $value) {
+                $this->push($value);
             }
         }
 
@@ -617,8 +647,8 @@ class ContentSet extends AbstractClassContent implements \Iterator, \Countable
     {
         $types = (array) $type;
         foreach ($types as $type) {
-            $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
-            if (false === in_array($type, $this->_accept)) {
+            $type = self::getShortClassname($type);
+            if (!in_array($type, $this->_accept)) {
                 $this->_accept[] = $type;
             }
         }

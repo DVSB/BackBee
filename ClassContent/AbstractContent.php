@@ -164,23 +164,15 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      *
      * @return string classname associated to provided
      *
-     * @throws
+     * @throws InvalidContentTypeException Raises if $type is unknown
      */
     public static function getClassnameByContentType($type)
     {
-        $className = self::CLASSCONTENT_BASE_NAMESPACE.str_replace('/', NAMESPACE_SEPARATOR, $type);
-
         try {
-            $exists = class_exists($className);
-        } catch (\Exception $e) {
-            $exists = false;
-        }
-
-        if (!$exists) {
+            return self::getFullClassname(str_replace('/', NAMESPACE_SEPARATOR, $type));
+        } catch (\InvalidArgumentException $e) {
             throw new InvalidContentTypeException($type);
         }
-
-        return $className;
     }
 
     /**
@@ -638,7 +630,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
         }
 
         foreach ($this->_accept[$var] as $type) {
-            if (0 === strpos($type, 'BackBee\ClassContent')) {
+            if (!in_array($type, ['scalar', 'array'])) {
                 return true;
             }
         }
@@ -668,7 +660,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
                 return false;
             }
 
-            $accept_array = $this->_accept;
+            $acceptArray = $this->_accept;
         } else {
             if (null === $var) {
                 return false;
@@ -678,14 +670,14 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
                 return true;
             }
 
-            $accept_array = $this->_accept[$var];
+            $acceptArray = $this->_accept[$var];
         }
 
-        if (0 === count($accept_array)) {
+        if (0 === count($acceptArray)) {
             return true;
         }
 
-        return in_array($this->_getType($value), $accept_array);
+        return in_array($this->_getType($value), $acceptArray);
     }
 
     /**
@@ -743,7 +735,11 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     protected function _getType($value)
     {
         if (is_object($value)) {
-            return ClassUtils::getRealClass($value);
+            try {
+                return self::getShortClassname($value);
+            } catch (\InvalidArgumentException $e) {
+                return null;
+            }
         }
 
         if (is_array($value)) {
@@ -884,9 +880,11 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
                 $value = end($values);
             }
 
-            if (0 === strpos($type, self::CLASSCONTENT_BASE_NAMESPACE)) {
-                if (!class_exists($type)) {
-                    throw new ClassNotFoundException(sprintf('Unknown class content %s.', $type));
+            if ($type !== 'scalar' && $type !== 'array') {
+                try {
+                    $type = self::getFullClassname($type);
+                } catch (\InvalidArgumentException $e) {
+                    throw new ClassNotFoundException(sprintf('Unknown class content %s.', $type), 0, $e);
                 }
 
                 if (false !== $subcontent = $this->getContentByDataValue($type, $value)) {
@@ -997,8 +995,8 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     public function getTemplateName()
     {
         return str_replace(
-            ["BackBee".NAMESPACE_SEPARATOR."ClassContent".NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
-            ["", DIRECTORY_SEPARATOR],
+            [self::CLASSCONTENT_BASE_NAMESPACE, NAMESPACE_SEPARATOR],
+            ['', DIRECTORY_SEPARATOR],
             get_class($this)
         );
     }
@@ -1098,4 +1096,58 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
 
         return $data;
     }
+
+    /**
+     * Returns the sort classname of the given $classname.
+     * 
+     * @param mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
+     * 
+     * @return string                       The short classname.
+     * 
+     * @throws InvalidArgumentException     Raises if $classname is not subclass of AbstractClassContent.
+     */
+    public static function getShortClassname($classname)
+    {
+        if (is_object($classname)) {
+            $classname = ClassUtils::getRealClass($classname);
+        }
+
+        if (!is_subclass_of($classname, 'BackBee\ClassContent\AbstractClassContent')) {
+            throw new \InvalidArgumentException(sprintf('Given classname %s or object is not a subclass of AbstractClassContent.', $classname));
+        }
+
+        return str_replace(self::CLASSCONTENT_BASE_NAMESPACE, '', ltrim($classname, NAMESPACE_SEPARATOR));
+    }
+
+    /**
+     * Returns the full classname of the given $classname.
+     * 
+     * @param mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
+     * 
+     * @return string                       The full classname.
+     * 
+     * @throws InvalidArgumentException     Raises if $classname cannot be resolved as a short classname of AbstractClassContent.
+     */
+    public static function getFullClassname($classname)
+    {
+        if (is_object($classname)) {
+            if (!$classname instanceof AbstractClassContent) {
+                throw new \InvalidArgumentException('First parameter must be a string or an AbstractClassContent object.');
+            }
+
+            return ClassUtils::getRealClass($classname);
+        }
+
+        try {
+            if (0 !== strpos($classname, self::CLASSCONTENT_BASE_NAMESPACE)) {
+                $classname = self::CLASSCONTENT_BASE_NAMESPACE.$classname;
+            }
+            class_exists($classname);
+        } catch (ClassNotFoundException $ex) {
+            throw new \InvalidArgumentException($classname.' is not a short classname of an AbstractClassContent instance.', 0, $ex);
+        }
+
+        return $classname;
+    }
+
 }

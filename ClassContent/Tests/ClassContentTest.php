@@ -25,7 +25,6 @@ namespace BackBee\ClassContent\Tests;
 
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Image;
-use BackBee\ClassContent\Revision;
 use BackBee\ClassContent\Tests\Mock\MockContent;
 use BackBee\Tests\BackBeeTestCase;
 
@@ -38,6 +37,7 @@ use BackBee\Tests\BackBeeTestCase;
  */
 class ClassContentTest extends BackBeeTestCase
 {
+
     private $content;
 
     public function setUp()
@@ -46,11 +46,6 @@ class ClassContentTest extends BackBeeTestCase
         $this->content->load();
     }
 
-    /**
-     * test getProperty.
-     *
-     * @coverage \BackBee\ClassContent\AbstractClassContent::getProperty
-     */
     public function testGetProperty()
     {
         $this->assertInternalType('array', $this->content->getProperty());
@@ -58,22 +53,12 @@ class ClassContentTest extends BackBeeTestCase
         $this->assertNull($this->content->getProperty('notset'));
     }
 
-    /**
-     * test setProperty.
-     *
-     * @coverage \BackBee\ClassContent\AbstractClassContent::setProperty
-     */
     public function testSetProperty()
     {
         $this->content->setProperty('foo', 'bar');
         $this->assertEquals('bar', $this->content->getProperty('foo'));
     }
 
-    /**
-     * test createClone.
-     *
-     * @coverage \BackBee\ClassContent\AbstractClassContent::createClone
-     */
     public function testCreateClone()
     {
         $this->content->setProperty('foo', 'bar');
@@ -86,9 +71,6 @@ class ClassContentTest extends BackBeeTestCase
         $this->assertNotEquals($this->content->getUid(), $clone->getUid());
     }
 
-    /**
-     * test setProperty.
-     */
     public function testAcceptedType()
     {
         $this->assertTrue($this->content->isAccepted($this->content->title, 'title'));
@@ -102,7 +84,7 @@ class ClassContentTest extends BackBeeTestCase
     {
         $name = $this->content->getProperty('name');
 
-        $this->content->mockedDefineProperty('name', $name.' foobar');
+        $this->content->mockedDefineProperty('name', $name . ' foobar');
         $this->assertEquals($name, $this->content->getProperty('name'));
 
         $this->content->mockedDefineProperty('newproperty', 'foobar');
@@ -116,7 +98,7 @@ class ClassContentTest extends BackBeeTestCase
         $this->assertFalse(isset($defaultParams['test_foobar']));
         $this->content->mockedDefineParam('test_foobar', [
             'default' => 'hello world',
-            'value'   => null,
+            'value' => null,
         ]);
 
         $defaultParams = $this->content->getDefaultParams();
@@ -167,13 +149,12 @@ class ClassContentTest extends BackBeeTestCase
         self::$em->flush($content);
 
         $content->mockedDefineParam(
-            'foo',
-            [
-                'type'    => 'checkbox',
-                'label'   => 'Foo',
-                'options' => ['bar' => 'Bar'],
-                'value'   => ['bar']
-            ]
+            'foo', [
+            'type' => 'checkbox',
+            'label' => 'Foo',
+            'options' => ['bar' => 'Bar'],
+            'value' => ['bar']
+                ]
         );
 
         $this->assertSame($content->getDefaultParams(), $content->getAllParams());
@@ -184,7 +165,7 @@ class ClassContentTest extends BackBeeTestCase
 
         $content->setDraft(null);
         $this->assertEquals($content->getParamValue('foo'), ['bar']);
-        
+
         $contentManager->setBBUserToken(null);
         self::$app->getSecurityContext()->setToken(null);
     }
@@ -219,27 +200,19 @@ class ClassContentTest extends BackBeeTestCase
     public function testDefineData()
     {
         $this->content->mockedDefineData(
-            'title',
-            '\BackBee\ClassContent\Element\Date',
-            array(
-                'default' => array('value' => 'Foo Bar Baz'),
-            )
+            'title', '\BackBee\ClassContent\Element\Date', array(
+            'default' => array('value' => 'Foo Bar Baz'),
+                )
         );
         $this->content->mockedDefineData(
-            'title',
-            '\BackBee\ClassContent\Element\Image',
-            array(
-                'default' => array('value' => 'Foo Bar Baz'),
-            ),
-            false
+            'title', '\BackBee\ClassContent\Element\Image', array(
+            'default' => array('value' => 'Foo Bar Baz'),
+                ), false
         );
         $this->content->mockedDefineData(
-            'date',
-            '\BackBee\ClassContent\Element\Date',
-            array(
-                'default' => array('value' => 'A date'),
-            ),
-            true
+            'date', '\BackBee\ClassContent\Element\Date', array(
+            'default' => array('value' => 'A date'),
+                ), true
         );
 
         $this->assertNotEquals('Foo Bar Baz', $this->content->title->value);
@@ -363,4 +336,50 @@ class ClassContentTest extends BackBeeTestCase
         $this->assertFalse(isset($data['properties']));
         $this->assertFalse(isset($data['extra']));
     }
+
+    public function testGetShortClassname()
+    {
+        $this->assertEquals('Tests\Mock\MockContent', AbstractClassContent::getShortClassname(new MockContent()));
+        $this->assertEquals('Tests\Mock\MockContent', AbstractClassContent::getShortClassname('BackBee\ClassContent\Tests\Mock\MockContent'));
+        $this->assertEquals('Tests\Mock\MockContent', AbstractClassContent::getShortClassname('\BackBee\ClassContent\Tests\Mock\MockContent'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetShortClassnameWithBadObject()
+    {
+        AbstractClassContent::getShortClassname(new \StdClass());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetShortClassnameWithUnknownClass()
+    {
+        AbstractClassContent::getShortClassname('FakeClassName');
+    }
+
+    public function testGetFullClassname()
+    {
+        $this->assertEquals('BackBee\ClassContent\Tests\Mock\MockContent', AbstractClassContent::getFullClassname(new MockContent()));
+        $this->assertEquals('BackBee\ClassContent\Tests\Mock\MockContent', AbstractClassContent::getFullClassname('Tests\Mock\MockContent'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetFullClassnameWithBadObject()
+    {
+        AbstractClassContent::getFullClassname(new \StdClass());
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetFullClassnameWithUnknownClass()
+    {
+        AbstractClassContent::getFullClassname('FakeClassName');
+    }
+
 }

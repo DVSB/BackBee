@@ -87,7 +87,7 @@ class UpgradeToPageSectionCommand extends AbstractCommand
      */
     protected function configure()
     {
-        $this->setName('bbapp:upgradeToPageSection')
+        $this->setName('migration:upgradeToPageSection')
                 ->addOption('force', 'f', InputOption::VALUE_NONE, 'The database storage will be overrided against the existing one.')
                 ->addOption('skip-nodes-update', null, InputOption::VALUE_NONE, 'Skip the updating of the existing nested pages data.')
                 ->addOption('memory-limit', 'm', InputOption::VALUE_OPTIONAL, 'The memory limit to set.')
