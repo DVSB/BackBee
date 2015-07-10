@@ -25,7 +25,6 @@ namespace BackBee\Console\Command;
 
 use BackBee\BBApplication;
 use BackBee\Exception\BBException;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -43,7 +42,7 @@ use BackBee\Console\AbstractCommand;
  */
 class ApplicationUpdateCommand extends AbstractCommand
 {
-    
+
     /**
      * The current entity manager
      * @var \Doctrine\ORM\EntityManager

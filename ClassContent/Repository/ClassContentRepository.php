@@ -31,8 +31,6 @@ use BackBee\NestedNode\Page;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Util\Doctrine\SettablePaginator;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
 /**

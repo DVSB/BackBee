@@ -23,7 +23,6 @@
 
 namespace BackBee\ClassContent;
 
-use BackBee\ClassContent\Element\File as ElementFile;
 use BackBee\ApplicationInterface;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Routing\RouteCollection;

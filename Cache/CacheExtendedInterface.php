@@ -23,9 +23,6 @@
 
 namespace BackBee\Cache;
 
-use Psr\Log\LoggerInterface;
-use BackBee\Cache\Exception\CacheException;
-
 /**
  * Interface for BackBee Cache Tag & Expire features
  *
@@ -34,7 +31,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
-interface CacheExtendedInterface
+interface CacheExtendedInterface extends CacheInterface
 {
     /**
      * Removes all cache records associated to one of the tags.

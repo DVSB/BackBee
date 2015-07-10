@@ -23,7 +23,6 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\Renderer\Exception\RendererException;
 use BackBee\ClassContent\Element\Date;
 
 /**
@@ -79,7 +78,7 @@ class dateHelper extends AbstractHelper
             $config = $this->_renderer->getApplication()->getConfig()->getDateConfig();
             if (is_array($config) && array_key_exists('timezone', $config)) {
                 $this->timezone = $config['timezone'];
-            } 
+            }
         } else {
             $this->timezone = $timezone;
         }

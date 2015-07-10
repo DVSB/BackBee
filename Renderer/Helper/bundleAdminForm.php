@@ -23,9 +23,6 @@
 
 namespace BackBee\Renderer\Helper;
 
-use BackBee\Bundle\BundleControllerResolver;
-use BackBee\Bundle\Exception\BundleConfigurationException;
-
 /**
  * @category    BackBee
  *
