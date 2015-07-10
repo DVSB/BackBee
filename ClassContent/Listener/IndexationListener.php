@@ -126,20 +126,6 @@ class IndexationListener implements EventSubscriberInterface
     }
 
     /**
-     * Checks the event validity.
-     *
-     * @param \BackBee\Event\Event $event
-     *
-     * @return boolean
-     */
-    private static function _checkContentEvent(Event $event)
-    {
-        self::$_content = $event->getTarget();
-
-        return self::$_content instanceof AbstractClassContent;
-    }
-
-    /**
      * Returns the current application.
      *
      * @param \BackBee\Event\Event $event
