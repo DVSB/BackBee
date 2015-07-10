@@ -56,7 +56,6 @@ final class ChainAnnotationReader implements Reader
      */
     public function getClassAnnotations(\ReflectionClass $class)
     {
-        $e = null;
         $annotations = array();
 
         foreach ($this->delegates as $delegateReader) {
@@ -90,8 +89,6 @@ final class ChainAnnotationReader implements Reader
      */
     public function getPropertyAnnotations(\ReflectionProperty $property)
     {
-        $e = null;
-
         $annotations = array();
 
         foreach ($this->delegates as $delegateReader) {
@@ -125,8 +122,6 @@ final class ChainAnnotationReader implements Reader
      */
     public function getMethodAnnotations(\ReflectionMethod $method)
     {
-        $e = null;
-
         $annotations = array();
 
         foreach ($this->delegates as $delegateReader) {
