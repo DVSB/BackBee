@@ -263,13 +263,15 @@ class CacheListener implements EventSubscriberInterface
             return;
         }
 
-        $cache_page = $this->application->getContainer()->get('cache.page');
-        if (true === ($cache_page instanceof AbstractExtendedCache)) {
+        $cachePage = $this->application->getContainer()->get('cache.page');
+        if ($cachePage instanceof CacheInterface
+                && $cachePage instanceof CacheExtendedInterface
+            ) {
             $node_uids = $this->application->getEntityManager()
                 ->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
                 ->getNodeUids($content_uids)
             ;
-            $cache_page->removeByTag($node_uids);
+            $cachePage->removeByTag($node_uids);
             $this->application->debug(sprintf('Remove cache for page %s.', implode(', ', $node_uids)));
         }
     }
