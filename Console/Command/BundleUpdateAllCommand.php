@@ -27,17 +27,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use BackBee\Console\AbstractCommand;
-
 /**
  * Update all bundles command.
  *
  * @category    BackBee
- *
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      Eric Chau <eric.chau@lp-digital.fr>
  */
-class BundleUpdateAllCommand extends AbstractCommand
+class BundleUpdateAllCommand extends AbstractBundleCommand
 {
     /**
      * {@inheritdoc}
@@ -47,7 +44,7 @@ class BundleUpdateAllCommand extends AbstractCommand
         $this
             ->setName('bundle:update_all')
             ->addOption('force', null, InputOption::VALUE_NONE, 'The update SQL will be executed against the DB')
-            ->setDescription('Updates a bundle')
+            ->setDescription('Updates all bundles')
             ->setHelp(<<<EOF
 The <info>%command.name%</info> updates all bundles:
 
@@ -63,21 +60,18 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $force = $input->getOption('force');
+        $methodToCall = $this->getCommandType().'Bundle';
 
-        $bbapp = $this->getContainer()->get('bbapp');
-
-        foreach ($bbapp->getBundles() as $bundle) {
-            $output->writeln('Updating bundle: '.$bundle->getId().'');
-
-            $sqls = $bundle->getUpdateQueries($bundle->getBundleEntityManager());
-
-            if ($force) {
-                $output->writeln('<info>Running update</info>');
-
-                $bundle->update();
-            }
-
-            $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
+        foreach ($this->getContainer()->get('bbapp')->getBundles() as $bundle) {
+            $this->doExecute($bundle, $force, $methodToCall, $output);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCommandType()
+    {
+        return AbstractBundleCommand::UPDATE_COMMAND;
     }
 }
