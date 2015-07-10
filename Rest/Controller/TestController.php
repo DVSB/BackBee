@@ -44,8 +44,6 @@ class TestController extends Controller
      */
     public function generateKeyAction(Request $request)
     {
-        $response = new Response();
-
         $values = $request->request->get('generator');
 
         $signature = null;

@@ -53,7 +53,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
     private $_priorities_name;
     private $_buffer;
     private $_start;
-    private $_mailto;
 
     public function __call($method, $args)
     {

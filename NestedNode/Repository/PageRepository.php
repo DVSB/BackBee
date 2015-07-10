@@ -1011,7 +1011,8 @@ class PageRepository extends EntityRepository
         // Finally updating contentset and mainnode
         foreach ($new_page->cloningData['contents'] as $content) {
             $this->updateRelatedPostCloning($content, $new_page->cloningData, $token)
-                    ->updateMainNodePostCloning($content, $new_page->cloningData['pages'], $token);
+                ->updateMainNodePostCloning($content, $new_page->cloningData['pages'], $token)
+            ;
         }
 
         return $new_page;

@@ -280,8 +280,6 @@ class AclManager
 
         $acl = $this->getAcl($objectIdentity);
 
-        $found = false;
-
         foreach ($acl->getClassAces() as $index => $ace) {
             if ($ace->getSecurityIdentity()->equals($sid)) {
                 return $ace;
@@ -303,8 +301,6 @@ class AclManager
         $this->enforceSecurityIdentity($sid);
 
         $acl = $this->getAcl($objectIdentity);
-
-        $found = false;
 
         foreach ($acl->getObjectAces() as $index => $ace) {
             if ($ace->getSecurityIdentity()->equals($sid)) {

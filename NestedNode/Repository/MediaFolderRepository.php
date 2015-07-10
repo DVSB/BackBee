@@ -77,47 +77,4 @@ class MediaFolderRepository extends NestedNodeRepository
        }
        return $result;
     }
-
-    private function preloadMediaType(\BackBee\BBApplication $bbApp)
-    {
-        $classnames = $bbApp->getAutoloader()->glob('Media' . DIRECTORY_SEPARATOR . '*');
-        foreach ($classnames as $classname) {
-            class_exists($classname);
-        }
-    }
-
-    private function deleteMediaContent(\BackBee\BBApplication $bbapp, $media)
-    {
-        $em = $this->_em;
-        if ($media) {
-            $token = $bbapp->getBBUserToken();
-            $content = $media->getContent();
-
-            if ($content instanceof AbstractClassContent) {
-                foreach ($content->getData() as $element => $value) {
-                    $subcontent = $content->$element;
-
-                    if (!($subcontent instanceof AbstractClassContent)) {
-                        continue;
-                    }
-
-                    if (null !== $draft = $em->getRepository('BackBee\ClassContent\Revision')->getDraft($subcontent, $token)) {
-                        $draft->setContent(null);
-                        $draft->setState(Revision::STATE_DELETED);
-                    }
-
-                    $subcontent->releaseDraft();
-                    $em->remove($subcontent); //title - description - copyright - image
-                    unset($content->$element);
-                }
-
-                $content->releaseDraft();
-                $em->remove($content);
-            }
-
-            $media->setContent(null);
-            $em->remove($media);
-        }
-    }
-
 }

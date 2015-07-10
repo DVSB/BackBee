@@ -82,7 +82,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
         $this->application = $application;
         $this->raw_routes = array();
 
-        $uri_prefixes = array();
+        $this->uri_prefixes = array();
         $container = $application->getContainer();
         if (true === $container->hasParameter('bbapp.routing.image_uri_prefix')) {
             $this->uri_prefixes[self::IMAGE_URL] = $container->getParameter('bbapp.routing.image_uri_prefix');
