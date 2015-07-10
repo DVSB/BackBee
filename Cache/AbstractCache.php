@@ -140,7 +140,7 @@ abstract class AbstractCache implements CacheInterface
      *
      * @param \Psr\Log\LoggerInterface $logger
      *
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\CacheAdapterInterface
      * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger = null)
@@ -177,7 +177,7 @@ abstract class AbstractCache implements CacheInterface
      *
      * @param string $context
      *
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\CacheAdapterInterface
      * @codeCoverageIgnore
      */
     public function setContext($context = null)
@@ -192,9 +192,7 @@ abstract class AbstractCache implements CacheInterface
      *
      * @param array $options
      *
-     * @return \BackBee\Cache\ACache
-     *
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\CacheAdapterInterface
      * @throws \BackBee\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
     private function setInstanceOptions(array $options = array())
