@@ -34,7 +34,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AbstractCache
+abstract class AbstractCache implements CacheInterface
 {
     /**
      * Cache adapter options.
@@ -180,7 +180,7 @@ abstract class AbstractCache
      * @return \BackBee\Cache\AbstractCache
      * @codeCoverageIgnore
      */
-    protected function setContext($context = null)
+    public function setContext($context = null)
     {
         $this->_context = $context;
 
@@ -218,7 +218,7 @@ abstract class AbstractCache
      * @param array  $context The logging context
      * @codeCoverageIgnore
      */
-    protected function log($level, $message, array $context = array('cache'))
+    public function log($level, $message, array $context = array('cache'))
     {
         if (null !== $this->_logger) {
             $this->_logger->log($level, $message, $context);
@@ -233,7 +233,7 @@ abstract class AbstractCache
      * @return int
      * @codeCoverageIgnore
      */
-    protected function getExpireTime($lifetime = null, $bypass_control = false)
+    public function getExpireTime($lifetime = null, $bypass_control = false)
     {
         $expire = 0;
 
@@ -263,7 +263,7 @@ abstract class AbstractCache
      *
      * @return int
      */
-    protected function getControledLifetime($lifetime)
+    public function getControledLifetime($lifetime)
     {
         if (
             null !== $this->_instance_options['min_lifetime']

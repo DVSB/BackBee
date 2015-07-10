@@ -431,7 +431,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     }
 
     /**
-     * @return \BackBee\Cache\AbstractCache|null
+     * @return \BackBee\Cache\CacheInterface|null
      */
     public function getBootstrapCache()
     {

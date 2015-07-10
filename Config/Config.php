@@ -26,7 +26,7 @@ namespace BackBee\Config;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-use BackBee\Cache\AbstractCache;
+use BackBee\Cache\CacheInterface;
 use BackBee\Config\Exception\InvalidConfigException;
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\DispatchTagEventInterface;
@@ -90,7 +90,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * The optional cache system.
      *
-     * @var \BackBee\Cache\AbstractCache
+     * @var \BackBee\Cache\CacheInterface
      */
     protected $cache;
 
@@ -142,12 +142,12 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
      * Class constructor.
      *
      * @param string                                 $basedir       The base directory in which look for config files
-     * @param \BackBee\Cache\AbstractCache           $cache         Optional cache system
+     * @param \BackBee\Cache\CacheInterface          $cache         Optional cache system
      * @param \BackBee\DependencyInjection\Container $container     The BackBee Container
      * @param boolean                                $debug         The debug mode
      * @param array                                  $yml_to_ignore List of yaml filename to ignore form loading/parsing process
      */
-    public function __construct($basedir, AbstractCache $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
+    public function __construct($basedir, CacheInterface $cache = null, Container $container = null, $debug = false, array $yml_to_ignore = array())
     {
         $this->basedir = $basedir;
         $this->raw_parameters = array();
@@ -206,11 +206,11 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     /**
      * Set the cache used for the configuration
      *
-     * @param \BackBee\Cache\AbstractCache $cache
+     * @param \BackBee\Cache\CacheInterface $cache
      *
      * @return \BackBee\Config\Config
      */
-    public function setCache(AbstractCache $cache)
+    public function setCache(CacheInterface $cache)
     {
         $this->cache = $cache;
 
