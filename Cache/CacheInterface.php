@@ -27,7 +27,7 @@ use Psr\Log\LoggerInterface;
 use BackBee\Cache\Exception\CacheException;
 
 /**
- * Abstract class for cache adapters.
+ * Interface for BackBee Cache
  *
  * @category    BackBee
  *
