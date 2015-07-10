@@ -161,20 +161,6 @@ class Database
     /**
      * @return array
      */
-    private function _getBundlesClasses()
-    {
-        $classes = array();
-        foreach ($this->_application->getBundles() as $bundle) {
-            $tmp = $this->_getBundleSchema($bundle);
-            $classes = array_merge($classes, $tmp);
-        }
-
-        return $classes;
-    }
-
-    /**
-     * @return array
-     */
     private function _getBackBeeSchema()
     {
         $classes = array();
