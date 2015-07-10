@@ -131,7 +131,6 @@ class CategoryManager
             ));
         }
 
-        $categories = [];
         foreach ($classcontents as $class) {
             try {
                 if (class_exists($class)) {
