@@ -165,7 +165,7 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return $result = [
+        return [
             'uid'          => $this->getUid(),
             'root_uid'     => $this->getRoot()->getUid(),
             'is_root'      => $this->isRoot(),
