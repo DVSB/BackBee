@@ -100,6 +100,6 @@ class LayoutListener
                     ->removeThumbnail($layout, $dispatcher->getApplication());
         }
 
-        $renderer = $dispatcher->getApplication()->getRenderer()->removeLayout($layout);
+        $dispatcher->getApplication()->getRenderer()->removeLayout($layout);
     }
 }
