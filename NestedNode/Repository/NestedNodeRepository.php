@@ -46,7 +46,7 @@ class NestedNodeRepository extends EntityRepository
         $node->rightnode = $leftnode + 1;
         $node->level = $level;
 
-        foreach ($children = $this->getNativelyNodeChildren($nodeUid) as $row) {
+        foreach ($this->getNativelyNodeChildren($nodeUid) as $row) {
             $child = $this->updateTreeNatively($row['uid'], $leftnode + 1, $level + 1);
             $node->rightnode = $child->rightnode + 1;
             $leftnode = $child->rightnode;
@@ -173,7 +173,7 @@ class NestedNodeRepository extends EntityRepository
      * @param  \BackBee\NestedNode\AbstractNestedNode             $node         The node to be inserted
      * @param  \BackBee\NestedNode\AbstractNestedNode             $parent       The parent node
      * @param  int                                                $newLeftNode  The new left node of the inserted node
-     * 
+     *
      * @return \BackBee\NestedNode\AbstractNestedNode             The inserted node
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the node is an ancestor of $parent or $parent is not flushed yet
      */
