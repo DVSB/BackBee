@@ -26,7 +26,7 @@ namespace BackBee\NestedNode;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use Symfony\Component\Security\Core\Util\ClassUtils;
+
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Security\Acl\Domain\AbstractObjectIdentifiable;
 use BackBee\Utils\Numeric;

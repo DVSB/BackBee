@@ -24,12 +24,10 @@
 namespace BackBee\Bundle;
 
 use BackBee\BBApplication;
-use BackBee\Bundle\AdminBundle\ValueProvider\ManageableProviderInterface;
 use BackBee\Controller\Controller;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\Translator;
 
 /**

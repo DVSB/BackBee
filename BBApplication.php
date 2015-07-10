@@ -30,7 +30,6 @@ use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBee\Event\Event;
 use BackBee\Exception\BBException;
-use BackBee\Security\Token\AnonymousToken;
 use BackBee\Security\Token\BBUserToken;
 use BackBee\Site\Site;
 use BackBee\Utils\File\File;

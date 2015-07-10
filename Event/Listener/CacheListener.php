@@ -136,18 +136,14 @@ class CacheListener implements EventSubscriberInterface
 
         if ($this->application->getContainer()->has('cache.content')) {
             $cacheContent = $this->application->getContainer()->get('cache.content');
-            if ($cacheContent instanceof CacheInterface
-                && $cacheContent instanceof CacheExtendedInterface
-                ) {
+            if ($cacheContent instanceof CacheExtendedInterface) {
                 $this->cache_content = $cacheContent;
             }
         }
 
         if ($this->application->getContainer()->has('cache.page')) {
             $cachePage = $this->application->getContainer()->get('cache.page');
-            if ($cachePage instanceof CacheInterface
-                && $cachePage instanceof CacheExtendedInterface
-                ) {
+            if ($cachePage instanceof CacheExtendedInterface) {
                 $this->cache_page = $cachePage;
             }
         }
@@ -264,9 +260,7 @@ class CacheListener implements EventSubscriberInterface
         }
 
         $cachePage = $this->application->getContainer()->get('cache.page');
-        if ($cachePage instanceof CacheInterface
-                && $cachePage instanceof CacheExtendedInterface
-            ) {
+        if ($cachePage instanceof CacheExtendedInterface) {
             $node_uids = $this->application->getEntityManager()
                 ->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
                 ->getNodeUids($content_uids)

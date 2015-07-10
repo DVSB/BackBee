@@ -26,7 +26,6 @@ namespace BackBee\ClassContent;
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\Exception\InvalidContentTypeException;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
-use BackBee\Exception\InvalidArgumentException;
 use BackBee\Renderer\RenderableInterface;
 use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
 

@@ -27,7 +27,6 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Security\Acl\Permission\MaskBuilder;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
@@ -540,7 +539,7 @@ class PageController extends AbstractRestController
     {
         $qb = $this->getPageRepository()
                     ->createQueryBuilder('p');
-        
+
         $order_by = [
             '_position' => 'ASC',
             '_leftnode' => 'ASC',

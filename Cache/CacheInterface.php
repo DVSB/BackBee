@@ -24,7 +24,6 @@
 namespace BackBee\Cache;
 
 use Psr\Log\LoggerInterface;
-use BackBee\Cache\Exception\CacheException;
 
 /**
  * Interface for BackBee Cache
