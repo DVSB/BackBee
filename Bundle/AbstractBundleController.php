@@ -248,7 +248,7 @@ abstract class AbstractBundleController extends Controller
      *
      * @return Translator
      */
-    private function getTranslator()
+    protected function getTranslator()
     {
         return $this->getContainer()->get('translator');
     }

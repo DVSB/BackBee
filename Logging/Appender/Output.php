@@ -34,7 +34,6 @@ use BackBee\Logging\Formatter\Simple;
  */
 class Output implements AppenderInterface
 {
-    private $_fhandler = null;
     private $_formatter = null;
 
     public function __construct($options)

@@ -39,7 +39,6 @@ class ClassContentManager
 {
     private $application;
     private $categoryManager;
-    private $contents;
     private $em;
     private $thumbnailBaseDir;
     private $token;
@@ -54,8 +53,6 @@ class ClassContentManager
         $this->application = $application;
         $this->em = $application->getEntityManager();
         $this->categoryManager = $application->getContainer()->get('classcontent.category_manager');
-
-        $this->contents = new \SplObjectStorage();
     }
 
     /**

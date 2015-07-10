@@ -82,12 +82,9 @@ class ClassContentListener
         if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
             if (null !== $content->getProperty('labelized-by')) {
                 $elements = explode('->', $content->getProperty('labelized-by'));
-                $owner = null;
                 $element = null;
                 $value = $content;
                 foreach ($elements as $element) {
-                    $owner = $value;
-
                     if (null !== $value) {
                         $value = $value->getData($element);
                         if ($value instanceof AbstractClassContent && false === $em->contains($value)) {

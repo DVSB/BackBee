@@ -288,40 +288,6 @@ class Logger extends DebugStack implements LoggerInterface, SQLLogger
         $this->log(self::DEBUG, $message, $context);
     }
 
-    private function _sendErrorMail($subject, $message)
-    {
-        $application = $this->_application;
-
-        if (false === is_array($this->_mailto) || 0 === count($this->_mailto)) {
-            return;
-        }
-
-        try {
-            $mailer = $application->getMailer();
-            $mailerconfig = $application->getConfig()->getMailerConfig();
-            $from = isset($mailerconfig['from']) ? $mailerconfig['from'] : 'no-reply@anonymous.com';
-            $from_name = isset($mailerconfig['from_name']) ? $mailerconfig['from_name'] : null;
-
-            if (is_array($from)) {
-                $from = reset($from);
-            }
-            if (is_array($from_name)) {
-                $from_name = reset($from_name);
-            }
-
-            $mail = \Swift_Message::newInstance($subject, $message, 'text/html', 'utf-8');
-            $mail->addFrom($from, $from_name);
-
-            foreach ($this->_mailto as $to) {
-                $mail->addTo($to);
-            }
-
-            $mailer->send($mail);
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
     /**
      * Get priority name by its code.
      *

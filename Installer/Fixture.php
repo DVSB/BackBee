@@ -53,7 +53,7 @@ class Fixture
         }
         foreach ($classes as $classMetadata) {
             if ($this->isFixturedEntity($classMetadata->getReflectionClass())) {
-                $class = $this->getClass($classMetadata);
+                $this->getClass($classMetadata);
             }
         }
     }

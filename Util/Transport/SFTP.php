@@ -365,7 +365,7 @@ class SFTP extends AbstractTransport
         }
 
         $remote_path = $this->_getAbsoluteRemotePath($remote_path);
-        if (false === $stats = @ssh2_sftp_stat($this->_sftp_resource, $remote_path)) {
+        if (false === @ssh2_sftp_stat($this->_sftp_resource, $remote_path)) {
             return $this->_trigger_error(sprintf('Remote file to delete does not exist: %s.', $remote_path));
         }
 

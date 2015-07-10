@@ -376,7 +376,6 @@ class ClassContentRepository extends EntityRepository
         }
         $db = $this->_em->getConnection();
 
-        $order = "";
         $start = (is_array($limitInfos) && array_key_exists("start", $limitInfos)) ? (int) $limitInfos["start"] : 0;
         $limit = (is_array($limitInfos) && array_key_exists("limit", $limitInfos)) ? (int) $limitInfos["limit"] : 0;
         $stmt = $db->executeQuery("SELECT * FROM `content` WHERE `classname` IN (?) order by modified desc limit ?,?", array($classnameArr, $start, $limit), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1)
@@ -477,64 +476,6 @@ class ClassContentRepository extends EntityRepository
         }
 
         return $result;
-    }
-
-    /**
-     * Add SQL filter to content search.
-     *
-     * @param \Doctrine\ORM\Query $query
-     * @param string              $name
-     * @param array               $classesArray
-     *
-     * @return string
-     */
-    private function addInstanceFilters(Query $query, $name = null, $classesArray = array())
-    {
-        $dqlString = "";
-        if (!is_string($name)) {
-            return $dqlString;
-        }
-        if (is_array($classesArray) && count($classesArray)) {
-            $dqlString .= $query->getDql();
-            $filters = array();
-            foreach ($classesArray as $classname) {
-                $filters[] = "c INSTANCE OF '".$classname."'";
-            }
-            $classFilter = implode(" OR ", $filters);
-
-            return $classFilter;
-        }
-
-        return $qlString;
-    }
-
-    private function getPageMainContentSets($selectedNode, $online = false)
-    {
-        $rsm = new ResultSetMapping();
-        $rsm->addEntityResult("BackBee\ClassContent\ContentSet", "c");
-
-        $rsm->addFieldResult('c', 'uid', '_uid');
-        $sql = "Select c.uid from content c LEFT JOIN content_has_subcontent sc ON c.uid = sc.content_uid";
-        $sql .= " LEFT JOIN page as p ON p.contentset = sc.parent_uid";
-        $sql .= " LEFT JOIN section as sp ON p.section_uid = sp.uid";
-        $sql .= " where p.uid = :selectedNodeUid";
-        $sql .= " AND sp.root_uid = :selectedPageRoot";
-        $sql .= " AND sp.leftnode >= :selectedPageLeftnode";
-        $sql .= " AND sp.rightnode <= :selectedPageRightnode";
-        if ($online) {
-            $sql .= " AND p.state IN(:selectedPageState)";
-        }
-        $query = $this->_em->createNativeQuery($sql, $rsm);
-        $query->setParameters(array(
-            "selectedPageRoot" => $selectedNode->getSection()->getRoot(),
-            "selectedNodeUid" => $selectedNode->getUid(),
-            "selectedPageLeftnode" => $selectedNode->getLeftnode(),
-            "selectedPageRightnode" => $selectedNode->getRightnode(), ));
-        if ($online) {
-            $query->setParameter("selectedPageState", array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN));
-        }
-
-        return $query->getResult();
     }
 
     /**
