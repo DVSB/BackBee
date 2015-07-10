@@ -26,7 +26,8 @@ namespace BackBee\Event\Listener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use BackBee\ApplicationInterface;
-use BackBee\Cache\AbstractExtendedCache;
+use BackBee\Cache\CacheInterface;
+use BackBee\Cache\CacheExtendedInterface;
 use BackBee\Cache\CacheIdentifierGenerator;
 use BackBee\Cache\CacheValidator;
 use BackBee\ClassContent\AbstractClassContent;
@@ -71,14 +72,14 @@ class CacheListener implements EventSubscriberInterface
     /**
      * The page cache system.
      *
-     * @var \BackBee\Cache\AbstractExtendedCache
+     * @var \BackBee\Cache\CacheExtendedInterface
      */
     private $cache_page;
 
     /**
      * The content cache system.
      *
-     * @var \BackBee\Cache\AbstractExtendedCache
+     * @var \BackBee\Cache\CacheExtendedInterface
      */
     private $cache_content;
 
@@ -92,14 +93,14 @@ class CacheListener implements EventSubscriberInterface
     /**
      * Is the deletion of cached page is done.
      *
-     * @var boolean
+     * @var bool
      */
     private $page_cache_deletion_done = false;
 
     /**
      * Cached contents already deleted.
      *
-     * @var boolean
+     * @var bool
      */
     private $content_cache_deletion_done = array();
 
@@ -111,12 +112,12 @@ class CacheListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            'classcontent.prerender'     => 'onPreRenderContent',
-            'classcontent.postrender'    => 'onPostRenderContent',
-            'classcontent.onflush'       => 'onFlushContent',
-            'nestednode.page.prerender'  => 'onPreRenderPage',
+            'classcontent.prerender' => 'onPreRenderContent',
+            'classcontent.postrender' => 'onPostRenderContent',
+            'classcontent.onflush' => 'onFlushContent',
+            'nestednode.page.prerender' => 'onPreRenderPage',
             'nestednode.page.postrender' => 'onPostRenderPage',
-            'nestednode.page.onflush'    => 'onFlushPage',
+            'nestednode.page.onflush' => 'onFlushPage',
         );
     }
 
@@ -133,17 +134,21 @@ class CacheListener implements EventSubscriberInterface
         $this->validator = $validator;
         $this->identifier_generator = $generator;
 
-        if (true === $this->application->getContainer()->has('cache.content')) {
-            $cache_content = $this->application->getContainer()->get('cache.content');
-            if (true === ($cache_content instanceof AbstractExtendedCache)) {
-                $this->cache_content = $cache_content;
+        if ($this->application->getContainer()->has('cache.content')) {
+            $cacheContent = $this->application->getContainer()->get('cache.content');
+            if ($cacheContent instanceof CacheInterface
+                && $cacheContent instanceof CacheExtendedInterface
+                ) {
+                $this->cache_content = $cacheContent;
             }
         }
 
-        if (true === $this->application->getContainer()->has('cache.page')) {
-            $cache_page = $this->application->getContainer()->get('cache.page');
-            if (true === ($cache_page instanceof AbstractExtendedCache)) {
-                $this->cache_page = $cache_page;
+        if ($this->application->getContainer()->has('cache.page')) {
+            $cachePage = $this->application->getContainer()->get('cache.page');
+            if ($cachePage instanceof CacheInterface
+                && $cachePage instanceof CacheExtendedInterface
+                ) {
+                $this->cache_page = $cachePage;
             }
         }
     }
@@ -381,9 +386,9 @@ class CacheListener implements EventSubscriberInterface
      * Checks the event and system validity then returns the content target, FALSE otherwise.
      *
      * @param \BackBee\Event\Event $event
-     * @param boolean              $check_status
+     * @param bool                 $check_status
      *
-     * @return boolean
+     * @return bool
      */
     private function checkCacheContentEvent($check_status = true)
     {
@@ -408,9 +413,9 @@ class CacheListener implements EventSubscriberInterface
      * Checks the event and system validity then returns the page target, FALSE otherwise.
      *
      * @param \BackBee\Event\Event $event
-     * @param boolean              $check_status
+     * @param bool                 $check_status
      *
-     * @return boolean
+     * @return bool
      */
     private function checkCachePageEvent($check_status = true)
     {

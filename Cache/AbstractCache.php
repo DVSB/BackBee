@@ -34,7 +34,7 @@ use BackBee\Cache\Exception\CacheException;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AbstractCache
+abstract class AbstractCache implements CacheInterface
 {
     /**
      * Cache adapter options.
@@ -140,7 +140,7 @@ abstract class AbstractCache
      *
      * @param \Psr\Log\LoggerInterface $logger
      *
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\CacheAdapterInterface
      * @codeCoverageIgnore
      */
     public function setLogger(LoggerInterface $logger = null)
@@ -177,10 +177,10 @@ abstract class AbstractCache
      *
      * @param string $context
      *
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\CacheAdapterInterface
      * @codeCoverageIgnore
      */
-    protected function setContext($context = null)
+    public function setContext($context = null)
     {
         $this->_context = $context;
 
@@ -192,9 +192,7 @@ abstract class AbstractCache
      *
      * @param array $options
      *
-     * @return \BackBee\Cache\ACache
-     *
-     * @return \BackBee\Cache\AbstractCache
+     * @return \BackBee\Cache\CacheAdapterInterface
      * @throws \BackBee\Cache\Exception\CacheException Occurs if a provided option is unknown for this adapter.
      */
     private function setInstanceOptions(array $options = array())
@@ -218,7 +216,7 @@ abstract class AbstractCache
      * @param array  $context The logging context
      * @codeCoverageIgnore
      */
-    protected function log($level, $message, array $context = array('cache'))
+    public function log($level, $message, array $context = array('cache'))
     {
         if (null !== $this->_logger) {
             $this->_logger->log($level, $message, $context);
@@ -233,7 +231,7 @@ abstract class AbstractCache
      * @return int
      * @codeCoverageIgnore
      */
-    protected function getExpireTime($lifetime = null, $bypass_control = false)
+    public function getExpireTime($lifetime = null, $bypass_control = false)
     {
         $expire = 0;
 
@@ -263,7 +261,7 @@ abstract class AbstractCache
      *
      * @return int
      */
-    protected function getControledLifetime($lifetime)
+    public function getControledLifetime($lifetime)
     {
         if (
             null !== $this->_instance_options['min_lifetime']

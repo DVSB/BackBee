@@ -454,7 +454,7 @@ class Cache extends AbstractExtendedCache
      * @return int
      * @codeCoverageIgnore
      */
-    protected function getExpireTime($lifetime = null, $bypass_control = false)
+    public function getExpireTime($lifetime = null, $bypass_control = false)
     {
         $expire = parent::getExpireTime($lifetime, $bypass_control);
 

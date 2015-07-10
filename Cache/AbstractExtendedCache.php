@@ -32,46 +32,28 @@ namespace BackBee\Cache;
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-abstract class AbstractExtendedCache extends AbstractCache
+abstract class AbstractExtendedCache extends AbstractCache implements CacheExtendedInterface
 {
     /**
-     * Removes all cache records associated to one of the tags.
-     *
-     * @param string|array $tag
-     *
-     * @return boolean TRUE if cache is removed FALSE otherwise
+     * @{inheritdoc}
      */
     abstract public function removeByTag($tag);
 
     /**
-     * Updates the expire date time for all cache records
-     * associated to one of the provided tags.
-     *
-     * @param string|array $tag
-     * @param int          $lifetime Optional, the specific lifetime for this record
-     *                               (by default null, infinite lifetime)
-     *
-     * @return boolean TRUE if cache is removed FALSE otherwise
+     * @{inheritdoc}
      */
     abstract public function updateExpireByTag($tag, $lifetime = null);
 
     /**
-     * Returns the minimum expire date time for all cache records
-     * associated to one of the provided tags.
-     *
-     * @param string|array $tag
-     * @param int          $lifetime Optional, the specific lifetime for this record
-     *                               (by default 0, infinite lifetime)
-     *
-     * @return int
+     * @{inheritdoc}
      */
     abstract public function getMinExpireByTag($tag, $lifetime = 0);
 
     /**
-     * @param $id
-     * @param $tag
+     * @{inheritdoc}
      */
     public function saveTag($id, $tag)
     {
+        return null;
     }
 }
