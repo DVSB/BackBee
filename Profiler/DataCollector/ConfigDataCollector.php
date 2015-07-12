@@ -77,6 +77,8 @@ class ConfigDataCollector extends DataCollector
             'BackBee_version'  => BBApplication::VERSION,
             'name'             => $this->kernel->getApplication()->getSite() ? $this->kernel->getApplication()->getSite()->getLabel() : 'n/a',
             'debug'            => isset($this->kernel) ? $this->kernel->getApplication()->isDebugMode() : 'n/a',
+            'env'              => isset($this->kernel) ? $this->kernel->getApplication()->getEnvironment() : 'n/a',
+            'context'          => isset($this->kernel) ? $this->kernel->getApplication()->getContext() : 'n/a',
             'php_version'      => PHP_VERSION,
             'xdebug_enabled'   => extension_loaded('xdebug'),
             'eaccel_enabled'   => extension_loaded('eaccelerator') && ini_get('eaccelerator.enable'),
@@ -227,6 +229,26 @@ class ConfigDataCollector extends DataCollector
     public function getSapiName()
     {
         return $this->data['sapi_name'];
+    }
+
+    /**
+     * Get the environment name
+     *
+     * @return string return 'default' if null
+     */
+    public function getEnvironment()
+    {
+        return empty($this->data['env']) ? 'default' : $this->data['env'];
+    }
+
+    /**
+     * Get the context name
+     *
+     * @return string return the Application context
+     */
+    public function getContext()
+    {
+        return $this->data['context'];
     }
 
     /**

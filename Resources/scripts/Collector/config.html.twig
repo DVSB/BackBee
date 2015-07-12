@@ -7,7 +7,7 @@
             {% if collector.applicationname %}
                 {{ collector.applicationname }} {{ collector.applicationversion }}
             {% else %}
-                {{ collector.BackBeeversion }}
+                {{ collector.BackBeeVersion }}
             {% endif %}
         </span>
     {% endset %}
@@ -30,7 +30,7 @@
         {% if 'n/a' != collector.appname or 'n/a' != collector.env %}
             <span class="bb-toolbar-item-additional-detail">
                 <span class="bb-toolbar-info-with-delimiter">{{ collector.appname }}</span>
-                <span>{{ collector.env }}</span>
+                <span>{{ collector.getEnvironnement }}</span>
             </span>
         {% endif %}
     {% endset %}
@@ -50,7 +50,7 @@
                 <td>{{ collector.applicationname }} {{ collector.applicationversion }} (on Symfony {{ collector.symfonyversion }})</td>
             {% else %}
                 <th>BackBee version</th>
-                <td>{{ collector.BackBee_version }}</td>
+                <td>{{ collector.BackBeeVersion }}</td>
             {% endif %}
         </tr>
         {% if 'n/a' != collector.appname %}
@@ -62,7 +62,13 @@
         {% if 'n/a' != collector.env %}
             <tr>
                 <th>Environment</th>
-                <td>{{ collector.env }}</td>
+                <td>{{ collector.getEnvironment }}</td>
+            </tr>
+        {% endif %}
+        {% if 'n/a' != collector.context %}
+            <tr>
+                <th>Context</th>
+                <td>{{ collector.getContext }}</td>
             </tr>
         {% endif %}
         {% if 'n/a' != collector.debug %}
@@ -106,10 +112,6 @@
         <tr>
             <th>EAccelerator</th>
             <td>{{ collector.haseaccelerator ? 'enabled' : 'disabled' }}</td>
-        </tr>
-        <tr>
-            <th>Full PHP configuration</th>
-            <td><a href="#phpinfo"><code>phpinfo</code></a></td>
         </tr>
     </table>
 
