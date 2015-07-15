@@ -74,4 +74,26 @@ class SiteController extends AbstractRestController
 
         return new Response($this->formatCollection($layouts), 200, ['Content-Type' => 'application/json']);
     }
+
+    /**
+     * retrieve all Site visible for the current user
+     *
+     * @return Response
+     */
+    public function getCollectionAction()
+    {
+        if (!$this->isGranted('ROLE_API_USER')) {
+            throw new AccessDeniedHttpException('Your account\'s api access is disabled');
+        }
+        $sitesAvailable = [];
+        $sites = $this->getEntityManager()->getRepository('BackBee\Site\Site')->findAll();
+
+        foreach ($sites as $site) {
+            if ($this->isGranted('VIEW', $site)) {
+                $sitesAvailable[] = $site;
+            }
+        }
+        return new Response($this->formatCollection($sitesAvailable), 200,  ['Content-Type' => 'application/json']);
+    }
+
 }

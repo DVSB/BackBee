@@ -172,6 +172,31 @@ class SiteControllerTest extends TestCase
         $this->assertEquals(404, $response->getStatusCode());
     }
 
+        /**
+     * @covers ::getLayoutsAction
+     */
+    public function test_getSiteController()
+    {
+        $user = $this->createAuthUser('super_admin', array('ROLE_API_USER'));
+
+        $aclManager = $this->getBBApp()->getContainer()->get('security.acl_manager');
+        $aclManager->insertOrUpdateObjectAce(
+            new ObjectIdentity($this->site->getObjectIdentifier(), get_class($this->site)),
+            new UserSecurityIdentity($user->getGroups()[0]->getId(), 'BackBee\Security\Group'),
+            MaskBuilder::MASK_VIEW
+        );
+        // authenticate a user with super admin authority
+        $controller = $this->getController();
+        $response = $controller->getCollectionAction(new Request());
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $content = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $content);
+
+        $this->assertCount(1, $content);
+    }
+
     protected function tearDown()
     {
         $this->dropDb($this->getBBApp());
