@@ -545,12 +545,16 @@ class PageController extends AbstractRestController
             }
         }
 
-        if (null === $parent) {
-            $qb->andSiteIs($this->getApplication()->getSite())
-                    ->andParentIs(null);
-        } else {
-            $this->granted('VIEW', $parent);
+        if (null === $parent && !$request->query->has('site_uid')) {
+            $qb->andSiteIs($this->getApplication()->getSite());
+        } elseif ($request->query->has('site_uid')) {
+            $qb->andSiteIs($request->query->get('site_uid'));
+        }
 
+        if ($request->query->has('root')) {
+            $qb->andParentIs(null);
+        } elseif ($parent !== null) {
+            $this->granted('VIEW', $parent);
             $qb->andIsDescendantOf($parent, true, 1, $order_by, $count, $start);
         }
 
