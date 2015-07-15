@@ -23,13 +23,17 @@
 
 namespace BackBee\Bundle;
 
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
 use BackBee\DependencyInjection\Util\ServiceLoader;
+use BackBee\Bundle\Event\BundleInstallUpdateEvent;
 use BackBee\Exception\InvalidArgumentException;
 use BackBee\Util\Resolver\BundleConfigDirectory;
+
+use Doctrine\ORM\Tools\SchemaTool;
+
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * BundleLoader loads and injects bundles into application and its dependency injection container.
@@ -41,15 +45,15 @@ use BackBee\Util\Resolver\BundleConfigDirectory;
  */
 class BundleLoader
 {
-    const EVENT_RECIPE_KEY = 'event';
-    const SERVICE_RECIPE_KEY = 'service';
     const CLASSCONTENT_RECIPE_KEY = 'classcontent';
-    const TEMPLATE_RECIPE_KEY = 'template';
-    const HELPER_RECIPE_KEY = 'helper';
-    const RESOURCE_RECIPE_KEY = 'resource';
-    const NAMESPACE_RECIPE_KEY = 'namespace';
     const CUSTOM_RECIPE_KEY = 'custom';
+    const EVENT_RECIPE_KEY = 'event';
+    const HELPER_RECIPE_KEY = 'helper';
+    const NAMESPACE_RECIPE_KEY = 'namespace';
+    const RESOURCE_RECIPE_KEY = 'resource';
     const ROUTE_RECIPE_KEY = 'route';
+    const SERVICE_RECIPE_KEY = 'service';
+    const TEMPLATE_RECIPE_KEY = 'template';
 
     /**
      * @var BackBee\ApplicationInterface
@@ -182,6 +186,143 @@ class BundleLoader
 
             $this->loadRoutes($config, $this->getCallbackFromRecipes($recipes, self::ROUTE_RECIPE_KEY));
         }
+    }
+
+    /**
+     * It will at least install provided bundle Doctrine entities located into /Entity folder.
+     *
+     * Note that if $force is equal to false it will only return informations your bundle installation but
+     * it won't execute any SQL statement.
+     *
+     * @param  BundleInterface $bundle The bundle to install
+     * @param  boolean         $force  If true it will execute SQL query, default: false
+     * @return array
+     */
+    public function installBundle(BundleInterface $bundle, $force = false)
+    {
+        $event = new BundleInstallUpdateEvent($bundle, [
+            'force' => $force,
+            'logs'  => [
+                'sql'   => [],
+            ],
+        ]);
+
+        $this->application->getEventDispatcher()->dispatch(sprintf('bundle.%s.preinstall', $bundle->getId()), $event);
+
+        $sqls = $this->createEntitiesSchema($bundle, $force);
+
+        $this->application->getEventDispatcher()->dispatch(sprintf('bundle.%s.postinstall', $bundle->getId()), $event);
+
+        return array_merge($event->getLogs(), [
+            'sql' => $sqls,
+        ]);
+    }
+
+    /**
+     * It will at least update provided bundle Doctrine entities located into /Entity folder.
+     *
+     * Note that if $force is equal to false it will only return updates informations about your bundle but
+     * it won't execute any SQL statement.
+     *
+     * @param  BundleInterface $bundle The bundle to update
+     * @param  boolean         $force  If true it will execute SQL query, default: false
+     * @return array
+     */
+    public function updateBundle(BundleInterface $bundle, $force = false)
+    {
+        $event = new BundleInstallUpdateEvent($bundle, [
+            'force' => $force,
+            'logs'  => [
+                'sql'   => [],
+            ],
+        ]);
+
+        $this->application->getEventDispatcher()->dispatch(sprintf('bundle.%s.preupdate', $bundle->getId()), $event);
+
+        $sqls = $this->updateEntitiesSchema($bundle, $force);
+
+        $this->application->getEventDispatcher()->dispatch(sprintf('bundle.%s.postupdate', $bundle->getId()), $event);
+
+        return array_merge($event->getLogs(), [
+            'sql' => $sqls,
+        ]);
+    }
+
+    /**
+     * Creates SQL requests to create your bundle entities and executes them against application database
+     * if force is equal to true.
+     *
+     * @param  BundleInterface $bundle
+     * @param  boolean         $force
+     * @return array
+     */
+    private function createEntitiesSchema(BundleInterface $bundle, $force = false)
+    {
+        if (!is_dir($entityDir = $this->getBundleEntityDir($bundle))) {
+            return [];
+        }
+
+        $bundleEntityManager = $bundle->getEntityManager();
+        $bundleEntityManager
+            ->getConfiguration()
+            ->getMetadataDriverImpl()
+            ->addPaths([
+                $entityDir,
+            ])
+        ;
+
+        $metadata = $bundleEntityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool = new SchemaTool($bundleEntityManager);
+        $sqls = $schemaTool->getCreateSchemaSql($metadata);
+        if (true === $force) {
+            $schemaTool->createSchema($metadata);
+        }
+
+        return $sqls;
+    }
+
+    /**
+     * Creates SQL requests to update your bundle entities and executes them against application database
+     * if force is equal to true.
+     *
+     * @param  BundleInterface $bundle
+     * @param  boolean         $force
+     * @return array
+     */
+    private function updateEntitiesSchema(BundleInterface $bundle, $force = false)
+    {
+        if (!is_dir($entityDir = $this->getBundleEntityDir($bundle))) {
+            return [];
+        }
+
+        $bundleEntityManager = $bundle->getEntityManager();
+        $bundleEntityManager
+            ->getConfiguration()
+            ->getMetadataDriverImpl()
+            ->addPaths([
+                $entityDir,
+            ])
+        ;
+
+        $metadata = $bundleEntityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool = new SchemaTool($bundleEntityManager);
+        $sqls = $schemaTool->getUpdateSchemaSql($metadata, true);
+        if (true === $force) {
+            $schemaTool->updateSchema($metadata, true);
+        }
+
+        return $sqls;
+    }
+
+    /**
+     * Returns bundle entity directory path.
+     *
+     * @param  BundleInterface $bundle
+     * @return string
+     */
+    protected function getBundleEntityDir(BundleInterface $bundle)
+    {
+        return $bundle->getBaseDirectory().DIRECTORY_SEPARATOR.'Entity';
     }
 
     /**
@@ -327,7 +468,7 @@ class BundleLoader
     {
         $recipes = null;
         $bundleConfig = $config->getBundleConfig();
-        if (null !== $bundleConfig && array_key_exists('bundle_loader_recipes', $bundleConfig)) {
+        if (null !== $bundleConfig && isset($bundleConfig['bundle_loader_recipes'])) {
             $recipes = $bundleConfig['bundle_loader_recipes'];
         }
 
@@ -345,7 +486,7 @@ class BundleLoader
     private function getCallbackFromRecipes($key, array $recipes = null)
     {
         $recipe = null;
-        if (null !== $recipes && array_key_exists($key, $recipes) && is_callable($recipes[$key])) {
+        if (isset($recipes[$key]) && is_callable($recipes[$key])) {
             $recipe = $recipes[$key];
         }
 
@@ -494,6 +635,7 @@ class BundleLoader
         if (false === $this->runRecipe($config, $recipe)) {
             $baseDir = dirname($config->getBaseDir()).DIRECTORY_SEPARATOR;
             $directory = realpath($baseDir.DIRECTORY_SEPARATOR.'Resources');
+
             if (false === $directory) {
                 $directory = realpath($baseDir.DIRECTORY_SEPARATOR.'Ressources');
             }

@@ -40,11 +40,9 @@ use BackBee\Event\Event;
 class ContainerListener
 {
     /**
-     * [onApplicationInit description].
+     * Occurs on event ``bbapplication.init`` to dump application container if debug mode is false.
      *
-     * @param Event $event [description]
-     *
-     * @return [type] [description]
+     * @param Event $event
      */
     public static function onApplicationInit(Event $event)
     {
@@ -52,18 +50,19 @@ class ContainerListener
         $container = $application->getContainer();
 
         if (false === $application->isDebugMode() && false === $container->isRestored()) {
-            $container_filename = $container->getParameter('container.filename');
-            $container_directory = $container->getParameter('container.dump_directory');
+            $containerFilename = $container->getParameter('container.filename');
+            $containerDir = $container->getParameter('container.dump_directory');
 
-            if (false === is_dir($container_directory) && false === @mkdir($container_directory, 0755)) {
-                throw new CannotCreateContainerDirectoryException($container_directory);
+            if (false === is_dir($containerDir) && false === @mkdir($containerDir, 0755)) {
+                throw new CannotCreateContainerDirectoryException($containerDir);
             }
 
-            if (false === is_writable($container_directory)) {
-                throw new ContainerDirectoryNotWritableException($container_directory);
+            if (false === is_writable($containerDir)) {
+                throw new ContainerDirectoryNotWritableException($containerDir);
             }
 
             $dumper = new PhpArrayDumper($container);
+
             $dump = $dumper->dump(array('do_compile' => true));
 
             $container_proxy = new ContainerProxy();
@@ -73,9 +72,9 @@ class ContainerListener
             $container_proxy->setParameter('is_compiled', $dump['is_compiled']);
 
             file_put_contents(
-                $container_directory.DIRECTORY_SEPARATOR.$container_filename.'.php',
+                $containerDir.DIRECTORY_SEPARATOR.$containerFilename.'.php',
                 (new PhpDumper($container_proxy))->dump(array(
-                    'class'      => $container_filename,
+                    'class'      => $containerFilename,
                     'base_class' => 'BackBee\DependencyInjection\ContainerProxy',
                 ))
             );

@@ -24,11 +24,7 @@
 namespace BackBee\Console\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-
-use BackBee\Console\AbstractCommand;
 
 /**
  * Install bundle command.
@@ -36,9 +32,9 @@ use BackBee\Console\AbstractCommand;
  * @category    BackBee
  *
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      Eric Chau <eric.chau@lp-digital.fr>
  */
-class BundleInstallCommand extends AbstractCommand
+class BundleInstallCommand extends AbstractBundleCommand
 {
     /**
      * {@inheritdoc}
@@ -62,30 +58,8 @@ EOF
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function getCommandType()
     {
-        $name = strtr($input->getArgument('name'), '/', '\\');
-
-        $force = $input->getOption('force');
-
-        $bbapp = $this->getContainer()->get('bbapp');
-
-        $bundle = $bbapp->getBundle($name);
-        /* @var $bundle \BackBee\Bundle\AbstractBundle */
-
-        if (null === $bundle) {
-            throw new \InvalidArgumentException(sprintf("Not a valid bundle: %s", $name));
-        }
-
-        $output->writeln('Installing bundle: '.$bundle->getId().'');
-
-        $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
-
-        if ($force) {
-            $output->writeln('<info>Running install</info>');
-            $bundle->install();
-        }
-
-        $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
+        return AbstractBundleCommand::INSTALL_COMMAND;
     }
 }

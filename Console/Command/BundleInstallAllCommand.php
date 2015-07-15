@@ -27,17 +27,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use BackBee\Console\AbstractCommand;
-
 /**
  * Install all bundles command.
  *
  * @category    BackBee
- *
  * @copyright   Lp digital system
- * @author      k.golovin
+ * @author      Eric Chau <eric.chau@lp-digital.fr>
  */
-class BundleInstallAllCommand extends AbstractCommand
+class BundleInstallAllCommand extends AbstractBundleCommand
 {
     /**
      * {@inheritdoc}
@@ -63,20 +60,18 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $force = $input->getOption('force');
+        $methodToCall = $this->getCommandType().'Bundle';
 
-        $bbapp = $this->getContainer()->get('bbapp');
-
-        foreach ($bbapp->getBundles() as $bundle) {
-            $output->writeln('Installing bundle: '.$bundle->getId().'');
-
-            $sqls = $bundle->getCreateQueries($bundle->getBundleEntityManager());
-
-            if ($force) {
-                $output->writeln('<info>Running install</info>');
-                $bundle->install();
-            }
-
-            $output->writeln('<info>SQL executed: </info>'.PHP_EOL.implode(";".PHP_EOL, $sqls).'');
+        foreach ($this->getContainer()->get('bbapp')->getBundles() as $bundle) {
+            $this->doExecute($bundle, $force, $methodToCall, $output);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getCommandType()
+    {
+        return AbstractBundleCommand::INSTALL_COMMAND;
     }
 }
