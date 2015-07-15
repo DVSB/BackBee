@@ -114,6 +114,25 @@ class PageController extends AbstractRestController
     /**
      * Get collection of page entity.
      *
+     * Version 1
+     *  - without params return current root
+     *  - parent_uid return first level before the parent page
+     *
+     * Version 2
+     *  - without params return all pages
+     *  - `parent_uid` return all pages available before the nested level
+     *  - `root` return current root
+     *  - `level_offset` permit to choose the depth ex: `parent_uid=oneuid&level_offset=1` equals version 1 parent_uid parameter
+     *  - `has_children` return only pages they have children
+     *  - new available filter params:
+     *    - `title` (is a like method)
+     *    - `layout_uid`
+     *    - `site_uid`
+     *    - `created_before`
+     *    - `created_after`
+     *    - `modified_before`
+     *    - `modified_after`
+     *
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\Pagination(default_count=25, max_count=100)
@@ -150,6 +169,8 @@ class PageController extends AbstractRestController
             throw new BadRequestHttpException(
                 'To get page collection by content, you must provide `content_uid` and `content_type` as query parameters.'
             );
+        } elseif ($request->attributes->get('version') == 1) {
+            $response = $this->doClassicGetCollectionVersion1($request, $start, $count, $parent);
         } else {
             $response = $this->doClassicGetCollection($request, $start, $count, $parent);
         }
@@ -525,16 +546,53 @@ class PageController extends AbstractRestController
      *
      * @return Symfony\Component\HttpFoundation\Response
      */
+    private function doClassicGetCollectionVersion1(Request $request, $start, $count, Page $parent = null)
+    {
+        $qb = $this->getPageRepository()
+                    ->createQueryBuilder('p');
+        $order_by = [
+            '_position' => 'ASC',
+            '_leftnode' => 'ASC',
+        ];
+        if (null !== $request->query->get('order_by', null)) {
+            foreach ($request->query->get('order_by') as $key => $value) {
+                if ('_' !== $key[0]) {
+                    $key = '_' . $key;
+                }
+                $order_by[$key] = $value;
+            }
+        }
+        if (null === $parent) {
+            $qb->andSiteIs($this->getApplication()->getSite())
+                    ->andParentIs(null);
+        } else {
+            $this->granted('VIEW', $parent);
+            $qb->andIsDescendantOf($parent, true, 1, $order_by, $count, $start);
+        }
+        if (null !== $state = $request->query->get('state', null)) {
+            $qb->andStateIsIn((array) $state);
+        }
+
+        return $this->paginateClassicCollectionAction($qb, $start, $count);
+    }
+
+    /**
+     * Returns pages collection by doing classic selection and by applying filters provided in request
+     * query parameters.
+     *
+     * @param Request   $request
+     * @param integer   $start
+     * @param integer   $count
+     * @param Page|null $parent
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     */
     private function doClassicGetCollection(Request $request, $start, $count, Page $parent = null)
     {
         $qb = $this->getPageRepository()
                     ->createQueryBuilder('p');
 
-        $order_by = [
-            '_position' => 'ASC',
-            '_leftnode' => 'ASC',
-        ];
-
+        $order_by = [];
         if (null !== $request->query->get('order_by', null)) {
             foreach ($request->query->get('order_by') as $key => $value) {
                 if ('_' !== $key[0]) {
@@ -543,6 +601,11 @@ class PageController extends AbstractRestController
 
                 $order_by[$key] = $value;
             }
+        } else {
+            $order_by = [
+                '_position' => 'ASC',
+                '_leftnode' => 'ASC',
+            ];
         }
 
         if (null === $parent && !$request->query->has('site_uid')) {
@@ -553,15 +616,53 @@ class PageController extends AbstractRestController
 
         if ($request->query->has('root')) {
             $qb->andParentIs(null);
+        } elseif ($parent !== null && $request->query->has('level_offset')) {
+            $this->granted('VIEW', $parent);
+            $qb->andIsDescendantOf($parent, true, $request->query->get('level_offset'), $order_by, $count, $start);
         } elseif ($parent !== null) {
             $this->granted('VIEW', $parent);
-            $qb->andIsDescendantOf($parent, true, 1, $order_by, $count, $start);
+            $qb->andIsDescendantOf($parent, true, null, $order_by, $count, $start);
+        } else {
+            $qb->addMultipleOrderBy($order_by);
         }
 
         if (null !== $state = $request->query->get('state', null)) {
             $qb->andStateIsIn((array) $state);
         }
 
+        if ($request->query->has('has_children')) {
+            $qb->andIsSection();
+        }
+
+        if (null !== $title = $request->query->get('title', null)) {
+            $qb->andWhere($qb->expr()->like($qb->getAlias().'._title', $qb->expr()->literal('%'.$title.'%')));
+        }
+
+        if (null !== $layout = $request->query->get('layout_uid', null)) {
+            $qb->andWhere($qb->getAlias().'._layout = :layout')->setParameter('layout', $layout);
+        }
+
+        if (null !== $created_before = $request->query->get('created_before', null)) {
+            $qb->andWhere($qb->getAlias().'._created > :created_before')->setParameter('created_before', $created_before);
+        }
+
+        if (null !== $created_after = $request->query->get('created_after', null)) {
+            $qb->andWhere($qb->getAlias().'._created < :created_after')->setParameter('created_after', $modified_after);
+        }
+
+        if (null !== $modified_before = $request->query->get('modified_before', null)) {
+            $qb->andWhere($qb->getAlias().'._modified > :modified_before')->setParameter('modified_before', $modified_before);
+        }
+
+        if (null !== $modified_after = $request->query->get('modified_after', null)) {
+            $qb->andWhere($qb->getAlias().'._modified < :modified_after')->setParameter('modified_after', $modified_after);
+        }
+
+        return $this->paginateClassicCollectionAction($qb, $start, $count);
+    }
+
+    private function paginateClassicCollectionAction($qb, $start, $count)
+    {
         $results = new Paginator($qb->setFirstResult($start)->setMaxResults($count));
         $count = 0;
         foreach ($results as $row) {

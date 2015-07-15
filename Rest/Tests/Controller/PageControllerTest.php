@@ -67,7 +67,7 @@ class PageControllerTest extends RestTestCase
         $this->getContainer()->set('site', $this->site);
         self::$restUser = $this->createAuthUser('page_admin');
         $this->group_id = self::$restUser->getGroups()[0]->getId();
-        
+
         $this->em->flush();
     }
 
@@ -260,78 +260,88 @@ class PageControllerTest extends RestTestCase
         $this->assertEquals('New Page Title', $pageUpdated->getTitle());
     }
 
-    /**
-     * @covers ::getCollectionAction
-     */
-    public function testGetCollectionAction()
+
+    private function initializeTestGetCollectionAction()
     {
         // create pages
-        $homePage = new Page();
-        $homePage
+        $pages = [];
+        $pages['home'] = new Page();
+        $pages['home']
             ->setTitle('Home Page')
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
         ;
 
-        $deletedPage = new Page();
-        $deletedPage
+        $pages['delete'] = new Page();
+        $pages['delete']
             ->setTitle('Deleted')
             ->setParent(new Page())
             ->setState(Page::STATE_DELETED)
             ->setSite($this->site)
         ;
 
-        $offlinePage = new Page();
-        $offlinePage
+        $pages['offline'] = new Page();
+        $pages['offline']
             ->setTitle('Offline')
             ->setParent(new Page())
             ->setState(Page::STATE_OFFLINE)
             ->setSite($this->site)
         ;
 
-        $onlinePage = new Page();
-        $onlinePage
+        $pages['online'] = new Page();
+        $pages['online']
             ->setTitle('Online')
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
         ;
-        $onlinePage2 = new Page();
-        $onlinePage2
+        $pages['online2'] = new Page();
+        $pages['online2']
             ->setTitle('Online2')
             ->setState(Page::STATE_ONLINE)
             ->setSite($this->site)
         ;
-        $this->em->persist($homePage);
-        $this->em->flush($homePage);
-        
+        $this->em->persist($pages['home']);
+        $this->em->flush($pages['home']);
+
         $repo = $this->em->getRepository('BackBee\NestedNode\Page');
-        $repo->insertNodeAsFirstChildOf($deletedPage, $homePage);
-        $this->em->persist($deletedPage);
-        $this->em->flush($deletedPage);
-        $this->em->refresh($homePage);
-        
-        $repo->insertNodeAsFirstChildOf($offlinePage, $homePage);
-        $this->em->persist($offlinePage);
-        $this->em->flush($offlinePage);
-        $this->em->refresh($homePage);
-        
-        $repo->insertNodeAsFirstChildOf($onlinePage, $homePage, true);
-        $this->em->persist($onlinePage);
-        $this->em->flush($onlinePage);
-        $this->em->refresh($homePage);
-        $this->em->refresh($onlinePage);
-        
-        $repo->insertNodeAsFirstChildOf($onlinePage2, $onlinePage);
-        $this->em->persist($onlinePage2);
-        $this->em->flush($onlinePage2);
-        $this->em->refresh($homePage);
-        $this->em->refresh($onlinePage);
+        $repo->insertNodeAsFirstChildOf($pages['delete'], $pages['home']);
+        $this->em->persist($pages['delete']);
+        $this->em->flush($pages['delete']);
+        $this->em->refresh($pages['home']);
+
+        $repo->insertNodeAsFirstChildOf($pages['offline'], $pages['home']);
+        $this->em->persist($pages['offline']);
+        $this->em->flush($pages['offline']);
+        $this->em->refresh($pages['home']);
+
+        $repo->insertNodeAsFirstChildOf($pages['online'], $pages['home'], true);
+        $this->em->persist($pages['online']);
+        $this->em->flush($pages['online']);
+        $this->em->refresh($pages['home']);
+        $this->em->refresh($pages['online']);
+
+        $repo->insertNodeAsFirstChildOf($pages['online2'], $pages['online']);
+        $this->em->persist($pages['online2']);
+        $this->em->flush($pages['online2']);
+        $this->em->refresh($pages['home']);
+        $this->em->refresh($pages['online']);
+        $this->em->refresh($pages['online2']);
 
         $this->getAclManager()->insertOrUpdateObjectAce(
-            $homePage,
+            $pages['home'],
             new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
             MaskBuilder::MASK_VIEW
         );
+
+        return $pages;
+    }
+
+    /**
+     * @covers ::getCollectionAction
+     */
+    public function testGetCollectionActionVersion1()
+    {
+        $pages = $this->initializeTestGetCollectionAction();
 
         // no filters - should return current site root page
         $response1 = $this->sendRequest(self::requestGet('/rest/1/page'));
@@ -339,21 +349,21 @@ class PageControllerTest extends RestTestCase
         $res1 = json_decode($response1->getContent(), true);
         $this->assertInternalType('array', $res1);
         $this->assertCount(1, $res1);
-        $this->assertEquals($homePage->getUid(), $res1[0]['uid']);
+        $this->assertEquals($pages['home']->getUid(), $res1[0]['uid']);
 
         // filter by parent
-        $response2 = $this->sendRequest(self::requestGet('/rest/1/page', array('parent_uid' => $homePage->getUid())));
+        $response2 = $this->sendRequest(self::requestGet('/rest/1/page', ['parent_uid' => $pages['home']->getUid()]));
         $this->assertEquals(200, $response2->getStatusCode());
         $res2 = json_decode($response2->getContent(), true);
         $this->assertInternalType('array', $res2);
         $this->assertCount(3, $res2);
-        $this->assertEquals($onlinePage->getUid(), $res2[0]['uid']);
-        $this->assertEquals($offlinePage->getUid(), $res2[1]['uid']);
-        $this->assertEquals($deletedPage->getUid(), $res2[2]['uid']);
+        $this->assertEquals($pages['online']->getUid(), $res2[0]['uid']);
+        $this->assertEquals($pages['offline']->getUid(), $res2[1]['uid']);
+        $this->assertEquals($pages['delete']->getUid(), $res2[2]['uid']);
 
         // filter by state = offline
         $response3 = $this->sendRequest(self::requestGet('/rest/1/page', array(
-            'parent_uid' => $homePage->getUid(),
+            'parent_uid' => $pages['home']->getUid(),
             'state'      => array(Page::STATE_OFFLINE),
         )));
 
@@ -361,7 +371,81 @@ class PageControllerTest extends RestTestCase
         $res3 = json_decode($response3->getContent(), true);
         $this->assertInternalType('array', $res3);
         $this->assertCount(1, $res3);
-        $this->assertEquals($offlinePage->getUid(), $res3[0]['uid']);
+        $this->assertEquals($pages['offline']->getUid(), $res3[0]['uid']);
+    }
+
+    /**
+     * @covers ::getCollectionAction
+     */
+    public function testGetCollectionAction()
+    {
+        $pages = $this->initializeTestGetCollectionAction();
+
+        // no filters - should return all site pages
+        $response1 = $this->sendRequest(self::requestGet('/rest/2/page'));
+        $this->assertEquals(200, $response1->getStatusCode());
+        $res1 = json_decode($response1->getContent(), true);
+        $this->assertInternalType('array', $res1);
+        $this->assertCount(5, $res1);
+        $this->assertEquals($pages['home']->getUid(), $res1[0]['uid']);
+
+        // root filters - should return current site root page
+        $response1 = $this->sendRequest(self::requestGet('/rest/2/page', ['root' => '']));
+        $this->assertEquals(200, $response1->getStatusCode());
+        $res1 = json_decode($response1->getContent(), true);
+        $this->assertInternalType('array', $res1);
+        $this->assertCount(1, $res1);
+        $this->assertEquals($pages['home']->getUid(), $res1[0]['uid']);
+
+        // filter by parent
+        $response2 = $this->sendRequest(self::requestGet('/rest/2/page', ['parent_uid' => $pages['home']->getUid()]));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(4, $res2);
+        $this->assertEquals($pages['online']->getUid(), $res2[0]['uid'], 'filter by parent online');
+        $this->assertEquals($pages['offline']->getUid(), $res2[1]['uid'], 'filter by parent offline');
+        $this->assertEquals($pages['online2']->getUid(), $res2[2]['uid'], 'filter by parent online2');
+        $this->assertEquals($pages['delete']->getUid(), $res2[3]['uid'], 'filter by parent delete');
+
+        // filter by title
+        $response2 = $this->sendRequest(self::requestGet('/rest/2/page', ['title' => 'online']));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(2, $res2);
+        $this->assertEquals($pages['online']->getUid(), $res2[0]['uid'], 'filter by title online');
+        $this->assertEquals($pages['online2']->getUid(), $res2[1]['uid'], 'filter by title online2');
+
+        // filter by parent and level offset
+        $response2 = $this->sendRequest(self::requestGet('/rest/2/page', ['parent_uid' => $pages['home']->getUid(), 'level_offset' => 1]));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(3, $res2);
+        $this->assertEquals($pages['online']->getUid(), $res2[0]['uid']);
+        $this->assertEquals($pages['offline']->getUid(), $res2[1]['uid']);
+        $this->assertEquals($pages['delete']->getUid(), $res2[2]['uid']);
+
+        // filter by parent and level offset
+        $response2 = $this->sendRequest(self::requestGet('/rest/2/page', ['parent_uid' => $pages['home']->getUid(), 'has_children' => '']));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(1, $res2);
+        $this->assertEquals($pages['online']->getUid(), $res2[0]['uid']);
+
+        // filter by state = offline
+        $response3 = $this->sendRequest(self::requestGet('/rest/1/page', array(
+            'parent_uid' => $pages['home']->getUid(),
+            'state'      => array(Page::STATE_OFFLINE),
+        )));
+
+        $this->assertEquals(200, $response3->getStatusCode());
+        $res3 = json_decode($response3->getContent(), true);
+        $this->assertInternalType('array', $res3);
+        $this->assertCount(1, $res3);
+        $this->assertEquals($pages['offline']->getUid(), $res3[0]['uid']);
     }
 
     public function testGetAction()
