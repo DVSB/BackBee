@@ -619,6 +619,6 @@ class FrontController implements HttpKernelInterface
             $eventName = str_replace('frontcontroller.', '', $eventName);
         }
 
-        return $eventName.'.'.$actionName;
+        return $eventName.'.'.strtolower($actionName);
     }
 }
