@@ -481,16 +481,6 @@ class PageController extends AbstractRestController
     }
 
     /**
-     * Getter for section entity repository.
-     *
-     * @return \BackBee\NestedNode\Repository\SectionRepository
-     */
-    private function getSectionRepository()
-    {
-        return $this->getEntityManager()->getRepository('BackBee\NestedNode\Section');
-    }
-
-    /**
      * Returns every pages that contains provided classcontent.
      *
      * @param string $contentType

@@ -571,33 +571,6 @@ class ClassContentController extends AbstractRestController
     }
 
     /**
-     * Returns all classcontents classnames containing by the given page.
-     *
-     * @param string $pageUid The unique identifier of the page we want to get all classcontents
-     *
-     * @return array
-     */
-    private function getClassContentClassnamesByPageUid($pageUid)
-    {
-        $result = $this->getEntityManager()->getConnection()->prepare(
-            'SELECT DISTINCT c.classname
-             FROM idx_content_content icc, content c, page p
-             WHERE p.uid = :pageUid AND p.contentset = icc.content_uid
-             AND icc.subcontent_uid = c.uid AND c.classname != :contentset_classname'
-        )->execute([
-            'pageUid'              => $pageUid,
-            'contentset_classname' => AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet',
-        ]);
-
-        $classnames = [];
-        foreach ($result as $classname) {
-            $classnames[] = $classname['classname'];
-        }
-
-        return $classnames;
-    }
-
-    /**
      * Returns all classcontents classnames that belong to provided category.
      *
      * @param string $name The category name
@@ -640,22 +613,6 @@ class ClassContentController extends AbstractRestController
         }
 
         return $definitions;
-    }
-
-    /**
-     * Find classcontents by provided classnames, criterias from request, provided start and count.
-     *
-     * @deprecated since 1.1
-     *
-     * @param array   $classnames
-     * @param integer $start
-     * @param integer $count
-     *
-     * @return null|Paginator
-     */
-    private function findContentsByCriterias(array $classnames, $start, $count)
-    {
-        return $this->findContentsByCriteria($classnames, $start, $count);
     }
 
     /**

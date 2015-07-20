@@ -155,7 +155,6 @@ class MediaRepository extends EntityRepository
 
     public function getMediasByFolder(MediaFolder $mediafolder)
     {
-        $result = null;
         $q = $this->createQueryBuilder('m')
             ->leftJoin('m._media_folder', 'mf')
             ->leftJoin('m._content', 'mc')

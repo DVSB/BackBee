@@ -152,8 +152,6 @@ class MediaFolderController extends AbstractRestController
      */
     public function postAction(Request $request, $parent = null)
     {
-        $reponse = null;
-
         try {
             $title = trim($request->request->get('title'));
             $uid = $request->request->get('uid', null);

@@ -236,8 +236,6 @@ class Renderer extends AbstractRenderer implements DumpableServiceInterface, Dum
             $ignoreModeIfNotSet
         ));
 
-        $parent = $this->getObject();
-
         $renderer = clone $this;
 
         $renderer->updatesAfterClone();

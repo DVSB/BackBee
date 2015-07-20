@@ -82,7 +82,7 @@ class SectionRepository extends NestedNodeRepository
         $node->rightnode = $leftNode + 1;
         $node->level = $level;
 
-        foreach ($children = $this->getNativelyNodeChildren($nodeUid) as $child_uid) {
+        foreach ($this->getNativelyNodeChildren($nodeUid) as $child_uid) {
             $child = $this->updateTreeNatively($child_uid, $leftNode + 1, $level + 1);
             $node->rightnode = $child->rightnode + 1;
             $leftNode = $child->rightnode;
