@@ -65,6 +65,16 @@ abstract class AbstractBundleController extends Controller
     }
 
     /**
+     * Get the current bundle
+     *
+     * @param BundleInterface|null $bundle if bundle was not set, return null
+     */
+    public function getBundle()
+    {
+        return $this->bundle;
+    }
+
+    /**
      * Set the current bundle
      *
      * @param BundleInterface $bundle
