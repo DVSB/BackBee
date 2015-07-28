@@ -56,9 +56,13 @@ class ExceptionListener
     {
         $exception = $event->getException();
         $statusCode = $exception->getCode();
+        $request = $exception->getRequest();
 
-        if ($this->application->isDebugMode()){
+        if ($this->application->isDebugMode()) {
             $this->response = (new \Symfony\Component\Debug\ExceptionHandler())->createResponse($exception);
+            if (in_array('application/json', $request->getAcceptableContentTypes())) {
+                $this->response = new JsonResponse($this->response->getContent(), $this->response->getStatusCode(), $this->response->headers);
+            }
         }
 
         if (!$this->application->isDebugMode()) {
