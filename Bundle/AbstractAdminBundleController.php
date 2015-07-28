@@ -50,7 +50,7 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
      */
     public function __call($method, $arguments)
     {
-        if (!$this->isGranted('VIEW', $this->getBundle())) {
+        if (!$this->isGranted('VIEW', $this->bundle)) {
             return $this->createResponse('You must be authenticated to access', 401);
         }
 
@@ -71,6 +71,18 @@ abstract class AbstractAdminBundleController extends AbstractBundleController
             ];
             return new JsonResponse($completeResponse, 500);
         }
+    }
+
+    /**
+     * Renders provided template with parameters and returns the generated string.
+     *
+     * @param  string     $template   the template relative path
+     * @param  array|null $parameters
+     * @return string
+     */
+    public function render($template, array $parameters = null, Response $response = null)
+    {
+        return parent::render($this->bundle->getBaseDirectory().DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$template, $parameters, $response);
     }
 
     /**
