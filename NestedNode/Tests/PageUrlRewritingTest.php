@@ -90,6 +90,12 @@ class PageUrlRewritingTest extends BackBeeTestCase
         $this->assertEquals('/backbee-2', $this->generatePage('backbee', null, true)->getUrl());
     }
 
+    public function testGenerateUniqueUrlWithSpecialCharacters()
+    {
+        $this->assertEquals('/backbee+', $this->generatePage('backbee+', null, true)->getUrl());
+        $this->assertEquals('/backbee+-1', $this->generatePage('backbee+', null, true)->getUrl());
+    }
+
     public function testReplaceOldDeletedUrl()
     {
         $this->assertTrue($this->urlGenerator->isPreserveUnicity());
