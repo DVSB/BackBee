@@ -285,7 +285,7 @@ class UrlGenerator implements UrlGeneratorInterface
             $existings = $this->application->getEntityManager()->getConnection()->executeQuery(
                 'SELECT p.uid FROM page p LEFT JOIN section s ON s.uid = p.section_uid WHERE s.root_uid = :root AND p.url REGEXP :regex',
                 [
-                    'regex' => $url.'(-[0-9]+)?$',
+                    'regex' => str_replace(['+'], ['[+]'], $url).'(-[0-9]+)?$',
                     'root'  => $page->getRoot()->getUid(),
                 ]
             )->fetchAll();
