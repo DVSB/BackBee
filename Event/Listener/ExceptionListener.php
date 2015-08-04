@@ -25,6 +25,7 @@ namespace BackBee\Event\Listener;
 
 use BackBee\BBApplication;
 use Symfony\Component\Debug\ExceptionHandler;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
@@ -61,7 +62,7 @@ class ExceptionListener
         if ($this->application->isDebugMode()) {
             $this->response = (new \Symfony\Component\Debug\ExceptionHandler())->createResponse($exception);
             if (in_array('application/json', $request->getAcceptableContentTypes())) {
-                $this->response = new JsonResponse($this->response->getContent(), $this->response->getStatusCode(), $this->response->headers);
+                $this->response = new JsonResponse($this->response->getContent(), $this->response->getStatusCode(), $this->response->headers->all());
             }
         }
 
