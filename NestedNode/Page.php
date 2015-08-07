@@ -1610,13 +1610,7 @@ class Page extends AbstractObjectIdentifiable implements RenderableInterface, Do
     public function hasChildren($ignoreDeleted = true)
     {
         if ($ignoreDeleted) {
-            foreach ($this->getChildren() as $child) {
-                if (!($child->getState() & self::STATE_DELETED)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return $this->hasMainSection() ? $this->getMainSection()->getHasChildren() : false;
         }
 
         return $this->hasMainSection() ? $this->getMainSection()->hasChildren() : false;

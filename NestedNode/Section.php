@@ -91,6 +91,15 @@ class Section extends AbstractNestedNode
     protected $_children;
 
     /**
+     * This section has not deleted children nodes.
+     *
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", name="has_children", options={"default"=false})
+     */
+    protected $_has_children = false;
+
+    /**
      * The associated page of this section
      *
      * @var \BackBee\NestedNode\Page
@@ -241,5 +250,26 @@ class Section extends AbstractNestedNode
     public function isLeaf()
     {
         return false;
+    }
+
+    /**
+     * A section is never a leaf.
+     *
+     * @return boolean                                  always false
+     */
+    public function setHasChildren($value)
+    {
+        $this->_has_children = (boolean)$value;
+        return $this;
+    }
+
+    /**
+     * A section is never a leaf.
+     *
+     * @return boolean                                  always false
+     */
+    public function getHasChildren()
+    {
+        return (boolean)$this->_has_children;
     }
 }

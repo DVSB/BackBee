@@ -24,9 +24,12 @@
 namespace BackBee\Rest\Controller;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
@@ -35,6 +38,7 @@ use BackBee\Exception\InvalidArgumentException;
 use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
 use BackBee\Rest\Controller\Annotations as Rest;
+use BackBee\Rest\Exception\NotModifiedException;
 use BackBee\Rest\Patcher\EntityPatcher;
 use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
@@ -356,6 +360,113 @@ class PageController extends AbstractRestController
     }
 
     /**
+     * Update page collecton.
+     *
+     * @return Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
+     */
+    public function putCollectionAction(Request $request)
+    {
+        $result = [];
+        foreach ($request->request->all() as $data) {
+            if (!isset($data['uid'])) {
+                throw new BadRequestHttpException('uid is missing.');
+            }
+
+            try {
+                $page = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page')->find($data['uid']);
+
+                $this->granted('EDIT', $page);
+                if (isset($data['state'])) {
+                    $this->granted('PUBLISH', $page);
+                }
+                $this->updatePage($page, $data);
+
+                $result[] = [
+                    'uid'        => $page->getUid(),
+                    'statusCode' => 200,
+                    'message'    => 'OK',
+                ];
+            } catch (NotModifiedException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'statusCode' => 304,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (AccessDeniedException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'statusCode' => 401,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (InsufficientAuthenticationException $e) {
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'statusCode' => 403,
+                    'message'    => $e->getMessage(),
+                ];
+            } catch (\Exception $e) {
+                var_dump($e->getMessage());
+                $result[] = [
+                    'uid'        => $data['uid'],
+                    'statusCode' => 500,
+                    'message'    => $e->getMessage(),
+                ];
+            }
+        }
+
+        $this->getEntityManager()->flush();
+
+        return $this->createJsonResponse($result);
+    }
+
+    private function updatePage(Page $page, $data)
+    {
+        if (isset($data['state'])) {
+            $this->updatePageState($page, $data['state']);
+        }
+        if (isset($data['parent_uid'])) {
+            $repo = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
+            $parent = $repo->find($data['parent_uid']);
+            if ($parent !== null) {
+                $repo->moveAsLastChildOf($page, $parent);
+            } else {
+                throw new BadRequestHttpException('Parent uid doesn\'t exists');
+            }
+        }
+    }
+
+    private function updatePageState(Page $page, $state)
+    {
+        if ($state === 'online') {
+            if (!$page->isOnline(true)) {
+                $page->setState($page->getState() + 1);
+            } else {
+                throw new NotModifiedException();
+            }
+        } elseif ($state === 'offline') {
+            if ($page->isOnline(true)) {
+                $page->setState($page->getState() - 1);
+            } else {
+                throw new NotModifiedException();
+            }
+        } elseif ($state === 'delete') {
+            if ($page->getState() >= 4) {
+                $this->hardDelete($page);
+            } else {
+                $page->setState(4);
+            }
+        }
+    }
+
+    private function hardDelete(Page $page)
+    {
+        $this->getEntityManager()->getRepository('BackBee\NestedNode\Page')->deletePage($page);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
      * Patch page.
      *
      * @return Symfony\Component\HttpFoundation\Response
@@ -632,6 +743,7 @@ class PageController extends AbstractRestController
 
         if ($request->query->has('has_children')) {
             $qb->andIsSection();
+            $qb->andWhere($qb->getSectionAlias().'._has_children = 1');
         }
 
         if (null !== $title = $request->query->get('title', null)) {
