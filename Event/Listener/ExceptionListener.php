@@ -57,7 +57,7 @@ class ExceptionListener
     {
         $exception = $event->getException();
         $statusCode = $exception->getCode();
-        $request = $exception->getRequest();
+        $request = $this->application->getRequest();
 
         if ($this->application->isDebugMode()) {
             $this->response = (new \Symfony\Component\Debug\ExceptionHandler())->createResponse($exception);
