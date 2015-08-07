@@ -226,6 +226,102 @@ class PageControllerTest extends RestTestCase
     }
 
     /**
+     * @covers ::getCollectionAction
+     */
+    public function testPutCollectionAction()
+    {
+        $pages = $this->initializeTestGetCollectionAction();
+
+        // change state with Insufficient rigth
+        $response = $this->sendRequest(self::requestPut('/rest/1/page', [
+            ['uid' => $pages['offline']->getUid(), 'state' => 'online'],
+        ]));
+        $this->assertEquals(200, $response->getStatusCode());
+        $res = json_decode($response->getContent(), true);
+        $this->assertInternalType('array', $res);
+        $this->assertCount(1, $res);
+        $this->assertEquals(403, $res[0]['statusCode']);
+
+        $builder = new MaskBuilder();
+        $builder
+            ->add('VIEW')
+            ->add('PUBLISH')
+            ->add('EDIT');
+
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $pages['home'],
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            $builder->get()
+        );
+
+        // change state to onlinne
+        $response1 = $this->sendRequest(self::requestPut('/rest/1/page', [
+            ['uid' => $pages['offline']->getUid(), 'state' => 'online'],
+            ['uid' => $pages['online']->getUid(), 'state' => 'online'],
+        ]));
+        $this->assertEquals(200, $response1->getStatusCode());
+
+        $res1 = json_decode($response1->getContent(), true);
+        $this->assertInternalType('array', $res1);
+        $this->assertCount(2, $res1);
+        $this->assertEquals(200, $res1[0]['statusCode']);
+        $this->assertEquals(304, $res1[1]['statusCode']);
+        $this->em->refresh($pages['offline']);
+        $this->assertEquals(Page::STATE_ONLINE, $pages['offline']->getState());
+
+        // change state to offline
+        $response2 = $this->sendRequest(self::requestPut('/rest/1/page', [
+            ['uid' => $pages['offline']->getUid(), 'state' => 'offline'],
+            ['uid' => $pages['online']->getUid(), 'state' => 'offline'],
+        ]));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $res2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $res2);
+        $this->assertCount(2, $res2);
+        $this->assertEquals(200, $res2[0]['statusCode']);
+        $this->assertEquals(200, $res2[1]['statusCode']);
+        $this->em->refresh($pages['offline']);
+        $this->assertEquals(Page::STATE_OFFLINE, $pages['offline']->getState());
+        $this->assertEquals(Page::STATE_OFFLINE, $pages['online']->getState());
+
+        // change parent
+        $response3 = $this->sendRequest(self::requestPut('/rest/1/page', [
+            ['uid' => $pages['offline']->getUid(), 'parent_uid' => $pages['online']->getUid()],
+        ]));
+        $this->assertEquals(200, $response3->getStatusCode());
+        $res3 = json_decode($response3->getContent(), true);
+        $this->assertInternalType('array', $res3);
+        $this->assertCount(1, $res3);
+        $this->assertEquals(200, $res3[0]['statusCode']);
+        $this->em->refresh($pages['offline']);
+        $this->assertEquals($pages['online']->getUid(), $pages['offline']->getParent()->getUid());
+
+        // soft delete
+        $response4 = $this->sendRequest(self::requestPut('/rest/1/page', [
+            ['uid' => $pages['offline']->getUid(), 'state' => 'delete'],
+        ]));
+        $this->assertEquals(200, $response4->getStatusCode());
+        $res4 = json_decode($response4->getContent(), true);
+        $this->assertInternalType('array', $res4);
+        $this->assertCount(1, $res4);
+        $this->assertEquals(200, $res4[0]['statusCode']);
+        $this->em->refresh($pages['offline']);
+        $this->assertEquals(4, $pages['offline']->getState());
+
+        // hard delete not working yet
+        $response5 = $this->sendRequest(self::requestPut('/rest/1/page', [
+            ['uid' => $pages['offline']->getUid(), 'state' => 'delete'],
+        ]));
+        $this->assertEquals(200, $response5->getStatusCode());
+        $res5 = json_decode($response5->getContent(), true);
+        $this->assertInternalType('array', $res5);
+        $this->assertCount(1, $res5);
+        $this->assertEquals(200, $res5[0]['statusCode']);
+        $page = $this->em->find('BackBee\NestedNode\Page', $pages['offline']->getUid());
+        $this->assertNull($page);
+    }
+
+    /**
      * @covers ::patchAction
      */
     public function testPatchAction()
