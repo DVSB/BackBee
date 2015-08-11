@@ -391,12 +391,6 @@ class PageControllerTest extends RestTestCase
             ->setSite($this->site)
         ;
 
-        $pages['offline'] = new Page();
-        $pages['offline']
-            ->setTitle('Offline')
-            ->setSite($this->site)
-        ;
-
         $pages['online'] = new Page();
         $pages['online']
             ->setTitle('Online')
@@ -406,6 +400,12 @@ class PageControllerTest extends RestTestCase
         $pages['online2'] = new Page();
         $pages['online2']
             ->setTitle('Online 2')
+            ->setSite($this->site)
+        ;
+
+        $pages['offline'] = new Page();
+        $pages['offline']
+            ->setTitle('Offline')
             ->setSite($this->site)
         ;
 
@@ -423,35 +423,31 @@ class PageControllerTest extends RestTestCase
         $pages['delete']->setState(Page::STATE_DELETED);
         $this->em->persist($pages['delete']);
         $this->em->flush($pages['delete']);
-        $this->em->refresh($pages['home']);
+        $this->refreshEntities($repo);
 
         $repo->insertNodeAsFirstChildOf($pages['offline'], $pages['home'], true);
         $pages['offline']->setState(Page::STATE_OFFLINE);
         $this->em->persist($pages['offline']);
         $this->em->flush($pages['offline']);
-        $this->em->refresh($pages['home']);
-        $this->em->refresh($pages['offline']);
+        $this->refreshEntities($repo);
 
         $repo->insertNodeAsFirstChildOf($pages['online'], $pages['home'], true);
         $pages['online']->setState(Page::STATE_ONLINE);
         $this->em->persist($pages['online']);
         $this->em->flush($pages['online']);
-        $this->em->refresh($pages['home']);
-        $this->em->refresh($pages['online']);
+        $this->refreshEntities($repo);
 
         $repo->insertNodeAsFirstChildOf($pages['online2'], $pages['online']);
         $pages['online2']->setState(Page::STATE_ONLINE);
         $this->em->persist($pages['online2']);
         $this->em->flush($pages['online2']);
-        $this->em->refresh($pages['online']);
-        $this->em->refresh($pages['online2']);
+        $this->refreshEntities($repo);
 
         $repo->insertNodeAsFirstChildOf($pages['delete2'], $pages['offline']);
         $pages['delete2']->setState(Page::STATE_DELETED);
         $this->em->persist($pages['delete2']);
         $this->em->flush($pages['delete2']);
-        $this->em->refresh($pages['offline']);
-        $this->em->refresh($pages['delete2']);
+        $this->refreshEntities($repo);
 
         $this->getAclManager()->insertOrUpdateObjectAce(
             $pages['home'],
@@ -460,6 +456,13 @@ class PageControllerTest extends RestTestCase
         );
 
         return $pages;
+    }
+
+    private function refreshEntities($repo)
+    {
+        foreach ($repo->findAll() as $value) {
+            $this->em->refresh($value);
+        }
     }
 
     /**

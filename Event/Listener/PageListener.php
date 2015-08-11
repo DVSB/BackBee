@@ -67,16 +67,14 @@ class PageListener
         $page->setUseUrlRedirect($isBbSessionActive);
     }
 
-    public static function setSectionHasChildren($em, Section $section = null)
+    public static function setSectionHasChildren($em, Section $section = null, $pageCountModifier = 0)
     {
         if ($section !== null) {
             $repo = $em->getRepository('BackBee\NestedNode\Page');
-            $notDeletedDescendants = $repo->getNotDeletedDescendants($section->getPage(), 1, false, [], true, 0, 1);
+            $notDeletedDescendants = $repo->getNotDeletedDescendants($section->getPage(), 1, false, [], true, 0, 2);
 
-            //var_dump($section->getUid().' '.(string)isset($notDeletedDescendants->getIterator()[0]));
-
-            $section->setHasChildren(isset($notDeletedDescendants->getIterator()[0]));
-            $em->getUnitOfWork()->computeChangeSet($em->getClassMetadata('BackBee\NestedNode\Section'), $section);
+            $section->setHasChildren(($notDeletedDescendants->getIterator()->count() + $pageCountModifier) > 0);
+            $em->getUnitOfWork()->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBee\NestedNode\Section'), $section);
         }
     }
 
@@ -96,7 +94,6 @@ class PageListener
 
         if ($eventArgs instanceof PreUpdateEventArgs) {
             if ($page instanceof Page && $eventArgs->hasChangedField('_section')) {
-                var_dump('update page section');
                 $old = $eventArgs->getOldValue('_section');
                 $new = $eventArgs->getNewValue('_section');
 
@@ -107,15 +104,17 @@ class PageListener
             }
 
             if ($page instanceof Page && $eventArgs->hasChangedField('_state')) {
-                var_dump('update page state');
                 if ($page->getParent() !== null) {
-                    $new = $page->getParent()->getSection();
+                    if ($eventArgs->getNewValue('_state') >= 4) {
+                        $old = $page->getParent()->getSection();
+                    } else {
+                        $new = $page->getParent()->getSection();
+                    }
                     $updateParents = true;
                 }
             }
 
             if ($page instanceof Section && $eventArgs->hasChangedField('_parent')) {
-                var_dump('update section parent');
                 $old = $eventArgs->getOldValue('_parent');
                 $new = $eventArgs->getNewValue('_parent');
                 $updateParents = true;
@@ -124,8 +123,8 @@ class PageListener
             if ($updateParents) {
                 $em = $event->getApplication()->getEntityManager();
 
-                self::setSectionHasChildren($em, $old);
-                self::setSectionHasChildren($em, $new);
+                self::setSectionHasChildren($em, $old, -1);
+                self::setSectionHasChildren($em, $new, +1);
             }
         }
     }
@@ -137,15 +136,13 @@ class PageListener
      *
      * @param Event $event
      */
-    public static function onPrePersist(Event $event)
+    public static function onFlushPage(Event $event)
     {
         $em = $event->getApplication()->getEntityManager();
         $uow = $em->getUnitOfWork();
         $page = $event->getTarget();
-
-        if ($uow->isScheduledForInsert($page) && $page->getParent() !== null) {
-            var_dump('pre persist');
-            self::setSectionHasChildren($em, $page->getParent()->getSection());
+        if ($uow->isScheduledForInsert($page) && $page->getParent() !== null && $page->getState() < 4) {
+            self::setSectionHasChildren($em, $page->getParent()->getSection(), +1);
         }
     }
 }

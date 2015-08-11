@@ -406,6 +406,7 @@ class PageController extends AbstractRestController
                     'message'    => $e->getMessage(),
                 ];
             } catch (\Exception $e) {
+                var_dump($e->getMessage());
                 $result[] = [
                     'uid'        => $data['uid'],
                     'statusCode' => 500,
@@ -428,7 +429,7 @@ class PageController extends AbstractRestController
             $repo = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
             $parent = $repo->find($data['parent_uid']);
             if ($parent !== null) {
-                $repo->moveAsChildOf($page, $parent);
+                $repo->moveAsLastChildOf($page, $parent);
             } else {
                 throw new BadRequestHttpException('Parent uid doesn\'t exists');
             }
@@ -740,6 +741,7 @@ class PageController extends AbstractRestController
 
         if ($request->query->has('has_children')) {
             $qb->andIsSection();
+            $qb->andWhere($qb->getSectionAlias().'._has_children = 1');
         }
 
         if (null !== $title = $request->query->get('title', null)) {

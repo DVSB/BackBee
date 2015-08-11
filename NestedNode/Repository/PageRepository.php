@@ -1050,6 +1050,7 @@ class PageRepository extends EntityRepository
         if ($page->getContentSet() !== null) {
             $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($page->getContentSet());
         }
+
         $this->getEntityManager()->remove($page);
     }
 
