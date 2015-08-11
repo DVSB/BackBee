@@ -1035,13 +1035,22 @@ class PageRepository extends EntityRepository
             ->setParameter('site', $site);
 
         foreach ($q->getQuery()->execute() as $page) {
-            if ($page->hasMainSection()) {
-                $this->getEntityManager()
-                        ->getRepository('BackBee\NestedNode\Section')
-                        ->delete($page->getSection());
-            }
-            $this->getEntityManager()->remove($page);
+            $this->deletePage($page);
         }
+    }
+
+    public function deletePage(Page $page)
+    {
+        if ($page->hasMainSection()) {
+            $this->getEntityManager()
+                    ->getRepository('BackBee\NestedNode\Section')
+                    ->delete($page->getSection());
+        }
+
+        if ($page->getContentSet() !== null) {
+            $this->getEntityManager()->getRepository('BackBee\ClassContent\AbstractClassContent')->deleteContent($page->getContentSet());
+        }
+        $this->getEntityManager()->remove($page);
     }
 
     /**

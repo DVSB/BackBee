@@ -89,7 +89,7 @@ class PageRepositoryTest extends BackBeeTestCase
 
         $site = self::$em->find('BackBee\Site\Site', 'site-test');
         $layout = self::$em->find('BackBee\Site\Layout', 'layout-test');
-        
+
         $this->root = new Page('root', ['title' => 'root']);
         $this->root->setSite($site)
                 ->setLayout($layout);
@@ -135,6 +135,32 @@ class PageRepositoryTest extends BackBeeTestCase
         }
 
         return $page;
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getAncestor
+     */
+    public function testSectionHasChildren()
+    {
+        $section1 = $this->repository->find('section1')->getSection();
+        $root = $this->repository->find('root')->getSection();
+        $page2 = $this->repository->find('page2');
+        $page1 = $this->repository->find('page1');
+
+        $this->assertTrue($root->getHasChildren(), 'Root has_children after loading');
+        $this->assertTrue($section1->getHasChildren(), 'Section has_children after loading');
+
+        $page1->setState(4);
+        self::$em->persist($page1);
+        self::$em->flush($page1);
+        self::$em->refresh($section1);
+        $this->assertTrue($section1->getHasChildren(), 'Section has_children after set page1 offline');
+
+        $page2->setState(4);
+        self::$em->persist($page2);
+        self::$em->flush($page2);
+        self::$em->refresh($section1);
+        $this->assertFalse($section1->getHasChildren(), 'Section has_children after set page2 offline');
     }
 
     /**

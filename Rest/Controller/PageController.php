@@ -406,7 +406,6 @@ class PageController extends AbstractRestController
                     'message'    => $e->getMessage(),
                 ];
             } catch (\Exception $e) {
-                var_dump(get_class($e));
                 $result[] = [
                     'uid'        => $data['uid'],
                     'statusCode' => 500,
@@ -428,7 +427,11 @@ class PageController extends AbstractRestController
         if (isset($data['parent_uid'])) {
             $repo = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
             $parent = $repo->find($data['parent_uid']);
-            $repo->insertNodeAsFirstChildOf($page, $parent);
+            if ($parent !== null) {
+                $repo->moveAsChildOf($page, $parent);
+            } else {
+                throw new BadRequestHttpException('Parent uid doesn\'t exists');
+            }
         }
     }
 
@@ -457,7 +460,7 @@ class PageController extends AbstractRestController
 
     private function hardDelete(Page $page)
     {
-        $this->getEntityManager()->remove($page);
+        $this->getEntityManager()->getRepository('BackBee\NestedNode\Page')->deletePage($page);
     }
 
     /**
