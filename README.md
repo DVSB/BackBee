@@ -14,7 +14,7 @@ All changes in content – adding, deleting or changing text, images or new page
 
 BackBee offers what we like to call WYSIWYRG, What You See Is What You Really Get. And because it automatically saves different page versions, there’s no fear of losing changes along the way. If only everything in life could be this easy and secure.
 
-> this is the Core library repository of BackBee CMS, if you are looking for the packaged CMS, take a look to [BackBee standard edition](https://github.com/backbee/standard-edition)
+> this is the Core library repository of BackBee CMS, if you are looking for the packaged CMS, take a look to [BackBee standard edition](https://github.com/backbee/backbee-standard)
 
 
 :speech_balloon: If you want to have more information about the project progression you can take a look at the actual [Roadmap](https://waffle.io/backbee/backbee-standard).
