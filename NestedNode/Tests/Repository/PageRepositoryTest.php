@@ -147,8 +147,8 @@ class PageRepositoryTest extends BackBeeTestCase
         $page2 = $this->repository->find('page2');
         $page1 = $this->repository->find('page1');
 
-        // $this->assertTrue($root->getHasChildren(), 'Root has_children after loading');
-        // $this->assertTrue($section1->getHasChildren(), 'Section has_children after loading');
+        $this->assertTrue($root->getHasChildren(), 'Root has_children after loading');
+        $this->assertTrue($section1->getHasChildren(), 'Section has_children after loading');
         $page1->setState(4);
         self::$em->persist($page1);
         self::$em->flush($page1);
@@ -181,16 +181,19 @@ class PageRepositoryTest extends BackBeeTestCase
         $page1 = $this->repository->find('page1');
         $section1 = $this->repository->find('section1');
         $sectionRepo = self::$em->getRepository('BackBee\NestedNode\Section');
+
         $this->repository->deletePage($page1);
-        self::$em->flush($page1);
+        self::$em->flush();
 
-        $this->assertNotInstanceOf('BackBee\NestedNode\Page', $this->repository->find('page1'), 'Page 1 isn\'t deleted');
-
+        $this->assertCount(5, $this->repository->findAll());
+        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from page where uid = "page1"')->fetch(), 'Page 1 isn\'t deleted');
         $this->repository->deletePage($section1);
-        self::$em->flush($section1);
-        $this->assertNotInstanceOf('BackBee\NestedNode\Page', $this->repository->find('section1'), 'the page of Section 1 isn\'t deleted');
-        $this->assertNotInstanceOf('BackBee\NestedNode\Section',  $sectionRepo->find('section1'), 'Section 1 isn\'t deleted');
-        $this->assertNotInstanceOf('BackBee\NestedNode\Page', $this->repository->find('page2'), 'the sub page 2 isn\'t deleted');
+        self::$em->flush();
+
+        $this->assertCount(3, $this->repository->findAll());
+        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from page where uid = "section1"')->fetch(), 'the page of Section 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from section where uid = "section1"')->fetch(), 'the section of Section 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from page where uid = "page2"')->fetch(), 'the sub page 2 isn\'t deleted');
 
     }
 
