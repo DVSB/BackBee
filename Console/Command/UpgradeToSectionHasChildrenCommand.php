@@ -26,12 +26,7 @@ namespace BackBee\Console\Command;
 use BackBee\BBApplication;
 use BackBee\Console\AbstractCommand;
 use BackBee\Exception\BBException;
-use BackBee\Site\Site;
-use BackBee\Utils\Collection\Collection;
 use BackBee\Event\Listener\PageListener;
-
-use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Tools\SchemaTool;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -43,7 +38,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @category    BackBee
  *
  * @copyright   Lp digital system
- * @author      c.rouillon <charles.rouillon@lp-digital.fr>
+ * @author      Nicolas Dufreche <nicolas.dufreche@lp-digital.fr>
  */
 class UpgradeToSectionHasChildrenCommand extends AbstractCommand
 {
@@ -67,16 +62,9 @@ class UpgradeToSectionHasChildrenCommand extends AbstractCommand
     private $em;
 
     /**
-     * The required fields for table `page`
-     * @var array
+     * The section repository
+     * @var \BackBee\NestedNode\Repository\SectionRepository
      */
-    private $requiredFields;
-
-    /**
-     * @var int
-     */
-    private $step = 1000;
-
     private $repo;
 
     /**
@@ -138,10 +126,10 @@ EOF
     }
 
     /**
-     * Checks for existing table `section`, throw exception if overrideExisting is set to FALSE
+     * Checks for existing `has_children` attribut in table `section`, throw exception if `has_children` doesn't exists
      *
      * @return \BackBee\Console\Command\UpgradeToPageSectionCommand
-     * @throws BBException                                              Raises if table `section` already exists
+     * @throws BBException  Raises if `has_children` doesn't exists
      */
     private function checksSectionTable()
     {
@@ -164,9 +152,8 @@ EOF
     }
 
     /**
-     * Updates nested data from existing pages
+     * Updates `has_section` data from existing section
      *
-     * @param  string       $classname
      *
      * @return \BackBee\Console\Command\UpgradeToPageSectionCommand
      */
