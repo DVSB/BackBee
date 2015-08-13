@@ -145,7 +145,7 @@ class SectionRepository extends NestedNodeRepository
         return $this;
     }
 
-    public function delete(Section $section)
+    public function deleteSection(Section $section)
     {
         $page_repo = $this->getEntityManager()
                 ->getRepository('BackBee\NestedNode\Page');

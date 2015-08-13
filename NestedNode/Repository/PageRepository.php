@@ -1011,7 +1011,7 @@ class PageRepository extends EntityRepository
         // Finally updating contentset and mainnode
         foreach ($new_page->cloningData['contents'] as $content) {
             $this->updateRelatedPostCloning($content, $new_page->cloningData, $token)
-                ->updateMainNodePostCloning($content, $new_page->cloningData['pages'], $token)
+                 ->updateMainNodePostCloning($content, $new_page->cloningData['pages'], $token)
             ;
         }
 
@@ -1044,7 +1044,7 @@ class PageRepository extends EntityRepository
         if ($page->hasMainSection()) {
             $this->getEntityManager()
                     ->getRepository('BackBee\NestedNode\Section')
-                    ->delete($page->getSection());
+                    ->deleteSection($page->getSection());
         }
 
         if ($page->getContentSet() !== null) {

@@ -182,18 +182,20 @@ class PageRepositoryTest extends BackBeeTestCase
         $section1 = $this->repository->find('section1');
         $sectionRepo = self::$em->getRepository('BackBee\NestedNode\Section');
 
+        $baseQuery = 'select uid from %s where uid = "%s"';
+
         $this->repository->deletePage($page1);
         self::$em->flush();
 
         $this->assertCount(5, $this->repository->findAll());
-        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from page where uid = "page1"')->fetch(), 'Page 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'page', 'page1'))->fetch(), 'Page 1 isn\'t deleted');
         $this->repository->deletePage($section1);
         self::$em->flush();
 
         $this->assertCount(3, $this->repository->findAll());
-        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from page where uid = "section1"')->fetch(), 'the page of Section 1 isn\'t deleted');
-        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from section where uid = "section1"')->fetch(), 'the section of Section 1 isn\'t deleted');
-        $this->assertFalse(self::$em->getConnection()->executeQuery('select uid from page where uid = "page2"')->fetch(), 'the sub page 2 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'page', 'section1'))->fetch(), 'the page of Section 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'section', 'section1'))->fetch(), 'the section of Section 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'page', 'page2'))->fetch(), 'the sub page 2 isn\'t deleted');
 
     }
 
