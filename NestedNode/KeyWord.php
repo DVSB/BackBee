@@ -48,7 +48,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @Serializer\ExclusionPolicy("all")
  */
-class KeyWord extends AbstractNestedNode implements RenderableInterface
+class KeyWord extends AbstractNestedNode implements RenderableInterface, \JsonSerializable
 {
     /**
      * Unique identifier of the content.
@@ -265,7 +265,23 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface
         $object->level = $this->getLevel();
         $object->keyword = $this->getKeyword();
         $object->children = array();
-
         return $object;
     }
+
+    /**
+     *
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'uid'          => $this->getUid(),
+            'root_uid'     => $this->getRoot()->getUid(),
+            'parent_uid'   => $this->getParent() ? $this->getParent()->getUid() : null,
+            'keyword'      => $this->getKeyWord(),
+            'has_children' => $this->hasChildren(),
+            'created'      => $this->getCreated() ? $this->getCreated()->getTimestamp() : null,
+            'modified'     => $this->getModified() ? $this->getModified()->getTimestamp() : null,
+        ];
+    }
+
 }
