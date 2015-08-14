@@ -175,6 +175,6 @@ class CategoryManager
      */
     private function buildCategoryId($name)
     {
-        return strtolower(str_replace(' ', '_', $name));
+        return mb_strtolower(str_replace(' ', '_', $name), 'UTF-8');
     }
 }
