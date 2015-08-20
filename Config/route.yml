@@ -662,6 +662,14 @@ bb.media.list:
   requirements:
     _method: GET
 
+bb.keyword.get_collection:
+  pattern: /rest/{version}/keyword
+  defaults:
+    _action: getCollectionAction
+    _controller: BackBee\Rest\Controller\KeywordController
+  requirements:
+    _method: GET
+
 # BackBee rss
 bb.rss:
     pattern: /rss/{uri}

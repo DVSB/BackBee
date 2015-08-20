@@ -37,10 +37,10 @@ use Exception;
  */
 class KeyWordRepository extends NestedNodeRepository
 {
-    public function getLikeKeyWords($cond)
+    public function getLikeKeyWords($cond, $max = 10)
     {
         try {
-            $q = $this->createQueryBuilder('k')->andWhere('k._keyWord like :key')->orderBy('k._keyWord', 'ASC')->setMaxResults(10)
+            $q = $this->createQueryBuilder('k')->andWhere('k._keyWord like :key')->orderBy('k._keyWord', 'ASC')->setMaxResults($max)
                     ->setParameters(array('key' => $cond.'%'))
                     ->getQuery();
 
@@ -50,6 +50,32 @@ class KeyWordRepository extends NestedNodeRepository
         } catch (Exception $e) {
             return;
         }
+    }
+
+    public function getKeyWords($parent, $orderInfos, $paging = array())
+    {
+        $qb = $this->createQueryBuilder('kw');
+        $qb->andParentIs($parent);
+
+        /* order */
+        if (is_array($orderInfos)) {
+            if (array_key_exists('field', $orderInfos) && array_key_exists('dir', $orderInfos)) {
+                $qb->orderBy('kw.'.$orderInfos['field'], $orderInfos['dir']);
+            }
+        }
+        /* paging */
+        if (is_array($paging) && !empty($paging)) {
+            if (array_key_exists('start', $paging) && array_key_exists('limit', $paging)) {
+                $qb->setFirstResult($paging['start'])
+                       ->setMaxResults($paging['limit']);
+                $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($qb);
+                $result = iterator_to_array($paginator->getIterator());
+            }
+        } else {
+            $result = $qb->getQuery()->getResult();
+        }
+
+        return $result;
     }
 
     public function getRoot()
@@ -91,7 +117,7 @@ class KeyWordRepository extends NestedNodeRepository
             if (isset($keywords) && !empty($keywords)) {
                 $keywords = (is_array($keywords)) ? $keywords : array($keywords);
                 $db = $this->_em->getConnection();
-                $queryString = "SELECT content.uid
+                $queryString = 'SELECT content.uid
                     FROM
                         keywords_contents
                     LEFT JOIN
@@ -99,15 +125,15 @@ class KeyWordRepository extends NestedNodeRepository
                     LEFT JOIN
                         page on (content.node_uid = page.uid)
                     WHERE
-                        keywords_contents.keyword_uid IN (?)";
+                        keywords_contents.keyword_uid IN (?)';
 
                 if ($limitToOnline) {
-                    $queryString .= " AND page.state IN (?)";
+                    $queryString .= ' AND page.state IN (?)';
                     $pageStates = array(Page::STATE_ONLINE, Page::STATE_ONLINE | Page::STATE_HIDDEN);
                     $secondParam = \Doctrine\DBAL\Connection::PARAM_STR_ARRAY;
                 } else {
                     $pageStates = Page::STATE_DELETED;
-                    $queryString .= " AND page.state < (?)";
+                    $queryString .= ' AND page.state < (?)';
                     $secondParam = 1;
                 }
                 $stmt = $db->executeQuery($queryString, array($keywords, $pageStates), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, $secondParam));
