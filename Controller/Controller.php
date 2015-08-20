@@ -133,6 +133,10 @@ class Controller implements ContainerAwareInterface
      */
     public function createFormBuilder($data)
     {
+        if (!class_exists('Symfony\\Component\\Form\\Forms')) {
+            throw new \RuntimeException('Unable to use ``createFormBuilder`` function as the Symfony Form Component is not installed.');
+        }
+
         $validator = Validation::createValidator();
 
         $formFactory = Forms::createFormFactoryBuilder()
