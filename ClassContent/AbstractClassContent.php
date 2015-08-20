@@ -59,7 +59,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\HasLifecycleCallbacks
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="classname", type="string")
- * @ORM\DiscriminatorMap({"BackBee\ClassContent\ContentSet" = "BackBee\ClassContent\ContentSet"})
+ * @ORM\DiscriminatorMap({"ContentSet" = "BackBee\ClassContent\ContentSet"})
  */
 abstract class AbstractClassContent extends AbstractContent
 {
@@ -255,7 +255,7 @@ abstract class AbstractClassContent extends AbstractContent
     /**
      * Add a new revision to the collection.
      *
-     * @param \BackBee\ClassContent\Revision $revisions
+     * @param \BackBee\ClassContent\Revision $revision
      *
      * @return \BackBee\ClassContent\AbstractClassContent the current instance
      * @codeCoverageIgnore
@@ -281,7 +281,7 @@ abstract class AbstractClassContent extends AbstractContent
     /**
      * Returns defined property of the content or all the properties.
      *
-     * @param $var string the property to be return, if NULL, all properties are returned
+     * @param string $var the property to be return, if NULL, all properties are returned
      *
      * @return mixed The property value or NULL if unfound
      */
@@ -423,20 +423,20 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function postLoad()
     {
-        $tmp_modified = $this->_modified;
+        $tmpModified = $this->_modified;
         $this->isloaded = true;
         $this->initData();
-        $this->_modified = $tmp_modified;
+        $this->_modified = $tmpModified;
     }
 
     /**
      * Alternative recursive clone method, created because of problems related to doctrine clone method.
      *
-     * @param \BackBee\NestedNode\Page $origin_page
+     * @param \BackBee\NestedNode\Page $originPage
      *
      * @return \BackBee\ClassContent\ContentSet
      */
-    public function createClone(Page $origin_page = null)
+    public function createClone(Page $originPage = null)
     {
         $class = ClassUtils::getRealClass($this);
         $clone = new $class(null, null);
@@ -447,11 +447,11 @@ abstract class AbstractClassContent extends AbstractContent
         $clone->_mainnode = $this->_mainnode;
 
         if (
-            null !== $origin_page
-            && is_array($origin_page->cloningData)
-            && array_key_exists('contents', $origin_page->cloningData)
+            null !== $originPage
+            && is_array($originPage->cloningData)
+            && array_key_exists('contents', $originPage->cloningData)
         ) {
-            $origin_page->cloningData['contents'][$this->getUid()] = $clone;
+            $originPage->cloningData['contents'][$this->getUid()] = $clone;
         }
 
         if (!($this instanceof ContentSet)) {
@@ -465,10 +465,10 @@ abstract class AbstractClassContent extends AbstractContent
                         $value = end($values);
                     }
 
-                    if (0 === strpos($type, 'BackBee\ClassContent')) {
+                    if (!in_array($type, ['scalar', 'array'])) {
                         foreach ($this->_subcontent as $subcontent) {
                             if ($subcontent->getUid() == $value) {
-                                $newsubcontent = $subcontent->createClone($origin_page);
+                                $newsubcontent = $subcontent->createClone($originPage);
                                 $clone->$key = $newsubcontent;
                                 break;
                             }
@@ -649,7 +649,10 @@ abstract class AbstractClassContent extends AbstractContent
 
         $types = (array) $type;
         foreach ($types as $type) {
-            $type = (NAMESPACE_SEPARATOR === substr($type, 0, 1)) ? substr($type, 1) : $type;
+            if ('scalar' !== $type && 'array' !== $type) {
+                $type = self::getShortClassname($type);
+            }
+
             if (!in_array($type, $this->_accept[$var])) {
                 $this->_accept[$var][] = $type;
             }
@@ -744,6 +747,8 @@ abstract class AbstractClassContent extends AbstractContent
      * Magical function to check the setting of an element.
      *
      * @param string $var the name of the element
+     *
+     * @return boolean Returns TRUE if $var is element
      * @codeCoverageIgnore
      */
     public function __isset($var)
@@ -755,6 +760,7 @@ abstract class AbstractClassContent extends AbstractContent
      * Magical function to unset an element.
      *
      * @param string $var The name of the element to unset
+     * @return boolean Returns TRUE if $var is unsetted
      * @codeCoverageIgnore
      */
     public function __unset($var)
@@ -882,6 +888,7 @@ abstract class AbstractClassContent extends AbstractContent
     public function getMode()
     {
         $rendermode = $this->getParamValue('rendermode');
+
         return (is_array($rendermode)) ? reset($rendermode) : null;
     }
 
@@ -914,8 +921,8 @@ abstract class AbstractClassContent extends AbstractContent
     /**
      * Return the data of this content.
      *
-     * @param  string                                                   $var        The element to be return, if NULL, all datas are returned
-     * @param  Boolean                                                  $forceArray Force the return as array
+     * @param  string  $var        The element to be return, if NULL, all datas are returned
+     * @param  Boolean $forceArray Force the return as array
      *
      * @return mixed                                                    Could be either one or array of scalar, array, AbstractClassContent instance
      * @throws \BackBee\ClassContent\Exception\UnknownPropertyException Occurs when $var does not match an element
@@ -941,7 +948,7 @@ abstract class AbstractClassContent extends AbstractContent
     public function setParam($key, $value = null)
     {
         if (!isset($this->defaultParams[$key])) {
-            throw new \InvalidArgumentException("Cannot set $key as parameter cause this key does not exist.");
+            throw new \InvalidArgumentException(sprintf('Cannot set %s as parameter cause this key does not exist.', $key));
         }
 
         if (is_object($value)) {
@@ -1115,7 +1122,7 @@ abstract class AbstractClassContent extends AbstractContent
     /**
      * Check if a variable is part of accepted types
      *
-     * @param mixed $var  the variable to be checked
+     * @param mixed $var the variable to be checked
      *
      * @return boolean|ClassContentException
      */

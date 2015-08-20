@@ -46,18 +46,18 @@ class ClassContentRepository extends EntityRepository
     /**
      * Get all content uids owning the provided content.
      *
-     * @param string content uid
+     * @param  string $contentUid
      *
      * @return array
      */
-    public function getParentContentUidByUid($content_uid)
+    public function getParentContentUidByUid($contentUid)
     {
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
                 ->select('c.parent_uid')
                 ->from('content_has_subcontent', 'c')
                 ->where('c.content_uid = :uid')
-                ->setParameter('uid', $content_uid);
+                ->setParameter('uid', $contentUid);
 
         return $q->execute()->fetchAll(\PDO::FETCH_COLUMN);
     }
@@ -83,6 +83,7 @@ class ClassContentRepository extends EntityRepository
 
         $parents = [];
         foreach ($result as $parentData) {
+            $parentData['classname'] = AbstractClassContent::getFullClassname($parentData['classname']);
             $parents[] = $this->_em->find($parentData['classname'], $parentData['parent_uid']);
         }
 
@@ -174,10 +175,12 @@ class ClassContentRepository extends EntityRepository
         $offset = $start + $delta;
 
         if (true === is_array($classnameArr) && 0 < count($classnameArr)) {
-            foreach ($classnameArr as $classname) {
+            foreach ($classnameArr as &$classname) {
                 // ensure Doctrine already known these classname
                 class_exists($classname);
+                $classname = AbstractClassContent::getShortClassname($classname);
             }
+            unset($classname);
             $where[] = str_replace('\\', '\\\\', 'c.classname IN ("'.implode('","', $classnameArr).'")');
         }
 
@@ -214,15 +217,15 @@ class ClassContentRepository extends EntityRepository
             }
         }
 
-        if (true === array_key_exists("keywordsselector", $selector)) {
-            $keywordInfos = $selector["keywordsselector"];
+        if (true === array_key_exists('keywordsselector', $selector)) {
+            $keywordInfos = $selector['keywordsselector'];
             if (true === is_array($keywordInfos)) {
-                if (true === array_key_exists("selected", $keywordInfos)) {
-                    $selectedKeywords = $keywordInfos["selected"];
+                if (true === array_key_exists('selected', $keywordInfos)) {
+                    $selectedKeywords = $keywordInfos['selected'];
                     if (true === is_array($selectedKeywords)) {
                         $selectedKeywords = array_filter($selectedKeywords);
                         if (false === empty($selectedKeywords)) {
-                            $contentIds = $this->_em->getRepository("BackBee\NestedNode\KeyWord")->getContentsIdByKeyWords($selectedKeywords, false);
+                            $contentIds = $this->_em->getRepository('BackBee\NestedNode\KeyWord')->getContentsIdByKeyWords($selectedKeywords, false);
                             if (true === is_array($contentIds) && false === empty($contentIds)) {
                                 $where[] = 'c.uid IN ("'.implode('","', $contentIds).'")';
                             } else {
@@ -240,7 +243,7 @@ class ClassContentRepository extends EntityRepository
             $selector['orderby'] = (array) $selector['orderby'];
         }
 
-        $has_page_joined = false;
+        $hasPageJoined = false;
         if (array_key_exists('parentnode', $selector) && true === is_array($selector['parentnode'])) {
             $parentnode = array_filter($selector['parentnode']);
             if (false === empty($parentnode)) {
@@ -278,7 +281,7 @@ class ClassContentRepository extends EntityRepository
                         $where[] = 'p.state < 4';
                     }
 
-                    $has_page_joined = true;
+                    $hasPageJoined = true;
                 }
             }
         }
@@ -324,7 +327,7 @@ class ClassContentRepository extends EntityRepository
                 ->where('c._uid IN (:uids)')
                 ->setParameter('uids', $uids);
 
-        if (true === $has_page_joined && true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
+        if (true === $hasPageJoined && true === property_exists('BackBee\NestedNode\Page', '_'.$selector['orderby'][0])) {
             $q->join('c._mainnode', 'p')
                     ->orderBy('p._'.$selector['orderby'][0], count($selector['orderby']) > 1 ? $selector['orderby'][1] : 'desc');
         } elseif (true === property_exists('BackBee\ClassContent\AbstractClassContent', '_'.$selector['orderby'][0])) {
@@ -337,7 +340,7 @@ class ClassContentRepository extends EntityRepository
         }
 
         if (true === $multipage) {
-            $num_results = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
+            $numResults = $this->getEntityManager()->getConnection()->executeQuery('SELECT FOUND_ROWS()')->fetch(\PDO::FETCH_COLUMN);
             $result = $q->getQuery()->getResult();
 
             $q->setFirstResult($offset)
@@ -345,7 +348,7 @@ class ClassContentRepository extends EntityRepository
 
             $paginator = new SettablePaginator($q);
             $paginator
-                ->setCount($num_results)
+                ->setCount($numResults)
                 ->setResult($result)
             ;
 
@@ -374,15 +377,15 @@ class ClassContentRepository extends EntityRepository
         }
         $db = $this->_em->getConnection();
 
-        $start = (is_array($limitInfos) && array_key_exists("start", $limitInfos)) ? (int) $limitInfos["start"] : 0;
-        $limit = (is_array($limitInfos) && array_key_exists("limit", $limitInfos)) ? (int) $limitInfos["limit"] : 0;
-        $stmt = $db->executeQuery("SELECT * FROM `content` WHERE `classname` IN (?) order by modified desc limit ?,?", array($classnameArr, $start, $limit), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1)
+        $start = (is_array($limitInfos) && array_key_exists('start', $limitInfos)) ? (int) $limitInfos['start'] : 0;
+        $limit = (is_array($limitInfos) && array_key_exists('limit', $limitInfos)) ? (int) $limitInfos['limit'] : 0;
+        $stmt = $db->executeQuery('SELECT * FROM `content` WHERE `classname` IN (?) order by modified desc limit ?,?', array($classnameArr, $start, $limit), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY, 1, 1)
         );
 
         $items = $stmt->fetchAll();
         if ($items) {
             foreach ($items as $item) {
-                $content = $this->_em->find($item["classname"], $item["uid"]);
+                $content = $this->_em->find(AbstractClassContent::getFullClassname($item['classname']), $item['uid']);
                 if ($content) {
                     $result[] = $content;
                 }
@@ -425,7 +428,7 @@ class ClassContentRepository extends EntityRepository
                 // Data protection
                 array_walk($uids, function (&$item) {
                             $item = addslashes($item);
-                        });
+                });
 
                 // Getting classnames for provided uids
                 $classnames = $this->_em
@@ -517,6 +520,12 @@ class ClassContentRepository extends EntityRepository
         return $result;
     }
 
+    /**
+     * @param array $classnames
+     * @param array $cond
+     *
+     * @return int
+     */
     public function countContentsBySearch($classnames = array(), $cond = array())
     {
         $qb = new ClassContentQueryBuilder($this->_em, $this->_em->getExpressionBuilder()->count('cc'));
@@ -607,22 +616,28 @@ class ClassContentRepository extends EntityRepository
                 continue;
             }
             $criterion = (object) $criterion;
-            $alias = uniqid("i".rand());
-            $qb->leftJoin("cc._indexation", $alias)
-                    ->andWhere($alias."._field = :field".$alias)
-                    ->andWhere($alias."._value ".$criterion->op." :value".$alias)
-                    ->setParameter("field".$alias, $criterion->field)
-                    ->setParameter("value".$alias, $criterion->value);
+            $alias = uniqid('i'.rand());
+            $qb->leftJoin('cc._indexation', $alias)
+                    ->andWhere($alias.'._field = :field'.$alias)
+                    ->andWhere($alias.'._value '.$criterion->op.' :value'.$alias)
+                    ->setParameter('field'.$alias, $criterion->field)
+                    ->setParameter('value'.$alias, $criterion->value);
         }
     }
 
+    /**
+     * @param Page  $page
+     * @param array $classnames
+     *
+     * @return AbstractContent
+     */
     public function getLastByMainnode(Page $page, $classnames = array())
     {
         try {
             $q = $this->createQueryBuilder('c');
 
             foreach ($classnames as $classname) {
-                $q->orWhere('c INSTANCE OF '.$classname);
+                $q->orWhere('c INSTANCE OF '.  AbstractClassContent::getShortClassname($classname));
             }
 
             $q->andWhere('c._mainnode = :node')
@@ -639,6 +654,11 @@ class ClassContentRepository extends EntityRepository
         return $entity;
     }
 
+    /**
+     * @param array $classname
+     *
+     * @return int
+     */
     public function countContentsByClassname($classname = array())
     {
         $result = 0;
@@ -646,7 +666,7 @@ class ClassContentRepository extends EntityRepository
             return $result;
         }
         $db = $this->_em->getConnection();
-        $stmt = $db->executeQuery("SELECT count(*) as total FROM `content` WHERE `classname` IN (?)", array($classname), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY));
+        $stmt = $db->executeQuery('SELECT count(*) as total FROM `content` WHERE `classname` IN (?)', array($classname), array(\Doctrine\DBAL\Connection::PARAM_STR_ARRAY));
 
         $result = $stmt->fetchColumn();
 
@@ -688,11 +708,11 @@ class ClassContentRepository extends EntityRepository
     /**
      * Set the temporary directory.
      *
-     * @param type $temporary_dir
+     * @param type $temporaryDir
      *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setTemporaryDir($temporary_dir = null)
+    public function setTemporaryDir($temporaryDir = null)
     {
         return $this;
     }
@@ -700,11 +720,11 @@ class ClassContentRepository extends EntityRepository
     /**
      * Set the storage directory.
      *
-     * @param type $storage_dir
+     * @param type $storageDir
      *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setStorageDir($storage_dir = null)
+    public function setStorageDir($storageDir = null)
     {
         return $this;
     }
@@ -712,11 +732,11 @@ class ClassContentRepository extends EntityRepository
     /**
      * Set the media library directory.
      *
-     * @param type $media_dir
+     * @param type $mediaDir
      *
      * @return \BackBee\ClassContent\Repository\Element\fileRepository
      */
-    public function setMediaDir($media_dir = null)
+    public function setMediaDir($mediaDir = null)
     {
         return $this;
     }
@@ -725,8 +745,8 @@ class ClassContentRepository extends EntityRepository
      * Load content if need, the user's revision is also set.
      *
      * @param  AbstractClassContent $content
-     * @param  BBUserToken   $token
-     * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  BBUserToken          $token
+     * @param  boolean              $checkoutOnMissing If true, checks out a new revision if none was found
      * @return AbstractClassContent
      */
     public function load(AbstractClassContent $content, BBUserToken $token = null, $checkoutOnMissing = false)
@@ -821,12 +841,12 @@ class ClassContentRepository extends EntityRepository
     /**
      * Returns an uid if parent with this classname found, false otherwise.
      *
-     * @param string $child_uid
-     * @param string $class_name
+     * @param string $childUid
+     * @param string $classname
      *
-     * @return string|false
+     * @return mixed
      */
-    public function getParentByClassName($child_uid, $class_name)
+    public function getParentByClassName($childUid, $classname)
     {
         $q = $this->_em->getConnection()
                 ->createQueryBuilder()
@@ -835,14 +855,14 @@ class ClassContentRepository extends EntityRepository
                 ->from('content', 'c')
                 ->andWhere('c.uid = j.parent_uid')
                 ->andWhere('j.content_uid = :uid')
-                ->setParameter('uid', $child_uid);
+                ->setParameter('uid', $childUid);
 
         $result = $q->execute()->fetch();
         if (false !== $result) {
-            if ($result['classname'] == $class_name) {
-                return $this->_em->find($class_name, $result['parent_uid']);
+            if ($result['classname'] == $classname) {
+                return $this->_em->find($classname, $result['parent_uid']);
             } else {
-                $result = $this->getParentByClassName($result['parent_uid'], $class_name);
+                $result = $this->getParentByClassName($result['parent_uid'], $classname);
             }
         } else {
             return;
@@ -854,8 +874,8 @@ class ClassContentRepository extends EntityRepository
     /**
      * Delete a Class Content
      *
-     * @param \BackBee\ClassContent\AbstractClassContent $content
-     * @param bool $mainContent if it's a main content, delete recursively under contents
+     * @param AbstractClassContent $content
+     * @param bool                 $mainContent if it's a main content, delete recursively under contents
      *
      * @return
      */
@@ -917,7 +937,7 @@ class ClassContentRepository extends EntityRepository
     /**
      * Returns distinct classnames for provided classcontent uids.
      *
-     * @param  array  $contentUids The array that contains every classcontent uids
+     * @param  array $contentUids The array that contains every classcontent uids
      * @return array
      */
     public function getClassnames(array $contentUids)
@@ -956,7 +976,7 @@ class ClassContentRepository extends EntityRepository
         $classname = AbstractClassContent::getClassnameByContentType($type);
 
         if (null === $content = $this->findOneBy(['_uid' => $uid])) {
-            throw new \InvalidArgumentException("No `$classname` exists with uid `$uid`.");
+            throw new \InvalidArgumentException(sprintf('No `%s` exists with uid `%s`.', $classname, $uid));
         }
 
         return $content;

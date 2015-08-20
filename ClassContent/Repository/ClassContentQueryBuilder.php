@@ -41,9 +41,10 @@ use BackBee\Site\Site;
 class ClassContentQueryBuilder extends QueryBuilder
 {
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
     private $_em;
+
     /**
      * @var array
      */
@@ -55,8 +56,8 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * ClassContentQueryBuilder constructor.
      *
-     * @param $em \Doctrine\ORM\EntityManager
-     * @param $select \Doctrine\ORM\Query\Expr Use cc as identifier
+     * @param EntityManager            $em
+     * @param \Doctrine\ORM\Query\Expr $select Use cc as identifier
      */
     public function __construct(EntityManager $em, Func $select = null)
     {
@@ -69,7 +70,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Add site filter to the query.
      *
-     * @param $site mixed (BackBee/Site/Site|String)
+     * @param  mixed $site (BackBee/Site/Site|String)
      */
     public function addSiteFilter($site)
     {
@@ -84,7 +85,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Set contents uid as filter.
      *
-     * @param $uids array
+     * @param  array $uids
      */
     public function addUidsFilter(array $uids)
     {
@@ -106,7 +107,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Set a page to filter the query on a nested portion.
      *
-     * @param $page BackBee\NestedNode\Page
+     * @param  BackBee\NestedNode\Page $page
      */
     public function addPageFilter(Page $page)
     {
@@ -127,7 +128,7 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Filter the query by keywords.
      *
-     * @param $keywords array
+     * @param  array $keywords
      */
     public function addKeywordsFilter($keywords)
     {
@@ -141,16 +142,16 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Filter by rhe classname descriminator.
      *
-     * @param $classes array
+     * @param  array $classes
      */
     public function addClassFilter($classes)
     {
         if (is_array($classes) && count($classes) !== 0) {
             $filters = array();
             foreach ($classes as $class) {
-                $filters[] = 'cc INSTANCE OF \''.$class.'\'';
+                $filters[] = 'cc INSTANCE OF \''.  $class .'\'';
             }
-            $filter = implode(" OR ", $filters);
+            $filter = implode(' OR ', $filters);
 
             $this->andWhere($filter);
         }
@@ -159,8 +160,8 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Order with the indexation table.
      *
-     * @param $label string
-     * @param $sort ('ASC'|'DESC')
+     * @param  string $label
+     * @param  string $sort  ('ASC'|'DESC')
      */
     public function orderByIndex($label, $sort = 'ASC')
     {
@@ -173,8 +174,8 @@ class ClassContentQueryBuilder extends QueryBuilder
     /**
      * Get Results paginated.
      *
-     * @param $start integer
-     * @param $limit integer
+     * @param  integer $start
+     * @param  integer $limit
      *
      * @return Doctrine\ORM\Tools\Pagination\Paginator
      */
@@ -186,6 +187,10 @@ class ClassContentQueryBuilder extends QueryBuilder
         return new Paginator($this);
     }
 
+    /**
+     * Adds filter on title
+     * @param string $expression
+     */
     public function addTitleLike($expression)
     {
         if (null !== $expression) {
@@ -198,6 +203,13 @@ class ClassContentQueryBuilder extends QueryBuilder
         }
     }
 
+    /**
+     * Returns the classname for $ey
+     *
+     * @param string $key
+     *
+     * @return string
+     */
     private function getClass($key)
     {
         if (array_key_exists($key, $this->classmap)) {

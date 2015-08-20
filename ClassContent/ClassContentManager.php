@@ -58,6 +58,8 @@ class ClassContentManager
      * Setter of BBUserToken.
      *
      * @param BBUserToken $token
+     * 
+     * @return ClassContentManager
      */
     public function setBBUserToken(BBUserToken $token = null)
     {
@@ -70,7 +72,7 @@ class ClassContentManager
      * Updates the content whith provided data.
      *
      * @param  AbstractClassContent $content
-     * @param  array         $data    array of data that must contains parameters and/or elements key
+     * @param  array                $data    array of data that must contains parameters and/or elements key
      * @return AbstractClassContent
      * @throws \InvalidArgumentException if provided data doesn't have parameters and elements key
      */
@@ -95,7 +97,7 @@ class ClassContentManager
      * Calls ::jsonSerialize of the content and build valid url for image
      *
      * @param  AbstractClassContent $content
-     * @param  integer       $format
+     * @param  integer              $format
      * @return array
      */
     public function jsonEncode(AbstractClassContent $content, $format = AbstractClassContent::JSON_DEFAULT_FORMAT)
@@ -113,7 +115,9 @@ class ClassContentManager
      *
      * It can manage collection type of array or object that implements \IteratorAggregate and/or \Traversable.
      *
-     * @param Paginator $paginator the paginator to convert
+     * @param mixed $collection The collection to encode
+     * @param int   $format     The format to use
+     * 
      * @return array
      * @throws \InvalidArgumentException if provided collection is not supported type
      */
@@ -190,7 +194,9 @@ class ClassContentManager
     /**
      * Returns current revision for the given $content
      *
-     * @param AbstractClassContent $content content we want to get the latest revision
+     * @param AbstractClassContent $content           The content we want to get the latest revision
+     * @param boolean              $checkoutOnMissing If TRUE, checkout a new revision for $content
+     * 
      * @return null|BackBee\ClassContent\Revision
      */
     public function getDraft(AbstractClassContent $content, $checkoutOnMissing = false)
@@ -206,7 +212,8 @@ class ClassContentManager
      * Computes provided data to define what to commit from given content.
      *
      * @param  AbstractClassContent $content
-     * @param  array         $data
+     * @param  array                $data
+     * 
      * @return self
      */
     public function commit(AbstractClassContent $content, array $data)
@@ -235,7 +242,8 @@ class ClassContentManager
      * Computes provided data to define what to revert from given content.
      *
      * @param  AbstractClassContent $content
-     * @param  array         $data
+     * @param  array                $data
+     * 
      * @return self
      */
     public function revert(AbstractClassContent $content, array $data)
@@ -473,6 +481,7 @@ class ClassContentManager
                         ;
                     }
                 }
+                unset($subcontent);
 
                 $content->$key = $values;
             }

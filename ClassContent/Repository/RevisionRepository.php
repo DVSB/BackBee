@@ -43,6 +43,14 @@ use BackBee\Security\Token\BBUserToken;
  */
 class RevisionRepository extends EntityRepository
 {
+    /**
+     * Checkouts a new revision for $content
+     *
+     * @param AbstractClassContent $content
+     * @param BBUserToken          $token
+     *
+     * @return Revision
+     */
     public function checkout(AbstractClassContent $content, BBUserToken $token)
     {
         $revision = new Revision();
@@ -74,6 +82,7 @@ class RevisionRepository extends EntityRepository
      *
      * @param Revision $revision
      *
+     * @return Revision
      * @throws ClassContentException Occurs on illegal revision state
      */
     public function update(Revision $revision)
@@ -110,6 +119,12 @@ class RevisionRepository extends EntityRepository
         throw new ClassContentException('Content is already up-to-date', ClassContentException::REVISION_UPTODATE);
     }
 
+    /**
+     * Loads subcontents
+     *
+     * @param  Revision $revision
+     * @return Revision
+     */
     public function loadSubcontents(Revision $revision)
     {
         $content = $revision->getContent();
@@ -154,8 +169,8 @@ class RevisionRepository extends EntityRepository
      * Return the user's draft of a content, optionally checks out a new one if not exists.
      *
      * @param  AbstractClassContent $content
-     * @param  BBUserToken   $token
-     * @param  boolean       $checkoutOnMissing If true, checks out a new revision if none was found
+     * @param  BBUserToken          $token
+     * @param  boolean              $checkoutOnMissing If true, checks out a new revision if none was found
      *
      * @return Revision|null
      */
@@ -202,15 +217,24 @@ class RevisionRepository extends EntityRepository
      * Returns all current drafts for authenticated user.
      *
      * @param TokenInterface $token
+     *
+     * @return array
      */
     public function getAllDrafts(TokenInterface $token)
     {
-        return $this->_em->getRepository('BackBee\ClassContent\Revision')->findBy([
+        return $this->findBy([
             '_owner' => UserSecurityIdentity::fromToken($token),
             '_state' => [Revision::STATE_ADDED, Revision::STATE_MODIFIED],
         ]);
     }
 
+    /**
+     * Returns revisions for $content
+     *
+     * @param AbstractClassContent $content
+     *
+     * @return array
+     */
     public function getRevisions(AbstractClassContent $content)
     {
         return $this->_em->getRepository('BackBee\ClassContent\Revision')->findBy(['_content' => $content]);
