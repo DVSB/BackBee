@@ -25,6 +25,7 @@ namespace BackBee\ClassContent;
 
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\Exception\InvalidContentTypeException;
+use BackBee\ClassContent\Exception\MalformedParameterException;
 use BackBee\ClassContent\Exception\UnknownPropertyException;
 use BackBee\Renderer\RenderableInterface;
 use BackBee\Security\Acl\Domain\ObjectIdentifiableInterface;
@@ -955,12 +956,18 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      * @param string $key The parameter to be return, if NULL, all parameters are returned
      *
      * @return mixed the parameter value or NULL if unfound
+     * @throws MalformedParameterException Raises if the parameter is malformed.
      */
     public function getParam($key)
     {
-        $value = null;
-        if (isset($this->_parameters[$key])) {
-            $value = $this->_parameters[$key];
+        if (!isset($this->_parameters[$key])) {
+            return null;
+        }
+
+        $value = $this->_parameters[$key];
+
+        if (!is_array($value) || !isset($value['value'])) {
+            throw new MalformedParameterException(sprintf('Parameter %s is malformed.', $key));
         }
 
         return $value;
