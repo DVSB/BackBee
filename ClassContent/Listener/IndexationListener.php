@@ -221,16 +221,8 @@ class IndexationListener implements EventSubscriberInterface
         }
 
         foreach ($content->getProperty('indexation') as $indexedElement) {
-            $value = $owner = null;
-
             $indexedElement = (array) $indexedElement;
-            if ('@' === substr($indexedElement[0], 0, 1)) {
-                // parameter indexation
-                list($value, $owner) = self::getParamValue($content, substr($indexedElement[0], 1));
-            } else {
-                // element indexation
-                list($value, $owner) = self::getContentValue($content, $indexedElement[0]);
-            }
+            list($value, $owner) = self::getIndexValue($content, $indexedElement[0]);
 
             $callback = array_key_exists(1, $indexedElement) ? $indexedElement[1] : null;
             if (null !== $callback) {
@@ -257,13 +249,7 @@ class IndexationListener implements EventSubscriberInterface
                 continue;
             }
 
-            if ('@' === substr($field, 0, 1)) {
-                // parameter indexation
-                list($value, $owner) = self::getParamValue($content, substr($field, 1));
-            } else {
-                // element indexation
-                list($value, $owner) = self::getContentValue($content, $field);
-            }
+            list($value, $owner) = self::getIndexValue($index->getContent(), $field);
 
             $callback = unserialize($index->getCallback());
             if (null !== $callback) {
@@ -274,6 +260,25 @@ class IndexationListener implements EventSubscriberInterface
                 $index->setValue($value);
                 self::$em->getRepository('BackBee\ClassContent\Indexation')->save($index);
             }
+        }
+    }
+
+    /**
+     * Returns the indexed value.
+     * 
+     * @param  AbstractClassContent $content      The content flushed.
+     * @param  string               $indexedField The parameter to index.
+     * 
+     * @return array                              An array of the value and the content owner.
+     */
+    private static function getIndexValue(AbstractClassContent $content, $indexedField)
+    {
+        if ('@' === substr($indexedField, 0, 1)) {
+            // parameter indexation
+            return self::getParamValue($content, substr($indexedField, 1));
+        } else {
+            // element indexation
+            return self::getContentValue($content, $indexedField);
         }
     }
 
@@ -299,10 +304,10 @@ class IndexationListener implements EventSubscriberInterface
      */
     private static function getParamValue(AbstractClassContent $content, $indexedParam)
     {
-        $value = $content->getParamValue($indexedParam);
+        $value = (array) $content->getParamValue($indexedParam);
         $owner = $content;
 
-        return [$value, $owner];
+        return [implode(',', $value), $owner];
     }
 
     /**
@@ -316,7 +321,6 @@ class IndexationListener implements EventSubscriberInterface
     private static function getContentValue(AbstractClassContent $content, $indexedElement)
     {
         $value = $owner = $content;
-
         $elements = explode('->', $indexedElement);
         foreach ($elements as $element) {
             $value = $value->getData($element);
@@ -324,10 +328,11 @@ class IndexationListener implements EventSubscriberInterface
                 break;
             }
 
-            $owner = $value;
             if (!self::$em->contains($value)) {
                 $value = self::$em->find(get_class($value), $value->getUid());
             }
+
+            $owner = $value;
         }
 
         return [$value, $owner];
