@@ -955,7 +955,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      *
      * @param string $key The parameter to be return, if NULL, all parameters are returned
      *
-     * @return mixed the parameter value or NULL if unfound
+     * @return null|array The parameter value or NULL if unfound
      * @throws MalformedParameterException Raises if the parameter is malformed.
      */
     public function getParam($key)

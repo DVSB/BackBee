@@ -1043,7 +1043,7 @@ abstract class AbstractClassContent extends AbstractContent
 
         foreach ($this->defaultParams as $key => $value) {
             $params[$key] = $value;
-            if (isset($instanceParams[$key]) && isset($instanceParams[$key]['value'])) {
+            if (isset($instanceParams[$key]['value'])) {
                 $params[$key]['value'] = $instanceParams[$key]['value'];
             }
         }
