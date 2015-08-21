@@ -62,7 +62,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      *
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="uid")
+     * @ORM\Column(type="string", lenght=32, name="uid")
      */
     protected $_uid;
 

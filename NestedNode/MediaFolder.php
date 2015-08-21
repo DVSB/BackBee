@@ -49,7 +49,7 @@ class MediaFolder extends AbstractNestedNode implements \JsonSerializable
      *
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="uid")
+     * @ORM\Column(type="string", length=32, name="uid")
      */
     protected $_uid;
 
