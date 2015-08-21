@@ -84,6 +84,9 @@
         "backbee/bb-core-js": "1.0.0",
         "symfony/phpunit-bridge": "~2.7.0"
     },
+    "suggest": {
+        "symfony/form": "Allows you to use Symfony Form Component integration"
+    },
     "minimum-stability": "stable",
     "extra": {
         "branch-alias": {
