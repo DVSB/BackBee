@@ -21,7 +21,7 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace backbee\Rest\Controller;
+namespace BackBee\Rest\Controller;
 
 use BackBee\Rest\Controller\AbstractRestController;
 use Symfony\Component\HttpFoundation\Request;
