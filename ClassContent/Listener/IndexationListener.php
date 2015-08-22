@@ -27,7 +27,7 @@ use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Indexation;
 use BackBee\Event\Event;
 use BackBee\Util\Doctrine\ScheduledEntities;
-
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -50,28 +50,21 @@ class IndexationListener implements EventSubscriberInterface
     /**
      * The current entity manager.
      *
-     * @var \Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
-    private static $_em;
-
-    /**
-     * The content to be indexed.
-     *
-     * @var \BackBee\ClassContent\AbstractClassContent
-     */
-    private static $_content;
+    private static $em;
 
     /**
      * Array of content uids already treated.
      *
-     * @var type
+     * @var array
      */
     private static $_content_content_done = [];
 
     /**
      * Array of content uids already treated.
      *
-     * @var type
+     * @var array
      */
     private static $_site_content_done = [];
 
@@ -87,7 +80,7 @@ class IndexationListener implements EventSubscriberInterface
             return;
         }
 
-        self::$_em->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
+        self::$em->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
                 ->replaceIdxSiteContents($site, array_diff($contents_inserted, self::$_site_content_done))
                 ->removeIdxSiteContents($site, $contents_removed);
 
@@ -106,7 +99,7 @@ class IndexationListener implements EventSubscriberInterface
             return;
         }
 
-        self::$_em->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
+        self::$em->getRepository('BackBee\ClassContent\Indexes\IdxContentContent')
                 ->replaceIdxContentContents(array_diff($contents_saved, self::$_content_content_done))
                 ->removeIdxContentContents($contents_removed);
 
@@ -119,7 +112,7 @@ class IndexationListener implements EventSubscriberInterface
      *       the Page target is inserted or updated
      *     - Remove page-content and site-content if the Page target is deleted.
      *
-     * @param \BackBee\Event\Event $event
+     * @param Event $event
      */
     public static function onFlushPage(Event $event)
     {
@@ -128,11 +121,11 @@ class IndexationListener implements EventSubscriberInterface
     /**
      * Returns the current application.
      *
-     * @param \BackBee\Event\Event $event
+     * @param Event $event
      *
      * @return \BackBee\BBApplication
      */
-    private static function _getApplication(Event $event)
+    private static function getApplication(Event $event)
     {
         if (null === self::$_application) {
             if (null !== $event->getDispatcher()) {
@@ -146,35 +139,35 @@ class IndexationListener implements EventSubscriberInterface
     /**
      * Returns the current entity manager.
      *
-     * @param \BackBee\Event\Event $event
+     * @param Event $event
      *
-     * @return \Doctrine\ORM\EntityManager
+     * @return EntityManager
      */
-    private static function _getEntityManager(Event $event)
+    private static function getEntityManager(Event $event)
     {
-        if (null === self::$_em) {
-            if (null !== self::_getApplication($event)) {
-                self::$_em = self::_getApplication($event)->getEntityManager();
+        if (null === self::$em) {
+            if (null !== self::getApplication($event)) {
+                self::$em = self::getApplication($event)->getEntityManager();
             }
         }
 
-        return self::$_em;
+        return self::$em;
     }
 
     /**
      * Updates every indexed value assocatied to the contents flushed.
      *
-     * @param \BackBee\Event\Event $event
+     * @param Event $event
      */
     public static function onFlushContent(Event $event)
     {
-        if (null === self::_getEntityManager($event)) {
+        if (null === self::getEntityManager($event)) {
             return;
         }
 
-        $contents_inserted = ScheduledEntities::getScheduledAClassContentInsertions(self::$_em, true, true);
-        $contents_updated = ScheduledEntities::getScheduledAClassContentUpdates(self::$_em, true, true);
-        $contents_deleted = ScheduledEntities::getSchedulesAClassContentDeletions(self::$_em, true);
+        $contents_inserted = ScheduledEntities::getScheduledAClassContentInsertions(self::$em, true, true);
+        $contents_updated = ScheduledEntities::getScheduledAClassContentUpdates(self::$em, true, true);
+        $contents_deleted = ScheduledEntities::getSchedulesAClassContentDeletions(self::$em, true);
 
         // Updates content-content indexes
         self::_updateIdxContentContents(array_merge($contents_inserted, $contents_updated), $contents_deleted);
@@ -192,115 +185,174 @@ class IndexationListener implements EventSubscriberInterface
             return;
         }
 
-        $em = $application->getEntityManager();
-        $uow = $em->getUnitOfWork();
+        $uow = self::$em->getUnitOfWork();
 
         if ($uow->isScheduledForInsert($content) || $uow->isScheduledForUpdate($content)) {
-            self::$_em->getRepository('BackBee\ClassContent\Indexes\OptContentByModified')
+            self::$em->getRepository('BackBee\ClassContent\Indexes\OptContentByModified')
                     ->replaceOptContentTable($content);
 
-            if (is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty())) {
-                foreach ($content->getProperty('indexation') as $indexedElement) {
-                    $indexedElement = (array) $indexedElement;
-                    $callback = array_key_exists(1, $indexedElement) ? $indexedElement[1] : null;
-
-                    if ('@' === substr($indexedElement[0], 0, 1)) {
-                        // parameter indexation
-                        $param = substr($indexedElement[0], 1);
-                        $value = $content->getParam($param);
-                        $owner = $content;
-                    } else {
-                        $elements = explode('->', $indexedElement[0]);
-
-                        $owner = null;
-                        $element = null;
-                        $value = $content;
-                        foreach ($elements as $element) {
-                            $owner = $value;
-                            if (!($value instanceof AbstractClassContent)) {
-                                continue;
-                            }
-
-                            if (null !== $value) {
-                                $value = $value->getData($element);
-                                if ($value instanceof AbstractClassContent && !$em->contains($value)) {
-                                    $value = $em->find(get_class($value), $value->getUid());
-                                }
-                            }
-                        }
-                    }
-
-                    if (null !== $callback) {
-                        $callback = (array) $callback;
-                        foreach ($callback as $func) {
-                            $value = call_user_func($func, $value);
-                        }
-                    }
-
-                    if (null !== $owner && null !== $value) {
-                        $index = $em->getRepository('BackBee\ClassContent\Indexation')->find([
-                            '_content' => $content,
-                            '_field'   => $indexedElement[0],
-                        ]);
-                        if (null === $index) {
-                            $index = new Indexation($content, $indexedElement[0], $owner, $value, serialize($callback));
-                            $em->persist($index);
-                        }
-
-                        $index->setValue($value);
-                        $em
-                            ->getUnitOfWork()
-                            ->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
-                        ;
-                    }
-                }
-
-                $alreadyIndex = $em->getRepository('BackBee\ClassContent\Indexation')->findBy(['_owner' => $content]);
-                foreach ($alreadyIndex as $index) {
-                    $field = $index->getField();
-                    $callback = unserialize($index->getCallback());
-
-                    if (null !== $field) {
-                        $tmp = explode('->', $field);
-                        $field = array_pop($tmp);
-
-                        try {
-                            $value = $content->$field;
-
-                            if (null !== $callback) {
-                                $callback = (array) $callback;
-                                foreach ($callback as $func) {
-                                    $value = call_user_func($func, $value);
-                                }
-                            }
-
-                            if ($value != $index->getValue() && null !== $value) {
-                                $index->setValue($value);
-                                $em
-                                    ->getUnitOfWork()
-                                    ->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
-                                ;
-                            }
-                        } catch (\Exception $e) {
-                            // Nothing to do
-                        }
-                    }
-                }
-            }
+            self::indexContent($content);
+            self::updateSuperContentIndexes($content);
         } elseif ($uow->isScheduledForDelete($content)) {
-            self::$_em
+            self::$em
                 ->getRepository('BackBee\ClassContent\Indexes\OptContentByModified')
                 ->removeOptContentTable($content)
             ;
 
             foreach ($content->getIndexation() as $index) {
-                $em->remove($index);
-                $em
+                self::$em->remove($index);
+                self::$em
                     ->getUnitOfWork()
-                    ->computeChangeSet($em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
+                    ->computeChangeSet(self::$em->getClassMetadata('BackBee\ClassContent\Indexation'), $index)
                 ;
             }
         }
+    }
+
+    /**
+     * Indexes $content according to the class content property `indexation`.
+     * 
+     * @param AbstractClassContent $content The content to index.
+     */
+    private static function indexContent(AbstractClassContent $content)
+    {
+        if (!self::hasIndexedElements($content)) {
+            return;
+        }
+
+        foreach ($content->getProperty('indexation') as $indexedElement) {
+            $indexedElement = (array) $indexedElement;
+            list($value, $owner) = self::getIndexValue($content, $indexedElement[0]);
+
+            $callback = array_key_exists(1, $indexedElement) ? $indexedElement[1] : null;
+            if (null !== $callback) {
+                $value = self::applyCallbacks($value, (array) $callback);
+            }
+
+            if (null !== $value && null !== $owner) {
+                $index = new Indexation($content, $indexedElement[0], $owner, $value, serialize($callback));
+                self::$em->getRepository('BackBee\ClassContent\Indexation')->save($index);
+            }
+        }
+    }
+
+    /**
+     * Reindexes parent content of $content.
+     * 
+     * @param AbstractClassContent $content The content to index.
+     */
+    private static function updateSuperContentIndexes(AbstractClassContent $content)
+    {
+        $alreadyIndexed = self::$em->getRepository('BackBee\ClassContent\Indexation')->findBy(['_owner' => $content]);
+        foreach ($alreadyIndexed as $index) {
+            if (null === $field = $index->getField()) {
+                continue;
+            }
+
+            list($value, $owner) = self::getIndexValue($index->getContent(), $field);
+
+            $callback = unserialize($index->getCallback());
+            if (null !== $callback) {
+                $value = self::applyCallbacks($value, (array) $callback);
+            }
+
+            if (null !== $value) {
+                $index->setValue($value);
+                self::$em->getRepository('BackBee\ClassContent\Indexation')->save($index);
+            }
+        }
+    }
+
+    /**
+     * Returns the indexed value.
+     * 
+     * @param  AbstractClassContent $content      The content flushed.
+     * @param  string               $indexedField The parameter to index.
+     * 
+     * @return array                              An array of the value and the content owner.
+     */
+    private static function getIndexValue(AbstractClassContent $content, $indexedField)
+    {
+        if ('@' === substr($indexedField, 0, 1)) {
+            // parameter indexation
+            return self::getParamValue($content, substr($indexedField, 1));
+        } else {
+            // element indexation
+            return self::getContentValue($content, $indexedField);
+        }
+    }
+
+    /**
+     * Returns TRUE if something has to be indexed for $content.
+     * 
+     * @param  AbstractClassContent $content The content to index.
+     * 
+     * @return boolean
+     */
+    private static function hasIndexedElements(AbstractClassContent $content)
+    {
+        return is_array($content->getProperty()) && array_key_exists('indexation', $content->getProperty());
+    }
+
+    /**
+     * Returns the indexed parameter value.
+     * 
+     * @param  AbstractClassContent $content      The content flushed.
+     * @param  string               $indexedParam The parameter to index.
+     * 
+     * @return array                              An array of the parameter value and the content owner.
+     */
+    private static function getParamValue(AbstractClassContent $content, $indexedParam)
+    {
+        $value = (array) $content->getParamValue($indexedParam);
+        $owner = $content;
+
+        return [implode(',', $value), $owner];
+    }
+
+    /**
+     * Returns the indexed value of an element.
+     * 
+     * @param  AbstractClassContent $content        The content flushed.
+     * @param  string               $indexedElement The parameter to index.
+     * 
+     * @return array                                An array of the element value and the content owner.
+     */
+    private static function getContentValue(AbstractClassContent $content, $indexedElement)
+    {
+        $value = $owner = $content;
+        $elements = explode('->', $indexedElement);
+        foreach ($elements as $element) {
+            $value = $value->getData($element);
+            if (!$value instanceof AbstractClassContent) {
+                break;
+            }
+
+            if (!self::$em->contains($value)) {
+                $value = self::$em->find(get_class($value), $value->getUid());
+            }
+
+            $owner = $value;
+        }
+
+        return [$value, $owner];
+    }
+
+    /**
+     * Applies callbacks to value.
+     * 
+     * @param  mixed $value     The value on which apply callbacks.
+     * @param  array $callbacks An array of callable function.
+     * 
+     * @return mixed            The new value.
+     */
+    private static function applyCallbacks($value, array $callbacks)
+    {
+        foreach ($callbacks as $callback) {
+            $value = call_user_func($callback, $value);
+        }
+
+        return $value;
     }
 
     /**

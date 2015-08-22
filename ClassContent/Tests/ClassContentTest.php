@@ -382,4 +382,18 @@ class ClassContentTest extends BackBeeTestCase
         AbstractClassContent::getFullClassname('FakeClassName');
     }
 
+    public function testHasParam()
+    {
+        $this->assertTrue($this->content->hasParam('excludefromautobloc'));
+        $this->assertFalse($this->content->hasParam('unknownparam'));
+    }
+
+    /**
+     * @expectedException \BackBee\ClassContent\Exception\MalformedParameterException
+     */
+    public function testMalformedParam()
+    {
+        $this->content->setRawParameters(['excludefromautobloc' => ['novalue' => 'fake']]);
+        $this->content->getParam('excludefromautobloc');
+    }
 }

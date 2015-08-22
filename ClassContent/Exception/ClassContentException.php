@@ -40,6 +40,7 @@ use BackBee\Exception\BBException;
  * * UNMATCH_REVISION : the revision does not match the content
  * * REVISION_MISSING : none revision defined for the content
  * * REVISION_UNLOADED : the revision is unloaded
+ * * MALFORMED_PARAM : the parameter is malformed
  *
  * @category    BackBee
  *
@@ -117,4 +118,11 @@ class ClassContentException extends BBException
      * @var int
      */
     const REVISION_UNLOADED = 3010;
+
+    /**
+     * The parameter is malformed.
+     *
+     * @var int
+     */
+    const MALFORMED_PARAM = 3011;
 }

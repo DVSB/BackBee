@@ -938,6 +938,18 @@ abstract class AbstractClassContent extends AbstractContent
     }
 
     /**
+     * Returns true if $key is a parameter name, false otherwise.
+     * 
+     * @param string $key The parameter to be tested
+     * 
+     * @return boolean
+     */
+    public function hasParam($key)
+    {
+        return isset($this->defaultParams[$key]);
+    }
+
+    /**
      * Parameters setter.
      *
      * @param string $key   the parameter name to set, if NULL all the parameters array wil be set
@@ -947,7 +959,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function setParam($key, $value = null)
     {
-        if (!isset($this->defaultParams[$key])) {
+        if (!$this->hasParam($key)) {
             throw new \InvalidArgumentException(sprintf('Cannot set %s as parameter cause this key does not exist.', $key));
         }
 
@@ -989,7 +1001,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function getParam($key)
     {
-        if (!isset($this->defaultParams[$key])) {
+        if (!$this->hasParam($key)) {
             return;
         }
 
@@ -997,7 +1009,7 @@ abstract class AbstractClassContent extends AbstractContent
 
         $params = $this->defaultParams[$key];
 
-        if ($value !== null) {
+        if (is_array($value) && isset($value['value'])) {
             $params['value'] = $value['value'];
         }
 
@@ -1031,7 +1043,7 @@ abstract class AbstractClassContent extends AbstractContent
 
         foreach ($this->defaultParams as $key => $value) {
             $params[$key] = $value;
-            if (isset($instanceParams[$key])) {
+            if (isset($instanceParams[$key]['value'])) {
                 $params[$key]['value'] = $instanceParams[$key]['value'];
             }
         }

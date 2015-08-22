@@ -27,6 +27,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 use BackBee\ClassContent\AbstractClassContent;
+use BackBee\ClassContent\Indexation;
 use BackBee\NestedNode\Page;
 use BackBee\Site\Site;
 use BackBee\Util\Doctrine\DriverFeatures;
@@ -749,5 +750,30 @@ class IndexationRepository extends EntityRepository
         );
 
         return $this->_executeQuery($query, $params);
+    }
+
+    /**
+     * Saves an indexation entity, persists it first if need.
+     * 
+     * @param Indexation $index The indexation entity to save.
+     */
+    public function save(Indexation $index)
+    {
+        $existing = $this->find([
+            '_content' => $index->getContent(),
+            '_field' => $index->getField(),
+        ]);
+
+        if (null === $existing) {
+            $existing = $index;
+            $this->getEntityManager()->persist($existing);
+        } else {
+            $existing->setValue($index->getValue());
+        }
+
+        $metadata = $this->getEntityManager()->getClassMetadata('BackBee\ClassContent\Indexation');
+        $this->getEntityManager()
+                ->getUnitOfWork()
+                ->computeChangeSet($metadata, $existing);
     }
 }

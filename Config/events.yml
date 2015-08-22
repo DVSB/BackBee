@@ -2,6 +2,10 @@ classcontent.include:
     listeners:
         - [BackBee\ClassContent\Listener\ClassContentListener, onInclude]
 
+classcontent.postload:
+    listeners:
+        - [BackBee\ClassContent\Listener\ClassContentListener, onPostload]
+
 classcontent.update:
     listeners:
         - [BackBee\ClassContent\Listener\ClassContentListener, onUpdate]

@@ -709,4 +709,16 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
         return $elements;
     }
+
+    /**
+     * Returns true if $key is a parameter name, false otherwise.
+     * 
+     * @param string $key The parameter to be tested
+     * 
+     * @return boolean
+     */
+    public function hasParam($key)
+    {
+        return $this->_content->hasParam($key);
+    }
 }

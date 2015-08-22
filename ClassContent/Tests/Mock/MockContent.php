@@ -131,4 +131,9 @@ class MockContent extends AbstractClassContent implements MockInterface
     {
         return 'foobar';
     }
+
+    public function setRawParameters(array $parameters)
+    {
+        $this->_parameters = $parameters;
+    }
 }

@@ -68,6 +68,16 @@ class ClassContentListener
     }
 
     /**
+     * Occurs on classcontent.postload events.
+     * 
+     * @param Event $event
+     */
+    public static function onPostload(Event $event)
+    {
+        $event->getTarget()->postLoad();
+    }
+
+    /**
      * Occurs on classcontent.onflush events.
      * 
      * @param Event $event
