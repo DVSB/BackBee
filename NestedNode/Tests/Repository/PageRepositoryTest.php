@@ -89,7 +89,7 @@ class PageRepositoryTest extends BackBeeTestCase
 
         $site = self::$em->find('BackBee\Site\Site', 'site-test');
         $layout = self::$em->find('BackBee\Site\Layout', 'layout-test');
-        
+
         $this->root = new Page('root', ['title' => 'root']);
         $this->root->setSite($site)
                 ->setLayout($layout);
@@ -135,6 +135,68 @@ class PageRepositoryTest extends BackBeeTestCase
         }
 
         return $page;
+    }
+
+    /**
+     * @covers \BackBee\NestedNode\Repository\PageRepository::getAncestor
+     */
+    public function testSectionHasChildren()
+    {
+        $section1 = $this->repository->find('section1')->getSection();
+        $root = $this->repository->find('root')->getSection();
+        $page2 = $this->repository->find('page2');
+        $page1 = $this->repository->find('page1');
+
+        $this->assertTrue($root->getHasChildren(), 'Root has_children after loading');
+        $this->assertTrue($section1->getHasChildren(), 'Section has_children after loading');
+        $page1->setState(4);
+        self::$em->persist($page1);
+        self::$em->flush($page1);
+        self::$em->refresh($section1);
+        $this->assertTrue($section1->getHasChildren(), 'Section has_children after set page1 offline');
+
+        $page2->setState(4);
+        self::$em->persist($page2);
+        self::$em->flush($page2);
+        self::$em->refresh($section1);
+        $this->assertFalse($section1->getHasChildren(), 'Section has_children after set page2 offline');
+
+        $layout = self::$em->find('BackBee\Site\Layout', 'layout-test');
+        $page4 = $this->addPage('page4', $layout, $section1->getPage());
+        self::$em->refresh($section1);
+        $this->assertTrue($section1->getHasChildren(), 'Section has_children after a page creation');
+
+        $section2 = $this->repository->find('section2');
+        $this->repository->moveAsLastChildOf($page4, $section2);
+        self::$em->persist($page4);
+        self::$em->flush($page4);
+        self::$em->refresh($section1);
+        self::$em->refresh($section2);
+        $this->assertFalse($section1->getHasChildren(), 'Section has_children after set page2 offline');
+        $this->assertTrue($section2->getSection()->getHasChildren(), 'Section has_children after a page creation');
+    }
+
+    public function testHardDeletePage()
+    {
+        $page1 = $this->repository->find('page1');
+        $section1 = $this->repository->find('section1');
+        $sectionRepo = self::$em->getRepository('BackBee\NestedNode\Section');
+
+        $baseQuery = 'select uid from %s where uid = "%s"';
+
+        $this->repository->deletePage($page1);
+        self::$em->flush();
+
+        $this->assertCount(5, $this->repository->findAll());
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'page', 'page1'))->fetch(), 'Page 1 isn\'t deleted');
+        $this->repository->deletePage($section1);
+        self::$em->flush();
+
+        $this->assertCount(3, $this->repository->findAll());
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'page', 'section1'))->fetch(), 'the page of Section 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'section', 'section1'))->fetch(), 'the section of Section 1 isn\'t deleted');
+        $this->assertFalse(self::$em->getConnection()->executeQuery(sprintf($baseQuery, 'page', 'page2'))->fetch(), 'the sub page 2 isn\'t deleted');
+
     }
 
     /**

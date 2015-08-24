@@ -44,8 +44,13 @@ nestednode.page.prerender:
     listeners:
         - [@cache.listener, onPreRenderPage]
 
+nestednode.section.preupdate:
+     listeners:
+         - [BackBee\Event\Listener\PageListener, onPreUpdate]
+
 nestednode.page.preupdate:
     listeners:
+        - [BackBee\Event\Listener\PageListener, onPreUpdate]
         - [BackBee\Workflow\Listener\PageListener, onPreUpdate]
 
 nestednode.page.postrender:
@@ -54,6 +59,7 @@ nestednode.page.postrender:
 
 nestednode.page.onflush:
     listeners:
+        - [BackBee\Event\Listener\PageListener, onFlushPage]
         - [BackBee\Event\Listener\MetaDataListener, onFlushPage]
         - [BackBee\ClassContent\Listener\IndexationListener, onFlushPage]
         - [BackBee\Event\Listener\RewritingListener, onFlushPage]

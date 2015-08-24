@@ -323,6 +323,15 @@ bb.rest.page.patch:
         uid: \w{32}
         _method: PATCH
 
+bb.rest.page.put_collection:
+    pattern: /rest/{version}/page
+    defaults:
+        _action:     putCollectionAction
+        _controller: BackBee\Rest\Controller\PageController
+    requirements:
+        version: \d+
+        _method: PUT
+
 bb.rest.page.delete:
     pattern: /rest/{version}/page/{uid}
     defaults:
