@@ -162,8 +162,8 @@ EOF
         $sections = $this->repo->findAll();
         foreach ($sections as $section) {
             PageListener::setSectionHasChildren($this->em, $section);
-            $this->em->flush();
         }
+        $this->em->flush();
 
         return $this;
     }

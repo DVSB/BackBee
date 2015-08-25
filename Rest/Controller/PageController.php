@@ -407,7 +407,6 @@ class PageController extends AbstractRestController
                     'message'    => $e->getMessage(),
                 ];
             } catch (\Exception $e) {
-                var_dump($e->getMessage());
                 $result[] = [
                     'uid'        => $data['uid'],
                     'statusCode' => 500,
