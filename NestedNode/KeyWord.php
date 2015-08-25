@@ -55,7 +55,7 @@ class KeyWord extends AbstractNestedNode implements RenderableInterface, \JsonSe
      *
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="uid")
+     * @ORM\Column(type="string", length=32, name="uid")
      *
      * @Serializer\Expose
      * @Serializer\SerializedName("id")

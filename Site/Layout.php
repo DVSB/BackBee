@@ -70,7 +70,7 @@ class Layout extends AbstractObjectIdentifiable
      *
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="uid")
+     * @ORM\Column(type="string", length=32, name="uid")
      *
      * @Serializer\Expose
      * @Serializer\Type("string")

@@ -47,7 +47,7 @@ class MockNestedNode extends AbstractNestedNode implements MockInterface
      *
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="uid")
+     * @ORM\Column(type="string", length=32, name="uid")
      *
      * @Serializer\Type("string")
      */

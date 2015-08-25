@@ -55,7 +55,7 @@ abstract class AbstractNestedNode extends AbstractObjectIdentifiable
      *
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="uid")
+     * @ORM\Column(type="string", length=32, name="uid")
      *
      * @Serializer\Type("string")
      */
