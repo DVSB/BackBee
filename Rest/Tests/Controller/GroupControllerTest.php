@@ -69,7 +69,7 @@ class GroupControllerTest extends TestCase
 
         $bbapp->getEntityManager()->flush();
 
-        $this->user = $this->createAuthUser($this->groupEditor->getId());
+        $this->user = $this->createAuthUser($this->groupEditor->getName());
         $bbapp->getEntityManager()->persist($this->user);
         $bbapp->getEntityManager()->flush();
     }

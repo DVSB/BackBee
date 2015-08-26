@@ -57,7 +57,14 @@ class GroupController extends AbstractRestController
             $site_uid = $this->getApplication()->getSite()->getUid();
         }
 
-        $groups = $this->getEntityManager()->getRepository('BackBee\Security\Group')->findBy(['_site' => $site_uid]);
+        $groups = $this->getEntityManager()
+                ->getRepository('BackBee\Security\Group')
+                ->createQueryBuilder('g')
+                ->where('g._site = :siteUid')
+                ->orWhere('g._site IS NULL')
+                ->setParameter(':siteUid', $site_uid)
+                ->getQuery()
+                ->getResult();
 
         return new Response($this->formatCollection($groups), 200, ['Content-Type' => 'application/json']);
     }
