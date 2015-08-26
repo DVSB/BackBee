@@ -32,7 +32,7 @@ classcontent.postrender:
     listeners:
         - [@cache.listener, onPostRenderContent]
 
-rest.controller.classcontentcontroller.getAction.postcall:
+rest.controller.classcontentcontroller.getaction.postcall:
   listeners:
     - [BackBee\ClassContent\Listener\ClassContentListener, onPostCall]
 
