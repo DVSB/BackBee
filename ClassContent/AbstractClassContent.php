@@ -26,6 +26,7 @@ namespace BackBee\ClassContent;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 use BackBee\ClassContent\Exception\ClassContentException;
+use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\NestedNode\Page;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -564,12 +565,12 @@ abstract class AbstractClassContent extends AbstractContent
     /**
      * Dynamically adds and sets new element to this content.
      *
-     * @param string  $var          the name of the element
-     * @param string  $type         the type
-     * @param array   $options      Initial options for the content (see this constructor)
-     * @param Boolean $updateAccept dynamically accept or not the type for the new element
+     * @param string  $var          The name of the element
+     * @param string  $type         Optional, the type of the element, scalar by default
+     * @param array   $options      Optional, initial options for the content (see this constructor)
+     * @param Boolean $updateAccept Optional, dynamically accept (default) or not the type for the new element.
      *
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
+     * @return AbstractClassContent The current instance.
      */
     protected function defineData($var, $type = 'scalar', $options = null, $updateAccept = true)
     {
@@ -597,7 +598,11 @@ abstract class AbstractClassContent extends AbstractContent
                     unset($value);
                 }
             } else {
-                $values[] = ('scalar' == $type) ? '' : new $type(null, $options);
+                try {
+                    $values[] = ('scalar' === $type) ? '' : new $type(null, $options);
+                } catch (ClassNotFoundException $ex) {
+                    self::onUnknownClassname(sprintf('Unknown classname `%s`.', $type), $ex);
+                }
             }
 
             return $this->__set($var, $values);

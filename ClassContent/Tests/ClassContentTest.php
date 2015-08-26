@@ -396,4 +396,20 @@ class ClassContentTest extends BackBeeTestCase
         $this->content->setRawParameters(['excludefromautobloc' => ['novalue' => 'fake']]);
         $this->content->getParam('excludefromautobloc');
     }
+
+    public function testIgnoreUnknownClassnameFalse()
+    {
+        AbstractClassContent::throwExceptionOnUnknownClassname(false);
+        $this->content->mockedDefineData('unknown', '\BackBee\ClassContent\UnknownClassname');
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testIgnoreUnknownClassnameTrue()
+    {
+        AbstractClassContent::throwExceptionOnUnknownClassname(true);
+        $this->content->mockedDefineData('unknown', '\BackBee\ClassContent\UnknownClassname');
+    }
 }
