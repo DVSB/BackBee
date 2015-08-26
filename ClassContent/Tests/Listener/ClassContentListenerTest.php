@@ -44,7 +44,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ClassContentListenerTest extends BackBeeTestCase
 {
-    const POST_CALL_EVENT_NAME = 'rest.controller.classcontentcontroller.getAction.postcall';
+    const POST_CALL_EVENT_NAME = 'rest.controller.classcontentcontroller.getaction.postcall';
 
     /**
      * @var BackBee\ClassContent\ClassContentManager
