@@ -274,4 +274,26 @@ class ClassContentListener
 
         $response->setContent(json_encode($content));
     }
+
+    /**
+     * Occurs on event ``bbapplication.init`` to set AbstractContent::$ignoreUnknownClassname according to bbapp parameters.
+     *
+     * @param Event $event
+     */
+    public static function onApplicationInit(Event $event)
+    {
+        $application = $event->getTarget();
+        $container = $application->getContainer();
+        if ($container->hasParameter('bbapp.classcontent.ignore_unknown_classname')) {
+            $parameter = $container->getParameter('bbapp.classcontent.exception_on_unknown_classname');
+        } else {
+            $parameter = true;
+        }
+
+        if ('debug' === strtolower($parameter)) {
+            AbstractClassContent::throwExceptionOnUnknownClassname($application->isDebugMode());
+        } else {
+            AbstractClassContent::throwExceptionOnUnknownClassname($parameter);
+        }
+    }
 }

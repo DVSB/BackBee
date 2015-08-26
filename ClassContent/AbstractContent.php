@@ -58,6 +58,14 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     const JSON_INFO_FORMAT = 3;
 
     /**
+     * If TRUE (default) raises an exception on unknown class content classname.
+     * If set to FALSE, remind silent
+     * 
+     * @var boolean
+     */
+    private static $throwException = false;
+
+    /**
      * Unique identifier.
      *
      * @var string
@@ -1107,11 +1115,9 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Returns the sort classname of the given $classname.
      * 
-     * @param mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
+     * @param  mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
      * 
-     * @return string                       The short classname.
-     * 
-     * @throws InvalidArgumentException     Raises if $classname is not subclass of AbstractClassContent.
+     * @return string|null      The short classname if found, NULL otherwise.
      */
     public static function getShortClassname($classname)
     {
@@ -1119,8 +1125,12 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
             $classname = ClassUtils::getRealClass($classname);
         }
 
-        if (!is_subclass_of($classname, 'BackBee\ClassContent\AbstractClassContent')) {
-            throw new \InvalidArgumentException(sprintf('Given classname %s or object is not a subclass of AbstractClassContent.', $classname));
+        try {
+            if (!is_subclass_of($classname, 'BackBee\ClassContent\AbstractClassContent')) {
+                throw new ClassNotFoundException();
+            }
+        } catch (ClassNotFoundException $ex) {
+            return self::onUnknownClassname(sprintf('Given classname %s or object is not a subclass of AbstractClassContent.', $classname), $ex);
         }
 
         return str_replace(self::CLASSCONTENT_BASE_NAMESPACE, '', ltrim($classname, NAMESPACE_SEPARATOR));
@@ -1129,11 +1139,9 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * Returns the full classname of the given $classname.
      * 
-     * @param mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
+     * @param  mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
      * 
-     * @return string                       The full classname.
-     * 
-     * @throws InvalidArgumentException     Raises if $classname cannot be resolved as a short classname of AbstractClassContent.
+     * @return string|null      The full classname if found, NULL otherwise.
      */
     public static function getFullClassname($classname)
     {
@@ -1151,10 +1159,38 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
             }
             class_exists($classname);
         } catch (ClassNotFoundException $ex) {
-            throw new \InvalidArgumentException($classname.' is not a short classname of an AbstractClassContent instance.', 0, $ex);
+            return self::onUnknownClassname($classname.' is not a short classname of an AbstractClassContent instance.', $ex);
         }
 
         return $classname;
     }
 
+    /**
+     * On an unknown class content classname, raises an exception or return NULL depending on self::$ignoreUnknownClassname.
+     * 
+     * @param  string $message                   The message of the raised exception.
+     * @param  ClassNotFoundException $exception Optional, the previous exception if provided.
+     * 
+     * @return null
+     * @throws \InvalidArgumentException         Raises if self::$ignoreUnknownClassname is set to TRUE.
+     */
+    protected static function onUnknownClassname($message, ClassNotFoundException $exception = null)
+    {
+        if (self::$throwException) {
+            throw new \InvalidArgumentException($message, 0, $exception);
+        }
+
+        return null;
+    }
+
+    /**
+     * If setted to TRUE (default) raises an exception on unknown class content classname.
+     * If setted to FALSE, remind silent.
+     * 
+     * @param boolean $throwException Optional
+     */
+    public static function throwExceptionOnUnknownClassname($throwException = true)
+    {
+        self::$throwException = (true === $throwException);
+    }
 }

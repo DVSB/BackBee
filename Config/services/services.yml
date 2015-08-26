@@ -58,6 +58,9 @@ parameters:
     bbapp.bundle.loader.class: BackBee\Bundle\BundleLoader
     bbapp.classcontent.category_manager.class: BackBee\ClassContent\CategoryManager
     bbapp.classcontent.manager.class: BackBee\ClassContent\ClassContentManager
+    bbapp.classcontent.exception_on_unknown_classname: true  # true: always throw an exception on class content unknown
+                                                             # false:  always ignore class content unknown
+                                                             # debug: throw an exception on class content unknown if debug mode is activated
 
 services:
 
