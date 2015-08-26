@@ -284,7 +284,7 @@ class ClassContentListener
     {
         $application = $event->getTarget();
         $container = $application->getContainer();
-        if ($container->hasParameter('bbapp.classcontent.ignore_unknown_classname')) {
+        if ($container->hasParameter('bbapp.classcontent.exception_on_unknown_classname')) {
             $parameter = $container->getParameter('bbapp.classcontent.exception_on_unknown_classname');
         } else {
             $parameter = true;
