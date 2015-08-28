@@ -25,6 +25,8 @@ namespace BackBee\Console\Command;
 
 use BackBee\BBApplication;
 use BackBee\Exception\BBException;
+use Doctrine\DBAL\Event\SchemaAlterTableEventArgs;
+use Doctrine\DBAL\Events;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -148,8 +150,23 @@ EOF
         $schema = new SchemaTool($this->em);
 
         $metadatas = $this->em->getMetadataFactory()->getAllMetadata();
+
+        // Insure the name of altered tables are quoted according to the platform
+        $this->em->getEventManager()->addEventListener(Events::onSchemaAlterTable, $this);
+
         $sqls = $schema->getUpdateSchemaSql($metadatas, true);
 
         return $sqls;
+    }
+
+    /**
+     * Insures the name of the altered table is quoted according to the platform/
+     * 
+     * @param SchemaAlterTableEventArgs $args
+     */
+    public function onSchemaAlterTable(SchemaAlterTableEventArgs $args)
+    {
+        $tableDiff = $args->getTableDiff();
+        $tableDiff->name = $tableDiff->fromTable->getQuotedName($args->getPlatform());
     }
 }
