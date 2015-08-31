@@ -102,11 +102,17 @@ class ManualBBApplication implements ApplicationInterface
     protected $site;
 
     /**
+     * @var boolean
+     */
+    protected $isClientSAPI;
+
+    /**
      * ManualBBApplication's constructor.
      */
     public function __construct($context = null, $environment = null)
     {
         $this->is_started = false;
+        $this->isClientSAPI = false;
         $this->context = null === $context ? BBApplication::DEFAULT_CONTEXT : $context;
         $this->environment = null === $environment ? BBApplication::DEFAULT_ENVIRONMENT : $environment;
         $this->overrided_config = false;
@@ -287,5 +293,10 @@ class ManualBBApplication implements ApplicationInterface
     public function isStarted()
     {
         return $this->is_started;
+    }
+    
+    public function isClientSAPI()
+    {
+        return $this->isClientSAPI;
     }
 }
