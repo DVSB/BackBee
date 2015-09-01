@@ -23,13 +23,16 @@
 
 namespace BackBee\Routing;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
-use BackBee\BBApplication;
+use BackBee\ApplicationInterface;
 use BackBee\DependencyInjection\ContainerInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBee\Site\Site;
+use BackBee\Utils\File\File;
+
+use Psr\Log\LoggerInterface;
+
+use Symfony\Component\Routing\RouteCollection as sfRouteCollection;
 
 /**
  * A RouteCollection represents a set of Route instances.
@@ -51,66 +54,137 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     const RESOURCE_URL = 3;
 
     /**
-     * The current BBApplication.
+     * The current application.
      *
-     * @var \BackBee\BBApplication
+     * @var ApplicationInterface
      */
     private $application;
 
     /**
+     * A message logger.
+     *
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * The raw routes of the collection.
+     *
      * @var array
      */
-    private $raw_routes;
+    private $rawRoutes;
 
     /**
+     * URL prefixes for resources.
+     *
+     * @var atring[]
+     */
+    private $uriPrefixes;
+
+    /**
+     * The current site.
+     *
+     * @var Site
+     */
+    private $currentSite;
+
+    /**
+     * The default protocol scheme for this instance.
+     *
      * @var string
      */
-    private $uri_prefixes;
+    private $defaultScheme;
 
     /**
+     * Is the collection restored?
      * @var boolean
      */
-    private $is_restored;
+    private $isRestored;
 
     /**
      * Class constructor.
      *
-     * @param \BackBee\BBApplication $application
+     * @param ApplicationInterface|null $application Optional, the current application.
+     * @param LoggerInterface|null      $logger      Optional, a message logger
      */
-    public function __construct(BBApplication $application = null)
+    public function __construct(ApplicationInterface $application = null, LoggerInterface $logger = null)
     {
         $this->application = $application;
-        $this->raw_routes = array();
+        $this->logger = $logger;
+        $this->isRestored = false;
+        $this->rawRoutes = [];
+        $this->uriPrefixes = [];
+        $this->defaultScheme = '';
 
-        $this->uri_prefixes = array();
-        $container = $application->getContainer();
-        if (true === $container->hasParameter('bbapp.routing.image_uri_prefix')) {
-            $this->uri_prefixes[self::IMAGE_URL] = $container->getParameter('bbapp.routing.image_uri_prefix');
+        if (
+                null !== $this->application &&
+                null !== $container = $this->application->getContainer()
+        ) {
+            $this->readFromContainer($container);
         }
-
-        if (true === $container->hasParameter('bbapp.routing.media_uri_prefix')) {
-            $this->uri_prefixes[self::MEDIA_URL] = $container->getParameter('bbapp.routing.media_uri_prefix');
-        }
-
-        if (true === $container->hasParameter('bbapp.routing.resource_uri_prefix')) {
-            $this->uri_prefixes[self::RESOURCE_URL] = $container->getParameter('bbapp.routing.resource_uri_prefix');
-        }
-
-        $this->is_restored = false;
     }
 
     /**
-     * [pushRouteCollection description].
+     * Reads varibles from the applicative container.
      *
-     * @param array $routes [description]
+     * @param ContainerInterface $container
+     */
+    private function readFromContainer(ContainerInterface $container)
+    {
+        $this->currentSite = $this->application->getSite();
+
+        $this->setValueIfParameterExists($container, $this->uriPrefixes[self::IMAGE_URL], 'bbapp.routing.image_uri_prefix')
+                ->setValueIfParameterExists($container, $this->uriPrefixes[self::MEDIA_URL], 'bbapp.routing.media_uri_prefix')
+                ->setValueIfParameterExists($container, $this->uriPrefixes[self::RESOURCE_URL], 'bbapp.routing.resource_uri_prefix')
+                ->setValueIfParameterExists($container, $this->defaultScheme, 'bbapp.routing.default_protocol');
+
+        if (null === $this->logger && $container->has('logging')) {
+            $this->logger = $container->get('logging');
+        }
+    }
+
+    /**
+     * Sets the reference $value to the parameter value if exists in the container.
      *
-     * @return [type] [description]
+     * @param ContainerInterface $container The container to read.
+     * @param mixed              $value     The reference value to set.
+     * @param string             $parameter The parameter name to look for in the container.
+     *
+     * @return RouteCollection
+     */
+    private function setValueIfParameterExists(ContainerInterface $container, &$value, $parameter)
+    {
+        if ($container->hasParameter($parameter)) {
+            $value = $container->getParameter($parameter);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Logs with an arbitrary level.
+     *
+     * @param mixed  $level   The log level.
+     * @param string $message The log message.
+     * @param array  $context The log contexts.
+     */
+    private function log($level, $message, array $context = [])
+    {
+        if (null !== $this->logger) {
+            $this->logger->log($level, $message, $context);
+        }
+    }
+
+    /**
+     * Pushes an array of new routes in the collection.
+     *
+     * @param array $routes The new routes to push.
      */
     public function pushRouteCollection(array $routes)
     {
         foreach ($routes as $name => $route) {
-            if (false === array_key_exists('pattern', $route) || false === array_key_exists('defaults', $route)) {
-                $this->application->warning(sprintf('Unable to parse the route definition `%s`.', $name));
+            if (!array_key_exists('pattern', $route) || !array_key_exists('defaults', $route)) {
+                $this->log('warning', sprintf('Unable to parse the route definition `%s`.', $name));
                 continue;
             }
 
@@ -121,115 +195,120 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     }
 
     /**
-     * Return the path associated to a route.
+     * Returns the path associated to a route.
      *
-     * @param string $id
+     * @param  string $name The name of the route to look for.
      *
-     * @return url|NULL
+     * @return string|null     The path of the route if found, null otherwise.
      */
-    public function getRoutePath($id)
+    public function getRoutePath($name)
     {
-        if (null !== $this->get($id)) {
-            return $this->get($id)->getPath();
+        if (null !== $this->get($name)) {
+            return $this->get($name)->getPath();
         }
 
-        return;
+        return null;
     }
 
     /**
-     * Return complete url which match with routeName and routeParams; you can also customize
+     * Returns complete url which match with routeName and routeParams; you can also customize
      * the base url; by default it use current site base url.
      *
-     * @param string      $route_name
-     * @param array|null  $route_params
-     * @param string|null $base_url
-     * @param boolean     $add_ext
+     * @param  string      $name       The name of the route to look for.
+     * @param  array|null  $params     Optional, parameters to apply to the route.
+     * @param  string|null $baseUrl    Optional, base URL to use rather than the computed one.
+     * @param  boolean     $addExt     If true adds the default extension to result.
+     * @param  Site|null   $site       Optional, the site for which the uri will be built.
+     * @param  boolean     $buildQuery If true, adds unused parameters in querystring
      *
-     * @return string
+     * @return string                  The computed URL.
      */
-    public function getUrlByRouteName(
-        $route_name,
-        array $route_params = null,
-        $base_url = null,
-        $add_ext = true,
-        Site $site = null,
-        $build_query = false
-    ) {
-        $uri = $this->getRoutePath($route_name);
-        $params_to_add = array();
-        if (null !== $route_params && true === is_array($route_params)) {
-            foreach ($route_params as $key => $value) {
-                $uri = str_replace('{'.$key.'}', $value, $uri, $count);
-                if (0 === $count) {
-                    $params_to_add[$key] = $value;
-                }
-            }
+    public function getUrlByRouteName($name, array $params = null, $baseUrl = null, $addExt = true, Site $site = null, $buildQuery = false)
+    {
+        $paramsToAdd = [];
+        $uri = $this->applyRouteParameters(
+                $this->getRoutePath($name),
+                (array) $params,
+                $paramsToAdd
+        );
+
+        if (is_string($baseUrl)) {
+            $path = $this->getDefaultExtFromSite($baseUrl.$uri, null, $site);
+        } else {
+            $path = $this->getUri($uri, null, $site);
         }
 
-        $path = null !== $base_url && true === is_string($base_url)
-            ? $base_url.$uri.(false === $add_ext ? '' : $this->getDefaultExtFromSite($site))
-            : $this->getUri($uri, false === $add_ext ? '' : null, $site)
-        ;
+        if (true !== $addExt) {
+            $path = File::removeExtension($path);
+        }
 
-        if (false === empty($params_to_add) && true === $build_query) {
-            $path = $path.'?'.http_build_query($params_to_add);
+        if (!empty($paramsToAdd) && true === $buildQuery) {
+            $path = $path.'?'.http_build_query($paramsToAdd);
         }
 
         return $path;
     }
 
     /**
+     * Applies parameters to route pattern.
+     *
+     * @param  string $uri              The route pattern.
+     * @param  array  $parameters       An array of parameters to apply.
+     * @param  array  $additionalParams Optional, the parameters to found in the pattern.
+     *
+     * @return string                   The route uri modified.
+     */
+    private function applyRouteParameters($uri, array $parameters, array &$additionalParams = array())
+    {
+        $result = $uri;
+
+        foreach ($parameters as $key => $value) {
+            $count = 0;
+            $result = str_replace('{'.$key.'}', $value, $result, $count);
+
+            if (0 === $count) {
+                $additionalParams[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Returns $pathinfo with base url of current page
      * If $site is provided, the url will be pointing on the associate domain.
      *
-     * @param string             $pathinfo
-     * @param string             $defaultExt
-     * @param \BackBee\Site\Site $site
+     * @param  string      $pathinfo  The pathinfo to treate.
+     * @param  string|null $extension Optional, the extension to add to URI.
+     * @param  Site|null   $site      Optional, the site for which the uri will be built.
+     * @param  int|null    $urlType   Optional, the URL prefix to use.
      *
-     * @return string
+     * @return string                 The URI computed.
      */
-    public function getUri($pathinfo = null, $defaultExt = null, Site $site = null, $url_type = null)
+    public function getUri($pathinfo = '', $extension = null, Site $site = null, $urlType = null)
     {
-        if (true === array_key_exists((int) $url_type, $this->uri_prefixes)) {
-            $pathinfo = '/'.$this->uri_prefixes[(int) $url_type].'/'.$pathinfo;
+        // if scheme already provided, returns pathinfo
+        if (parse_url($pathinfo, PHP_URL_SCHEME)) {
+            return $pathinfo;
         }
 
-        // If scheme already provided, return pathinfo
-        if (null !== $pathinfo && preg_match('/^([a-zA-Z1-9\/_]*)http[s]?:\/\//', $pathinfo, $matches)) {
-            return substr($pathinfo, strlen($matches[1]));
-        }
-
+        // ensure $pathinfo is absolute
         if ('/' !== substr($pathinfo, 0, 1)) {
             $pathinfo = '/'.$pathinfo;
         }
 
-        // If no BBApplication or no Request, return pathinfo
-        $application = $this->application;
-        if (null === $application || false === $application->isStarted() || null === $application->getRequest()) {
-            return $pathinfo;
+        // prefixes $pathinfo if needed
+        if (array_key_exists((int) $urlType, $this->uriPrefixes)) {
+            $pathinfo = '/'.$this->uriPrefixes[(int) $urlType].$pathinfo;
         }
 
-        if (null === $pathinfo) {
-            $pathinfo = $this->getUriFromBaseUrl();
+        if (null === $site && $this->hasRequestAvailable()) {
+            $pathinfo = $this->getUriFromBaseUrl($pathinfo);
+        } else {
+            $pathinfo = $this->getUriForSite($pathinfo, $site);
         }
 
-        $pathinfo = str_replace('//', '/', $pathinfo);
-        if (null === $site) {
-            $site = $this->application->getSite();
-        }
-
-        $pathinfo = $this->getUriForSite($application->getRequest(), $pathinfo, $site);
-
-        // If need add default extension provided or set from $site
-        if (false === strpos(basename($pathinfo), '.') && '/' !== substr($pathinfo, -1)) {
-            if (null === $defaultExt) {
-                $defaultExt = $this->getDefaultExtFromSite($site);
-            }
-
-            $pathinfo .= $defaultExt;
-        }
-
-        return str_replace('\\', '/', $pathinfo);
+        return $this->getDefaultExtFromSite($pathinfo, $extension, $site);
     }
 
     /**
@@ -245,7 +324,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     public function dump(array $options = array())
     {
-        return array('routes' => $this->raw_routes);
+        return ['routes' => $this->rawRoutes];
     }
 
     /**
@@ -253,13 +332,18 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     public function restore(ContainerInterface $container, array $dump)
     {
+        if (!isset($dump['routes'])) {
+            $this->log('warning', 'No routes found when restoring collection.');
+            return;
+        }
+
         foreach ($dump['routes'] as $name => $route) {
             $this->addRoute($name, $route);
         }
 
         $this->moveDefaultRoute();
 
-        $this->is_restored = true;
+        $this->isRestored = true;
     }
 
     /**
@@ -267,93 +351,129 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     public function isRestored()
     {
-        return $this->is_restored;
+        return $this->isRestored;
     }
 
     /**
-     * [addRoute description].
+     * Adds a new route to the collection.
      *
-     * @param [type] $name  [description]
-     * @param array  $route [description]
+     * @param string $name  The name of the new route.
+     * @param array  $route The array description of the route.
      */
     private function addRoute($name, array $route)
     {
-        $this->raw_routes[$name] = $route;
+        $this->rawRoutes[$name] = $route;
 
-        $this->add($name, new Route(
-            $route['pattern'],
-            $route['defaults'],
-            true === array_key_exists('requirements', $route)
-                ? $route['requirements']
-                : array()
-        ));
+        $newRoute = new Route(
+                $route['pattern'],
+                $route['defaults'],
+                array_key_exists('requirements', $route) ? $route['requirements'] : []
+        );
 
-        $this->application->debug(sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
+        $this->add($name, $newRoute);
+
+        $this->log('debug', sprintf('Route `%s` with pattern `%s` defined.', $name, $route['pattern']));
     }
 
+    /**
+     * Ensures that the default route is always the last one in the collection.
+     */
     private function moveDefaultRoute()
     {
-        $default_route = $this->get('default');
-        if (null !== $default_route) {
+        $defaultRoute = $this->get('default');
+        if (null !== $defaultRoute) {
             $this->remove('default');
-            $this->add('default', $default_route);
+            $this->add('default', $defaultRoute);
         }
     }
 
     /**
-     * Returns uri from pathinfo according to current request BaseUrl().
+     * Returns URI from pathinfo according to current request BaseUrl().
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param string                                    $pathinfo
+     * @param  string $pathinfo The pathinfo to treate.
      *
-     * @return string
+     * @return string           The computed URI.
      */
-    private function getUriFromBaseUrl()
+    private function getUriFromBaseUrl($pathinfo)
     {
-        $request = $this->application->getRequest();
-        $pathinfo = $request->getBaseUrl();
+        if (!$this->hasRequestAvailable()) {
+            return $this->getUriForSite($pathinfo, $this->currentSite);
+        }
 
-        if (basename($request->getBaseUrl()) == basename($request->server->get('SCRIPT_NAME'))) {
+        $request = $this->application->getRequest();
+        if (basename($request->getBaseUrl()) === basename($request->server->get('SCRIPT_NAME'))) {
             return $request->getSchemeAndHttpHost()
-                    .substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl()))))
-                    .$pathinfo;
+                    . substr($request->getBaseUrl(), 0, -1 * (1 + strlen(basename($request->getBaseUrl()))))
+                    . $pathinfo;
         } else {
             return $request->getUriForPath($pathinfo);
         }
     }
 
     /**
-     * Returns uri from pathinfo according to site to be reached.
+     * Checks is a request is available.
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param string                                    $pathinfo
-     * @param \BackBee\Site\Site                        $site
-     *
-     * @return string
+     * @return boolean Returns true is a request is available, false otherwise.
      */
-    private function getUriForSite(Request $request, $pathinfo, Site $site)
+    private function hasRequestAvailable()
     {
-        return $request->getScheme().'://'.$site->getServerName().$pathinfo;
+        return (
+                null !== $this->application
+                && !$this->application->isClientSAPI()
+                && $this->application->isStarted()
+                );
     }
 
     /**
-     * Returns the default extension for a site.
+     * Returns URI from pathinfo according to site to be reached.
      *
-     * @param \BackBee\Site\Site $site
+     * @param  string    $pathinfo The pathinfo to treate.
+     * @param  Site|null $site     Optional, the site to care of, if null get the current site.
      *
-     * @return string|null
+     * @return string               The computed URI.
      */
-    private function getDefaultExtFromSite(Site $site = null)
+    private function getUriForSite($pathinfo, Site $site = null)
     {
         if (null === $site) {
-            $site = $this->application->getSite();
+            $site = $this->currentSite;
         }
 
-        $extension = null;
-        if (null !== $site) {
-            $extension = $site->getDefaultExtension();
+        if (null === $site || null === $this->application) {
+            return $pathinfo;
         }
 
-        return $extension;
+        $protocol = $this->defaultScheme;
+        if (!empty($this->defaultScheme)) {
+            $protocol .= ':';
+        }
+
+        return $protocol.'//'.$site->getServerName().$pathinfo;
+    }
+
+    /**
+     * Adds the extension provided, pr the default one for a site.
+     *
+     * @param  string      $pathinfo  The pathinfo to change.
+     * @param  string|null $extension Optional, the extention to add.
+     * @param  Site|null   $site      Optional, the site from which the default extension will be got.
+     *
+     * @return string                 The pathinfo with the extension added.
+     */
+    private function getDefaultExtFromSite($pathinfo, $extension = null, Site $site = null)
+    {
+        if (strpos(basename($pathinfo), '.') || '/' === substr($pathinfo, -1)) {
+            return $pathinfo;
+        }
+
+        if (null === $site) {
+            $site = $this->currentSite;
+        }
+
+        $addExtension = $extension;
+        if (null === $extension && null !== $site) {
+            $addExtension = $site->getDefaultExtension();
+        }
+
+        return $pathinfo.$addExtension;
     }
 }

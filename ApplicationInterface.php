@@ -136,9 +136,16 @@ interface ApplicationInterface
     public function isDebugMode();
 
     /**
-     * @return BackBee\Site\Site
+     * @return Site
      */
     public function getSite();
+
+    /**
+     * Is the BackBee application started as SAPI client?
+     * 
+     * @return boolean Returns true is application started as SAPI client, false otherwise
+     */
+    public function isClientSAPI();
 
     /**
      *
