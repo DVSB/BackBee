@@ -82,13 +82,6 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
     private $uriPrefixes;
 
     /**
-     * The current site.
-     *
-     * @var Site
-     */
-    private $currentSite;
-
-    /**
      * The default protocol scheme for this instance.
      *
      * @var string
@@ -131,8 +124,6 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     private function readFromContainer(ContainerInterface $container)
     {
-        $this->currentSite = $this->application->getSite();
-
         $this->setValueIfParameterExists($container, $this->uriPrefixes[self::IMAGE_URL], 'bbapp.routing.image_uri_prefix')
                 ->setValueIfParameterExists($container, $this->uriPrefixes[self::MEDIA_URL], 'bbapp.routing.media_uri_prefix')
                 ->setValueIfParameterExists($container, $this->uriPrefixes[self::RESOURCE_URL], 'bbapp.routing.resource_uri_prefix')
@@ -232,12 +223,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
                 $paramsToAdd
         );
 
-        if (is_string($baseUrl)) {
-            $path = $this->getDefaultExtFromSite($baseUrl.$uri, null, $site);
-        } else {
-            $path = $this->getUri($uri, null, $site);
-        }
-
+        $path = $this->getUri($baseUrl.$uri, null, $site);
         if (true !== $addExt) {
             $path = File::removeExtension($path);
         }
@@ -396,10 +382,6 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     private function getUriFromBaseUrl($pathinfo)
     {
-        if (!$this->hasRequestAvailable()) {
-            return $this->getUriForSite($pathinfo, $this->currentSite);
-        }
-
         $request = $this->application->getRequest();
         if (basename($request->getBaseUrl()) === basename($request->server->get('SCRIPT_NAME'))) {
             return $request->getSchemeAndHttpHost()
@@ -434,11 +416,8 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
      */
     private function getUriForSite($pathinfo, Site $site = null)
     {
-        if (null === $site) {
-            $site = $this->currentSite;
-        }
-
-        if (null === $site || null === $this->application) {
+        $siteUsed = $this->getCurrentSite($site);
+        if (null === $siteUsed || null === $this->application) {
             return $pathinfo;
         }
 
@@ -447,7 +426,7 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             $protocol .= ':';
         }
 
-        return $protocol.'//'.$site->getServerName().$pathinfo;
+        return $protocol.'//'.$siteUsed->getServerName().$pathinfo;
     }
 
     /**
@@ -465,15 +444,32 @@ class RouteCollection extends sfRouteCollection implements DumpableServiceInterf
             return $pathinfo;
         }
 
-        if (null === $site) {
-            $site = $this->currentSite;
-        }
-
+        $siteUsed = $this->getCurrentSite($site);
         $addExtension = $extension;
-        if (null === $extension && null !== $site) {
-            $addExtension = $site->getDefaultExtension();
+        if (null === $addExtension && null !== $siteUsed) {
+            $addExtension = $siteUsed->getDefaultExtension();
         }
 
         return $pathinfo.$addExtension;
+    }
+
+    /**
+     * Returns the current site if defined.
+     * 
+     * @param  Site|null $site Optional, if provided, will be return.
+     * 
+     * @return Site|null
+     */
+    private function getCurrentSite(Site $site = null)
+    {
+        if (null !== $site) {
+            return $site;
+        }
+
+        if (null !== $this->application) {
+            return $this->application->getSite();
+        }
+
+        return null;
     }
 }

@@ -192,7 +192,7 @@ class RouteCollectionTest extends BackBeeTestCase
         $this->assertEquals('https://www.fakeserver.com/public/fake/1/2.html', $routeCollection->getUrlByRouteName('fake', ['param1' => '1', 'param2' => '2']));
         $this->assertEquals('https://www.fakeserver.com/public/fake/1/2.html', $routeCollection->getUrlByRouteName('fake', ['param1' => '1', 'param2' => '2', 'param3' => '3']));
         $this->assertEquals('https://www.fakeserver.com/public/fake/1/2.html?param3=3', $routeCollection->getUrlByRouteName('fake', ['param1' => '1', 'param2' => '2', 'param3' => '3'], null, true, null, true));
-        $this->assertEquals('/test/fake/1/2.html', $routeCollection->getUrlByRouteName('fake', ['param1' => '1', 'param2' => '2'], '/test'));
+        $this->assertEquals('https://www.fakeserver.com/public/test/fake/1/2.html', $routeCollection->getUrlByRouteName('fake', ['param1' => '1', 'param2' => '2'], '/test'));
         $this->assertEquals('https://www.fakeserver.com/public/fake/1/2', $routeCollection->getUrlByRouteName('fake', ['param1' => '1', 'param2' => '2'], null, false));
     }
 }
