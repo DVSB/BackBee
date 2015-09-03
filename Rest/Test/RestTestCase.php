@@ -166,8 +166,6 @@ class RestTestCase extends TestCase
             $user = self::$restUser;
         }
 
-        // @todo: complete this method if needed
-
         return self;
     }
 

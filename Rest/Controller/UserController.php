@@ -414,8 +414,6 @@ class UserController extends AbstractRestController
     }
 
     /**
-     * @todo  set minimal password size in security config
-     * [updateUserPassword description]
      *
      * @param User    $user    [description]
      * @param Request $request [description]

@@ -171,7 +171,6 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      */
     private function _authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)
     {
-        //@todo: don't use salt in call_user_func anymore
         if (null !== $user->getSalt() &&
                 call_user_func($user->getSalt(), $token->getCredentials()) === $user->getPassword()) {
             return new UsernamePasswordToken($user, $user->getPassword(), $user->getRoles());
