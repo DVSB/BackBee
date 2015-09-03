@@ -85,6 +85,19 @@ class PageController extends AbstractRestController
         return $this->createJsonResponse($metadata);
     }
 
+
+    /**
+     * Get page ancestors
+     * @param Page $page the page we want to get its ancestors
+     * @return Symfony\Component\HttpFoundation\Response
+     * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
+     */
+    public function getAncestorsAction(Page $page)
+    {
+       $ancestors = $this->getPageRepository()->getAncestors($page);
+       return $this->createResponse($this->formatCollection($ancestors));
+    }
+
     /**
      * Update page's metadatas.
      *
@@ -780,7 +793,7 @@ class PageController extends AbstractRestController
             $count++;
         }
 
-        $result_count = $start + $count - 1; // minus 1 cause $start start at 0 and not 1
+        $result_count = $start + $count - 1; // minus 1 because $start starts at 0 and not at 1
         $response = $this->createResponse($this->formatCollection($results));
         if (0 < $count) {
             $response->headers->set('Content-Range', "$start-$result_count/".count($results));

@@ -255,7 +255,16 @@ bb.rest.page.get_metadata:
     requirements:
         uid: \w{32}
         _method: GET
-
+        
+bb.rest.page.get_ancestors:
+  pattern: /rest/{version}/page/{uid}/ancestors
+  defaults:
+    _action: getAncestorsAction
+    _controller: BackBee\Rest\Controller\PageController
+  requirements:
+    uid: \w{32}
+    _method: GET
+        
 bb.rest.page.put_metadata:
     pattern: /rest/{version}/page/{uid}/metadata
     defaults:
