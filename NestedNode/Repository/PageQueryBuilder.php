@@ -367,7 +367,6 @@ class PageQueryBuilder extends QueryBuilder
 
     /**
      * Add query part to select page matching provided criteria.
-     * @Todo: more generic search function
      *
      * @param  integer|integer[]    $restrictedStates   Optional, limit to pages having provided states, empty by default.
      * @param  string[]             $options            Optional, the search criteria:

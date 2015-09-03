@@ -60,7 +60,6 @@ class PublicKeyToken extends BBUserToken
      * @codeCoverageIgnore
      *
      * @return type
-     *              todo Function added: problem with redirection - authentification lost.
      */
     public function isAuthenticated()
     {
