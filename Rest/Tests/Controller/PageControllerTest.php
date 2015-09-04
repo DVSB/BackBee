@@ -312,6 +312,38 @@ class PageControllerTest extends RestTestCase
         //
     }
 
+    public function testGetAncestorsAction()
+    {
+        $pages = $this->initializeTestGetCollectionAction();
+
+        $homePage =  $pages["home"];
+        $deletePage = $pages["delete"];
+        $online2Page = $pages["online2"];
+
+        /* home page has no ancestors */
+        $response1 = $this->sendRequest(self::requestGet("/rest/1/page/" . $homePage->getUid() . "/ancestors"));
+        $this->assertEquals(200, $response1->getStatusCode());
+        $resContent1 =  json_decode($response1->getContent(), true);
+        $this->assertInternalType('array', $resContent1);
+        $this->assertCount(0, $resContent1);
+
+        /*delete page has one ancestor*/
+        $response2 = $this->sendRequest(self::requestGet("/rest/1/page/" . $deletePage->getUid() . "/ancestors"));
+        $this->assertEquals(200, $response2->getStatusCode());
+        $restContent2 = json_decode($response2->getContent(), true);
+        $this->assertInternalType('array', $restContent2);
+        $this->assertCount(1, $restContent2);
+
+        /*online2 page has two ancestor*/
+        $response3 = $this->sendRequest(self::requestGet("/rest/1/page/" . $online2Page->getUid() . "/ancestors"));
+        $this->assertEquals(200, $response3->getStatusCode());
+        $restContent3 = json_decode($response3->getContent(), true);
+        $this->assertInternalType('array', $restContent3);
+        $this->assertCount(2, $restContent3);
+    }
+
+
+
     public function testPutCollectionActionHardDelete()
     {
         $this->markTestSkipped('To do this test work we need to change TestCase system to BackBeeTestCase');
