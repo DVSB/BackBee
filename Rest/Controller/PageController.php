@@ -60,7 +60,7 @@ class PageController extends AbstractRestController
     /**
      * Returns page entity available status.
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function getAvailableStatusAction()
     {
@@ -72,7 +72,7 @@ class PageController extends AbstractRestController
      *
      * @param Page $page the page we want to get its metadatas
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      */
@@ -89,13 +89,14 @@ class PageController extends AbstractRestController
     /**
      * Get page ancestors
      * @param Page $page the page we want to get its ancestors
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      */
     public function getAncestorsAction(Page $page)
     {
-       $ancestors = $this->getPageRepository()->getAncestors($page);
-       return $this->createResponse($this->formatCollection($ancestors));
+        $ancestors = $this->getPageRepository()->getAncestors($page);
+
+        return $this->createResponse($this->formatCollection($ancestors));
     }
 
     /**
@@ -305,7 +306,7 @@ class PageController extends AbstractRestController
     /**
      * Update page.
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\RequestParam(name="title", description="Page title", requirements={
      *   @Assert\NotBlank(message="title is required")
@@ -375,7 +376,7 @@ class PageController extends AbstractRestController
     /**
      * Update page collecton.
      *
-     * @return Symfony\Component\HttpFoundation\JsonResponse
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      *
      * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
@@ -481,7 +482,7 @@ class PageController extends AbstractRestController
     /**
      * Patch page.
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\RequestParam(name="0", description="Patch operations", requirements={
      *   @Assert\NotBlank(message="Request must contain at least one operation")
@@ -527,7 +528,7 @@ class PageController extends AbstractRestController
     /**
      * Delete page.
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      */
@@ -551,7 +552,7 @@ class PageController extends AbstractRestController
     /**
      * Clone a page.
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Rest\RequestParam(name="title", description="Cloning page new title", requirements={
      *   @Assert\Length(min=3, minMessage="Title must contains atleast 3 characters"),
@@ -630,7 +631,7 @@ class PageController extends AbstractRestController
      * @param string $contentType
      * @param string $contentUid
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     private function doGetCollectionByContent($contentType, $contentUid)
     {
@@ -667,7 +668,7 @@ class PageController extends AbstractRestController
      * @param integer   $count
      * @param Page|null $parent
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     private function doClassicGetCollectionVersion1(Request $request, $start, $count, Page $parent = null)
     {
@@ -708,7 +709,7 @@ class PageController extends AbstractRestController
      * @param integer   $count
      * @param Page|null $parent
      *
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     private function doClassicGetCollection(Request $request, $start, $count, Page $parent = null)
     {
