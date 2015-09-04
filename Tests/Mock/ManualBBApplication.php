@@ -107,6 +107,16 @@ class ManualBBApplication implements ApplicationInterface
     protected $isClientSAPI;
 
     /**
+     * @var string[]
+     */
+    protected $resourceDir = [];
+
+    /**
+     * @var string[]
+     */
+    protected $classcontentDir = [];
+
+    /**
      * ManualBBApplication's constructor.
      */
     public function __construct($context = null, $environment = null)
@@ -217,6 +227,26 @@ class ManualBBApplication implements ApplicationInterface
      */
     public function getDataDir()
     {
+    }
+
+    /**
+     * Return the resource directories, if undefined, initialized with common resources.
+     *
+     * @return string[] The resource directories.
+     */
+    public function getResourceDir()
+    {
+        return $this->resourceDir;
+    }
+
+    /**
+     * Return the classcontent repositories path for this instance.
+     *
+     * @return string[]
+     */
+    public function getClassContentDir()
+    {
+        return $this->classcontentDir;
     }
 
     /**

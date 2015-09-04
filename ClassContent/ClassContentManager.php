@@ -24,10 +24,9 @@
 namespace BackBee\ClassContent;
 
 use BackBee\ApplicationInterface;
+use BackBee\ClassContent\Iconizer\IconizerInterface;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\Routing\RouteCollection;
 use BackBee\Security\Token\BBUserToken;
-use BackBee\Utils\File\File;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Security\Core\Util\ClassUtils;
 
@@ -36,29 +35,63 @@ use Symfony\Component\Security\Core\Util\ClassUtils;
  */
 class ClassContentManager
 {
+    /**
+     * @var ApplicationInterface
+     */
     private $application;
-    private $categoryManager;
-    private $em;
-    private $thumbnailBaseDir;
+
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
+
+    /**
+     * @var BBUserToken
+     */
     private $token;
+
+    /**
+     * @var IconizerInterface
+     */
+    private $iconizer;
+
+    /**
+     * @var string[]
+     */
+    private $contentClassnames;
 
     /**
      * Instantiate a ClassContentManager.
      *
-     * @param ApplicationInterface $application
+     * @param ApplicationInterface   $application The current application.
+     * @param IconizerInterface|null $iconizer    Optional, an content iconizer.
      */
-    public function __construct(ApplicationInterface $application)
+    public function __construct(ApplicationInterface $application, IconizerInterface $iconizer = null)
     {
         $this->application = $application;
-        $this->em = $application->getEntityManager();
-        $this->categoryManager = $application->getContainer()->get('classcontent.category_manager');
+        $this->entityManager = $application->getEntityManager();
+        $this->iconizer = $iconizer;
+    }
+
+    /**
+     * Sets a content iconizer to manager.
+     *
+     * @param  IconizerInterface $iconizer The content iconizer to use.
+     *
+     * @return ClassContentManager
+     */
+    public function setIconizer(IconizerInterface $iconizer)
+    {
+        $this->iconizer = $iconizer;
+
+        return $this;
     }
 
     /**
      * Setter of BBUserToken.
      *
-     * @param BBUserToken $token
-     * 
+     * @param  BBUserToken|null $token
+     *
      * @return ClassContentManager
      */
     public function setBBUserToken(BBUserToken $token = null)
@@ -71,10 +104,12 @@ class ClassContentManager
     /**
      * Updates the content whith provided data.
      *
-     * @param  AbstractClassContent $content
-     * @param  array                $data    array of data that must contains parameters and/or elements key
-     * @return AbstractClassContent
-     * @throws \InvalidArgumentException if provided data doesn't have parameters and elements key
+     * @param  AbstractClassContent $content The content to be updated.
+     * @param  array                $data    Array of data that must contains parameters and/or elements key.
+     *
+     * @return ClassContentManager
+     *
+     * @throws \InvalidArgumentException     Raises if provided data doesn't have parameters and elements key.
      */
     public function update(AbstractClassContent $content, array $data)
     {
@@ -94,10 +129,11 @@ class ClassContentManager
     }
 
     /**
-     * Calls ::jsonSerialize of the content and build valid url for image
+     * Calls ::jsonSerialize of the content and build valid url for image.
      *
      * @param  AbstractClassContent $content
      * @param  integer              $format
+     *
      * @return array
      */
     public function jsonEncode(AbstractClassContent $content, $format = AbstractClassContent::JSON_DEFAULT_FORMAT)
@@ -107,7 +143,13 @@ class ClassContentManager
             $content = new $classname;
         }
 
-        return $this->updateClassContentImageUrl($content->jsonSerialize($format));
+        $result = $content->jsonSerialize($format);
+
+        if (isset($result['image']) && null !== $this->iconizer) {
+            $result['image'] = $this->iconizer->getIcon($content);
+        }
+
+        return $result;
     }
 
     /**
@@ -117,7 +159,7 @@ class ClassContentManager
      *
      * @param mixed $collection The collection to encode
      * @param int   $format     The format to use
-     * 
+     *
      * @return array
      * @throws \InvalidArgumentException if provided collection is not supported type
      */
@@ -152,38 +194,38 @@ class ClassContentManager
     /**
      * Returns all classcontents classnames
      *
-     * @return array An array that contains all classcontents classnames
+     * @return string[] An array that contains all classcontents classnames
      */
     public function getAllClassContentClassnames()
     {
-        $classnames = [];
-        foreach ($this->categoryManager->getCategories() as $category) {
-            foreach ($category->getBlocks() as $block) {
-                $classnames[] = AbstractClassContent::getClassnameByContentType($block->type);
+        if (null === $this->contentClassnames) {
+            $this->contentClassnames = [AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'];
+            foreach ($this->application->getClassContentDir() as $directory) {
+                $this->contentClassnames = array_merge(
+                        $this->contentClassnames,
+                        CategoryManager::getClassContentClassnamesFromDir($directory)
+                );
             }
         }
 
-        return array_merge($this->getAllElementClassContentClassnames(), $classnames);
+        return $this->contentClassnames;
     }
 
     /**
      * Returns classnames of all classcontents element
      *
-     * @return array Contains every BackBee's element classcontent classnames
+     * @return string[] Contains every BackBee's element classcontent classnames
      */
     public function getAllElementClassContentClassnames()
     {
-        $directory = $this->application->getBBDir().DIRECTORY_SEPARATOR.'ClassContent';
-
-        $classnames = array_map(
-            function ($path) use ($directory) {
-                return str_replace(
-                    [DIRECTORY_SEPARATOR, '\\\\'],
-                    [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
-                    AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
+        $classnames = array_filter(
+            $this->getAllClassContentClassnames(),
+            function ($classname) {
+                return false !== strpos(
+                    $classname,
+                    AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.'Element\\'
                 );
-            },
-            File::getFilesRecursivelyByExtension($directory, 'yml')
+            }
         );
 
         $classnames[] = AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.'ContentSet';
@@ -196,12 +238,12 @@ class ClassContentManager
      *
      * @param AbstractClassContent $content           The content we want to get the latest revision
      * @param boolean              $checkoutOnMissing If TRUE, checkout a new revision for $content
-     * 
-     * @return null|BackBee\ClassContent\Revision
+     *
+     * @return null|Revision
      */
     public function getDraft(AbstractClassContent $content, $checkoutOnMissing = false)
     {
-        return $this->em->getRepository('BackBee\ClassContent\Revision')->getDraft(
+        return $this->entityManager->getRepository('BackBee\ClassContent\Revision')->getDraft(
             $content,
             $this->token ?: $this->application->getBBUserToken(),
             $checkoutOnMissing
@@ -213,8 +255,8 @@ class ClassContentManager
      *
      * @param  AbstractClassContent $content
      * @param  array                $data
-     * 
-     * @return self
+     *
+     * @return ClassContentManager
      */
     public function commit(AbstractClassContent $content, array $data)
     {
@@ -243,8 +285,8 @@ class ClassContentManager
      *
      * @param  AbstractClassContent $content
      * @param  array                $data
-     * 
-     * @return self
+     *
+     * @return ClassContentManager
      */
     public function revert(AbstractClassContent $content, array $data)
     {
@@ -274,12 +316,13 @@ class ClassContentManager
      * @param  string  $uid
      * @param  boolean $hydrateDraft      if true and BBUserToken is setted, will try to get and set draft to content
      * @param  boolean $checkoutOnMissing this parameter is used only if hydrateDraft is true
-     * @return AbstractClassContent
+     *
+     * @return AbstractClassContent|null
      */
     public function findOneByTypeAndUid($type, $uid, $hydrateDraft = false, $checkoutOnMissing = false)
     {
         $classname = AbstractClassContent::getClassnameByContentType($type);
-        $content = $this->em->getRepository($classname)->findOneBy(['_uid' => $uid]);
+        $content = $this->entityManager->getRepository($classname)->findOneBy(['_uid' => $uid]);
 
         if (null !== $content && true === $hydrateDraft && null !== $this->token) {
             $content->setDraft($this->getDraft($content, $checkoutOnMissing));
@@ -289,105 +332,40 @@ class ClassContentManager
     }
 
     /**
-     * Update a single classcontent image url.
-     *
-     * @param array $classcontent the classcontent we want to update its image url
-     * @return array
-     */
-    private function updateClassContentImageUrl(array $data)
-    {
-        if (!isset($data['image'])) {
-            return $data;
-        }
-
-        $imageUri = '';
-        $urlType = RouteCollection::RESOURCE_URL;
-        if ('/' === $data['image'][0]) {
-            $imageUri = $data['image'];
-            $urlType = RouteCollection::IMAGE_URL;
-        } else {
-            $baseFolder = $this->application->getContainer()->getParameter('classcontent_thumbnail.base_folder');
-            foreach ($this->getThumbnailBaseFolderPath() as $baseDir) {
-                $imageFilepath = $baseDir.DIRECTORY_SEPARATOR.$data['image'];
-                if (file_exists($imageFilepath) && is_readable($imageFilepath)) {
-                    $imageUri = $baseFolder.DIRECTORY_SEPARATOR.$data['image'];
-
-                    break;
-                } else {
-                    $imageUri = $baseFolder.DIRECTORY_SEPARATOR.'default_thumbnail.png';
-                }
-            }
-        }
-
-        $data['image'] = $this->application->getRouting()->getUri($imageUri, null, null, $urlType);
-
-        return $data;
-    }
-
-    /**
-     * Getter of class content thumbnail folder path
-     *
-     * @return string
-     */
-    private function getThumbnailBaseFolderPath()
-    {
-        if (null === $this->thumbnailBaseDir) {
-            $this->thumbnailBaseDir = [];
-            $baseFolder = $this->application->getContainer()->getParameter('classcontent_thumbnail.base_folder');
-            $thumbnailBaseDir = array_map(function ($directory) use ($baseFolder) {
-                return str_replace(
-                    DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,
-                    DIRECTORY_SEPARATOR,
-                    $directory.DIRECTORY_SEPARATOR.$baseFolder
-                );
-            }, $this->application->getResourceDir());
-
-            foreach (array_unique($thumbnailBaseDir) as $directory) {
-                if (is_dir($directory)) {
-                    $this->thumbnailBaseDir[] = $directory;
-                }
-            }
-        }
-
-        return $this->thumbnailBaseDir;
-    }
-
-    /**
      * Updates provided content's elements with data
      *
      * @param  AbstractClassContent $content
-     * @param  array         $elementsData
-     * @return self
+     * @param  array                $elementsData
+     *
+     * @return ClassContentManager
      */
     private function updateElements(AbstractClassContent $content, array $elementsData)
     {
         if ($content instanceof ContentSet) {
-            $content->clear();
-            foreach ($elementsData as $data) {
-                $element = $this->findOneByTypeAndUid($data['type'], $data['uid']);
-                if ($content->isAccepted($element)) {
-                    $content->push($element);
-                }
-            }
+            $elements = $this->prepareElements($elementsData, false);
+            $this->updateContentSetElements($content, $elements);
         } else {
-            foreach ($elementsData as $key => $values) {
-                if (is_scalar($values) && $content->isAccepted($values, $key)) {
-                    $content->$key = $values;
-                } elseif (is_array($values)) {
-                    if (isset($values['type']) && isset($values['uid'])) {
-                        $values = [$values];
-                    }
+            $elements = $this->prepareElements($elementsData);
+            $this->updateContentElements($content, $elements);
+        }
 
-                    $elements = [];
-                    foreach ($values as $data) {
-                        $element = $this->findOneByTypeAndUid($data['type'], $data['uid']);
-                        if ($content->isAccepted($element, $key)) {
-                            $elements[] = $element;
-                        }
-                    }
+        return $this;
+    }
 
-                    $content->$key = $elements;
-                }
+    /**
+     * Updates provided contentset's elements with data.
+     *
+     * @param  ContentSet $content
+     * @param  array      $elementsData
+     *
+     * @return ClassContentManager
+     */
+    private function updateContentSetElements(ContentSet $content, array $elementsData)
+    {
+        $content->clear();
+        foreach ($elementsData as $data) {
+            if ($data instanceof AbstractClassContent) {
+                $content->push($data);
             }
         }
 
@@ -395,11 +373,65 @@ class ClassContentManager
     }
 
     /**
+     * Updates provided content's elements with data.
+     *
+     * @param  AbstractClassContent $content
+     * @param  array                $elementsData
+     *
+     * @return ClassContentManager
+     */
+    private function updateContentElements(AbstractClassContent $content, array $elementsData)
+    {
+        foreach ($elementsData as $key => $data) {
+            $content->$key = $data;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Prepare elements to be setted.
+     *
+     * @param  array   $elementsData The elements to be setted.
+     * @param  boolean $acceptScalar If true, scalar value will be accepted.
+     *
+     * @return array
+     */
+    private function prepareElements(array $elementsData, $acceptScalar = true)
+    {
+        $elements = [];
+        foreach ($elementsData as $key => $data) {
+            if (true === $acceptScalar && is_scalar($data)) {
+                $elements[$key] = $data;
+                continue;
+            }
+
+            if (!is_array($data)) {
+                continue;
+            }
+
+            if (
+                    isset($data['type'])
+                    && isset($data['uid'])
+                    && null !== $element = $this->findOneByTypeAndUid($data['type'], $data['uid'])
+            ) {
+                $elements[$key] = $element;
+                continue;
+            }
+
+            $elements[$key] = $this->prepareElements($data, false);
+        }
+
+        return $elements;
+    }
+
+    /**
      * Updates provided content's parameters.
      *
      * @param  AbstractClassContent $content
-     * @param  array         $paramsData
-     * @return self
+     * @param  array                $paramsData
+     *
+     * @return ClassContentManager
      */
     private function updateParameters(AbstractClassContent $content, array $paramsData)
     {
@@ -414,9 +446,10 @@ class ClassContentManager
      * Prepares draft for commit.
      *
      * @param  AbstractClassContent $content
-     * @param  Revision      $draft
-     * @param  array         $data
-     * @return self
+     * @param  Revision             $draft
+     * @param  array                $data
+     *
+     * @return ClassContentManager
      */
     private function prepareDraftForCommit(AbstractClassContent $content, Revision $draft, array $data)
     {
@@ -454,8 +487,9 @@ class ClassContentManager
      * Executes commit action on content and its draft.
      *
      * @param  AbstractClassContent $content
-     * @param  Revision      $draft
-     * @return self
+     * @param  Revision             $draft
+     *
+     * @return ClassContentManager
      */
     private function executeCommit(AbstractClassContent $content, Revision $draft)
     {
@@ -465,7 +499,7 @@ class ClassContentManager
             $content->clear();
             while ($subcontent = $draft->next()) {
                 if ($subcontent instanceof AbstractClassContent) {
-                    $subcontent = $this->em->getRepository(ClassUtils::getRealClass($subcontent))->load($subcontent);
+                    $subcontent = $this->entityManager->getRepository(ClassUtils::getRealClass($subcontent))->load($subcontent);
                     if (null !== $subcontent) {
                         $content->push($subcontent);
                     }
@@ -476,7 +510,7 @@ class ClassContentManager
                 $values = is_array($values) ? $values : [$values];
                 foreach ($values as &$subcontent) {
                     if ($subcontent instanceof AbstractClassContent) {
-                        $subcontent = $this->em->getRepository(ClassUtils::getRealClass($subcontent))
+                        $subcontent = $this->entityManager->getRepository(ClassUtils::getRealClass($subcontent))
                             ->load($subcontent)
                         ;
                     }
@@ -505,8 +539,9 @@ class ClassContentManager
      * Runs process of post commit.
      *
      * @param  AbstractClassContent $content
-     * @param  Revision      $draft
-     * @return self
+     * @param  Revision             $draft
+     *
+     * @return ClassContentManager
      */
     private function commitPostProcess(AbstractClassContent $content, Revision $draft)
     {
@@ -514,17 +549,20 @@ class ClassContentManager
         if (0 !== count($data['parameters']) && 0 !== count($data['elements'])) {
             $draft->setRevision($content->getRevision());
             $draft->setState(Revision::STATE_MODIFIED);
-            $this->em->persist($draft);
+            $this->entityManager->persist($draft);
         }
+
+        return $this;
     }
 
     /**
      * Executes revert action on content and its draft.
      *
      * @param  AbstractClassContent $content
-     * @param  Revision      $draft
-     * @param  array         $data
-     * @return self
+     * @param  Revision             $draft
+     * @param  array                $data
+     *
+     * @return ClassContentManager
      */
     private function executeRevert(AbstractClassContent $content, Revision $draft, array $data)
     {
@@ -558,18 +596,21 @@ class ClassContentManager
      * Runs revert post action on content and its draft.
      *
      * @param  AbstractClassContent $content
-     * @param  Revision      $draft
-     * @return self
+     * @param  Revision             $draft
+     *
+     * @return ClassContentManager
      */
     private function revertPostProcess(AbstractClassContent $content, Revision $draft)
     {
         $data = $draft->jsonSerialize();
         if (0 === count($data['parameters']) && 0 === count($data['elements'])) {
-            $this->em->remove($draft);
+            $this->entityManager->remove($draft);
 
             if (AbstractClassContent::STATE_NEW === $content->getState()) {
-                $this->em->remove($content);
+                $this->entityManager->remove($content);
             }
         }
+
+        return $this;
     }
 }

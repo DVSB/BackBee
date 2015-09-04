@@ -119,16 +119,7 @@ class CategoryManager
     {
         $classcontents = [];
         foreach ($directories as $directory) {
-            $classcontents = array_merge($classcontents, array_map(
-                function ($path) use ($directory) {
-                    return str_replace(
-                        [DIRECTORY_SEPARATOR, '\\\\'],
-                        [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
-                        AbstractContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
-                    );
-                },
-                File::getFilesRecursivelyByExtension($directory, 'yml')
-            ));
+            $classcontents = array_merge($classcontents, self::getClassContentClassnamesFromDir($directory));
         }
 
         foreach ($classcontents as $class) {
@@ -176,5 +167,26 @@ class CategoryManager
     private function buildCategoryId($name)
     {
         return mb_strtolower(str_replace(' ', '_', $name), 'UTF-8');
+    }
+
+    /**
+     * Returns all content classnames found  in $directory.
+     * 
+     * @param  string $directory The directory to look at.
+     * 
+     * @return string[]          An array of content classnames found in directory.
+     */
+    public static function getClassContentClassnamesFromDir($directory)
+    {
+        return array_map(
+            function ($path) use ($directory) {
+                return str_replace(
+                    [DIRECTORY_SEPARATOR, '\\\\'],
+                    [NAMESPACE_SEPARATOR, NAMESPACE_SEPARATOR],
+                    AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE.str_replace([$directory, '.yml'], ['', ''], $path)
+                );
+            },
+            File::getFilesRecursivelyByExtension($directory, 'yml')
+        );
     }
 }
