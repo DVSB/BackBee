@@ -102,15 +102,25 @@ class RewritingListener
         $urlGenerator = $application->getUrlGenerator();
 
         $em = $application->getEntityManager();
-        if (null === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
-            $maincontent = $em->getRepository('BackBee\ClassContent\AbstractClassContent')
-                ->getLastByMainnode($page, $urlGenerator->getDiscriminators())
-            ;
-        }
 
         $uow = $em->getUnitOfWork();
         $changeSet = $uow->getEntityChangeSet($page);
 
+        if (null === $maincontent && 0 < count($urlGenerator->getDiscriminators())) {
+            if ($uow->isScheduledForInsert($page)) {
+               foreach($uow->getScheduledEntityInsertions() as $entity) {
+                   if ($entity instanceof \BackBee\ClassContent\AbstractClassContent && $page === $entity->getMainNode()) {
+                       $maincontent = $entity;
+                       break;
+                   }
+               }
+            } else {
+                $maincontent = $em->getRepository('BackBee\ClassContent\AbstractClassContent')
+                    ->getLastByMainnode($page, $urlGenerator->getDiscriminators())
+                ;
+            }
+        }
+        
         $newUrl = null;
         $url = $page->getUrl(false);
         if (isset($changeSet['_url']) && !empty($url)) {
