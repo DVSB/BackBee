@@ -637,7 +637,7 @@ class ClassContentRepository extends EntityRepository
             $q = $this->createQueryBuilder('c');
 
             foreach ($classnames as $classname) {
-                $q->orWhere('c INSTANCE OF '.  AbstractClassContent::getShortClassname($classname));
+                $q->orWhere('c INSTANCE OF '.  AbstractClassContent::getFullClassname($classname));
             }
 
             $q->andWhere('c._mainnode = :node')
