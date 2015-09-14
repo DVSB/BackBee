@@ -853,7 +853,7 @@ class PageBuilder
      */
     private function doPersistIfValid(Page $page)
     {
-        if (null === $page->getParent()) {
+        if (null === $page->getParent() && !empty($this->persist)) {
             // If root, only persist
             $this->em->persist($page);
             return;
