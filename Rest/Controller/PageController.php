@@ -740,14 +740,9 @@ class PageController extends AbstractRestController
 
         if ($request->query->has('root')) {
             $qb->andParentIs(null);
-        } elseif ($parent !== null && $request->query->has('level_offset')) {
-            $this->granted('VIEW', $parent);
-            $qb->andIsDescendantOf($parent, true, $request->query->get('level_offset'), $order_by, $count, $start);
         } elseif ($parent !== null) {
             $this->granted('VIEW', $parent);
-            $qb->andIsDescendantOf($parent, true, null, $order_by, $count, $start);
-        } else {
-            $qb->addMultipleOrderBy($order_by);
+            $qb->andIsDescendantOf($parent, true, $request->query->get('level_offset'), $order_by, $count, $start);
         }
 
         if (null !== $state = $request->query->get('state', null)) {
@@ -782,6 +777,8 @@ class PageController extends AbstractRestController
         if (null !== $modified_after = $request->query->get('modified_after', null)) {
             $qb->andWhere($qb->getAlias().'._modified < :modified_after')->setParameter('modified_after', $modified_after);
         }
+
+        $qb->addMultipleOrderBy($order_by);
 
         return $this->paginateClassicCollectionAction($qb, $start, $count);
     }
