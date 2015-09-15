@@ -132,13 +132,6 @@ abstract class AbstractClassContent extends AbstractContent
     protected $_indexation;
 
     /**
-     * The content's properties as defined in yaml file.
-     *
-     * @var array
-     */
-    protected $properties = [];
-
-    /**
      * Default parameters as defined in yaml file.
      *
      * @var array
@@ -277,41 +270,6 @@ abstract class AbstractClassContent extends AbstractContent
     public function getIndexation()
     {
         return $this->_indexation;
-    }
-
-    /**
-     * Returns defined property of the content or all the properties.
-     *
-     * @param string $var the property to be return, if NULL, all properties are returned
-     *
-     * @return mixed The property value or NULL if unfound
-     */
-    public function getProperty($var = null)
-    {
-        if (null === $var) {
-            return $this->properties;
-        }
-
-        if (isset($this->properties[$var])) {
-            return $this->properties[$var];
-        }
-
-        return;
-    }
-
-    /**
-     * Updates a non persistent property value for the current instance.
-     *
-     * @param string $var   the name of the property
-     * @param mixed  $value the value of the property
-     *
-     * @return \BackBee\ClassContent\AbstractClassContent the current instance
-     */
-    public function setProperty($var, $value)
-    {
-        $this->properties[$var] = $value;
-
-        return $this;
     }
 
     /**
@@ -543,23 +501,6 @@ abstract class AbstractClassContent extends AbstractContent
         } else {
             $this->setProperty('is_container', false);
         }
-    }
-
-    /**
-     * Dynamically adds and sets new property to this content.
-     *
-     * @param string $var   the name of the property
-     * @param mixed  $value the value of the property
-     *
-     * @return \BackBee\ClassContent\AbstractClassContent The current instance
-     */
-    protected function defineProperty($var, $value)
-    {
-        if (!array_key_exists($var, $this->properties)) {
-            $this->properties[$var] = $value;
-        }
-
-        return $this;
     }
 
     /**
@@ -905,16 +846,6 @@ abstract class AbstractClassContent extends AbstractContent
     public function getImageName()
     {
         return $this->getDefaultImageName();
-    }
-
-    /**
-     * Computes and returns image name of current content.
-     *
-     * @return string
-     */
-    final public function getDefaultImageName()
-    {
-        return str_replace([self::CLASSCONTENT_BASE_NAMESPACE, '\\'], ['', '/'], get_class($this)).'.png';
     }
 
     /*     * **************************************************************** */

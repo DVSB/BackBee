@@ -5,6 +5,7 @@ Image:
   properties:
     name: Image
     description: An inline image
+    iconized-by: path
   parameters:
     width: 50
     height: ~

@@ -106,6 +106,20 @@ interface ApplicationInterface
     public function getDataDir();
 
     /**
+     * Return the resource directories, if undefined, initialized with common resources.
+     *
+     * @return string[] The resource directories.
+     */
+    public function getResourceDir();
+
+    /**
+     * Return the classcontent repositories path for this instance.
+     *
+     * @return string[] The class contents directories
+     */
+    public function getClassContentDir();
+
+    /**
      * @return BackBee\Controller\FrontController
      */
     public function getController();

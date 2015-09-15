@@ -148,13 +148,25 @@ services:
         class:      %bbapp.config.persistor.class%
         arguments:  ["@bbapp", "@config.configurator"]
 
+    classcontent.iconizer.thumbnail:
+        class:      BackBee\ClassContent\Iconizer\ThumbnailIconizer
+        arguments:  [@bbapp]
+
+    classcontent.iconizer.property:
+        class:      BackBee\ClassContent\Iconizer\PropertyIconizer
+        arguments:  [@routing]
+
+    classcontent.iconizer.chained:
+        class:      BackBee\ClassContent\Iconizer\ChainIconizer
+        arguments:  [["@classcontent.iconizer.property", "@classcontent.iconizer.thumbnail"]]
+        
     classcontent.category_manager:
         class:      %bbapp.classcontent.category_manager.class%
         arguments: [@bbapp]
 
     classcontent.manager:
         class:      %bbapp.classcontent.manager.class%
-        arguments: [@bbapp]
+        arguments: [@bbapp, "@classcontent.iconizer.chained"]
 
     doctrine.listener:
         class: BackBee\Event\Listener\DoctrineListener
