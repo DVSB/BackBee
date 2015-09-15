@@ -51,7 +51,7 @@ class PostUploadEvent extends Event
      */
     public function getSourceFile()
     {
-        return $this->_target;
+        return $this->target;
     }
 
     /**
@@ -61,7 +61,7 @@ class PostUploadEvent extends Event
      */
     public function getTargetFile()
     {
-        return $this->_args;
+        return $this->args;
     }
 
     /**
