@@ -721,4 +721,14 @@ class Revision extends AbstractContent implements \Iterator, \Countable
     {
         return $this->_content->hasParam($key);
     }
+
+    /**
+     * Returns the mode to be used by current content.
+     *
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->getContent()->getMode();
+    }
 }
