@@ -383,7 +383,7 @@ class ClassContentManager
     private function updateContentElements(AbstractClassContent $content, array $elementsData)
     {
         foreach ($elementsData as $key => $data) {
-            $content->$key = $data;
+            $content->$key = (array) $data;
         }
 
         return $this;
@@ -410,16 +410,24 @@ class ClassContentManager
                 continue;
             }
 
-            if (
-                    isset($data['type'])
-                    && isset($data['uid'])
-                    && null !== $element = $this->findOneByTypeAndUid($data['type'], $data['uid'])
-            ) {
-                $elements[$key] = $element;
+            if (isset($data['type']) && isset($data['uid'])) {
+                if (null !== $element = $this->findOneByTypeAndUid($data['type'], $data['uid'])) {
+                    $elements[$key] = $element;
+                }
+
                 continue;
             }
 
-            $elements[$key] = $this->prepareElements($data, false);
+            $elements[$key] = [];
+            foreach ($data as $row) {
+                if (
+                    isset($row['type'])
+                    && isset($row['uid'])
+                    && null !== $element = $this->findOneByTypeAndUid($row['type'], $row['uid'])
+                ) {
+                    $elements[$key][] = $element;
+                }
+            }
         }
 
         return $elements;
