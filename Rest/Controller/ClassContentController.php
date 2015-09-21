@@ -226,8 +226,6 @@ class ClassContentController extends AbstractRestController
      */
     public function putAction($type, $uid, Request $request)
     {
-        $this->granted('VIEW', $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true));
-        $this->granted('EDIT', $this->getClassContentManager()->findOneByTypeAndUid($type, $uid, true));
         $this->updateClassContent($type, $uid, $request->request->all());
         $this->getEntityManager()->flush();
 
