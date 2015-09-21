@@ -565,13 +565,20 @@ class PageControllerTest extends RestTestCase
         $this->assertEquals(200, $response2->getStatusCode());
         $res2 = json_decode($response2->getContent(), true);
         $this->assertInternalType('array', $res2);
-        $this->assertCount(5, $res2);
+        $this->assertCount(3, $res2);
+        
+        // filter by parent and depth
+        $response2bis = $this->sendRequest(self::requestGet('/rest/2/page', ['parent_uid' => $pages['home']->getUid(), 'level_offset' => 2]));
+        $this->assertEquals(200, $response2bis->getStatusCode());
+        $res2bis = json_decode($response2bis->getContent(), true);
+        $this->assertInternalType('array', $res2bis);
+        $this->assertCount(5, $res2bis);
 
-        $this->assertEquals($pages['online']->getUid(), $res2[0]['uid'], 'filter by parent online');
-        $this->assertEquals($pages['offline']->getUid(), $res2[1]['uid'], 'filter by parent offline');
-        $this->assertEquals($pages['delete']->getUid(), $res2[2]['uid'], 'filter by parent online2');
-        $this->assertEquals($pages['online2']->getUid(), $res2[3]['uid'], 'filter by parent ofline 2');
-        $this->assertEquals($pages['delete2']->getUid(), $res2[4]['uid'], 'filter by parent delete 2');
+        $this->assertEquals($pages['online']->getUid(), $res2bis[0]['uid'], 'filter by parent online');
+        $this->assertEquals($pages['offline']->getUid(), $res2bis[1]['uid'], 'filter by parent offline');
+        $this->assertEquals($pages['delete']->getUid(), $res2bis[2]['uid'], 'filter by parent online2');
+        $this->assertEquals($pages['online2']->getUid(), $res2bis[3]['uid'], 'filter by parent ofline 2');
+        $this->assertEquals($pages['delete2']->getUid(), $res2bis[4]['uid'], 'filter by parent delete 2');
 
         // filter by title
         $response2 = $this->sendRequest(self::requestGet('/rest/2/page', ['title' => 'online']));

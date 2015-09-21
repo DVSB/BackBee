@@ -310,6 +310,8 @@ class PageRepository extends EntityRepository
             $this->shiftPosition($page, 1, true);
         }
 
+        $parent->getSection()->setHasChildren(true);
+
         return $page;
     }
 
@@ -527,6 +529,8 @@ class PageRepository extends EntityRepository
             $this->moveSectionAsChildOf($page, $target, $asFirst);
         }
 
+        $target->getSection()->setHasChildren(true);
+
         return $page->setParent($target)
                         ->setLevel($target->getLevel() + 1);
     }
@@ -565,15 +569,9 @@ class PageRepository extends EntityRepository
         $delta = $target->getLevel() - $page->getLevel() + 1;
         $this->shiftLevel($page, $delta);
 
-        if (true === $asFirst) {
-            $this->getEntityManager()
-                    ->getRepository('BackBee\NestedNode\Section')
-                    ->moveAsFirstChildOf($page->getSection(), $target->getSection());
-        } else {
-            $this->getEntityManager()
-                    ->getRepository('BackBee\NestedNode\Section')
-                    ->moveAsLastChildOf($page->getSection(), $target->getSection());
-        }
+        $this->getEntityManager()
+                ->getRepository('BackBee\NestedNode\Section')
+                ->moveNode($page->getSection(), $target->getSection(), $asFirst ? 'firstin' : 'lastin');
 
         return $page;
     }
@@ -621,8 +619,12 @@ class PageRepository extends EntityRepository
             throw new InvalidArgumentException('Cannot move a page as sibling of a root.');
         }
 
-        if (false === $page->hasMainSection()) {
+        if (!$page->hasMainSection() && $target->hasMainSection()) {
+            $this->moveAsFirstChildOf($page, $target->getParent());
+        } elseif (!$page->hasMainSection() && !$target->hasMainSection()) {
             $this->movePageAsSiblingOf($page, $target, $asPrevious);
+        } elseif ($page->hasMainSection() && !$target->hasMainSection()) {
+            $this->moveAsLastChildOf($page, $target->getParent());
         } else {
             $this->moveSectionAsSiblingOf($page, $target, $asPrevious);
         }
@@ -638,20 +640,13 @@ class PageRepository extends EntityRepository
      * @param  boolean              $asPrevious         Move page as previous sibling of $target if true (default), next sibling elsewhere.
      *
      * @return Page                                     The moved page.
-     *
-     * @throws InvalidArgumentException                 Raises if target page is a section.
      */
     private function movePageAsSiblingOf(Page $page, Page $target, $asPrevious = true)
     {
-        if (true === $target->hasMainSection()) {
-            throw new InvalidArgumentException('Cannot move a non-section page as sibling of a section page.');
-        }
-
         $this->shiftPosition($page, -1, true);
         $this->_em->refresh($target);
 
         if (true === $asPrevious) {
-
             $page->setPosition($target->getPosition());
             $this->shiftPosition($target, 1);
         } else {
@@ -670,27 +665,15 @@ class PageRepository extends EntityRepository
      * @param  boolean              $asPrevious         Move page as previous sibling of $target if true (default), next sibling elsewhere.
      *
      * @return Page                                     The moved page.
-     *
-     * @throws InvalidArgumentException                 Raises if target page is a section.
      */
     private function moveSectionAsSiblingOf(Page $page, Page $target, $asPrevious = true)
     {
-        if (false === $target->hasMainSection()) {
-            throw new InvalidArgumentException('Cannot move a section page as sibling of a non-section page.');
-        }
-
         $delta = $page->getLevel() - $target->getLevel();
         $this->shiftLevel($page, $delta);
 
-        if (true === $asPrevious) {
-            $this->getEntityManager()
-                    ->getRepository('BackBee\NestedNode\Section')
-                    ->moveAsPrevSiblingOf($page->getSection(), $target->getSection());
-        } else {
-            $this->getEntityManager()
-                    ->getRepository('BackBee\NestedNode\Section')
-                    ->moveAsNextSiblingOf($page->getSection(), $target->getSection());
-        }
+        $this->getEntityManager()
+                ->getRepository('BackBee\NestedNode\Section')
+                ->moveNode($page->getSection(), $target->getSection(), $asPrevious ? 'before' : 'after');
 
         return $page;
     }
