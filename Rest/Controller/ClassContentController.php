@@ -199,6 +199,17 @@ class ClassContentController extends AbstractRestController
 
         $this->getEntityManager()->flush();
 
+        $data = $request->request->all();
+        if (0 < count($data)) {
+            $data = array_merge($data, [
+                'type' => $type,
+                'uid'  => $content->getUid(),
+            ]);
+
+            $this->updateClassContent($type, $data['uid'], $data);
+            $this->getEntityManager()->flush();
+        }
+
         return $this->createJsonResponse(null, 201, [
             'BB-RESOURCE-UID' => $content->getUid(),
             'Location'        => $this->getApplication()->getRouting()->getUrlByRouteName(
