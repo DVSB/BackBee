@@ -205,4 +205,18 @@ class SectionRepository extends NestedNodeRepository
 
         return $this;
     }
+
+    /**
+     * Move node regarding $dest.
+     *
+     * @param  Section $node     The section to be moved.
+     * @param  Section $dest     The targetted section in tree.
+     * @param  string  $position Either 'after', 'before', 'firstin', 'lastin'.
+     * 
+     * @return Section
+     */
+    public function moveNode(Section $node, Section $dest, $position)
+    {
+        return $this->_moveNode($node, $dest, $position);
+    }
 }

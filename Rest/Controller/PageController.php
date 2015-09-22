@@ -442,11 +442,7 @@ class PageController extends AbstractRestController
         if (isset($data['parent_uid'])) {
             $repo = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
             $parent = $repo->find($data['parent_uid']);
-            if ($parent !== null) {
-                $repo->moveAsLastChildOf($page, $parent);
-            } else {
-                throw new BadRequestHttpException('Parent uid doesn\'t exists');
-            }
+            $this->moveAsFirstChildOf($page, $parent);
         }
     }
 
@@ -674,7 +670,7 @@ class PageController extends AbstractRestController
     {
         $qb = $this->getPageRepository()
                     ->createQueryBuilder('p');
-        $order_by = [
+        $orderBy = [
             '_position' => 'ASC',
             '_leftnode' => 'ASC',
         ];
@@ -683,7 +679,7 @@ class PageController extends AbstractRestController
                 if ('_' !== $key[0]) {
                     $key = '_' . $key;
                 }
-                $order_by[$key] = $value;
+                $orderBy[$key] = $value;
             }
         }
         if (null === $parent) {
@@ -691,7 +687,7 @@ class PageController extends AbstractRestController
                     ->andParentIs(null);
         } else {
             $this->granted('VIEW', $parent);
-            $qb->andIsDescendantOf($parent, true, 1, $order_by, $count, $start);
+            $qb->andIsDescendantOf($parent, true, 1, $orderBy, $count, $start);
         }
         if (null !== $state = $request->query->get('state', null)) {
             $qb->andStateIsIn((array) $state);
@@ -716,42 +712,32 @@ class PageController extends AbstractRestController
         $qb = $this->getPageRepository()
                     ->createQueryBuilder('p');
 
-        $order_by = [];
-        if (null !== $request->query->get('order_by', null)) {
-            foreach ($request->query->get('order_by') as $key => $value) {
-                if ('_' !== $key[0]) {
-                    $key = '_' . $key;
-                }
-
-                $order_by[$key] = $value;
-            }
-        } else {
-            $order_by = [
-                '_position' => 'ASC',
-                '_leftnode' => 'ASC',
-            ];
-        }
-
-        if (null === $parent && !$request->query->has('site_uid')) {
-            $qb->andSiteIs($this->getApplication()->getSite());
-        } elseif ($request->query->has('site_uid')) {
-            $qb->andSiteIs($request->query->get('site_uid'));
-        }
-
-        if ($request->query->has('root')) {
-            $qb->andParentIs(null);
-        } elseif ($parent !== null) {
+        if (null !== $parent) {
             $this->granted('VIEW', $parent);
-            $qb->andIsDescendantOf($parent, true, $request->query->get('level_offset'), $order_by, $count, $start);
-        }
 
-        if (null !== $state = $request->query->get('state', null)) {
-            $qb->andStateIsIn((array) $state);
+            // Ordering is disabled for descendants, BackBee takes care of that
+            $qb->andIsDescendantOf($parent, true, $request->query->get('level_offset', 1), $this->getOrderCriteria(), $count, $start);
+        } else {
+            if ($request->query->has('site_uid')) {
+                $qb->andSiteIs($request->query->get('site_uid'));
+            } else {
+                $qb->andSiteIs($this->getApplication()->getSite());
+            }
+
+            if ($request->query->has('root')) {
+                $qb->andParentIs(null);
+            }
+
+            $qb->addMultipleOrderBy($this->getOrderCriteria($request->query->get('order_by', null)));
         }
 
         if ($request->query->has('has_children')) {
             $qb->andIsSection();
             $qb->andWhere($qb->getSectionAlias().'._has_children = 1');
+        }
+
+        if (null !== $state = $request->query->get('state', null)) {
+            $qb->andStateIsIn((array) $state);
         }
 
         if (null !== $title = $request->query->get('title', null)) {
@@ -762,25 +748,51 @@ class PageController extends AbstractRestController
             $qb->andWhere($qb->getAlias().'._layout = :layout')->setParameter('layout', $layout);
         }
 
-        if (null !== $created_before = $request->query->get('created_before', null)) {
-            $qb->andWhere($qb->getAlias().'._created > :created_before')->setParameter('created_before', $created_before);
+        if (null !== $createdBefore = $request->query->get('created_before', null)) {
+            $qb->andWhere($qb->getAlias().'._created > :created_before')->setParameter('created_before', $createdBefore);
         }
 
-        if (null !== $created_after = $request->query->get('created_after', null)) {
-            $qb->andWhere($qb->getAlias().'._created < :created_after')->setParameter('created_after', $modified_after);
+        if (null !== $createdAfter = $request->query->get('created_after', null)) {
+            $qb->andWhere($qb->getAlias().'._created < :created_after')->setParameter('created_after', $createdAfter);
         }
 
-        if (null !== $modified_before = $request->query->get('modified_before', null)) {
-            $qb->andWhere($qb->getAlias().'._modified > :modified_before')->setParameter('modified_before', $modified_before);
+        if (null !== $modifiedBefore = $request->query->get('modified_before', null)) {
+            $qb->andWhere($qb->getAlias().'._modified > :modified_before')->setParameter('modified_before', $modifiedBefore);
         }
 
-        if (null !== $modified_after = $request->query->get('modified_after', null)) {
-            $qb->andWhere($qb->getAlias().'._modified < :modified_after')->setParameter('modified_after', $modified_after);
+        if (null !== $modifiedAfter = $request->query->get('modified_after', null)) {
+            $qb->andWhere($qb->getAlias().'._modified < :modified_after')->setParameter('modified_after', $modifiedAfter);
         }
-
-        $qb->addMultipleOrderBy($order_by);
 
         return $this->paginateClassicCollectionAction($qb, $start, $count);
+    }
+
+    /**
+     * Computes order criteria for collection.
+     * 
+     * @param  array|null $requestedOrder
+     * 
+     * @return array
+     */
+    private function getOrderCriteria(array $requestedOrder = null)
+    {
+        if (!empty($requestedOrder)) {
+            $orderBy = [];
+            foreach ($requestedOrder as $key => $value) {
+                if ('_' !== $key[0]) {
+                    $key = '_' . $key;
+                }
+
+                $orderBy[$key] = $value;
+            }
+        } else {
+            $orderBy = [
+                '_position' => 'ASC',
+                '_leftnode' => 'ASC',
+            ];
+        }
+
+        return $orderBy;
     }
 
     private function paginateClassicCollectionAction($qb, $start, $count)
@@ -917,13 +929,34 @@ class PageController extends AbstractRestController
                 unset($operations[$parent_operation['key']]);
 
                 $parent = $this->getPageByUid($parent_operation['op']['value']);
-                $this->granted('EDIT', $parent);
-
-                $this->getPageRepository()->moveAsLastChildOf($page, $parent);
+                $this->moveAsFirstChildOf($page, $parent);
             }
         } catch (InvalidArgumentException $e) {
             throw new BadRequestHttpException('Invalid node move action: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Moves $page as first child of $parent
+     * 
+     * @param Page      $page
+     * @param Page|null $parent
+     * 
+     * @throws BadRequestHttpException Raises if $parent is null
+     */
+    private function moveAsFirstChildOf(Page $page, Page $parent = null)
+    {
+        if (null === $parent) {
+            throw new BadRequestHttpException('Parent uid doesn\'t exists');
+        }
+
+        $this->granted('EDIT', $parent);
+
+        if (!$parent->hasMainSection()) {
+            $this->getPageRepository()->saveWithSection($parent);
+        }
+
+        $this->getPageRepository()->moveAsFirstChildOf($page, $parent);
     }
 
     /**

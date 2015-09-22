@@ -729,30 +729,6 @@ class PageRepositoryTest extends BackBeeTestCase
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::movePageAsSiblingOf
-     * @expectedException \BackBee\Exception\InvalidArgumentException
-     */
-    public function testMoveNonSectionAsSiblingOfSection()
-    {
-        $section1 = $this->repository->find('section1');
-        $page1 = $this->repository->find('page1');
-
-        $this->repository->moveAsPrevSiblingOf($page1, $section1);
-    }
-
-    /**
-     * @covers \BackBee\NestedNode\Repository\PageRepository::moveSectionAsSiblingOf
-     * @expectedException \BackBee\Exception\InvalidArgumentException
-     */
-    public function testMoveSectionAsSiblingOfNonSection()
-    {
-        $section1 = $this->repository->find('section1');
-        $page1 = $this->repository->find('page1');
-
-        $this->repository->moveAsPrevSiblingOf($section1, $page1);
-    }
-
-    /**
      * @covers \BackBee\NestedNode\Repository\PageRepository::getRoot
      */
     public function testGetRoot()
