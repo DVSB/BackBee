@@ -119,6 +119,14 @@ abstract class AbstractBundle implements BundleInterface
     }
 
     /**
+     * @return the path to the Resources folder
+     */
+    public function getResourcesDirectory()
+    {
+        return $this->baseDir.DIRECTORY_SEPARATOR.'Resources';
+    }
+
+    /**
      * @see BackBee\Bundle\BundleInterface::getProperty
      */
     public function getProperty($key = null)
