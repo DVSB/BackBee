@@ -60,7 +60,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * If TRUE (default) raises an exception on unknown class content classname.
      * If set to FALSE, remind silent
-     * 
+     *
      * @var boolean
      */
     private static $throwException = false;
@@ -1134,6 +1134,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     {
         $result = [];
         foreach ($elements as $key => $element) {
+            $result[$key] = null;
             if ($element instanceof AbstractContent) {
                 $result[$key] = [
                     'uid'  => $element->getUid(),
@@ -1183,9 +1184,9 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
 
     /**
      * Returns the sort classname of the given $classname.
-     * 
+     *
      * @param  mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
-     * 
+     *
      * @return string|null      The short classname if found, NULL otherwise.
      */
     public static function getShortClassname($classname)
@@ -1207,9 +1208,9 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
 
     /**
      * Returns the full classname of the given $classname.
-     * 
+     *
      * @param  mixed $classname A classname or an AbstractClassContent instance, if null the object itself.
-     * 
+     *
      * @return string|null      The full classname if found, NULL otherwise.
      */
     public static function getFullClassname($classname)
@@ -1236,10 +1237,10 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
 
     /**
      * On an unknown class content classname, raises an exception or return NULL depending on self::$ignoreUnknownClassname.
-     * 
+     *
      * @param  string $message                   The message of the raised exception.
      * @param  ClassNotFoundException $exception Optional, the previous exception if provided.
-     * 
+     *
      * @return null
      * @throws \InvalidArgumentException         Raises if self::$ignoreUnknownClassname is set to TRUE.
      */
@@ -1255,7 +1256,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     /**
      * If setted to TRUE (default) raises an exception on unknown class content classname.
      * If setted to FALSE, remind silent.
-     * 
+     *
      * @param boolean $throwException Optional
      */
     public static function throwExceptionOnUnknownClassname($throwException = true)
