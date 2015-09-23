@@ -40,7 +40,7 @@ class KeywordController extends AbstractRestController
      * @param Request $request
      *
      * @Rest\Pagination(default_count=25, max_count=100)
-     * 
+     *
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="query", class="BackBee\NestedNode\KeyWord", required=false
      * )
@@ -61,6 +61,21 @@ class KeywordController extends AbstractRestController
         }
 
         return $this->addRangeToContent($this->createJsonResponse($results), $results, $start);
+    }
+
+    /**
+     * Get Keyword by uid.
+     *
+     * @param string $uid the unique identifier of the page we want to retrieve
+     *
+     * @return Symfony\Component\HttpFoundation\Response
+     *
+     * @Rest\ParamConverter(name="keyword", class="BackBee\NestedNode\KeyWord")
+     * @Rest\Security(expression="is_granted('VIEW', keyword)")
+     */
+    public function getAction(KeyWord $keyword)
+    {
+        return $this->createResponse($this->formatItem($keyword));
     }
 
     private function addRangeToContent(Response $response, $collection, $start)

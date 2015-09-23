@@ -255,7 +255,7 @@ bb.rest.page.get_metadata:
     requirements:
         uid: \w{32}
         _method: GET
-        
+
 bb.rest.page.get_ancestors:
   pattern: /rest/{version}/page/{uid}/ancestors
   defaults:
@@ -264,7 +264,7 @@ bb.rest.page.get_ancestors:
   requirements:
     uid: \w{32}
     _method: GET
-        
+
 bb.rest.page.put_metadata:
     pattern: /rest/{version}/page/{uid}/metadata
     defaults:
@@ -687,6 +687,16 @@ bb.keyword.get_collection:
     _controller: BackBee\Rest\Controller\KeywordController
   requirements:
     _method: GET
+
+bb.keyword.get:
+  pattern: /rest/{version}/keyword/{uid}
+  defaults:
+    _action: getAction
+    _controller: BackBee\Rest\Controller\KeywordController
+  requirements:
+    _method: GET
+    version: \d+
+    uid: \w{32}
 
 # BackBee rss
 bb.rss:
