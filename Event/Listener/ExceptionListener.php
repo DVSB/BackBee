@@ -24,7 +24,9 @@
 namespace BackBee\Event\Listener;
 
 use BackBee\BBApplication;
-use Symfony\Component\Debug\ExceptionHandler;
+use BackBee\Controller\Exception\FrontControllerException;
+use BackBee\Renderer\AbstractRenderer;
+
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -37,15 +39,20 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class ExceptionListener
 {
     /**
-     * @var BackBee\Renderer
+     * @var AbstractRenderer
      */
     private $renderer;
 
     /**
-     * @var Symfony\Component\HttpFoundation\Response
+     * @var Response
      */
     private $response;
 
+    /**
+     * Class constructor.
+     * 
+     * @param BBApplication $application
+     */
     public function __construct(BBApplication $application)
     {
         $this->application = $application;
@@ -53,41 +60,87 @@ class ExceptionListener
         $this->response = new Response();
     }
 
+    /**
+     * @param GetResponseForExceptionEvent $event
+     */
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
-        $statusCode = $exception->getCode();
-        $request = $this->application->getRequest();
+        $statusCode = $this->getHttpStatusCode($exception->getCode());
 
         if ($this->application->isDebugMode()) {
-            $this->response = (new \Symfony\Component\Debug\ExceptionHandler())->createResponse($exception);
-            if (in_array('application/json', $request->getAcceptableContentTypes())) {
-                $this->response = new JsonResponse($this->response->getContent(), $this->response->getStatusCode(), $this->response->headers->all());
-            }
-        }
-
-        if (!$this->application->isDebugMode()) {
-            switch($statusCode) {
-                case 404:
-                case 500:
-                    $parameterKey = "error.$statusCode";
-                break;
-                default:
-                    $parameterKey = 'error.default';
-            }
-
-            $parameter = $this->application->getContainer()->getParameter($parameterKey);
-            $view = $this->getErrorTemplate($parameter);
-
-            $this->response
-                ->setStatusCode($statusCode)
-                ->setContent($this->renderer->partial($view, ['error' => $exception]));
+            $this->response = $this->getDebugTraceResponse($exception, $statusCode);
+        } else {
+            $this->response = $this->getErrorPageResponse($exception, $statusCode);
         }
 
         $event->setResponse($this->response);
 
         $filterEvent = new FilterResponseEvent($event->getKernel(), $event->getRequest(), $event->getRequestType(), $event->getResponse());
         $event->getDispatcher()->dispatch(KernelEvents::RESPONSE, $filterEvent);
+    }
+
+    /**
+     * Return response with debug trace.
+     * 
+     * @param \Exception $exception
+     * @param int        $statusCode
+     * 
+     * @return Response
+     */
+    private function getDebugTraceResponse(\Exception $exception, $statusCode)
+    {
+        $request = $this->application->getRequest();
+        $response = (new \Symfony\Component\Debug\ExceptionHandler())->createResponse($exception);
+        $response->setStatusCode($statusCode);
+
+        if (in_array('application/json', $request->getAcceptableContentTypes())) {
+            $response = new JsonResponse($response->getContent(), $response->getStatusCode(), $response->headers->all());
+        }
+
+        return $response;
+    }
+
+    /**
+     * Returns response for rendered error page.
+     * 
+     * @param  \Exception $exception
+     * @param  int        $statusCode
+     * 
+     * @return Response
+     */
+    private function getErrorPageResponse(\Exception $exception, $statusCode)
+    {
+        $parameter = $this->application->getContainer()->getParameter('error.default');
+        if ($this->application->getContainer()->getParameter('error.'.$statusCode)) {
+            $parameter = $this->application->getContainer()->getParameter('error.'.$statusCode);
+        }
+
+        $view = $this->getErrorTemplate($parameter);
+
+        return new Response($this->renderer->partial($view, ['error' => $exception]), $statusCode);
+    }
+
+    /**
+     * Returns a valid HTTP status code.
+     * 
+     * @param  int $statusCode
+     * 
+     * @return int
+     */
+    private function getHttpStatusCode($statusCode)
+    {
+        if ($statusCode >= 100 && $statusCode < 600) {
+            return $statusCode;
+        } elseif (
+                FrontControllerException::BAD_REQUEST === $statusCode 
+                || FrontControllerException::INTERNAL_ERROR === $statusCode 
+                || FrontControllerException::NOT_FOUND === $statusCode
+        ) {
+            return $statusCode - FrontControllerException::UNKNOWN_ERROR;
+        }
+
+        return 500;
     }
 
     /**
