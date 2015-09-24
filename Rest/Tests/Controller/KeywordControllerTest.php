@@ -41,43 +41,43 @@ class KeywordControllerTest extends RestTestCase {
         $this->user = $this->createAuthUser($this->groupEditor->getId());
         $this->em->persist($this->user);
         $this->em->flush();
-        
+
         $this->createKeywordTree();
     }
-    
-    private function createKeywordTree() { 
+
+    private function createKeywordTree() {
         $root = $this->createAKeyword("root");
         $this->createAKeyword("backbee",$root);
         $this->createAKeyword("patrov", $root);
         $this->createAKeyword("patrovski", $root);
- 
+
     }
-    
-    public function testGetCollectionAction() 
+
+    public function testGetCollectionAction()
     {
-        $url = '/rest/1/keyword';
+        $url = '/rest/2/keyword';
         $response = $this->sendRequest(self::requestGet($url));
         $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
-        $keywordCollection = json_decode($response->getContent(), true);  
+        $keywordCollection = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $keywordCollection);
-        $this->assertCount(3, $keywordCollection); 
+        $this->assertCount(1, $keywordCollection); //return only root
     }
-    
+
     public function testGetCollectionWithTerm()
     {
-      $url = '/rest/1/keyword';
+      $url = '/rest/2/keyword';
       $response = $this->sendRequest(self::requestGet($url, ["term" => "pat"]));
       $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
-      $keywordCollection = json_decode($response->getContent(), true);  
+      $keywordCollection = json_decode($response->getContent(), true);
       $this->assertInternalType('array', $keywordCollection);
-      $this->assertCount(2, $keywordCollection); 
-      
-      $url = '/rest/1/keyword';
+      $this->assertCount(2, $keywordCollection);
+
+      $url = '/rest/2/keyword';
       $response = $this->sendRequest(self::requestGet($url, ["term" => "toto"]));
       $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
       $keywordCollection = json_decode($response->getContent(), true);
       $this->assertInternalType('array', $keywordCollection);
-      $this->assertCount(0, $keywordCollection); 
+      $this->assertCount(0, $keywordCollection);
     }
 
     private function createAKeyword($label, KeyWord $parent = null) {

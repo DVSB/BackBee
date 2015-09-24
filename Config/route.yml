@@ -698,6 +698,39 @@ bb.keyword.get:
     version: \d+
     uid: \w{32}
 
+bb.keyword.post:
+  pattern: /rest/{version}/keyword
+  defaults:
+    _action: postAction
+    _controller: BackBee\Rest\Controller\KeywordController
+  requirements:
+    _method: POST
+
+bb.keyword.put:
+  pattern: /rest/{version}/keyword/{uid}
+  defaults:
+    _action: putAction
+    _controller: BackBee\Rest\Controller\KeywordController
+  requirements:
+    _method: PUT
+
+bb.keyword.delete:
+  pattern: /rest/{version}/keyword/{uid}
+  defaults:
+    _action: deleteAction
+    _controller: BackBee\Rest\Controller\KeywordController
+  requirements:
+    _method: DELETE
+
+bb.rest.keyword.patch:
+    pattern: /rest/{version}/keyword/{uid}
+    defaults:
+        _action: patchAction
+        _controller: BackBee\Rest\Controller\KeywordController
+    requirements:
+        version: \d+
+        _method: PATCH
+
 # BackBee rss
 bb.rss:
     pattern: /rss/{uri}
