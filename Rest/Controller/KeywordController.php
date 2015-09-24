@@ -25,10 +25,12 @@ namespace BackBee\Rest\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Validator\Constraints as Assert;
+
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\NestedNode\KeyWord;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use BackBee\Rest\Patcher\EntityPatcher;
 use BackBee\Rest\Patcher\Exception\InvalidOperationSyntaxException;
 use BackBee\Rest\Patcher\Exception\UnauthorizedPatchOperationException;
@@ -175,7 +177,7 @@ class KeywordController extends AbstractRestController
                     $parent = $this->getKeywordByUid($parentOperation['op']['value']);
                     $this->getKeywordRepository()->moveAsLastChildOf($keyword, $parent);
                 }
-            } catch (InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException $e) {
                 throw new BadRequestHttpException(sprintf('Invalid node move action: %s', $e->getMessage()));
             }
         }
@@ -253,13 +255,6 @@ class KeywordController extends AbstractRestController
      */
     public function putAction(KeyWord $keyword, Request $request)
     {
-        $parentId = $request->get('parent_uid', null);
-        if (null === $parentId) {
-            $parent = $this->getKeywordRepository()->getRoot();
-        } else {
-            $parent = $this->getKeywordRepository()->find($parentId);
-        }
-
         $keywordLabel = trim($request->request->get('keyword'));
 
         if ($this->keywordAlreadyExists($keywordLabel)) {
