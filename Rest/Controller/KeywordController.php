@@ -255,13 +255,6 @@ class KeywordController extends AbstractRestController
      */
     public function putAction(KeyWord $keyword, Request $request)
     {
-        $parentId = $request->get('parent_uid', null);
-        if (null === $parentId) {
-            $parent = $this->getKeywordRepository()->getRoot();
-        } else {
-            $parent = $this->getKeywordRepository()->find($parentId);
-        }
-
         $keywordLabel = trim($request->request->get('keyword'));
 
         if ($this->keywordAlreadyExists($keywordLabel)) {
