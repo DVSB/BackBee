@@ -75,7 +75,6 @@ class Site extends AbstractObjectIdentifiable
      * @BB\Fixture(type="domainWord")
      *
      * @Serializer\Expose
-     * @Serializer\SerializedName("label")
      * @Serializer\Type("string")
      *
      */
@@ -126,8 +125,7 @@ class Site extends AbstractObjectIdentifiable
      * @ORM\OneToMany(targetEntity="BackBee\Site\Layout", mappedBy="_site", fetch="EXTRA_LAZY")
      *
      * @Serializer\Expose
-     * @Serializer\SerializedName("layouts")
-     * @Serializer\Type("ArrayCollection<BackBee\Site\Layout>")
+     * @Serializer\Type("ArrayCollection<string, BackBee\Site\Layout>")
      */
     protected $_layouts;
 

@@ -197,6 +197,16 @@ class SiteControllerTest extends TestCase
         $this->assertCount(1, $content);
     }
 
+    public function test_serializeSite()
+    {   
+        $controller = $this->getController();
+        $serialized = $controller->formatItem($this->site);
+        $content = json_decode($serialized, true);
+        $this->assertInternalType('array', $content);
+    }
+
+
+
     protected function tearDown()
     {
         $this->dropDb($this->getBBApp());
