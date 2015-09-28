@@ -38,7 +38,7 @@ class ClassContentManager
     /**
      * @var ApplicationInterface
      */
-    private $application;
+    private $app;
 
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -61,16 +61,22 @@ class ClassContentManager
     private $contentClassnames;
 
     /**
+     * @var \BackBee\Cache\AbstractCache
+     */
+    private $cache;
+
+    /**
      * Instantiate a ClassContentManager.
      *
-     * @param ApplicationInterface   $application The current application.
-     * @param IconizerInterface|null $iconizer    Optional, an content iconizer.
+     * @param ApplicationInterface   $app      The current application.
+     * @param IconizerInterface|null $iconizer Optional, an content iconizer.
      */
-    public function __construct(ApplicationInterface $application, IconizerInterface $iconizer = null)
+    public function __construct(ApplicationInterface $app, IconizerInterface $iconizer = null)
     {
-        $this->application = $application;
-        $this->entityManager = $application->getEntityManager();
+        $this->app = $app;
+        $this->entityManager = $app->getEntityManager();
         $this->iconizer = $iconizer;
+        $this->cache = $app->getContainer()->get('cache.control');
     }
 
     /**
@@ -199,12 +205,19 @@ class ClassContentManager
     public function getAllClassContentClassnames()
     {
         if (null === $this->contentClassnames) {
-            $this->contentClassnames = [AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'];
-            foreach ($this->application->getClassContentDir() as $directory) {
-                $this->contentClassnames = array_merge(
-                        $this->contentClassnames,
-                        CategoryManager::getClassContentClassnamesFromDir($directory)
-                );
+            $cacheId = md5('all_classcontents_classnames_'.$this->app->getContext().'_'.$this->app->getEnvironment());
+            if (false !== $value = $this->cache->load($cacheId)) {
+                $this->contentClassnames = json_decode($value, true);
+            } else {
+                $this->contentClassnames = [AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'];
+                foreach ($this->app->getClassContentDir() as $directory) {
+                    $this->contentClassnames = array_merge(
+                            $this->contentClassnames,
+                            CategoryManager::getClassContentClassnamesFromDir($directory)
+                    );
+                }
+
+                $this->cache->save($cacheId, json_encode($this->contentClassnames));
             }
         }
 
@@ -245,7 +258,7 @@ class ClassContentManager
     {
         return $this->entityManager->getRepository('BackBee\ClassContent\Revision')->getDraft(
             $content,
-            $this->token ?: $this->application->getBBUserToken(),
+            $this->token ?: $this->app->getBBUserToken(),
             $checkoutOnMissing
         );
     }
@@ -260,6 +273,10 @@ class ClassContentManager
      */
     public function commit(AbstractClassContent $content, array $data)
     {
+        foreach ($this->getAllClassContentClassnames() as $classname) {
+            class_exists($classname);
+        }
+
         if (!isset($data['parameters']) && !isset($data['elements'])) {
             throw new \InvalidArgumentException('Provided data are not valids for ClassContentManager::commit.');
         }
