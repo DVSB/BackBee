@@ -109,6 +109,10 @@ class PropertyIconizer implements IconizerInterface
             return null;
         }
 
+        if (empty($parameter['value'])) {
+            return null;
+        }
+
         return $this->getUri($parameter['value']);
     }
 
@@ -124,6 +128,10 @@ class PropertyIconizer implements IconizerInterface
     {
         if ($content->$elementName instanceof AbstractContent) {
             return $content->$elementName;
+        }
+
+        if (empty($content->$elementName)) {
+            return null;
         }
 
         return $this->getUri($content->$elementName, is_a($content, 'BackBee\ClassContent\Element\Image') ? RouteCollection::IMAGE_URL : null);
