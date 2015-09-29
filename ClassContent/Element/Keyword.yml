@@ -7,3 +7,5 @@ Keyword:
     value: !!scalar
   fixture:
     value: word
+  parameters:
+    objectkeyword: []

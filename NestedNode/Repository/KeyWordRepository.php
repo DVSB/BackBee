@@ -185,7 +185,7 @@ class KeyWordRepository extends NestedNodeRepository
 
         foreach ($objects as $object) {
             if (true === array_key_exists($object->getUid(), $assoc)) {
-                $assoc[$object->getUid()]->setParam('objectKeyword', $object, 'object');
+                $assoc[$object->getUid()]->setParam('objectkeyword', [$object]);
             }
         }
 
