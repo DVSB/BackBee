@@ -202,10 +202,14 @@ class SiteControllerTest extends TestCase
         $controller = $this->getController();
         $serialized = $controller->formatItem($this->site);
         $content = json_decode($serialized, true);
-        $this->assertInternalType('array', $content);
+
+        $this->assertInternalType('string', $content['label']);
+        $this->assertEquals($this->site->getLayouts()->count(), count($content['layouts']));
+
+        foreach ($this->site->getLayouts() as $key => $layout) {
+            $this->assertSame(json_decode($controller->formatItem($layout), true), $content['layouts'][$key]);
+        }
     }
-
-
 
     protected function tearDown()
     {
