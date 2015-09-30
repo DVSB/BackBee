@@ -400,7 +400,7 @@ class ClassContentManager
     private function updateContentElements(AbstractClassContent $content, array $elementsData)
     {
         foreach ($elementsData as $key => $data) {
-            $content->$key = (array) $data;
+            $content->$key = $data;
         }
 
         return $this;
