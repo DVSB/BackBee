@@ -71,17 +71,20 @@ class BundleControllerResolver
     public function resolve($bundle, $controller)
     {
         if (!$this->container->has($this->computeBundleName($bundle))) {
-            throw new BundleConfigurationException($bundle.' doesn\'t exists', BundleConfigurationException::BUNDLE_UNDECLARED);
+            throw new BundleConfigurationException(sprintf("%s doesn't exist.", $bundle), BundleConfigurationException::BUNDLE_UNDECLARED);
         }
 
         $config = $this->container->get($this->computeBundleName($bundle))->getProperty();
 
         if (!isset($config['admin_controller'])) {
-            throw new BundleConfigurationException('No controller definition in '.$bundle.' bundle configuration', BundleConfigurationException::CONTROLLER_SECTION_MISSING);
+            throw new BundleConfigurationException(sprintf('No controller definition in %s bundle configuration.', $bundle),
+                BundleConfigurationException::CONTROLLER_SECTION_MISSING
+            );
         }
 
         if (!isset($config['admin_controller'][$controller])) {
-            throw new BundleConfigurationException($controller.' controller is undefinned in '.$bundle.' bundle configuration', BundleConfigurationException::CONTROLLER_UNDECLARED);
+            throw new BundleConfigurationException(sprintf('%s controller is undefined in %s bundle configuration.', $controller, $bundle),
+                BundleConfigurationException::CONTROLLER_UNDECLARED);
         }
         $namespace = '\\'.$config['admin_controller'][$controller];
         return new $namespace($this->application);
