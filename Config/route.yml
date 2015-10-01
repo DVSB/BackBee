@@ -578,9 +578,9 @@ bb.rest.bundle.exposed_actions:
         _controller: BackBee\Rest\Controller\BundleController
     requirements:
         version: \d+
-        bundleName: "[a-z]+"
-        controllerName: "[a-z]+"
-        actionName: "[a-z]+"
+        bundleName: "[a-zA-Z]+"
+        controllerName: "[a-zA-Z]+"
+        actionName: "[a-zA-Z]+"
         parameters: "^\/.+|"
 
 bb.rest.media_folder.get_collection:
