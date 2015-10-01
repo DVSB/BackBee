@@ -25,6 +25,7 @@ namespace BackBee\Rest\EventListener;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccountStatusException;
@@ -93,7 +94,9 @@ class ExceptionListener extends AbstractPathEnabledListener
             }
             // keep the HTTP status code
             $event->getResponse()->setStatusCode($exception->getStatusCode());
-        } elseif ($exception instanceof AccountStatusException ||$exception instanceof InsufficientAuthenticationException) {
+        } elseif ($exception instanceof AccountStatusException ||
+                  $exception instanceof InsufficientAuthenticationException ||
+                  $exception instanceof BadRequestHttpException) {
             // Forbidden access
             $this->setNewResponse($event, 403, $exception->getMessage());
         } elseif ($exception instanceof AuthenticationException || $exception instanceof AccessDeniedException) {

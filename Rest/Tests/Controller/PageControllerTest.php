@@ -116,6 +116,64 @@ class PageControllerTest extends RestTestCase
         $this->assertEquals(201, $response->getStatusCode());
     }
 
+    /**
+     * @covers ::postAction
+     */
+    public function testPostWithFinalLayoutAction()
+    {
+        $em = $this->getEntityManager();
+
+        $parentLayout = new Layout();
+
+        $parentLayout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
+            ->setParam('is_final', true)
+        ;
+
+        $em->persist($parentLayout);
+
+        // create pages
+        $parent = new Page();
+        $parent
+            ->setTitle('Page')
+            ->setSite($this->site)
+            ->setLayout($parentLayout)
+        ;
+        $em->persist($parent);
+
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
+        ;
+
+        $em->persist($layout);
+        $em->flush();
+
+        $this->getAclManager()->insertOrUpdateClassAce(
+            new ObjectIdentity('all', 'BackBee\NestedNode\Page'),
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            MaskBuilder::MASK_CREATE
+        )->insertOrUpdateClassAce(
+            $layout,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            MaskBuilder::MASK_VIEW
+        );
+
+        $response = $this->sendRequest(self::requestPost('/rest/1/page', [
+            'title' => 'New Page',
+            'url' => 'url',
+            'layout_uid' => $layout->getUid(),
+            'parent_uid' => $parent->getUid(),
+        ]));
+
+        $this->assertEquals(403, $response->getStatusCode());
+    }
+
     public function testCloneAction()
     {
         $em = $this->getEntityManager();
@@ -176,6 +234,56 @@ class PageControllerTest extends RestTestCase
         $this->assertTrue($response->headers->has('location'));
         $this->assertEquals('/a-new-title', $response->headers->get('BB-PAGE-URL'));
         $this->assertEquals(201, $response->getStatusCode());
+    }
+
+    /**
+     * @covers ::putAction
+     */
+    public function testPutWithFinalLayoutAction()
+    {
+        $em = $this->getEntityManager();
+
+        $layout = new Layout();
+
+        $layout->setLabel('Default')
+            ->setSite($this->site)
+            ->setDataObject(new \stdClass())
+            ->setPath($this->getBBApp()->getBaseRepository().'/Layouts/default.twig')
+            ->setParam('is_final', true)
+        ;
+        $em->persist($layout);
+
+        // create pages
+        $homePage = new Page();
+        $homePage
+            ->setTitle('Page')
+            ->setSite($this->site)
+            ->setLayout($layout)
+        ;
+        $em->persist($homePage);
+
+        $em->flush();
+
+        $this->getAclManager()->insertOrUpdateObjectAce(
+            $homePage,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            ['PUBLISH', 'EDIT']
+        )->insertOrUpdateObjectAce(
+            $layout,
+            new UserSecurityIdentity($this->group_id, 'BackBee\Security\Group'),
+            ['VIEW']
+        );
+
+        $response = $this->sendRequest(self::requestPut('/rest/1/page/'.$homePage->getUid(), [
+            'title' => 'New Page',
+            'url' => 'url',
+            'target' => Page::DEFAULT_TARGET,
+            'state' => Page::STATE_ONLINE,
+            'layout_uid' => $layout->getUid(),
+            'parent_uid' => $homePage->getUid(),
+        ]));
+
+        $this->assertEquals(403, $response->getStatusCode());
     }
 
     /**
@@ -566,7 +674,7 @@ class PageControllerTest extends RestTestCase
         $res2 = json_decode($response2->getContent(), true);
         $this->assertInternalType('array', $res2);
         $this->assertCount(3, $res2);
-        
+
         // filter by parent and depth
         $response2bis = $this->sendRequest(self::requestGet('/rest/2/page', ['parent_uid' => $pages['home']->getUid(), 'level_offset' => 2]));
         $this->assertEquals(200, $response2bis->getStatusCode());
@@ -647,7 +755,7 @@ class PageControllerTest extends RestTestCase
         $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
         $pageProperties = json_decode($response->getContent(), true);
         $this->assertInternalType('array', $pageProperties);
-        $this->assertCount(23, $pageProperties);
+        $this->assertCount(24, $pageProperties);
         $this->assertEquals($homePage->getUid(), $pageProperties['uid']);
         $this->assertEquals($now->getTimestamp(), $pageProperties['modified']);
     }

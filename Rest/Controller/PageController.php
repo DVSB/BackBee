@@ -247,6 +247,10 @@ class PageController extends AbstractRestController
             $builder->setParent($parent);
             $builder->setRoot($parent->getRoot());
             $builder->setSite($parent->getSite());
+
+            if ($this->isFinal($parent)) {
+                return $this->createFinalResponse($parent->getLayout());
+            }
         } else {
             $builder->setSite($this->getApplication()->getSite());
         }
@@ -303,6 +307,30 @@ class PageController extends AbstractRestController
         ));
     }
 
+    private function createFinalResponse(Layout $layout)
+    {
+        return $this->createResponse('Can\'t create children of ' . $layout->getLabel() . ' layout', 403);
+    }
+
+    /**
+     * Check if the page is final
+     *
+     * @param  Page|null $page [description]
+     * @return boolean         [description]
+     */
+    private function isFinal(Page $page = null)
+    {
+        $result = false;
+        if (null !== $page) {
+            $layout = $page->getLayout();
+            if (null !== $layout && $layout->isFinal()) {
+                $result = true;
+            }
+        }
+
+        return $result;
+    }
+
     /**
      * Update page.
      *
@@ -330,17 +358,19 @@ class PageController extends AbstractRestController
      * @Rest\ParamConverter(name="page", class="BackBee\NestedNode\Page")
      * @Rest\ParamConverter(name="layout", id_name="layout_uid", class="BackBee\Site\Layout", id_source="request")
      * @Rest\ParamConverter(
+     *   name="parent", id_name="parent_uid", class="BackBee\NestedNode\Page", id_source="request", required=false
+     * )
+     * @Rest\ParamConverter(
      *   name="workflow", id_name="workflow_uid", id_source="request", class="BackBee\Workflow\State", required=false
      * )
      * @Rest\Security(expression="is_granted('EDIT', page)")
      * @Rest\Security(expression="is_granted('VIEW', layout)")
      */
-    public function putAction(Page $page, Layout $layout, Request $request)
+    public function putAction(Page $page, Layout $layout, Request $request, Page $parent = null)
     {
 
         $page->setLayout($layout);
         $this->trySetPageWorkflowState($page, $this->getEntityFromAttributes('workflow'));
-
 
         $requestRedirect = $request->request->get('redirect');
         $redirect = ($requestRedirect === '' || $requestRedirect === null) ? null : $requestRedirect;
@@ -353,6 +383,13 @@ class PageController extends AbstractRestController
             ->setAltTitle($request->request->get('alttitle', null))
         ;
 
+        if ($parent !== null) {
+
+            $page->setParent($parent);
+            if ($this->isFinal($parent)) {
+                return $this->createFinalResponse($parent->getLayout());
+            }
+        }
 
         if ($request->request->has('publishing')) {
             $publishing = $request->request->get('publishing');
@@ -414,18 +451,20 @@ class PageController extends AbstractRestController
                     'statusCode' => 401,
                     'message'    => $e->getMessage(),
                 ];
-            } catch (InsufficientAuthenticationException $e) {
-                $result[] = [
-                    'uid'        => $data['uid'],
-                    'statusCode' => 403,
-                    'message'    => $e->getMessage(),
-                ];
             } catch (\Exception $e) {
-                $result[] = [
-                    'uid'        => $data['uid'],
-                    'statusCode' => 500,
-                    'message'    => $e->getMessage(),
-                ];
+                if ($e instanceof BadRequestHttpException || $e instanceof InsufficientAuthenticationException) {
+                    $result[] = [
+                        'uid'        => $data['uid'],
+                        'statusCode' => 403,
+                        'message'    => $e->getMessage(),
+                    ];
+                } else {
+                    $result[] = [
+                        'uid'        => $data['uid'],
+                        'statusCode' => 500,
+                        'message'    => $e->getMessage(),
+                    ];
+                }
             }
         }
 
@@ -442,6 +481,14 @@ class PageController extends AbstractRestController
         if (isset($data['parent_uid'])) {
             $repo = $this->getEntityManager()->getRepository('BackBee\NestedNode\Page');
             $parent = $repo->find($data['parent_uid']);
+
+            if (null !== $parent) {
+                $layout = $parent->getLayout();
+                if ($layout !== null && $layout->isFinal()) {
+                    throw new BadRequestHttpException('Can\'t create children of ' . $layout->getLabel() . ' layout');
+                }
+            }
+
             $this->moveAsFirstChildOf($page, $parent);
         }
     }
@@ -769,9 +816,9 @@ class PageController extends AbstractRestController
 
     /**
      * Computes order criteria for collection.
-     * 
+     *
      * @param  array|null $requestedOrder
-     * 
+     *
      * @return array
      */
     private function getOrderCriteria(array $requestedOrder = null)
@@ -929,6 +976,10 @@ class PageController extends AbstractRestController
                 unset($operations[$parent_operation['key']]);
 
                 $parent = $this->getPageByUid($parent_operation['op']['value']);
+                if ($this->isFinal($parent)) {
+                    throw new BadRequestHttpException('Can\'t create children of ' . $parent->getLayout()->getLabel() . ' layout');
+                }
+
                 $this->moveAsFirstChildOf($page, $parent);
             }
         } catch (InvalidArgumentException $e) {
@@ -938,10 +989,10 @@ class PageController extends AbstractRestController
 
     /**
      * Moves $page as first child of $parent
-     * 
+     *
      * @param Page      $page
      * @param Page|null $parent
-     * 
+     *
      * @throws BadRequestHttpException Raises if $parent is null
      */
     private function moveAsFirstChildOf(Page $page, Page $parent = null)

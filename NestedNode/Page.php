@@ -1997,6 +1997,17 @@ class Page extends AbstractObjectIdentifiable implements RenderableInterface, Do
     }
 
     /**
+     * Returns the parent uid, null if this page is root.
+     *
+     * @Serializer\VirtualProperty
+     * @Serializer\Type("string")
+     * @Serializer\SerializedName("parent_uid")
+     */
+    public function getParentUid()
+    {
+        return null !== $this->getParent() ? $this->getParent()->getUid() : '';
+    }
+    /**
      * Returns the nested node left position.
      *
      * @return integer
