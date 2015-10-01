@@ -171,6 +171,9 @@ class Layout extends AbstractObjectIdentifiable
      *
      * @var array
      * @ORM\Column(type="array", name="parameters", nullable = true)
+     *
+     * @Serializer\Expose
+     * @Serializer\Type("array")
      */
     protected $_parameters = array();
 
@@ -357,8 +360,10 @@ class Layout extends AbstractObjectIdentifiable
     {
         $param = $this->_parameters;
         if (null !== $var) {
-            if (true === isset($this->_parameters[$var])) {
+            if (isset($this->_parameters[$var])) {
                 $param = $this->_parameters[$var];
+            } else {
+                $param = null;
             }
         }
 
@@ -756,5 +761,14 @@ class Layout extends AbstractObjectIdentifiable
         );
 
         return $workflowStates;
+    }
+
+    /**
+     * @Serializer\VirtualProperty
+     * @Serializer\SerializedName("is_final")
+     */
+    public function isFinal()
+    {
+        return (bool) $this->getParam('is_final');
     }
 }
