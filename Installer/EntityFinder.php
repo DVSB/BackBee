@@ -49,22 +49,9 @@ class EntityFinder
     ];
 
     /**
-     * @var string
-     */
-    private $baseDir;
-
-    /**
      * @var SimpleAnnotationReader
      */
     private $annotationReader;
-
-    /**
-     * @param string $baseDir
-     */
-    public function __construct($baseDir)
-    {
-        $this->baseDir = $baseDir;
-    }
 
     /**
      * @param string $path
@@ -82,9 +69,9 @@ class EntityFinder
         foreach ($objects as $filename => $object) {
             $file = explode('/', $filename);
             if (!preg_filter($this->ignoredFolder, [], $file)) {
-                $namespace = $this->getNamespace($filename);
-                if ($this->isValidNamespace($namespace)) {
-                    $entities[] = $namespace;
+                $classname = $this->getNamespace($filename).NAMESPACE_SEPARATOR.  substr(basename($filename), 0, -4);
+                if ($this->isValidNamespace($classname)) {
+                    $entities[] = $classname;
                 }
             }
         }
@@ -136,25 +123,26 @@ class EntityFinder
      */
     public function getNamespace($file)
     {
-        $classname = str_replace([
-                $this->baseDir,
-                'bundle',
-                '.php',
-                '/',
-                'backbee',
-            ],
-            [
-                '',
-                'Bundle',
-                '',
-                '\\',
-                '',
-            ],
-            $file
-        );
-        $classname = preg_replace('/\\\\+/', '\\', $classname);
+        $src = file_get_contents($file);
+        $tokens = token_get_all($src);
+        $count = count($tokens);
+        $namespace = '';
 
-        return (strpos($classname, 'BackBee') === false) ? 'BackBee'.$classname : $classname;
+        for ($i=0; $i < $count; $i++) {
+            $token = $tokens[$i];
+            if (is_array($token) && $token[0] === T_NAMESPACE) {
+                while (++$i < $count) {
+                    if ($tokens[$i] === ';') {
+                        $namespace = trim($namespace);
+                        break;
+                    }
+                    $namespace .= is_array($tokens[$i]) ? $tokens[$i][1] : $tokens[$i];
+                }
+                break;
+            }
+        }
+        
+        return $namespace;
     }
 
     /**
