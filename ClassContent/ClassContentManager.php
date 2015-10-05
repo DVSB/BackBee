@@ -206,7 +206,7 @@ class ClassContentManager
     {
         if (null === $this->contentClassnames) {
             $cacheId = md5('all_classcontents_classnames_'.$this->app->getContext().'_'.$this->app->getEnvironment());
-            if (false !== $value = $this->cache->load($cacheId)) {
+            if (!$this->app->isDebugMode() && false !== $value = $this->cache->load($cacheId)) {
                 $this->contentClassnames = json_decode($value, true);
             } else {
                 $this->contentClassnames = [AbstractClassContent::CLASSCONTENT_BASE_NAMESPACE . 'ContentSet'];
