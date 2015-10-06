@@ -151,7 +151,7 @@ class NestedNodeRepository extends EntityRepository
      */
     public function insertNodeAsFirstChildOf(AbstractNestedNode $node, AbstractNestedNode $parent)
     {
-        return $this->insertNode($node, $parent, $parent->getLeftnode() + 1);
+        return $this->_insertNode($node, $parent, $parent->getLeftnode() + 1);
     }
 
     /**
@@ -164,7 +164,7 @@ class NestedNodeRepository extends EntityRepository
      */
     public function insertNodeAsLastChildOf(AbstractNestedNode $node, AbstractNestedNode $parent)
     {
-        return $this->insertNode($node, $parent, $parent->getRightnode());
+        return $this->_insertNode($node, $parent, $parent->getRightnode());
     }
 
     /**
@@ -177,7 +177,7 @@ class NestedNodeRepository extends EntityRepository
      * @return \BackBee\NestedNode\AbstractNestedNode             The inserted node
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the node is an ancestor of $parent or $parent is not flushed yet
      */
-    protected function insertNode(AbstractNestedNode $node, AbstractNestedNode $parent, $newLeftNode)
+    protected function _insertNode(AbstractNestedNode $node, AbstractNestedNode $parent, $newLeftNode)
     {
         if ($parent->isDescendantOf($node, false)) {
             throw new InvalidArgumentException('Cannot insert node in itself or one of its descendants');
