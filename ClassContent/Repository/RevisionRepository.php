@@ -65,8 +65,9 @@ class RevisionRepository extends EntityRepository
         $revision->setMinEntry($minEntry);
 
         $revision->setOwner($token->getUser());
-        foreach ($content->getAllParams() as $key => $value) {
-            if (null !== $content->getParamValue($key)) {
+        $defaultParams = $content->getDefaultParams();
+        foreach ($content->getAllParams() as $key => $param) {
+            if ($defaultParams[$key]['value'] !== $param['value']) {
                 $revision->setParam($key, $content->getParamValue($key));
             }
         }

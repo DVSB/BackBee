@@ -595,7 +595,9 @@ class ClassContentManager
             if (isset($data['elements']) && true === $data['elements']) {
                 $draft->clear();
                 foreach ($content->getData() as $element) {
-                    $draft->push($element);
+                    if ($element instanceof AbstractClassContent) {
+                        $draft->push($element);
+                    }
                 }
             }
         } else {
@@ -628,7 +630,18 @@ class ClassContentManager
     private function revertPostProcess(AbstractClassContent $content, Revision $draft)
     {
         $data = $draft->jsonSerialize();
-        if (0 === count($data['parameters']) && 0 === count($data['elements'])) {
+
+        if (
+            0 === count($data['parameters'])
+            && (
+                (
+                    $content instanceof ContentSet
+                    && 0 === count($data['elements']['current'])
+                    && 0 === count($data['elements']['draft'])
+                )
+                || 0 === count($data['elements'])
+            )
+        ) {
             $this->entityManager->remove($draft);
 
             if (AbstractClassContent::STATE_NEW === $content->getState()) {

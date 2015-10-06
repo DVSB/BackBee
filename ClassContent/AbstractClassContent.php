@@ -132,13 +132,6 @@ abstract class AbstractClassContent extends AbstractContent
     protected $_indexation;
 
     /**
-     * Default parameters as defined in yaml file.
-     *
-     * @var array
-     */
-    protected $defaultParams = [];
-
-    /**
      * Store the map associating content uid to subcontent index.
      *
      * @var array
@@ -270,17 +263,6 @@ abstract class AbstractClassContent extends AbstractContent
     public function getIndexation()
     {
         return $this->_indexation;
-    }
-
-    /**
-     * Returns the parameters as defined in Yaml.
-     *
-     * @return array
-     * @codeCoverageIgnore
-     */
-    public function getDefaultParams()
-    {
-        return $this->defaultParams;
     }
 
     /**
@@ -803,17 +785,6 @@ abstract class AbstractClassContent extends AbstractContent
     }
 
     /**
-     * Returns the state of the content.
-     *
-     * @return int
-     * @codeCoverageIgnore
-     */
-    public function getState()
-    {
-        return (null !== $this->getDraft()) ? $this->getDraft()->getState() : parent::getState();
-    }
-
-    /**
      * Checks if the element accept subcontent.
      *
      * @param string $var the element
@@ -874,18 +845,6 @@ abstract class AbstractClassContent extends AbstractContent
     }
 
     /**
-     * Returns true if $key is a parameter name, false otherwise.
-     * 
-     * @param string $key The parameter to be tested
-     * 
-     * @return boolean
-     */
-    public function hasParam($key)
-    {
-        return isset($this->defaultParams[$key]);
-    }
-
-    /**
      * Parameters setter.
      *
      * @param string $key   the parameter name to set, if NULL all the parameters array wil be set
@@ -895,37 +854,8 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function setParam($key, $value = null)
     {
-        if (!$this->hasParam($key)) {
-            throw new \InvalidArgumentException(sprintf('Cannot set %s as parameter cause this key does not exist.', $key));
-        }
 
-        if (is_object($value)) {
-            throw new \InvalidArgumentException('Parameter\'s value cannot be type of object.');
-        }
-
-        $currentValue = $this->getParamValue($key);
-        if (
-            (null !== $value && null !== $currentValue)
-            && (
-                gettype($value) !== gettype($currentValue)
-                && (
-                    !(is_string($value) || is_integer($value))
-                    || !(is_string($currentValue) || is_integer($currentValue))
-                )
-            )
-        ) {
-            throw new \InvalidArgumentException(sprintf(
-                'Cannot replace %s\'s value, %s expected and %s given.',
-                $key,
-                gettype($currentValue),
-                gettype($value)
-            ));
-        }
-
-        return null !== $this->getDraft()
-            ? $this->getDraft()->setParam($key, $value)
-            : parent::setParam($key, $value)
-        ;
+        return null !== $this->getDraft() ? $this->getDraft()->setParam($key, $value) : parent::setParam($key, $value);
     }
 
     /**
@@ -937,36 +867,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function getParam($key)
     {
-        if (!$this->hasParam($key)) {
-            return;
-        }
-
-        $value = null !== $this->getDraft() ? $this->getDraft()->getParam($key) : parent::getParam($key);
-
-        $params = $this->defaultParams[$key];
-
-        if (is_array($value) && isset($value['value'])) {
-            $params['value'] = $value['value'];
-        }
-
-        return $params;
-    }
-
-    /**
-     * Returns the parameter's value.
-     *
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function getParamValue($key)
-    {
-        $value = null;
-        if (is_array($param = $this->getParam($key))) {
-            $value = $param['value'];
-        }
-
-        return $value;
+        return null !== $this->getDraft() ? $this->getDraft()->getParam($key) : parent::getParam($key);
     }
 
     /**
@@ -974,17 +875,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function getAllParams()
     {
-        $instanceParams = null !== $this->getDraft() ? $this->getDraft()->getAllParams() : parent::getAllParams();
-        $params = [];
-
-        foreach ($this->defaultParams as $key => $value) {
-            $params[$key] = $value;
-            if (isset($instanceParams[$key]['value'])) {
-                $params[$key]['value'] = $instanceParams[$key]['value'];
-            }
-        }
-
-        return $params;
+        return null !== $this->getDraft() ? $this->getDraft()->getAllParams() : parent::getAllParams();
     }
 
     /**
