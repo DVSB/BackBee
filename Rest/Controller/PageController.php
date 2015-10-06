@@ -766,7 +766,11 @@ class PageController extends AbstractRestController
             $qb->andIsDescendantOf($parent, true, $request->query->get('level_offset', 1), $this->getOrderCriteria(), $count, $start);
         } else {
             if ($request->query->has('site_uid')) {
-                $qb->andSiteIs($request->query->get('site_uid'));
+                $site = $this->getSiteRepository()->find($request->query->get('site_uid'));
+                if (!$site) {
+                    throw new BadRequestHttpException(sprintf("There is no site with uid: %s", $request->query->get('site_uid')));
+                }
+                $qb->andSiteIs($site);
             } else {
                 $qb->andSiteIs($this->getApplication()->getSite());
             }
@@ -812,6 +816,16 @@ class PageController extends AbstractRestController
         }
 
         return $this->paginateClassicCollectionAction($qb, $start, $count);
+    }
+
+    /**
+     * Getter for page entity repository.
+     *
+     * @return \BackBee\NestedNode\Site\Site
+    */
+    private function getSiteRepository()
+    {
+        return $this->getEntityManager()->getRepository('BackBee\Site\Site');
     }
 
     /**
