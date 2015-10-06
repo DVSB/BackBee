@@ -74,7 +74,7 @@ class IndexationListener implements EventSubscriberInterface
      * @param array $contents_inserted
      * @param array $contents_removed
      */
-    private static function _updateIdxSiteContents(array $contents_inserted, array $contents_removed)
+    private static function updateIdxSiteContents(array $contents_inserted, array $contents_removed)
     {
         if (null === $site = self::$_application->getSite()) {
             return;
@@ -93,7 +93,7 @@ class IndexationListener implements EventSubscriberInterface
      * @param array $contents_saved
      * @param array $contents_removed
      */
-    private static function _updateIdxContentContents(array $contents_saved, array $contents_removed)
+    private static function updateIdxContentContents(array $contents_saved, array $contents_removed)
     {
         if (null === self::$_application->getSite()) {
             return;
@@ -170,10 +170,10 @@ class IndexationListener implements EventSubscriberInterface
         $contents_deleted = ScheduledEntities::getSchedulesAClassContentDeletions(self::$em, true);
 
         // Updates content-content indexes
-        self::_updateIdxContentContents(array_merge($contents_inserted, $contents_updated), $contents_deleted);
+        self::updateIdxContentContents(array_merge($contents_inserted, $contents_updated), $contents_deleted);
 
         // Updates site-content indexes
-        self::_updateIdxSiteContents($contents_inserted, $contents_deleted);
+        self::updateIdxSiteContents($contents_inserted, $contents_deleted);
 
         $content = $event->getTarget();
         if (!($content instanceof AbstractClassContent)) {

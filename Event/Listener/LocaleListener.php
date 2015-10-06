@@ -82,11 +82,11 @@ class LocaleListener
         $application = $dispatcher->getApplication();
         $em = $application->getEntityManager();
 
-        self::_updateUrl($application, $page, $maincontent);
+        self::updateUrl($application, $page, $maincontent);
 
         $descendants = $em->getRepository('BackBee\NestedNode\Page')->getDescendants($page);
         foreach ($descendants as $descendant) {
-            self::_updateUrl($application, $descendant);
+            self::updateUrl($application, $descendant);
         }
     }
 
@@ -97,7 +97,7 @@ class LocaleListener
      * @param \BackBee\NestedNode\Page            $page
      * @param \BackBee\ClassContent\AbstractClassContent $maincontent
      */
-    private static function _updateUrl(BBApplication $application, Page $page, AbstractClassContent $maincontent = null)
+    private static function updateUrl(BBApplication $application, Page $page, AbstractClassContent $maincontent = null)
     {
         $urlGenerator = $application->getUrlGenerator();
         if (!($urlGenerator instanceof UrlGeneratorInterface)) {

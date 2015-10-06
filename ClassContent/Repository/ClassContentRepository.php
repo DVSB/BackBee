@@ -419,7 +419,7 @@ class ClassContentRepository extends EntityRepository
      *
      * @return array An array of the classnames
      */
-    private function _getDistinctClassnamesFromUids(array $uids)
+    private function getDistinctClassnamesFromUids(array $uids)
     {
         $classnames = array();
 
@@ -460,7 +460,7 @@ class ClassContentRepository extends EntityRepository
         try {
             if (0 < count($uids)) {
                 // Getting classnames for provided uids
-                $classnames = $this->_getDistinctClassnamesFromUids($uids);
+                $classnames = $this->getDistinctClassnamesFromUids($uids);
 
                 // Construct the DQL query
                 $query = $this->createQueryBuilder('c');

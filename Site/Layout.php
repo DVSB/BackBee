@@ -338,7 +338,7 @@ class Layout extends AbstractObjectIdentifiable
                             $zone->defaultClassContent = null;
                         }
 
-                        $zone->options = $this->_getZoneOptions($zone);
+                        $zone->options = $this->getZoneOptions($zone);
 
                         array_push($this->_zones, $zone);
                     }
@@ -379,7 +379,7 @@ class Layout extends AbstractObjectIdentifiable
      *
      * @return mixed
      */
-    private function _getRecursivelyParam($param, array $pieces)
+    private function getRecursivelyParam($param, array $pieces)
     {
         if (0 === count($pieces)) {
             return $param;
@@ -390,7 +390,7 @@ class Layout extends AbstractObjectIdentifiable
             return;
         }
 
-        return $this->_getRecursivelyParam($param[$key], $pieces);
+        return $this->getRecursivelyParam($param[$key], $pieces);
     }
 
     /**
@@ -638,7 +638,7 @@ class Layout extends AbstractObjectIdentifiable
      *
      * @return array
      */
-    private function _getZoneOptions(\stdClass $zone)
+    private function getZoneOptions(\stdClass $zone)
     {
         $options = array(
             'parameters' => array(

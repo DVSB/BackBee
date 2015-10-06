@@ -234,7 +234,7 @@ class NestedNodeRepositoryTest extends BackBeeTestCase
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_refreshExistingNode
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::refreshExistingNode
      * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_refreshExistingNode()

@@ -61,7 +61,7 @@ class AdminLogRepository extends EntityRepository
         $sql = 'SELECT owner, entity FROM :from_result AS orderer_log GROUP BY owner';
         $result = $this->getEntityManager()->getConnection()->executeQuery($sql, array('form_result' => $from));
 
-        $verif = $this->_getActualAdminEdition();
+        $verif = $this->getActualAdminEdition();
         $return = $result->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($return as $key => $result) {
             if (
@@ -88,7 +88,7 @@ class AdminLogRepository extends EntityRepository
         return $result;
     }
 
-    private function _getActualAdminEdition()
+    private function getActualAdminEdition()
     {
         $date = new \DateTime('@'.strtotime('-30 minutes'));
         $from = sprintf('SELECT owner, entity FROM admin_log WHERE created_at > "%s" ORDER BY created_at DESC', $date->format('Y-m-d H:i:s'));

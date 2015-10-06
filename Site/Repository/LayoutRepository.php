@@ -49,7 +49,7 @@ class LayoutRepository extends EntityRepository
      * @param boolean   $nowpadding If true don't insert a right padding
      * @param boolean   $nohpadding If true don't insert a bottom padding
      */
-    private function _drawRect(&$image, $clip, $background, $nowpadding = true, $nohpadding = true)
+    private function drawRect(&$image, $clip, $background, $nowpadding = true, $nohpadding = true)
     {
         imagefilledrectangle($image, $clip[0], $clip[1], $clip[0] + $clip[2] - (!$nowpadding * 1), $clip[1] + $clip[3] - (!$nohpadding * 1), $background);
     }
@@ -68,7 +68,7 @@ class LayoutRepository extends EntityRepository
      *
      * @return int The new X axis position;
      */
-    private function _drawThumbnailZone(&$thumbnail, $node, $clip, $background, $gridcolumn, $lastChild = false)
+    private function drawThumbnailZone(&$thumbnail, $node, $clip, $background, $gridcolumn, $lastChild = false)
     {
         $x = $clip[0];
         $y = $clip[1];
@@ -84,7 +84,7 @@ class LayoutRepository extends EntityRepository
         }
 
         if (!$node->hasChildNodes()) {
-            $this->_drawRect($thumbnail, array($x, $y, $width, $height), $background, ($width == $clip[2] || strpos($node->getAttribute('class'), 'hChild')), $lastChild);
+            $this->drawRect($thumbnail, array($x, $y, $width, $height), $background, ($width == $clip[2] || strpos($node->getAttribute('class'), 'hChild')), $lastChild);
 
             return $width + 2;
         }
@@ -100,7 +100,7 @@ class LayoutRepository extends EntityRepository
                 continue;
             }
 
-            $x += $this->_drawThumbnailZone($thumbnail, $child, array($x, $y, $clip[2], $height), $background, $gridcolumn, $node->isSameNode($node->parentNode->lastChild));
+            $x += $this->drawThumbnailZone($thumbnail, $child, array($x, $y, $clip[2], $height), $background, $gridcolumn, $node->isSameNode($node->parentNode->lastChild));
         }
 
         return $x + $width - 2;
@@ -185,9 +185,9 @@ class LayoutRepository extends EntityRepository
 
             $domlayout = $layout->getDomDocument();
             if (!$domlayout->hasChildNodes() || !$domlayout->firstChild->hasChildNodes()) {
-                $this->_drawRect($thumbnail, $thumbnailconfig['clip'], $background);
+                $this->drawRect($thumbnail, $thumbnailconfig['clip'], $background);
             } else {
-                $this->_drawThumbnailZone($thumbnail, $domlayout->firstChild, $thumbnailconfig['clip'], $background, $gridcolumn);
+                $this->drawThumbnailZone($thumbnail, $domlayout->firstChild, $thumbnailconfig['clip'], $background, $gridcolumn);
             }
 
             imagesavealpha($thumbnail, true);

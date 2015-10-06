@@ -97,7 +97,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
         $authenticatedToken = false;
         while (false === $authenticatedToken) {
             if (null !== $provider = array_pop($user)) {
-                $authenticatedToken = $this->_authenticateUser($token, $provider);
+                $authenticatedToken = $this->authenticateUser($token, $provider);
             } else {
                 break;
             }
@@ -130,12 +130,12 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
-    private function _authenticateUser(TokenInterface $token, UserInterface $user)
+    private function authenticateUser(TokenInterface $token, UserInterface $user)
     {
         if (null === $this->_encoderFactory) {
-            return $this->_authenticateWithoutEncoder($token, $user);
+            return $this->authenticateWithoutEncoder($token, $user);
         } else {
-            return $this->_authenticateWithEncoder($token, $user);
+            return $this->authenticateWithEncoder($token, $user);
         }
     }
 
@@ -147,7 +147,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
-    private function _authenticateWithEncoder(TokenInterface $token, UserInterface $user)
+    private function authenticateWithEncoder(TokenInterface $token, UserInterface $user)
     {
         try {
             $classname = \Symfony\Component\Security\Core\Util\ClassUtils::getRealClass($user);
@@ -169,7 +169,7 @@ class UserAuthenticationProvider implements AuthenticationProviderInterface
      *
      * @return boolean|\BackBee\Security\Token\UsernamePasswordToken
      */
-    private function _authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)
+    private function authenticateWithoutEncoder(TokenInterface $token, UserInterface $user)
     {
         if (null !== $user->getSalt() &&
                 call_user_func($user->getSalt(), $token->getCredentials()) === $user->getPassword()) {

@@ -153,7 +153,7 @@ class IndexationRepository extends EntityRepository
      */
     public function replaceIdxSiteContents(Site $site, array $contents)
     {
-        $contentUids = $this->_getAClassContentUids($contents);
+        $contentUids = $this->getAClassContentUids($contents);
 
         return $this->replaceIdxSiteContentsUid($site->getUid(), $contentUids);
     }
@@ -168,7 +168,7 @@ class IndexationRepository extends EntityRepository
      */
     public function removeIdxSiteContents(Site $site, array $contents)
     {
-        return $this->_removeIdxSiteContents($site->getUid(), $this->_getAClassContentUids($contents));
+        return $this->_removeIdxSiteContents($site->getUid(), $this->getAClassContentUids($contents));
     }
 
     /**
@@ -191,7 +191,7 @@ class IndexationRepository extends EntityRepository
                 $parentUids[$content->getUid()] = array($content->getUid());
             }
 
-            $parentUids[$content->getUid()] = array_merge($parentUids[$content->getUid()], $this->_getAClassContentUids($content->getSubcontent()->toArray()));
+            $parentUids[$content->getUid()] = array_merge($parentUids[$content->getUid()], $this->getAClassContentUids($content->getSubcontent()->toArray()));
         }
 
         return $this->_replaceIdxContentContents($parentUids);
@@ -206,7 +206,7 @@ class IndexationRepository extends EntityRepository
      */
     public function removeIdxContentContents(array $contents)
     {
-        return $this->_removeIdxContentContents($this->_getAClassContentUids($contents));
+        return $this->_removeIdxContentContents($this->getAClassContentUids($contents));
     }
 
     /**
@@ -527,7 +527,7 @@ class IndexationRepository extends EntityRepository
             'site' => $page->getSite()->getUid(),
         );
 
-        return $this->_removeIdxSite($page)
+        return $this->removeIdxSite($page)
                         ->_executeQuery($query, $params);
     }
 
@@ -557,7 +557,7 @@ class IndexationRepository extends EntityRepository
      *
      * @return \BackBee\ClassContent\Repository\IndexationRepository
      */
-    private function _removeIdxContentPage(AbstractClassContent $content, Page $page)
+    private function removeIdxContentPage(AbstractClassContent $content, Page $page)
     {
         $query = 'DELETE FROM idx_page_content WHERE page_uid = :page '.
                 'AND (content_uid IN (SELECT subcontent_uid FROM idx_content_content WHERE content_uid = :content) '.
@@ -578,7 +578,7 @@ class IndexationRepository extends EntityRepository
      *
      * @return IndexationRepository
      */
-    private function _removeIdxSite(Page $page)
+    private function removeIdxSite(Page $page)
     {
         $query = 'DELETE FROM idx_site_content WHERE site_uid = :site AND content_uid IN (SELECT content_uid FROM idx_page_content WHERE page_uid = :page)';
 
@@ -644,7 +644,7 @@ class IndexationRepository extends EntityRepository
             'content' => $content->getUid(),
         );
 
-        return $this->_removeIdxContentPage($content, $page)
+        return $this->removeIdxContentPage($content, $page)
                         ->_executeQuery($query, $params)
                         ->_replaceIdxSite($page);
     }
@@ -680,7 +680,7 @@ class IndexationRepository extends EntityRepository
      *
      * @return array
      */
-    private function _getAClassContentUids(array $contents)
+    private function getAClassContentUids(array $contents)
     {
         $contentUids = array();
         foreach ($contents as $content) {
@@ -726,7 +726,7 @@ class IndexationRepository extends EntityRepository
             'page' => $page->getUid(),
         );
 
-        return $this->_removeIdxSite($page)
+        return $this->removeIdxSite($page)
                         ->_executeQuery($query, $params);
     }
 

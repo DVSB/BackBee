@@ -89,7 +89,7 @@ class FileRepository extends ClassContentRepository
             }
             File::move($filename, $currentname);
             $file->path = Media::getPathFromContent($file);
-            $this->_dispatchPostUploadEvent($currentname, $file->path);
+            $this->dispatchPostUploadEvent($currentname, $file->path);
         } catch (\BackBee\Exception\BBException $e) {
             return false;
         }
@@ -141,7 +141,7 @@ class FileRepository extends ClassContentRepository
                 file_put_contents($moveto, base64_decode($src));
             }
 
-            $this->_dispatchPostUploadEvent($moveto, $file->path);
+            $this->dispatchPostUploadEvent($moveto, $file->path);
         } catch (\BackBee\Exception\BBException $e) {
             return false;
         }
@@ -268,7 +268,7 @@ class FileRepository extends ClassContentRepository
      * @param string $sourcefile
      * @param string $targetfile
      */
-    private function _dispatchPostUploadEvent($sourcefile, $targetfile)
+    private function dispatchPostUploadEvent($sourcefile, $targetfile)
     {
         if (null !== $this->_application &&
                 null !== $this->_application->getEventDispatcher()) {

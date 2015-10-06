@@ -154,7 +154,7 @@ class Yaml extends AbstractClassWrapper
      *
      * @throws ClassWrapperException Occurs when data are not valid
      */
-    private function _checkDatas($yamlData)
+    private function checkDatas($yamlData)
     {
         try {
             if ($yamlData === false || !is_array($yamlData) || count($yamlData) > 1) {
@@ -263,7 +263,7 @@ class Yaml extends AbstractClassWrapper
      *
      * @return string The real path if found
      */
-    private function _resolveFilePath($path)
+    private function resolveFilePath($path)
     {
         $path = str_replace(array($this->_protocol.'://', '/'), array('', DIRECTORY_SEPARATOR), $path);
 
@@ -329,7 +329,7 @@ class Yaml extends AbstractClassWrapper
             );
         }
 
-        $this->_path = $this->_resolveFilePath($path);
+        $this->_path = $this->resolveFilePath($path);
         if (is_file($this->_path) && is_readable($this->_path)) {
             $this->_stat = @stat($this->_path);
 
@@ -349,7 +349,7 @@ class Yaml extends AbstractClassWrapper
                 throw new ClassWrapperException($e->getMessage());
             }
 
-            if ($this->_checkDatas($yamlDatas)) {
+            if ($this->checkDatas($yamlDatas)) {
                 $this->_data = $this->_buildClass();
                 $opened_path = $this->_path;
 
@@ -373,7 +373,7 @@ class Yaml extends AbstractClassWrapper
     {
         $path = str_replace(array($this->_protocol.'://', '/'), array('', DIRECTORY_SEPARATOR), $path);
 
-        $this->_path = $this->_resolveFilePath($path);
+        $this->_path = $this->resolveFilePath($path);
         if (is_file($this->_path) && is_readable($this->_path)) {
             $fd = fopen($this->_path, 'rb');
             $this->_stat = fstat($fd);
