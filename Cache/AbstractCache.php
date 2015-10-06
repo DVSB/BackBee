@@ -251,7 +251,7 @@ abstract class AbstractCache implements CacheInterface
             return $expire;
         }
 
-        return $this->_getControledExpireTime($expire);
+        return $this->getControledExpireTime($expire);
     }
 
     /**
@@ -285,7 +285,7 @@ abstract class AbstractCache implements CacheInterface
      *
      * @return int
      */
-    private function _getControledExpireTime($expire)
+    private function getControledExpireTime($expire)
     {
         $lifetime = $this->getControledLifetime($expire - time());
 

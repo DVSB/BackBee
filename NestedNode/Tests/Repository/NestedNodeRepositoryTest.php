@@ -211,7 +211,7 @@ class NestedNodeRepositoryTest extends BackBeeTestCase
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_insertNode
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::insertNode
      * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_insertParentAsChild()
@@ -223,7 +223,7 @@ class NestedNodeRepositoryTest extends BackBeeTestCase
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_insertNode
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::insertNode
      * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_insertNodeSameAsParent()
@@ -234,7 +234,7 @@ class NestedNodeRepositoryTest extends BackBeeTestCase
     }
 
     /**
-     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::_refreshExistingNode
+     * @covers \BackBee\NestedNode\Repository\NestedNodeRepository::refreshExistingNode
      * @expectedException \BackBee\Exception\InvalidArgumentException
      */
     public function test_refreshExistingNode()

@@ -109,9 +109,9 @@ class Cache extends AbstractExtendedCache
     {
         parent::__construct($options, $context, $logger);
 
-        $this->_setEntityManager();
-        $this->_setEntityRepository();
-        $this->_setPrefixKey();
+        $this->setEntityManager();
+        $this->setEntityRepository();
+        $this->setPrefixKey();
     }
 
     /**
@@ -125,7 +125,7 @@ class Cache extends AbstractExtendedCache
      */
     public function load($id, $bypassCheck = false, \DateTime $expire = null)
     {
-        if (null === $this->_getCacheEntity($id)) {
+        if (null === $this->getCacheEntity($id)) {
             return false;
         }
 
@@ -135,7 +135,7 @@ class Cache extends AbstractExtendedCache
 
         $last_timestamp = $this->test($id);
         if (true === $bypassCheck || 0 === $last_timestamp || $expire->getTimestamp() <= $last_timestamp) {
-            return $this->_getCacheEntity($id)->getData();
+            return $this->getCacheEntity($id)->getData();
         }
 
         return false;
@@ -150,12 +150,12 @@ class Cache extends AbstractExtendedCache
      */
     public function test($id)
     {
-        if (null === $this->_getCacheEntity($id)) {
+        if (null === $this->getCacheEntity($id)) {
             return false;
         }
 
-        if (null !== $this->_getCacheEntity($id)->getExpire()) {
-            $t = $this->_getCacheEntity($id)->getExpire()->getTimestamp();
+        if (null !== $this->getCacheEntity($id)->getExpire()) {
+            $t = $this->getCacheEntity($id)->getExpire()->getTimestamp();
 
             return (time() > $t) ? false : $t;
         }
@@ -178,8 +178,8 @@ class Cache extends AbstractExtendedCache
     {
         try {
             $params = array(
-                'uid' => $this->_getContextualId($id),
-                'tag' => $this->_getContextualId($tag),
+                'uid' => $this->getContextualId($id),
+                'tag' => $this->getContextualId($tag),
                 'data' => $data,
                 'expire' => $this->getExpireTime($lifetime, $bypass_control),
                 'created' => new \DateTime(),
@@ -193,7 +193,7 @@ class Cache extends AbstractExtendedCache
                 'datetime',
             );
 
-            if (null === $this->_getCacheEntity($id)) {
+            if (null === $this->getCacheEntity($id)) {
                 $this->_em->getConnection()
                         ->insert('cache', $params, $types);
             } else {
@@ -205,7 +205,7 @@ class Cache extends AbstractExtendedCache
                         ->update('cache', $params, $identifier, $types);
             }
 
-            $this->_resetCacheEntity();
+            $this->resetCacheEntity();
         } catch (\Exception $e) {
             $this->log('warning', sprintf('Enable to load cache for id %s : %s', $id, $e->getMessage()));
 
@@ -229,10 +229,10 @@ class Cache extends AbstractExtendedCache
                     ->createQueryBuilder('c')
                     ->delete()
                     ->where('c._uid = :uid')
-                    ->setParameters(array('uid' => $this->_getContextualId($id)))
+                    ->setParameters(array('uid' => $this->getContextualId($id)))
                     ->getQuery()
                     ->execute();
-            $this->_resetCacheEntity();
+            $this->resetCacheEntity();
         } catch (\Exception $e) {
             $this->log('warning', sprintf('Enable to remove cache for id %s : %s', $id, $e->getMessage()));
 
@@ -262,10 +262,10 @@ class Cache extends AbstractExtendedCache
                     ->createQueryBuilder('c')
                     ->delete()
                     ->where('c._tag IN (:tags)')
-                    ->setParameters(array('tags' => $this->_getContextualTags($tags)))
+                    ->setParameters(array('tags' => $this->getContextualTags($tags)))
                     ->getQuery()
                     ->execute();
-            $this->_resetCacheEntity();
+            $this->resetCacheEntity();
         } catch (\Exception $e) {
             $this->log('warning', sprintf('Enable to remove cache for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
 
@@ -303,10 +303,10 @@ class Cache extends AbstractExtendedCache
                     ->where('c._tag IN (:tags)')
                     ->setParameters(array(
                         'expire' => $expire,
-                        'tags' => $this->_getContextualTags($tags), ))
+                        'tags' => $this->getContextualTags($tags), ))
                     ->getQuery()
                     ->execute();
-            $this->_resetCacheEntity();
+            $this->resetCacheEntity();
         } catch (\Exception $e) {
             $this->log('warning', sprintf('Enable to update cache for tags (%s) : %s', implode(',', $tags), $e->getMessage()));
 
@@ -344,7 +344,7 @@ class Cache extends AbstractExtendedCache
                     ->where('c._tag IN (:tags)')
                     ->andWhere('c._expire IS NOT NULL')
                     ->setParameters(array(
-                        'tags' => $this->_getContextualTags($tags), ))
+                        'tags' => $this->getContextualTags($tags), ))
                     ->getQuery()
                     ->execute(null, \Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
 
@@ -373,7 +373,7 @@ class Cache extends AbstractExtendedCache
                     ->where('1 = 1')
                     ->getQuery()
                     ->execute();
-            $this->_resetCacheEntity();
+            $this->resetCacheEntity();
         } catch (\Exception $e) {
             $this->log('warning', sprintf('Enable to clear cache : %s', $e->getMessage()));
 
@@ -391,7 +391,7 @@ class Cache extends AbstractExtendedCache
      * @return string
      * @codeCoverageIgnore
      */
-    private function _getContextualId($id)
+    private function getContextualId($id)
     {
         return ($this->_prefix_key) ? md5($this->_prefix_key.$id) : $id;
     }
@@ -404,10 +404,10 @@ class Cache extends AbstractExtendedCache
      * @return array
      * @codeCoverageIgnore
      */
-    private function _getContextualTags(array $tags)
+    private function getContextualTags(array $tags)
     {
         foreach ($tags as &$tag) {
-            $tag = $this->_getContextualId($tag);
+            $tag = $this->getContextualId($tag);
         }
         unset($tag);
 
@@ -422,9 +422,9 @@ class Cache extends AbstractExtendedCache
      * @return \BackBee\Cache\DAO\Entity The cache entity or NULL
      * @codeCoverageIgnore
      */
-    private function _getCacheEntity($id)
+    private function getCacheEntity($id)
     {
-        $contextual_id = $this->_getContextualId($id);
+        $contextual_id = $this->getContextualId($id);
 
         if (null === $this->_entity || $this->_entity->getId() !== $contextual_id) {
             $this->_entity = $this->_repository->find($contextual_id);
@@ -438,7 +438,7 @@ class Cache extends AbstractExtendedCache
      *
      * @codeCoverageIgnore
      */
-    private function _resetCacheEntity()
+    private function resetCacheEntity()
     {
         if (null !== $this->_entity) {
             $this->_em->detach($this->_entity);
@@ -467,7 +467,7 @@ class Cache extends AbstractExtendedCache
      * @return \BackBee\Cache\DAO\Cache
      * @codeCoverageIgnore
      */
-    private function _setPrefixKey()
+    private function setPrefixKey()
     {
         if (null !== $this->getContext()) {
             $this->_prefix_key = md5($this->getContext());
@@ -484,7 +484,7 @@ class Cache extends AbstractExtendedCache
      * @throws \BackBee\Cache\Exception\CacheException Occurs if the entity repository cannot be found
      * @codeCoverageIgnore
      */
-    private function _setEntityRepository()
+    private function setEntityRepository()
     {
         try {
             $this->_repository = $this->_em->getRepository(self::ENTITY_CLASSNAME);
@@ -502,7 +502,7 @@ class Cache extends AbstractExtendedCache
      *
      * @throws \BackBee\Cache\Exception\CacheException Occurs if if enable to create a database connection.
      */
-    private function _setEntityManager()
+    private function setEntityManager()
     {
         try {
             if ($this->_instance_options['em'] instanceof EntityManager) {

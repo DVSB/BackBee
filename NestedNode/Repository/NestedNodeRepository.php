@@ -151,7 +151,7 @@ class NestedNodeRepository extends EntityRepository
      */
     public function insertNodeAsFirstChildOf(AbstractNestedNode $node, AbstractNestedNode $parent)
     {
-        return $this->_insertNode($node, $parent, $parent->getLeftnode() + 1);
+        return $this->insertNode($node, $parent, $parent->getLeftnode() + 1);
     }
 
     /**
@@ -164,7 +164,7 @@ class NestedNodeRepository extends EntityRepository
      */
     public function insertNodeAsLastChildOf(AbstractNestedNode $node, AbstractNestedNode $parent)
     {
-        return $this->_insertNode($node, $parent, $parent->getRightnode());
+        return $this->insertNode($node, $parent, $parent->getRightnode());
     }
 
     /**
@@ -177,7 +177,7 @@ class NestedNodeRepository extends EntityRepository
      * @return \BackBee\NestedNode\AbstractNestedNode             The inserted node
      * @throws \BackBee\Exception\InvalidArgumentException Occurs if the node is an ancestor of $parent or $parent is not flushed yet
      */
-    protected function _insertNode(AbstractNestedNode $node, AbstractNestedNode $parent, $newLeftNode)
+    protected function insertNode(AbstractNestedNode $node, AbstractNestedNode $parent, $newLeftNode)
     {
         if ($parent->isDescendantOf($node, false)) {
             throw new InvalidArgumentException('Cannot insert node in itself or one of its descendants');
@@ -187,7 +187,7 @@ class NestedNodeRepository extends EntityRepository
             throw new InvalidArgumentException('Cannot insert in a non managed node');
         }
 
-        $this->_detachOrPersistNode($node);
+        $this->detachOrPersistNode($node);
 
         $newRightNode = $newLeftNode + $node->getWeight() - 1;
         $node->setLeftnode($newLeftNode)
@@ -205,20 +205,6 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get the previous sibling of the provided node.
-     *
-     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
-     * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
-     *
-     * @deprecated since version 0.10.0
-     */
-    protected function _getPrevSiblingQuery(AbstractNestedNode $node)
-    {
-        return $this->createQueryBuilder('n')
-                        ->andIsPreviousSiblingOf($node);
-    }
-
-    /**
      * Returns the previous sibling node for $node or NULL if $node is the first one in its branch or root.
      *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
@@ -233,42 +219,6 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * @deprecated since version 0.10.0
-     */
-    protected function _getPrevSiblingsQuery(AbstractNestedNode $node)
-    {
-        return $this->createQueryBuilder('n')
-                        ->andParentIs($node->getParent())
-                        ->andLevelEquals($node->getLevel())
-                        ->andRightnodeIsLowerThan($node->getLeftnode(), true);
-    }
-
-    /**
-     * @deprecated since version 0.10.0
-     */
-    protected function _getNextSiblingsQuery(AbstractNestedNode $node)
-    {
-        return $this->createQueryBuilder('n')
-                        ->andParentIs($node->getParent())
-                        ->andLevelEquals($node->getLevel())
-                        ->andLeftnodeIsUpperThan($node->getLeftnode(), true);
-    }
-
-    /**
-     * Returns the query build to get the next sibling of the provided node.
-     *
-     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
-     * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
-     *
-     * @deprecated since version 0.10.0
-     */
-    protected function _getNextSiblingQuery(AbstractNestedNode $node)
-    {
-        return $this->createQueryBuilder('n')
-                        ->andIsNextSiblingOf($node);
-    }
-
-    /**
      * Returns the next sibling node for $node or NULL if $node is the last one in its branch.
      *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
@@ -280,24 +230,6 @@ class NestedNodeRepository extends EntityRepository
                         ->andIsNextSiblingOf($node)
                         ->getQuery()
                         ->getOneOrNullResult();
-    }
-
-    /**
-     * Returns the query build to get the siblings of the provided node.
-     *
-     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
-     * @param  boolean                                               $includeNode if TRUE, include $node in result array
-     * @param  array                                                 $order       ordering spec
-     * @param  int                                                   $limit       max number of results
-     * @param  int                                                   $start       first result index
-     * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
-     *
-     * @deprecated since version 0.10.0
-     */
-    protected function _getSiblingsQuery(AbstractNestedNode $node, $includeNode = false, $order = null, $limit = null, $start = 0)
-    {
-        return $this->createQueryBuilder('n')
-                        ->andIsSiblingsOf($node, !$includeNode, $order, $limit, $start);
     }
 
     /**
@@ -351,21 +283,6 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get ancestor at level $level of the provided node.
-     *
-     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
-     * @param  int                                                   $level
-     * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
-     *
-     * @deprecated since version 0.10.0
-     */
-    protected function _getAncestorQuery(AbstractNestedNode $node, $level = 0)
-    {
-        return $this->createQueryBuilder('n')
-                        ->andIsAncestorOf($node, false, $level);
-    }
-
-    /**
      * Returns the ancestor at level $level of the provided node.
      *
      * @param  \BackBee\NestedNode\AbstractNestedNode      $node
@@ -393,28 +310,6 @@ class NestedNodeRepository extends EntityRepository
     }
 
     /**
-     * Returns the query build to get ancestors of the provided node.
-     *
-     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
-     * @param  int                                                   $depth       Returns only ancestors from $depth number of generation
-     * @param  boolean                                               $includeNode Returns also the node itsef if TRUE
-     * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
-     *
-     * @deprecated since version 0.10.0
-     */
-    protected function _getAncestorsQuery(AbstractNestedNode $node, $depth = null, $includeNode = false)
-    {
-        $q = $this->createQueryBuilder('n')
-                ->andIsAncestorOf($node, !$includeNode);
-
-        if (null !== $depth) {
-            $q->andLevelIsUpperThan($node->getLevel() - $depth);
-        }
-
-        return $q;
-    }
-
-    /**
      * Returns the ancestors of the provided node.
      *
      * @param  \BackBee\NestedNode\AbstractNestedNode $node
@@ -434,28 +329,6 @@ class NestedNodeRepository extends EntityRepository
         return $q->orderBy('n._rightnode', 'desc')
                         ->getQuery()
                         ->getResult();
-    }
-
-    /**
-     * Returns the query build to get descendants of the provided node.
-     *
-     * @param  \BackBee\NestedNode\AbstractNestedNode                       $node
-     * @param  int                                                   $depth       Returns only descendants from $depth number of generation
-     * @param  boolean                                               $includeNode Returns also the node itsef if TRUE
-     * @return \BackBee\NestedNode\Repository\NestedNodeQueryBuilder
-     *
-     * @deprecated since version 0.10.0
-     */
-    protected function _getDescendantsQuery(AbstractNestedNode $node, $depth = null, $includeNode = false)
-    {
-        $q = $this->createQueryBuilder('n')
-                ->andIsDescendantOf($node, !$includeNode);
-
-        if (null !== $depth) {
-            $q->andLevelIsLowerThan($node->getLevel() + $depth);
-        }
-
-        return $q;
     }
 
     /**
@@ -553,13 +426,13 @@ class NestedNodeRepository extends EntityRepository
             throw new InvalidArgumentException('Cannot move node as child of one of its descendants');
         }
 
-        $this->_refreshExistingNode($node)
-                ->_detachFromTree($node)
-                ->_refreshExistingNode($dest);
+        $this->refreshExistingNode($node)
+                ->detachFromTree($node)
+                ->refreshExistingNode($dest);
 
-        $newleft = $this->_getNewLeftFromPosition($dest, $position);
-        $newlevel = $this->_getNewLevelFromPosition($dest, $position);
-        $newparent = $this->_getNewParentFromPosition($dest, $position);
+        $newleft = $this->getNewLeftFromPosition($dest, $position);
+        $newlevel = $this->getNewLevelFromPosition($dest, $position);
+        $newparent = $this->getNewParentFromPosition($dest, $position);
 
         $node->setRightnode($newleft + $node->getWeight() - 1)
                 ->setLeftnode($newleft)
@@ -596,7 +469,7 @@ class NestedNodeRepository extends EntityRepository
      * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws InvalidArgumentException        Occurs if $position is unknown
      */
-    private function _getNewLeftFromPosition(AbstractNestedNode $dest, $position)
+    private function getNewLeftFromPosition(AbstractNestedNode $dest, $position)
     {
         switch ($position) {
             case 'before':
@@ -626,7 +499,7 @@ class NestedNodeRepository extends EntityRepository
      * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws InvalidArgumentException        Occurs if $position is unknown
      */
-    private function _getNewLevelFromPosition(AbstractNestedNode $dest, $position)
+    private function getNewLevelFromPosition(AbstractNestedNode $dest, $position)
     {
         switch ($position) {
             case 'before':
@@ -652,7 +525,7 @@ class NestedNodeRepository extends EntityRepository
      * @return \BackBee\NestedNode\AbstractNestedNode
      * @throws InvalidArgumentException        Occurs if $position is unknown
      */
-    private function _getNewParentFromPosition(AbstractNestedNode $dest, $position)
+    private function getNewParentFromPosition(AbstractNestedNode $dest, $position)
     {
         switch ($position) {
             case 'before':
@@ -740,13 +613,13 @@ class NestedNodeRepository extends EntityRepository
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
      */
-    protected function _detachFromTree(AbstractNestedNode $node)
+    protected function detachFromTree(AbstractNestedNode $node)
     {
         if (true === $node->isRoot()) {
             return $this;
         }
 
-        $this->_refreshExistingNode($node)
+        $this->refreshExistingNode($node)
                 ->createQueryBuilder('n')
                 ->set('n._leftnode', 'n._leftnode - :delta_node')
                 ->set('n._rightnode', 'n._rightnode - :delta_node')
@@ -776,7 +649,7 @@ class NestedNodeRepository extends EntityRepository
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
      */
-    protected function _refreshExistingNode(AbstractNestedNode $node)
+    protected function refreshExistingNode(AbstractNestedNode $node)
     {
         if (true === $this->_em->contains($node)) {
             $this->_em->refresh($node);
@@ -793,11 +666,11 @@ class NestedNodeRepository extends EntityRepository
      * @param  \BackBee\NestedNode\AbstractNestedNode                     $node
      * @return \BackBee\NestedNode\Repository\NestedNodeRepository
      */
-    protected function _detachOrPersistNode(AbstractNestedNode $node)
+    protected function detachOrPersistNode(AbstractNestedNode $node)
     {
         if (null !== $refreshed = $this->find($node->getUid())) {
-            return $this->_detachFromTree($refreshed)
-                            ->_refreshExistingNode($node);
+            return $this->detachFromTree($refreshed)
+                            ->refreshExistingNode($node);
         }
 
         if (false === $this->_em->contains($node)) {

@@ -47,8 +47,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      *
      * @covers ::get
      * @covers ::getContainerValues
-     * @covers ::_getContainerParameters
-     * @covers ::_getContainerServices
+     * @covers ::getContainerParameters
+     * @covers ::getContainerServices
      * @covers ::isLoaded
      */
     public function testContainerOverridedAndNewMethods()

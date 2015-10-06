@@ -91,7 +91,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
     public function getContainerValues(&$item)
     {
         if (false === is_object($item) && false === is_array($item)) {
-            $item = $this->_getContainerServices($this->_getContainerParameters($item));
+            $item = $this->getContainerServices($this->getContainerParameters($item));
         }
 
         return $item;
@@ -104,7 +104,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
      *
      * @return string
      */
-    private function _getContainerParameters($item)
+    private function getContainerParameters($item)
     {
         $matches = array();
         if (preg_match('/^%([^%]+)%$/', $item, $matches)) {
@@ -131,7 +131,7 @@ class Container extends sfContainerBuilder implements ContainerInterface
      *
      * @return mixed
      */
-    private function _getContainerServices($item)
+    private function getContainerServices($item)
     {
         if (false === is_string($item)) {
             return $item;

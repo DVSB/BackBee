@@ -183,7 +183,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * @throws \BackBee\Stream\ClassWrapper\Exception\ClassWrapperException Occurs when the wrapper can not build PHP code
      * @throws \BackBee\AutoLoader\Exception\SyntaxErrorException           Occurs when the generated PHP code is not valid
      */
-    private function _autoloadThrowWrappers($namespace, $classname)
+    private function autoloadThrowWrappers($namespace, $classname)
     {
         if (false === is_array($this->_streamWrappers)) {
             return false;
@@ -229,7 +229,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      *
      * @throws \BackBee\AutoLoader\Exception\SyntaxErrorException Occurs when the found PHP code is not valid
      */
-    private function _autoloadThrowFilesystem($namespace, $classname)
+    private function autoloadThrowFilesystem($namespace, $classname)
     {
         if (false === is_array($this->_namespaces)) {
             return false;
@@ -284,7 +284,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
      * @throws \BackBee\AutoLoader\Exception\InvalidNamespaceException Occurs when the namespace is not valid
      * @throws \BackBee\AutoLoader\Exception\InvalidClassnameException Occurs when the class name is not valid
      */
-    private function _normalizeClassname($classpath)
+    private function normalizeClassname($classpath)
     {
         if (NAMESPACE_SEPARATOR == substr($classpath, 0, 1)) {
             $classpath = substr($classpath, 1);
@@ -312,7 +312,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     /**
      * Registers pre-defined stream wrappers.
      */
-    private function _registerStreams()
+    private function registerStreams()
     {
         foreach ($this->_streamWrappers as $wrappers) {
             foreach ($wrappers as $wrapper) {
@@ -336,9 +336,9 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
     {
         $this->_registeredNamespace = false;
 
-        list($namespace, $classname) = $this->_normalizeClassname($classpath);
+        list($namespace, $classname) = $this->normalizeClassname($classpath);
 
-        if ($this->_autoloadThrowWrappers($namespace, $classname) || $this->_autoloadThrowFilesystem($namespace, $classname)) {
+        if ($this->autoloadThrowWrappers($namespace, $classname) || $this->autoloadThrowFilesystem($namespace, $classname)) {
             if (NAMESPACE_SEPARATOR == substr($classpath, 0, 1)) {
                 $classpath = substr($classpath, 1);
             }
@@ -507,7 +507,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
         $this->_streamWrappers[$namespace][] = array('protocol' => $protocol, 'classname' => $classname);
         ksort($this->_streamWrappers);
 
-        $this->_registerStreams();
+        $this->registerStreams();
 
         return $this;
     }
@@ -555,7 +555,7 @@ class AutoLoader implements DumpableServiceInterface, DumpableServiceProxyInterf
         $this->_streamWrappers = $dump['wrappers_namespaces'];
 
         if (0 < count($dump['wrappers_namespaces'])) {
-            $this->_registerStreams();
+            $this->registerStreams();
         }
 
         $this->_is_restored = true;

@@ -150,7 +150,7 @@ class BBException extends \Exception
     {
         $this->_source = $source;
 
-        return $this->_updateMessage();
+        return $this->updateMessage();
     }
 
     /**
@@ -164,7 +164,7 @@ class BBException extends \Exception
     {
         $this->_seek = $seek;
 
-        return $this->_updateMessage();
+        return $this->updateMessage();
     }
 
     /**
@@ -172,7 +172,7 @@ class BBException extends \Exception
      *
      * @return \BackBee\Exception\BBException
      */
-    private function _updateMessage()
+    private function updateMessage()
     {
         $this->message = $this->_message;
 

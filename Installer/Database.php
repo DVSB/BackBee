@@ -80,7 +80,7 @@ class Database
      */
     public function createBackBeeSchema()
     {
-        $classes = $this->_getBackBeeSchema();
+        $classes = $this->getBackBeeSchema();
         try {
             $this->_schemaTool->dropSchema($classes);
             $this->_schemaTool->createSchema($classes);
@@ -112,7 +112,7 @@ class Database
 
         try {
             $schemaTool = new SchemaTool($bundle->getEntityManager());
-            $classes = $this->_getBundleSchema($bundle);
+            $classes = $this->getBundleSchema($bundle);
             $schemaTool->dropSchema($classes);
             $schemaTool->createSchema($classes);
             unset($schemaTool);
@@ -126,7 +126,7 @@ class Database
      */
     public function updateBackBeeSchema()
     {
-        $this->_schemaTool->updateSchema($this->_getBackBeeSchema(), true);
+        $this->_schemaTool->updateSchema($this->getBackBeeSchema(), true);
     }
 
     /**
@@ -152,7 +152,7 @@ class Database
 
         try {
             $schemaTool = new SchemaTool($bundle->getEntityManager());
-            $classes = $this->_getBundleSchema($bundle);
+            $classes = $this->getBundleSchema($bundle);
             $schemaTool->updateSchema($classes, true);
             unset($schemaTool);
         } catch (\Exception $e) {}
@@ -161,7 +161,7 @@ class Database
     /**
      * @return array
      */
-    private function _getBackBeeSchema()
+    private function getBackBeeSchema()
     {
         $classes = array();
         foreach ($this->_entityFinder->getEntities($this->_application->getBBDir()) as $className) {
@@ -175,7 +175,7 @@ class Database
      * @param  \BackBee\Bundle\AbstractBundle $bundle
      * @return array
      */
-    private function _getBundleSchema($bundle)
+    private function getBundleSchema($bundle)
     {
         $reflection = new \ReflectionClass(get_class($bundle));
         $classes = array();
@@ -200,7 +200,7 @@ class Database
 
     private function getBackBeeSqlSchema()
     {
-        $classes = $this->_getBackBeeSchema();
+        $classes = $this->getBackBeeSchema();
         $sql = $this->_schemaTool->getCreateSchemaSql($classes);
 
         return $sql;
@@ -211,7 +211,7 @@ class Database
         $sql = array();
 
         foreach ($this->_application->getBundles() as $bundle) {
-            $classes = $this->_getBundleSchema($bundle);
+            $classes = $this->getBundleSchema($bundle);
 
             $sql = array_merge($sql, $this->_schemaTool->getCreateSchemaSql($classes));
         }
@@ -241,7 +241,7 @@ class Database
 
     private function getUpdateBackBeeSqlSchema()
     {
-        $classes = $this->_getBackBeeSchema();
+        $classes = $this->getBackBeeSchema();
         $sql = $this->_schemaTool->getUpdateSchemaSql($classes, true);
 
         return $sql;
@@ -252,7 +252,7 @@ class Database
         $sql = array();
 
         foreach ($this->_application->getBundles() as $bundle) {
-            $classes = $this->_getBundleSchema($bundle);
+            $classes = $this->getBundleSchema($bundle);
 
             $sql = array_merge($sql, $this->_schemaTool->getUpdateSchemaSql($classes, true));
         }
@@ -272,7 +272,7 @@ class Database
 
     private function getBackBeeClassMetadata()
     {
-        $classes = $this->_getBackBeeSchema();
+        $classes = $this->getBackBeeSchema();
 
         return $classes;
     }
@@ -282,7 +282,7 @@ class Database
         $classes = array();
 
         foreach ($this->_application->getBundles() as $bundle) {
-            $classes = array_merge($classes, $this->_getBundleSchema($bundle));
+            $classes = array_merge($classes, $this->getBundleSchema($bundle));
         }
 
         return $classes;
