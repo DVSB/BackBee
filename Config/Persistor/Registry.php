@@ -62,7 +62,7 @@ class Registry implements PersistorInterface
         $baseScope = 'BUNDLE_CONFIG.';
         $key = $this->app->getContainer()->get('bundle.loader')->getBundleIdByBaseDir($config->getBaseDir());
         if (null === $key) {
-            $key = $application;
+            $key = 'application';
             $baseScope = 'APPLICATION_CONFIG.';
         }
 
