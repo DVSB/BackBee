@@ -157,7 +157,7 @@ class Configurator
     public function getConfigDefaultSections(Config $config)
     {
         $index = spl_object_hash($config);
-        $default_sections = null;
+        $default_sections = [];
         if (true === array_key_exists($index, $this->configsDefaultSections)) {
             $default_sections = $this->configsDefaultSections[$index];
         }
