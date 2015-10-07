@@ -99,6 +99,13 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     protected $_data = array();
 
     /**
+     * Default parameters as defined in yaml file.
+     *
+     * @var array
+     */
+    protected $defaultParams = [];
+
+    /**
      * The content's parameters.
      *
      * @var array
@@ -503,6 +510,33 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      */
     public function setParam($key, $value = null)
     {
+        if (!$this->hasParam($key)) {
+            throw new \InvalidArgumentException(sprintf('Cannot set %s as parameter cause this key does not exist.', $key));
+        }
+
+        if (is_object($value)) {
+            throw new \InvalidArgumentException('Parameter\'s value cannot be type of object.');
+        }
+
+        $currentValue = $this->getParamValue($key);
+        if (
+            (null !== $value && null !== $currentValue)
+            && (
+                gettype($value) !== gettype($currentValue)
+                && (
+                    !(is_string($value) || is_integer($value))
+                    || !(is_string($currentValue) || is_integer($currentValue))
+                )
+            )
+        ) {
+            throw new \InvalidArgumentException(sprintf(
+                'Cannot replace %s\'s value, %s expected and %s given.',
+                $key,
+                gettype($currentValue),
+                gettype($value)
+            ));
+        }
+
         if (null === $value) {
             unset($this->_parameters[$key]);
         } else {
@@ -966,6 +1000,20 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
     }
 
     /**
+     * Returns true if $key is a parameter name, false otherwise.
+     *
+     * @param string $key The parameter to be tested
+     *
+     * @return boolean
+     */
+    public function hasParam($key)
+    {
+        $defaultParams = $this->getDefaultParams();
+
+        return isset($defaultParams[$key]);
+    }
+
+    /**
      * Returns parameters if requested key exist.
      *
      * @param string $key The parameter to be return, if NULL, all parameters are returned
@@ -975,14 +1023,39 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      */
     public function getParam($key)
     {
-        if (!isset($this->_parameters[$key])) {
+        if (!$this->hasParam($key)) {
             return null;
         }
 
-        $value = $this->_parameters[$key];
+        $param = $this->getDefaultParams()[$key];
+        $value = null;
+        if (isset($this->_parameters[$key])) {
+            $value = $this->_parameters[$key];
 
-        if (!is_array($value) || !isset($value['value'])) {
-            throw new MalformedParameterException(sprintf('Parameter %s is malformed.', $key));
+            if (!is_array($value) || !array_key_exists('value', $value)) {
+                throw new MalformedParameterException(sprintf('Parameter %s is malformed.', $key));
+            }
+        }
+
+        if (is_array($value) && isset($value['value'])) {
+            $param['value'] = $value['value'];
+        }
+
+        return $param;
+    }
+
+    /**
+     * Returns the parameter's value.
+     *
+     * @param string $key
+     *
+     * @return mixed
+     */
+    public function getParamValue($key)
+    {
+        $value = null;
+        if (is_array($param = $this->getParam($key))) {
+            $value = $param['value'];
         }
 
         return $value;
@@ -995,7 +1068,27 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
      */
     public function getAllParams()
     {
-        return $this->_parameters;
+        $params = [];
+
+        foreach ($this->getDefaultParams() as $key => $value) {
+            $params[$key] = $value;
+            if (isset($this->_parameters[$key]['value'])) {
+                $params[$key]['value'] = $this->_parameters[$key]['value'];
+            }
+        }
+
+        return $params;
+    }
+
+    /**
+     * Returns the parameters as defined in Yaml.
+     *
+     * @return array
+     * @codeCoverageIgnore
+     */
+    public function getDefaultParams()
+    {
+        return $this->defaultParams;
     }
 
     /**
@@ -1112,7 +1205,7 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
             ),
             'minentry'   => $this->getMinEntry(),
             'maxentry'   => $this->getMaxEntry(),
-            'elements'   => $this->computeElementsToJson($this->getData()),
+            'elements'   => array_filter($this->computeElementsToJson($this->getData())),
             'extra'      => [],
         ];
 

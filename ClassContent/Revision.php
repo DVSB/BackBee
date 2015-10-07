@@ -435,7 +435,7 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * Return the last subcontent of the set.
-     * 
+     *
      * @return AbstractClassContent the last element
      */
     public function last()
@@ -578,11 +578,10 @@ class Revision extends AbstractContent implements \Iterator, \Countable
      */
     public function jsonSerialize()
     {
-        $draft = $this->getContent()->getDraft();
         $this->getContent()->setDraft(null);
 
         $sourceData = $this->getContent()->jsonSerialize(self::JSON_CONCISE_FORMAT);
-        $this->getContent()->setDraft($draft);
+        $this->getContent()->setDraft($this);
         $draftData = parent::jsonSerialize(self::JSON_CONCISE_FORMAT);
 
         $draftData['uid'] = $sourceData['uid'];
@@ -631,6 +630,14 @@ class Revision extends AbstractContent implements \Iterator, \Countable
         }
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefaultParams()
+    {
+        return $this->_content->getDefaultParams();
     }
 
     /**
@@ -712,9 +719,9 @@ class Revision extends AbstractContent implements \Iterator, \Countable
 
     /**
      * Returns true if $key is a parameter name, false otherwise.
-     * 
+     *
      * @param string $key The parameter to be tested
-     * 
+     *
      * @return boolean
      */
     public function hasParam($key)
