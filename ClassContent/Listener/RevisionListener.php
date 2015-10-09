@@ -138,13 +138,15 @@ class RevisionListener
         $moveFrom = $content->path;
         File::resolveFilepath($moveFrom, null, array('base_dir' => $application->getMediaDir()));
 
-        $content->setParam('stat', json_encode(stat($moveFrom)));
+        if (file_exists($moveFrom)) {
+            $content->setParam('stat', json_encode(stat($moveFrom)));
 
-        if ($content instanceof ElementImage) {
-            list($width, $height) = getimagesize($moveFrom);
+            if ($content instanceof ElementImage) {
+                list($width, $height) = getimagesize($moveFrom);
 
-            $content->setParam('width', $width);
-            $content->setParam('height', $height);
+                $content->setParam('width', $width);
+                $content->setParam('height', $height);
+            }
         }
 
         $uow->recomputeSingleEntityChangeSet($em->getClassMetadata('BackBee\ClassContent\Revision'), $revision);
