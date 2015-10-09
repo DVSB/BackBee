@@ -178,6 +178,10 @@ class CategoryManager
      */
     public static function getClassContentClassnamesFromDir($directory)
     {
+        if (!is_dir($directory)) {
+            return [];
+        }
+
         return array_map(
             function ($path) use ($directory) {
                 return str_replace(
