@@ -652,6 +652,10 @@ class ClassContentController extends AbstractRestController
         unset($criterias['order_by']);
         unset($criterias['order_direction']);
 
+        $criterias['contentIds'] = explode(',', $this->getRequest()->query->get('uids', ''));
+
+        unset($criterias['uids']);
+
         $contents = $this->getEntityManager()
             ->getRepository('BackBee\ClassContent\AbstractClassContent')
             ->findContentsBySearch($classnames, $order_infos, $pagination, $criterias)

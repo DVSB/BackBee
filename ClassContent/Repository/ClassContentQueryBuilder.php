@@ -77,9 +77,12 @@ class ClassContentQueryBuilder extends QueryBuilder
         if ($site instanceof Site) {
             $site = $site->getUid();
         }
-        $this->andWhere(
-            'cc._uid IN (SELECT i.content_uid FROM BackBee\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)'
-        )->setParameter('site_uid', $site);
+
+        if (!empty($site)) {
+            $this->andWhere(
+                'cc._uid IN (SELECT i.content_uid FROM BackBee\ClassContent\Indexes\IdxSiteContent i WHERE i.site_uid = :site_uid)'
+            )->setParameter('site_uid', $site);
+        }
     }
 
     /**
