@@ -652,7 +652,7 @@ class ClassContentController extends AbstractRestController
         unset($criterias['order_by']);
         unset($criterias['order_direction']);
 
-        $criterias['contentIds'] = explode(',', $this->getRequest()->query->get('uids', ''));
+        $criterias['contentIds'] = array_filter(explode(',', $this->getRequest()->query->get('uids', '')));
 
         unset($criterias['uids']);
 
