@@ -78,7 +78,7 @@ class KeywordController extends AbstractRestController
      * @return Symfony\Component\HttpFoundation\Response
      *
      * @Rest\ParamConverter(name="keyword", class="BackBee\NestedNode\KeyWord")
-     * @Rest\Security(expression="is_granted('VIEW', keyword)")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getAction(KeyWord $keyword)
     {
@@ -89,7 +89,7 @@ class KeywordController extends AbstractRestController
      * @return Response
      *
      * @Rest\ParamConverter(name="keyword", class="BackBee\NestedNode\KeyWord")
-     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('DELETE', '\BackBee\NestedNode\KeyWord')")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function deleteAction(KeyWord $keyword = null)
     {
@@ -117,7 +117,7 @@ class KeywordController extends AbstractRestController
      * @return Response
      *
      * @Rest\ParamConverter(name="keyword", class="BackBee\NestedNode\KeyWord")
-     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('EDIT', '\BackBee\NestedNode\KeyWord')")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function patchAction(KeyWord $keyword, Request $request)
     {
@@ -199,7 +199,7 @@ class KeywordController extends AbstractRestController
      * @Rest\ParamConverter(
      *   name="parent", id_name="parent_uid", id_source="request", class="BackBee\NestedNode\KeyWord", required=false
      * )
-     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('CREATE', '\BackBee\NestedNode\KeyWord')")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function postAction(Request $request, $parent = null)
     {
@@ -257,7 +257,7 @@ class KeywordController extends AbstractRestController
      *      @Assert\NotBlank()
      * })
      * @Rest\ParamConverter(name="keyword", class="BackBee\NestedNode\KeyWord")
-     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER') & is_granted('EDIT', '\BackBee\NestedNode\KeyWord')")
+     * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function putAction(KeyWord $keyword, Request $request)
     {
