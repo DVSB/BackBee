@@ -93,17 +93,21 @@ class KeywordController extends AbstractRestController
      */
     public function deleteAction(KeyWord $keyword = null)
     {
-        if (!$keyword) {
-            throw new BadRequestHttpException('A keyword show be provided.');
+        try  {
+            if (!$keyword) {
+            throw new BadRequestHttpException('A keyword should be provided.');
         }
 
-       /* delete only if keyword is not used */
+       /* delete only if this keyword is not linked to a content */
        if (!$keyword->getContent()->isEmpty()) {
-           throw new BadRequestHttpException(sprintf('Keyword `%s` is linked to a content', $keyword->getKeyWord()));
+           throw new BadRequestHttpException('KEYWORD_IS_LINKED');
        }
         $this->getKeywordRepository()->delete($keyword);
-
-        return new Response('', 204);
+        $response =  $this->createJsonResponse(null, 204);
+        } catch (\Exception $e) {
+            $response = $this->createErrorResponse($e);
+        }
+        return $response;
     }
 
     /**
@@ -213,10 +217,7 @@ class KeywordController extends AbstractRestController
                 }
 
                 if ($this->keywordAlreadyExists($keyWordLabel)) {
-                    throw new BadRequestHttpException(sprintf(
-                        'A Keyword named `%s` already exists.',
-                        $keyWordLabel
-                    ));
+                    throw new BadRequestHttpException('KEYWORD_ALREADY_EXISTS');
                 }
                 $keywordItem->setParent($parent);
                 $this->getKeywordRepository()->insertNodeAsLastChildOf($keywordItem, $parent);
@@ -237,11 +238,16 @@ class KeywordController extends AbstractRestController
                     false
                 ),
             ]);
-        } catch (\Exception $e) {
-            $response = $this->createResponse(sprintf('Internal server error: %s', $e->getMessage()), 500);
+        } catch(\Exception $e) {
+            $response = $this->createErrorResponse($e);
         }
 
         return $response;
+    }
+
+    private function createErrorResponse(\Exception $e)
+    {
+        return $this->createJsonResponse(array("statusCode" => 500, "message" => $e->getMessage()), 500);
     }
 
     /**
@@ -255,28 +261,34 @@ class KeywordController extends AbstractRestController
      */
     public function putAction(KeyWord $keyword, Request $request)
     {
-        $keywordLabel = trim($request->request->get('keyword'));
+        try {
+            $keywordLabel = trim($request->request->get('keyword'));
 
-        if ($this->keywordAlreadyExists($keywordLabel)) {
-            throw new BadRequestHttpException(sprintf('A KeyWord named %s already exists.', $keyword));
+            if ($this->keywordAlreadyExists($keywordLabel, $keyword->getUid())) {
+                throw new BadRequestHttpException('KEYWORD_ALREADY_EXISTS');
+            }
+
+            $keyword->setKeyWord($keywordLabel);
+
+            $this->getEntityManager()->persist($keyword);
+            $this->getEntityManager()->flush();
+
+            $response = $this->createJsonResponse(null, 204);
+        } catch(\Exception $e) {
+            $response = $this->createErrorResponse($e);
         }
 
-        $keyword->setKeyWord($keywordLabel);
-
-        $this->getEntityManager()->persist($keyword);
-        $this->getEntityManager()->flush();
-
-        return $this->createJsonResponse(null, 204);
+        return $response;
     }
 
-    private function keywordAlreadyExists($keywordLabel)
+    private function keywordAlreadyExists($keywordLabel, $kwUid = null)
     {
         $kwExists = false;
         $keywordItem = $this->getKeywordRepository()->findOneBy([
             '_keyWord' => strtolower(trim($keywordLabel)),
         ]);
 
-        if (null !== $keywordItem) {
+        if (null !== $keywordItem && $keywordItem->getUid() !== $kwUid) {
             $kwExists = true;
         }
 
