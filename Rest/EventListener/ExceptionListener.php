@@ -120,6 +120,10 @@ class ExceptionListener extends AbstractPathEnabledListener
             }
 
             $this->setNewResponse($event, $statusCode, $exception->getMessage());
+        } elseif ($exception instanceof \RuntimeException) {
+            $this->setNewResponse($event, 500, $exception->getMessage());
+            $event->getResponse()->setContent(json_encode(array('internal_error' => $exception->getMessage())));
+            $event->getResponse()->headers->add(['Content-Type', 'application/json']);
         } else {
             $this->setNewResponse($event, 500, $exception->getMessage());
         }
