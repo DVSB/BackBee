@@ -123,6 +123,10 @@ class Yaml extends AbstractClassWrapper
                     if (isset($value['parameters'])) {
                         $options['parameters'] = $value['parameters'];
                     }
+
+                    if (isset($value['extra'])) {
+                        $options['extra'] = $value['extra'];
+                    }
                 } else {
                     $type = 'array';
                     $options['default'] = $value;
