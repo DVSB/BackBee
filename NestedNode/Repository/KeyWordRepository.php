@@ -25,6 +25,7 @@ namespace BackBee\NestedNode\Repository;
 
 use BackBee\ClassContent\Element\Keyword;
 use BackBee\NestedNode\Page;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Exception;
 
 /**
@@ -68,8 +69,7 @@ class KeyWordRepository extends NestedNodeRepository
             if (array_key_exists('start', $paging) && array_key_exists('limit', $paging)) {
                 $qb->setFirstResult($paging['start'])
                        ->setMaxResults($paging['limit']);
-                $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($qb);
-                $result = iterator_to_array($paginator->getIterator());
+                $result = new Paginator($qb);
             }
         } else {
             $result = $qb->getQuery()->getResult();
