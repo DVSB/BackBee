@@ -68,6 +68,11 @@ class PaginationListener extends AbstractPathEnabledListener
     public function onKernelController(FilterControllerEvent $event)
     {
         $request = $this->request = $event->getRequest();
+
+        if ($request->attributes->has('start') && $request->attributes->has('limit')) {
+            return;
+        }
+
         if (false === $this->isEnabled()) {
             return;
         }
@@ -88,15 +93,14 @@ class PaginationListener extends AbstractPathEnabledListener
 
         $start = $metadata->default_start;
         $count = $metadata->default_count;
-        if (true === $request->headers->has('Range')) {
-            $range = explode(',', $request->headers->get('Range'));
-            if (true === isset($range[0])) {
-                $start = intval($range[0]);
-            }
 
-            if (true === isset($range[1])) {
-                $count = intval($range[1]);
-            }
+        $range = explode(',', $request->headers->get('Range'));
+        if (true === isset($range[0])) {
+            $start = intval($range[0]);
+        }
+
+        if (true === isset($range[1])) {
+            $count = intval($range[1]);
         }
 
         $violations = new ConstraintViolationList();
