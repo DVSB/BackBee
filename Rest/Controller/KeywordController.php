@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\NestedNode\KeyWord;
 use BackBee\Rest\Patcher\EntityPatcher;
@@ -66,8 +66,12 @@ class KeywordController extends AbstractRestController
             ];
             $results = $this->getKeywordRepository()->getKeyWords($parent, $orderInfos, array('start' => $start, 'limit' => $count));
         }
+        $total = count($results);
+        if ($results instanceof Paginator) {
+            $results = iterator_to_array($results->getIterator());
+        }
 
-        return $this->addRangeToContent($this->createJsonResponse($results), $results, $start);
+        return $this->addRangeToContent($this->createJsonResponse($results), $total, $start, count($results));
     }
 
     /**
@@ -93,20 +97,21 @@ class KeywordController extends AbstractRestController
      */
     public function deleteAction(KeyWord $keyword = null)
     {
-        try  {
+        try {
             if (!$keyword) {
-            throw new BadRequestHttpException('A keyword should be provided.');
-        }
+                throw new BadRequestHttpException('A keyword should be provided.');
+            }
 
-       /* delete only if this keyword is not linked to a content */
-       if (!$keyword->getContent()->isEmpty()) {
-           throw new BadRequestHttpException('KEYWORD_IS_LINKED');
-       }
-        $this->getKeywordRepository()->delete($keyword);
-        $response =  $this->createJsonResponse(null, 204);
+            /* delete only if this keyword is not linked to a content */
+            if (!$keyword->getContent()->isEmpty()) {
+                throw new BadRequestHttpException('KEYWORD_IS_LINKED');
+            }
+            $this->getKeywordRepository()->delete($keyword);
+            $response = $this->createJsonResponse(null, 204);
         } catch (\Exception $e) {
             $response = $this->createErrorResponse($e);
         }
+
         return $response;
     }
 
@@ -141,12 +146,11 @@ class KeywordController extends AbstractRestController
         return $this->createJsonResponse(null, 204);
     }
 
-    private function addRangeToContent(Response $response, $collection, $start)
+    private function addRangeToContent(Response $response, $total, $start, $nbItems)
     {
-        $count = count($collection);
-        $lastResult = $start + $count - 1;
+        $lastResult = $start + $nbItems - 1;
         $lastResult = $lastResult < 0 ? 0 : $lastResult;
-        $response->headers->set('Content-Range', "$start-$lastResult/".$count);
+        $response->headers->set('Content-Range', "$start-$lastResult/".$total);
 
         return $response;
     }
@@ -238,7 +242,7 @@ class KeywordController extends AbstractRestController
                     false
                 ),
             ]);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $response = $this->createErrorResponse($e);
         }
 
@@ -247,7 +251,7 @@ class KeywordController extends AbstractRestController
 
     private function createErrorResponse(\Exception $e)
     {
-        return $this->createJsonResponse(array("statusCode" => 500, "message" => $e->getMessage()), 500);
+        return $this->createJsonResponse(array('statusCode' => 500, 'message' => $e->getMessage()), 500);
     }
 
     /**
@@ -274,7 +278,7 @@ class KeywordController extends AbstractRestController
             $this->getEntityManager()->flush();
 
             $response = $this->createJsonResponse(null, 204);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $response = $this->createErrorResponse($e);
         }
 
