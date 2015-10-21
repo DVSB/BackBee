@@ -655,32 +655,40 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     public function getResourceDir()
     {
         if (null === $this->resourceDir) {
-            $this->resourceDir = [];
-
-            $this->addResourceDir($this->getBBDir().'/Resources');
-
-            if (is_dir($this->getBaseRepository().'/Resources')) {
-                $this->addResourceDir($this->getBaseRepository().'/Resources');
-            }
-
-            if (is_dir($this->getBaseRepository().'/Ressources')) {
-                $this->addResourceDir($this->getBaseRepository().'/Ressources');
-            }
-
-            if ($this->hasContext()) {
-                if (is_dir($this->getRepository().'/Resources')) {
-                    $this->addResourceDir($this->getRepository().'/Resources');
-                }
-
-                if (is_dir($this->getRepository().'/Resources')) {
-                    $this->addResourceDir($this->getRepository().'/Resources');
-                }
-            }
-
-            array_map(['BackBee\Utils\File\File', 'resolveFilepath'], $this->resourceDir);
+            $this->initResourceDir();
         }
 
         return $this->resourceDir;
+    }
+
+    /**
+     * Init the default resource directories
+     */
+    protected function initResourceDir()
+    {
+        $this->resourceDir = [];
+
+        $this->addResourceDir($this->getBBDir().'/Resources');
+
+        if (is_dir($this->getBaseRepository().'/Resources')) {
+            $this->addResourceDir($this->getBaseRepository().'/Resources');
+        }
+
+        if (is_dir($this->getBaseRepository().'/Ressources')) {
+            $this->addResourceDir($this->getBaseRepository().'/Ressources');
+        }
+
+        if ($this->hasContext()) {
+            if (is_dir($this->getRepository().'/Resources')) {
+                $this->addResourceDir($this->getRepository().'/Resources');
+            }
+
+            if (is_dir($this->getRepository().'/Resources')) {
+                $this->addResourceDir($this->getRepository().'/Resources');
+            }
+        }
+
+        array_map(['BackBee\Utils\File\File', 'resolveFilepath'], $this->resourceDir);
     }
 
     /**
@@ -733,7 +741,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     public function addResourceDir($dir)
     {
         if (null === $this->resourceDir) {
-            $this->resourceDir = [];
+            $this->initResourceDir();
         }
 
         if (!is_array($this->resourceDir)) {
