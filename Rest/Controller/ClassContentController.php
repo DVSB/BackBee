@@ -454,11 +454,18 @@ class ClassContentController extends AbstractRestController
     private function sortDraftCollection(array $drafts)
     {
         $sortedDrafts = [];
-        foreach ($drafts as $draft) {
+        $filteredDrafts = [];
+
+        foreach ($drafts as $key => $draft) {
+            if (null === $draft->getContent()) {
+                continue;
+            }
+
             $sortedDrafts[$draft->getContent()->getUid()] = [$draft->getContent()->getUid() => $draft];
+            $filteredDrafts[$key] = $draft;
         }
 
-        foreach ($drafts as $draft) {
+        foreach ($filteredDrafts as $draft) {
             foreach ($draft->getContent()->getData() as $key => $element) {
                 if (
                     is_object($element)
