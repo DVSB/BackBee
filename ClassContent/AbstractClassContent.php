@@ -904,10 +904,6 @@ abstract class AbstractClassContent extends AbstractContent
      */
     public function unsetSubContent(AbstractClassContent $subContent)
     {
-        if (null !== $this->getDraft()) {
-            return $this->getDraft()->unsetSubContent($subContent);
-        }
-
         foreach ($this->_data as $key => $value) {
             if (is_array($value)) {
                 $totalContent = count($value);

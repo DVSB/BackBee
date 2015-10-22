@@ -916,22 +916,34 @@ class ClassContentRepository extends EntityRepository
                 }
             }
 
-            $this->_em->getConnection()->executeQuery(
-                'DELETE FROM indexation WHERE owner_uid = :uid',
-                [
-                    'uid' => $content->getUid()
-                ]
-            )->execute();
-
-            $this->_em->getConnection()->executeQuery(
-                'DELETE FROM revision WHERE content_uid = :uid',
-                [
-                    'uid' => $content->getUid()
-                ]
-            )->execute();
-
+            $this->cleanUpContentHardDelete($content);
             $this->_em->remove($content);
         }
+    }
+
+    /**
+     * Performs custom process on hard delete of content.
+     *
+     * @param  AbstractClassContent $content
+     * @return self
+     */
+    protected function cleanUpContentHardDelete(AbstractClassContent $content)
+    {
+        $this->_em->getConnection()->executeQuery(
+            'DELETE FROM indexation WHERE owner_uid = :uid',
+            [
+                'uid' => $content->getUid(),
+            ]
+        )->execute();
+
+        $this->_em->getConnection()->executeQuery(
+            'DELETE FROM revision WHERE content_uid = :uid',
+            [
+                'uid' => $content->getUid(),
+            ]
+        )->execute();
+
+        return $this;
     }
 
     /**

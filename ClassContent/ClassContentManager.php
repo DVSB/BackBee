@@ -548,6 +548,7 @@ class ClassContentManager
 
         $draft->commit();
         $content->setLabel($draft->getLabel());
+
         foreach ($draft->getAllParams() as $key => $params) {
             $content->setParam($key, $params['value']);
         }
@@ -591,6 +592,7 @@ class ClassContentManager
      */
     private function executeRevert(AbstractClassContent $content, Revision $draft, array $data)
     {
+        $content->setDraft(null);
         if ($content instanceof ContentSet) {
             if (isset($data['elements']) && true === $data['elements']) {
                 $draft->clear();
@@ -634,18 +636,18 @@ class ClassContentManager
         if (
             0 === count($data['parameters'])
             && (
-                (
+                0 === count($data['elements'])
+                || (
                     $content instanceof ContentSet
-                    && 0 === count($data['elements']['current'])
-                    && 0 === count($data['elements']['draft'])
+                    && $data['elements']['current'] === $data['elements']['draft']
                 )
-                || 0 === count($data['elements'])
             )
         ) {
             $this->entityManager->remove($draft);
 
             if (AbstractClassContent::STATE_NEW === $content->getState()) {
-                $this->entityManager->remove($content);
+                $classname = AbstractClassContent::getClassnameByContentType($content->getContentType());
+                $this->entityManager->getRepository($classname)->deleteContent($content);
             }
         }
 
