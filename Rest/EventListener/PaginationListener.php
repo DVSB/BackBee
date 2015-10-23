@@ -69,7 +69,7 @@ class PaginationListener extends AbstractPathEnabledListener
     {
         $request = $this->request = $event->getRequest();
 
-        if ($request->attributes->has('start') && $request->attributes->has('limit')) {
+        if ($request->attributes->has('start') && $request->attributes->has('count')) {
             return;
         }
 
