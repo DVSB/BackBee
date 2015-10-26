@@ -25,6 +25,9 @@ namespace BackBee\Bundle;
 
 use BackBee\ApplicationInterface;
 use BackBee\Config\Config;
+use BackBee\DependencyInjection\ContainerInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\DependencyInjection\Dumper\DumpableServiceProxyInterface;
 use BackBee\DependencyInjection\Util\ServiceLoader;
 use BackBee\Bundle\Event\BundleInstallUpdateEvent;
 use BackBee\Exception\InvalidArgumentException;
@@ -43,7 +46,7 @@ use Symfony\Component\DependencyInjection\Reference;
  * @copyright   Lp digital system
  * @author      eric.chau <eric.chau@lp-digital.fr>
  */
-class BundleLoader
+class BundleLoader implements DumpableServiceInterface, DumpableServiceProxyInterface
 {
     const CLASSCONTENT_RECIPE_KEY = 'classcontent';
     const CUSTOM_RECIPE_KEY = 'custom';
@@ -81,12 +84,20 @@ class BundleLoader
     private $bundleInfos = [];
 
     /**
+     * define if renderer has been restored by container or not.
+     *
+     * @var boolean
+     */
+    private $isRestored;
+
+    /**
      * @param ApplicationInterface $application
      */
     public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
         $this->container = $application->getContainer();
+        $this->isRestored = false;
     }
 
     /**
@@ -674,5 +685,49 @@ class BundleLoader
         }
 
         return $done;
+    }
+
+    /**
+     * Returns the namespace of the class proxy to use or null if no proxy is required.
+     *
+     * @return string|null the namespace of the class proxy to use on restore or null if no proxy required
+     */
+    public function getClassProxy()
+    {
+        return;
+    }
+
+    /**
+     * Dumps current service state so we can restore it later by calling DumpableServiceInterface::restore()
+     * with the dump array produced by this method.
+     *
+     * @return array contains every datas required by this service to be restored at the same state
+     */
+    public function dump(array $options = array())
+    {
+        return [
+            'bundleInfos' => $this->bundleInfos,
+        ];
+    }
+
+    /**
+     * Restore current service to the dump's state.
+     *
+     * @param array $dump the dump provided by DumpableServiceInterface::dump() from where we can
+     *                    restore current service
+     */
+    public function restore(ContainerInterface $container, array $dump)
+    {
+        $this->bundleInfos = $dump['bundleInfos'];
+
+        $this->isRestored = true;
+    }
+
+    /**
+     * @return boolean true if current service is already restored, otherwise false
+     */
+    public function isRestored()
+    {
+        return $this->isRestored;
     }
 }

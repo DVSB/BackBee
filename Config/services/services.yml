@@ -137,7 +137,8 @@ services:
     bundle.loader:
         class:      %bbapp.bundle.loader.class%
         arguments:  [@bbapp]
-
+        tags:
+            - { name: "dumpable", dispatch_event: false }
 
     config.configurator:
         class:      %bbapp.config.configurator.class%
