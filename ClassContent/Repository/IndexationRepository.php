@@ -23,6 +23,7 @@
 
 namespace BackBee\ClassContent\Repository;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -291,50 +292,65 @@ class IndexationRepository extends EntityRepository
      */
     public function getParentContentUids(array $contents)
     {
-        $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxContentContent');
-
-        $q = $this->_em->getConnection()
-                ->createQueryBuilder()
-                ->select('c.'.$meta->getColumnName('content_uid'))
-                ->from($meta->getTableName(), 'c');
-
-        $p = $this->_em->getConnection()
-                ->createQueryBuilder()
-                ->select('j.parent_uid')
-                ->from('content_has_subcontent', 'j');
-
-        $index = 0;
-        $method = 'where';
-        $atleastone = false;
+        $elementUids = [];
+        $notElementUids = [];
         foreach ($contents as $content) {
-            if (false === ($content instanceof AbstractClassContent)) {
+            if (!($content instanceof AbstractClassContent)) {
                 continue;
             }
 
-            if (true === $content->isElementContent()) {
-                continue;
+            if ($content->isElementContent()) {
+                $elementUids[] = $content->getUid();
+            } else {
+                $notElementUids[] = $content->getUid();
             }
-
-            if ($index !== 0) {
-                $method = 'orWhere';
-            }
-
-            $q->{$method}('c.'.$meta->getColumnName('subcontent_uid').' = :uid'.$index)
-              ->setParameter('uid'.$index, $content->getUid());
-
-            $p->{$method}('j.content_uid = :uid'.$index)
-              ->setParameter('uid'.$index, $content->getUid());
-
-            $index++;
-            $atleastone = true;
         }
 
-        return (true === $atleastone) ? array_unique(
-            array_merge(
-                $q->execute()->fetchAll(\PDO::FETCH_COLUMN),
-                $p->execute()->fetchAll(\PDO::FETCH_COLUMN)
-            )
-        ) : array();
+        if (count($elementUids)) {
+            $query = $this->_em->getConnection()
+                    ->createQueryBuilder()
+                    ->select('j.parent_uid')
+                    ->from('content_has_subcontent', 'j');
+
+            $notElementUids = array_merge(
+                    $notElementUids, 
+                    $this->executeQueryIn($query, 'j.content_uid', $elementUids)
+            );
+        }
+
+        if (count($notElementUids)) {
+            $meta = $this->_em->getClassMetadata('BackBee\ClassContent\Indexes\IdxContentContent');
+            $query = $this->_em->getConnection()
+                    ->createQueryBuilder()
+                    ->select('c.'.$meta->getColumnName('content_uid'))
+                    ->from($meta->getTableName(), 'c');
+
+            return $this->executeQueryIn($query, 'c.'.$meta->getColumnName('subcontent_uid'), $notElementUids);
+        }
+
+        return [];
+    }
+
+    /**
+     * @param  QueryBuilder $query
+     * @param  string       $field
+     * @param  string[]     $values
+     * 
+     * @return string[]
+     */
+    private function executeQueryIn(QueryBuilder $query, $field, array $values)
+    {
+        array_walk(
+                $values,
+                function(&$value, $key, $query) {
+                    $value = $query->expr()->literal($value);
+                },
+                $query
+        );
+
+        return $query->where($query->expr()->in($field, $values))
+                        ->execute()
+                        ->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
