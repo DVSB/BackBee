@@ -27,6 +27,7 @@ use BackBee\ClassContent\AbstractClassContent;
 use BackBee\ClassContent\Element\Keyword;
 use BackBee\ClassContent\Exception\ClassContentException;
 use BackBee\ClassContent\Repository\ClassContentRepository;
+use BackBee\Security\Token\BBUserToken;
 
 /**
  * keyword repository.
@@ -47,6 +48,7 @@ class KeywordRepository extends ClassContentRepository
      *
      * @return \BackBee\ClassContent\Element\File
      * @throws ClassContentException Occures on invalid content type provided
+     * @deprecated since version v1.1
      */
     public function getValueFromPost(AbstractClassContent $content, $value, AbstractClassContent $parent = null)
     {
@@ -81,6 +83,7 @@ class KeywordRepository extends ClassContentRepository
      * @return type
      *
      * @throws ClassContentException
+     * @deprecated since version v1.1
      */
     public function removeFromPost(AbstractClassContent $content, $value = null, AbstractClassContent $parent = null)
     {
@@ -103,5 +106,90 @@ class KeywordRepository extends ClassContentRepository
         }
 
         return $content;
+    }
+
+    /**
+     * Updates keywords_contents join.
+     * 
+     * @param AbstractClassContent $content
+     * @param mixed                $keywords
+     * @param BBUserToken          $token
+     */
+    public function updateKeywordLinks(AbstractClassContent $content, $keywords, BBUserToken $token)
+    {
+        if (!is_array($keywords)) {
+            $keywords = [$keywords];
+        }
+
+        foreach ($keywords as $keyword) {
+            if (!$keyword instanceof Keyword) {
+                continue;
+            }
+
+            if (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($keyword, $token)) {
+                $keyword->setDraft($draft);
+            }
+
+            if (
+                    empty($keyword->value)
+                    || (null === $realKeyword = $this->_em->find('BackBee\NestedNode\KeyWord', $keyword->value))
+            ) {
+                continue;
+            }
+
+            if (!$realKeyword->getContent()->contains($content)) {
+                $realKeyword->getContent()->add($content);
+            }
+        }
+    }
+
+    /**
+     * Deletes outdated keyword content joins.
+     * 
+     * @param AbstractClassContent $content
+     * @param mixed                $keywords
+     */
+    public function cleanKeywordLinks(AbstractClassContent $content, $keywords)
+    {
+        if (!is_array($keywords)) {
+            $keywords = [$keywords];
+        }
+
+        $keywordUids = [];
+        foreach ($keywords as $keyword) {
+            if (
+                    $keyword instanceof Keyword
+                    && !empty($keyword->value)
+                    && (null !== $realKeyword = $this->_em->find('BackBee\NestedNode\KeyWord', $keyword->value))
+            ) {
+                $keywordUids[] = $realKeyword->getUid();
+            }
+        }
+
+        $query = $this->_em->getConnection()
+                    ->createQueryBuilder()
+                    ->select('c.keyword_uid')
+                    ->from('keywords_contents', 'c');
+        $query->where($query->expr()->eq('c.content_uid', $query->expr()->literal($content->getUid())));
+        $savedKeywords = $query->execute()->fetchAll(\PDO::FETCH_COLUMN);
+
+        $linksToBeRemoved = array_diff($savedKeywords, $keywordUids);
+        if (count($linksToBeRemoved)) {
+            $query = $this->_em->getConnection()
+                    ->createQueryBuilder()
+                    ->delete('keywords_contents');
+
+            array_walk(
+                $linksToBeRemoved,
+                function(&$value, $key, $query) {
+                    $value = $query->expr()->literal($value);
+                },
+                $query
+            );
+
+            $query->where($query->expr()->eq('content_uid', $query->expr()->literal($content->getUid())))
+                    ->andWhere($query->expr()->in('keyword_uid', $linksToBeRemoved))
+                    ->execute();
+        }
     }
 }

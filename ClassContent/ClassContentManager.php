@@ -400,6 +400,11 @@ class ClassContentManager
     private function updateContentElements(AbstractClassContent $content, array $elementsData)
     {
         foreach ($elementsData as $key => $data) {
+            if (in_array('Element\Keyword', $content->getAccept()[$key])) {
+                $this->entityManager
+                        ->getRepository('BackBee\ClassContent\Element\Keyword')
+                        ->updateKeywordLinks($content, $data, $this->token);
+            }
             $content->$key = $data;
         }
 
@@ -542,6 +547,12 @@ class ClassContentManager
                 }
                 unset($subcontent);
 
+                if (in_array('Element\Keyword', $content->getAccept()[$key])) {
+                    $this->entityManager
+                        ->getRepository('BackBee\ClassContent\Element\Keyword')
+                        ->cleanKeywordLinks($content, $values);
+                }
+
                 $content->$key = $values;
             }
         }
@@ -606,6 +617,12 @@ class ClassContentManager
             foreach ($content->getData() as $key => $element) {
                 if (isset($data['elements']) && in_array($key, $data['elements'])) {
                     $draft->$key = $content->$key;
+                }
+
+                if (in_array('Element\Keyword', $content->getAccept()[$key])) {
+                    $this->entityManager
+                        ->getRepository('BackBee\ClassContent\Element\Keyword')
+                        ->cleanKeywordLinks($content, $element);
                 }
             }
         }
