@@ -581,6 +581,8 @@ class PageController extends AbstractRestController
             throw new BadRequestHttpException('Cannot remove root page of a site.');
         }
 
+        $this->granted('DELETE', $page);
+
         $this->granted('EDIT', $page->getParent()); // user must have edit permission on parent
 
         if (true === $page->isOnline(true)) {
