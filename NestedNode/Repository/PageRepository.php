@@ -884,6 +884,7 @@ class PageRepository extends EntityRepository
                 }
 
                 if (
+                        $subcontent instanceof AbstractClassContent &&
                         null !== $subcontent->getMainNode() &&
                         true === in_array($subcontent->getMainNode()->getUid(), $copied_pages) &&
                         true === in_array($subcontent->getUid(), $copied_contents)
