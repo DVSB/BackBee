@@ -552,6 +552,10 @@ abstract class AbstractClassContent extends AbstractContent
             $values = $default;
         }
 
+        if (isset($this->defaultParams[$var])) {
+            $values = array_merge($values, $this->defaultParams[$var]);
+        }
+
         $this->defaultParams[$var] = $values;
 
         return $this;
