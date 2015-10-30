@@ -150,10 +150,6 @@ class ClassContentController extends AbstractRestController
      * @Rest\QueryParam(name="mode", description="The render mode to use")
      * @Rest\QueryParam(name="page_uid", description="The page to set to application's renderer before rendering")
      *
-     * @Rest\ParamConverter(
-     *   name="page", id_name="page_uid", id_source="query", class="BackBee\NestedNode\Page", required=false
-     * )
-     *
      * @Rest\Security("is_fully_authenticated() & has_role('ROLE_API_USER')")
      */
     public function getAction($type, $uid, Request $request)
@@ -162,8 +158,10 @@ class ClassContentController extends AbstractRestController
 
         $response = null;
         if (in_array('text/html', $request->getAcceptableContentTypes())) {
-            if (null !== $page = $this->getEntityFromAttributes('page')) {
-                $this->getApplication()->getRenderer()->setCurrentPage($page);
+            if (false != $pageUid = $request->query->get('page_uid')) {
+                if (null !== $page = $this->getEntityManager()->find('BackBee\NestedNode\Page', $pageUid)) {
+                    $this->getApplication()->getRenderer()->setCurrentPage($page);
+                }
             }
 
             $mode = $request->query->get('mode', null);
