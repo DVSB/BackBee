@@ -110,29 +110,32 @@ class KeywordRepository extends ClassContentRepository
 
     /**
      * Updates keywords_contents join.
-     * 
+     *
      * @param AbstractClassContent $content
      * @param mixed                $keywords
      * @param BBUserToken          $token
      */
-    public function updateKeywordLinks(AbstractClassContent $content, $keywords, BBUserToken $token)
+    public function updateKeywordLinks(AbstractClassContent $content, $keywords, BBUserToken $token = null)
     {
         if (!is_array($keywords)) {
             $keywords = [$keywords];
         }
 
         foreach ($keywords as $keyword) {
-            if (!$keyword instanceof Keyword) {
+            if (!($keyword instanceof Keyword)) {
                 continue;
             }
 
-            if (null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($keyword, $token)) {
+            if (
+                null !== $token &&
+                null !== $draft = $this->_em->getRepository('BackBee\ClassContent\Revision')->getDraft($keyword, $token)
+            ) {
                 $keyword->setDraft($draft);
             }
 
             if (
-                    empty($keyword->value)
-                    || (null === $realKeyword = $this->_em->find('BackBee\NestedNode\KeyWord', $keyword->value))
+                empty($keyword->value)
+                || (null === $realKeyword = $this->_em->find('BackBee\NestedNode\KeyWord', $keyword->value))
             ) {
                 continue;
             }
@@ -145,7 +148,7 @@ class KeywordRepository extends ClassContentRepository
 
     /**
      * Deletes outdated keyword content joins.
-     * 
+     *
      * @param AbstractClassContent $content
      * @param mixed                $keywords
      */
@@ -158,26 +161,30 @@ class KeywordRepository extends ClassContentRepository
         $keywordUids = [];
         foreach ($keywords as $keyword) {
             if (
-                    $keyword instanceof Keyword
-                    && !empty($keyword->value)
-                    && (null !== $realKeyword = $this->_em->find('BackBee\NestedNode\KeyWord', $keyword->value))
+                $keyword instanceof Keyword
+                && !empty($keyword->value)
+                && (null !== $realKeyword = $this->_em->find('BackBee\NestedNode\KeyWord', $keyword->value))
             ) {
                 $keywordUids[] = $realKeyword->getUid();
             }
         }
 
-        $query = $this->_em->getConnection()
-                    ->createQueryBuilder()
-                    ->select('c.keyword_uid')
-                    ->from('keywords_contents', 'c');
+        $query = $this->_em
+            ->getConnection()
+            ->createQueryBuilder()
+            ->select('c.keyword_uid')
+            ->from('keywords_contents', 'c')
+        ;
         $query->where($query->expr()->eq('c.content_uid', $query->expr()->literal($content->getUid())));
         $savedKeywords = $query->execute()->fetchAll(\PDO::FETCH_COLUMN);
 
         $linksToBeRemoved = array_diff($savedKeywords, $keywordUids);
         if (count($linksToBeRemoved)) {
-            $query = $this->_em->getConnection()
-                    ->createQueryBuilder()
-                    ->delete('keywords_contents');
+            $query = $this->_em
+                ->getConnection()
+                ->createQueryBuilder()
+                ->delete('keywords_contents')
+            ;
 
             array_walk(
                 $linksToBeRemoved,
@@ -187,9 +194,11 @@ class KeywordRepository extends ClassContentRepository
                 $query
             );
 
-            $query->where($query->expr()->eq('content_uid', $query->expr()->literal($content->getUid())))
-                    ->andWhere($query->expr()->in('keyword_uid', $linksToBeRemoved))
-                    ->execute();
+            $query
+                ->where($query->expr()->eq('content_uid', $query->expr()->literal($content->getUid())))
+                ->andWhere($query->expr()->in('keyword_uid', $linksToBeRemoved))
+                ->execute()
+            ;
         }
     }
 }
