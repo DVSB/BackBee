@@ -43,16 +43,10 @@ class ContextListener extends sfContextListener
     {
         $request = $event->getRequest();
         $application = $event->getKernel()->getApplication();
+
         if (null !== $application && false === $request->hasSession()) {
-            // Don't need to check if container has service with id `bb_session` cause we declared it as synthetic
-            if (null === $application->getContainer()->get('bb_session')) {
-                $application->getContainer()->set('bb_session', $application->getSession());
-            }
-
-            $application->getContainer()->get('bb_session')->start();
-            $application->info("Session started");
-
-            $event->getRequest()->setSession($application->getContainer()->get('bb_session'));
+            $container = $application->getContainer();
+            $event->getRequest()->setSession($container->get('bb_session'));
         }
 
         parent::handle($event);

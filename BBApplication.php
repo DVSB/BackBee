@@ -808,13 +808,7 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
     public function getSession()
     {
         if (null === $this->getRequest()->getSession()) {
-            if ('test' === $this->getEnvironment()) {
-                $session = new Session(new MockArraySessionStorage());
-            } else {
-                $session = new Session();
-            }
-
-            $session->start();
+            $session = $this->container->get('bb_session');
             $this->getRequest()->setSession($session);
         }
 
