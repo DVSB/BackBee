@@ -261,6 +261,7 @@ class EntityManagerCreator
      *
      * @param  array         $options
      * @param  Configuration $config
+     * @param  EventManager  $evm
      *
      * @return EntityManager
      *
@@ -269,7 +270,7 @@ class EntityManagerCreator
     private static function createEntityManagerWithParameters(array $options, Configuration $config, EventManager $evm = null)
     {
         try {
-            return EntityManager::create($options, $config, $evm);
+            return EntityManager::create(self::randomizeServerPoolConnection($options), $config, $evm);
         } catch (\Exception $e) {
             throw new InvalidArgumentException(
                 'Enable to create new EntityManager with provided parameters',
@@ -277,6 +278,23 @@ class EntityManagerCreator
                 $e
             );
         }
+    }
+
+    /**
+     * If an array og db hosts is provided, randomize the selection of one of them
+     * @param array $options
+     * @return array
+     */
+    private static function randomizeServerPoolConnection($options)
+    {
+        if (array_key_exists('host', $options) && is_array($options['host'])) {
+            if (1 < count($options['host'])) {
+                shuffle($options['host']);
+            }
+            $options['host'] = reset($options['host']);
+        }
+
+        return $options;
     }
 
     /**
