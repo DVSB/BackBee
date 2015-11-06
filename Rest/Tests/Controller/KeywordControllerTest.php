@@ -2,6 +2,7 @@
 
 namespace BackBee\Rest\Tests\Controller;
 
+use BackBee\ClassContent\Tests\Mock\MockContent;
 use BackBee\NestedNode\KeyWord;
 use BackBee\Rest\Test\RestTestCase;
 use BackBee\Security\Group;
@@ -10,7 +11,8 @@ use BackBee\Site\Site;
 /**
  * Test Keyword class
  */
-class KeywordControllerTest extends RestTestCase {
+class KeywordControllerTest extends RestTestCase
+{
 
     private $em;
     private $user;
@@ -24,6 +26,15 @@ class KeywordControllerTest extends RestTestCase {
         $this->initAcl();
 
         $this->em = $this->getBBApp()->getEntityManager();
+        $this->classMetadata = $this->em->getClassMetadata('BackBee\ClassContent\AbstractClassContent');
+        $this->classMetadata->addDiscriminatorMapClass(
+            'BackBee\ClassContent\Tests\Mock\MockContent',
+            'BackBee\ClassContent\Tests\Mock\MockContent'
+        );
+        $this->classMetadata->addDiscriminatorMapClass(
+            'BackBee\ClassContent\Element\Text',
+            'BackBee\ClassContent\Element\Text'
+        );
         $this->site = new Site();
         $this->site->setLabel('Test Site')->setServerName('test_server');
 
@@ -47,10 +58,9 @@ class KeywordControllerTest extends RestTestCase {
 
     private function createKeywordTree() {
         $root = $this->createAKeyword("root");
-        $this->createAKeyword("backbee",$root);
+        $this->keyword = $this->createAKeyword("backbee",$root);
         $this->createAKeyword("patrov", $root);
         $this->createAKeyword("patrovski", $root);
-
     }
 
     public function testGetCollectionAction()
@@ -63,7 +73,7 @@ class KeywordControllerTest extends RestTestCase {
         $this->assertCount(1, $keywordCollection); //return only root
     }
 
-    public function testGetCollectionWithTerm()
+    public function testGetCollectionWithTermAction()
     {
       $url = '/rest/2/keyword';
       $response = $this->sendRequest(self::requestGet($url, ["term" => "pat"]));
@@ -74,10 +84,39 @@ class KeywordControllerTest extends RestTestCase {
 
       $url = '/rest/2/keyword';
       $response = $this->sendRequest(self::requestGet($url, ["term" => "toto"]));
-      $this->assertTrue($response->isOk(), sprintf('HTTP 200 expected, HTTP %s returned.', $response->getStatusCode()));
+      $this->assertTrue($response->isOk(), sprintf('HTTP 204 expected, HTTP %s returned.', $response->getStatusCode()));
       $keywordCollection = json_decode($response->getContent(), true);
       $this->assertInternalType('array', $keywordCollection);
       $this->assertCount(0, $keywordCollection);
+    }
+
+    public function testDeleteAction()
+    {
+        $url = '/rest/2/keyword/'. $this->keyword->getUid();
+
+        $response = $this->sendRequest(self::requestDelete($url, []));
+        $this->assertTrue($response->isEmpty(), sprintf('HTTP 204 expected, HTTP %s returned.', $response->getStatusCode()));
+    }
+
+    public function testDeleteOnLinkedKeywordAction()
+    {
+        /* access a class content and "keyword" it */
+        $keyword = $this->createAKeyword('cms');
+
+        /* create a class content */
+        $classContent = new MockContent();
+        $classContent->load();
+        $this->em->persist($classContent);
+        $this->em->flush($classContent);
+
+        $keyword->addContent($classContent);
+        $this->em->flush();
+
+        $url = '/rest/2/keyword/'. $keyword->getUid();
+
+        $response = $this->sendRequest(self::requestDelete($url, []));
+        $this->assertTrue($response->isServerError(), sprintf('HTTP 500 expected, HTTP %s returned.', $response->getStatusCode()));
+        $this->assertEquals('KEYWORD_IS_LINKED', json_decode($response->getContent(), true)['message']);
     }
 
     private function createAKeyword($label, KeyWord $parent = null) {
@@ -96,7 +135,6 @@ class KeywordControllerTest extends RestTestCase {
         $this->dropDb($this->getBBApp());
         $this->getBBApp()->stop();
     }
-
 }
 
 ?>
