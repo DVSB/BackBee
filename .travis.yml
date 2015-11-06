@@ -23,6 +23,7 @@ before_install:
  
 before_script:
   - phpenv config-add ./Tests/travis.php.ini
+  - phpenv config-rm xdebug.ini
   - composer install --no-interaction --prefer-source
 
 script:
