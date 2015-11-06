@@ -61,6 +61,14 @@ parameters:
     bbapp.classcontent.exception_on_unknown_classname: true  # true: always throw an exception on class content unknown
                                                              # false:  always ignore class content unknown
                                                              # debug: throw an exception on class content unknown if debug mode is activated
+    bbapp.session.configurator.class: BackBee\Session\SessionConfigurator
+    bbapp.handler.pdo.configurator.class: BackBee\Session\PdoSessionHandlerConfigurator
+
+    session.handler.pdo.config:
+        db_table: 'session'
+        db_id_col: 'session_id'
+        db_data_col: 'session_value'
+        db_time_col: 'session_time'
 
 services:
 
@@ -261,6 +269,29 @@ services:
             - {default: em}
             - default
             - default
+
+    # session
+    bb_session.configurator:
+        class:      %bbapp.session.configurator.class%
+        arguments:  [@config, @session.storage]
+        public:     false
+
+    bb_session:
+        class: Symfony\Component\HttpFoundation\Session\Session
+        configurator: [@bb_session.configurator, createSession]
+
+    session.storage:
+        class: Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage
+
+    session.handler.pdo.configurator:
+        class: %bbapp.handler.pdo.configurator.class%
+        arguments: [@em, session.handler.pdo.config]
+        public: false
+
+    session.handler.pdo:
+        class:     Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+        public:    false
+        configurator: [@session.handler.pdo.configurator, createPdoHandler]
 
     # validator
     validator:
