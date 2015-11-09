@@ -36,9 +36,9 @@ use \SessionHandlerInterface;
  */
 class SessionConfigurator
 {
-    private $sessionConfig;
-    private $sessionStorage;
-    private $sessionHandler;
+    protected $sessionConfig;
+    protected $sessionStorage;
+    protected $sessionHandler;
 
     public function __construct(Config $config, SessionStorageInterface $sessionStorage, SessionHandlerInterface $sessionHandler = null)
     {
