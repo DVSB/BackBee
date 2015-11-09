@@ -34,11 +34,11 @@ use \SessionHandlerInterface;
  *
  * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
-class SessionConfigurator
+class SessionFactory
 {
-    private $sessionConfig;
-    private $sessionStorage;
-    private $sessionHandler;
+    protected $sessionConfig;
+    protected $sessionStorage;
+    protected $sessionHandler;
 
     public function __construct(Config $config, SessionStorageInterface $sessionStorage, SessionHandlerInterface $sessionHandler = null)
     {
