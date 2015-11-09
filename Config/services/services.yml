@@ -286,11 +286,9 @@ services:
     session.handler.pdo.factory:
         class: %bbapp.handler.pdo.factory.class%
         arguments: [@em, %session.handler.pdo.config%]
-        public: false
 
     session.handler.pdo:
         class:     Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
-        public:    false
         factory: [@session.handler.pdo.factory, createPdoHandler]
 
     # validator
