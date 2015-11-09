@@ -42,7 +42,7 @@ class SessionConfigurator
 
     public function __construct(Config $config, SessionStorageInterface $sessionStorage, SessionHandlerInterface $sessionHandler = null)
     {
-        $this->sessionConfig = $config->getSessionConfig();
+        $this->sessionConfig = is_array($config->getSessionConfig()) ? $config->getSessionConfig() : [];
         $this->sessionStorage = $sessionStorage;
         $this->sessionHandler = $sessionHandler;
     }
