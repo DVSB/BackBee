@@ -31,7 +31,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
  *
  * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
-class PdoSessionHandlerConfigurator
+class PdoSessionHandlerFactory
 {
     private $pdo;
     private $config;

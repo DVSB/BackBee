@@ -34,7 +34,7 @@ use \SessionHandlerInterface;
  *
  * @author      Mickaël Andrieu <mickael.andrieu@lp-digital.fr>
  */
-class SessionConfigurator
+class SessionFactory
 {
     protected $sessionConfig;
     protected $sessionStorage;
