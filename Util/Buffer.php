@@ -66,10 +66,12 @@ class Buffer
      * @param string $string
      * @codeCoverageIgnore
      */
-    public static function dump($string, $color = null)
+    public static function dump($string, $color = null, $debug = true)
     {
-        print self::formatOutput($string, $color);
-        static::flush();
+        if ($debug) {
+            print self::formatOutput($string, $color);
+            static::flush();
+        }
     }
 
     private static function formatOutput($string, $color = null)
