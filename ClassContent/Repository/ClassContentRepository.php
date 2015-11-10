@@ -582,7 +582,10 @@ class ClassContentRepository extends EntityRepository
         /* else try to use indexation */
         $searchField = (isset($cond['searchField'])) ? $cond['searchField'] : null;
         if (null !== $searchField) {
-            $qb->andWhere($qb->expr()->like('cc._label', $qb->expr()->literal('%'.$searchField.'%')));
+            $orModule = $qb->expr()->orX();
+            $orModule->add($qb->expr()->like('cc._label', $qb->expr()->literal('%'.$searchField.'%')));
+            $orModule->add($qb->expr()->eq('cc._uid', ':uid'));
+            $qb->andWhere($orModule)->setParameter('uid', trim($searchField));
         }
 
         $afterPubdateField = (isset($cond['afterPubdateField'])) ? $cond['afterPubdateField'] : null;
