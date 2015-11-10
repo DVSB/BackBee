@@ -46,9 +46,11 @@ class PdoSessionHandlerFactory
 
     /**
      * @return PdoSessionHandler
+     * @link https://github.com/symfony/symfony/blob/2.8/UPGRADE-2.6.md#httpfoundation PdoSessionHandler BC notes
      */
     public function createPdoHandler()
     {
+        $this->config = array_merge($this->config, ['lock_mode' => PdoSessionHandler::LOCK_NONE]);
         return new PdoSessionHandler($this->pdo, $this->config);
     }
 }
