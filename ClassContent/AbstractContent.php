@@ -937,9 +937,9 @@ abstract class AbstractContent implements ObjectIdentifiableInterface, Renderabl
                     throw new ClassNotFoundException(sprintf('Unknown class content %s.', $type), 0, $e);
                 }
 
-                if (false !== $subcontent = $this->getContentByDataValue($type, $value)) {
-                    $data[] = $subcontent;
-                }
+                $value = (null !== $value) ? $value : md5($this->getUid().$var);
+
+                $data[] = $this->getContentByDataValue($type, $value);
             } else {
                 $data[] = $value;
             }
