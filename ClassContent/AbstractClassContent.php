@@ -944,7 +944,7 @@ abstract class AbstractClassContent extends AbstractContent
      */
     protected function getContentByDataValue($type, $value)
     {
-        if (class_exists($type)) {
+        if (class_exists($type) && null !== $value) {
             $index = 0;
             foreach ($this->_subcontent as $subcontent) {
                 $this->subcontentmap[$subcontent->getUid()] = $index++;
@@ -955,7 +955,7 @@ abstract class AbstractClassContent extends AbstractContent
             }
         }
 
-        return false;
+        return parent::getContentByDataValue($type, $value);
     }
 
     /**
