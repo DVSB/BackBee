@@ -47,9 +47,8 @@ class metadata extends AbstractHelper
         }
 
         $metadata = $page->getMetadata();
-
         if (null === $metadata || $metadata->count() === 0) {
-            $metadata = new MetaDataBag($renderer->getApplication()->getConfig()->getMetadataConfig(), $page);
+            $metadata = $this->getRenderer()->getApplication()->getContainer()->get('nestednode.metadata.resolver')->resolve($page);
             $page->setMetaData($metadata);
             if ($renderer->getApplication()->getEntityManager()->contains($page)) {
                 $renderer->getApplication()->getEntityManager()->flush($page);

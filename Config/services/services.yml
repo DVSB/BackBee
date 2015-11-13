@@ -321,3 +321,9 @@ services:
     nestednode.page_listener:
         arguments:  [@bbapp]
         class: BackBee\Event\Listener\PageListener
+
+    nestednode.metadata.resolver:
+        class: BackBee\MetaData\MetaDataResolver
+        calls:
+            - [setDefinitionsFromConfig, [@config]]
+            - [setEntityManager, [@em]]

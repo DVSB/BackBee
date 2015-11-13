@@ -16,8 +16,8 @@ classcontent.onflush:
         - [BackBee\ClassContent\Listener\RevisionListener, onFlushContent]
         - [BackBee\ClassContent\Listener\IndexationListener, onFlushContent]
         - [@cache.listener, onFlushContent]
-        - [BackBee\Event\Listener\MetaDataListener, onFlushContent]
         - [BackBee\Event\Listener\RewritingListener, onFlushContent]
+        - [BackBee\MetaData\Listener\MetaDataListener, onFlushContent, -100]
 
 classcontent.preremove:
     listeners:
@@ -60,10 +60,10 @@ nestednode.page.postrender:
 nestednode.page.onflush:
     listeners:
         - [BackBee\Event\Listener\PageListener, onFlushPage]
-        - [BackBee\Event\Listener\MetaDataListener, onFlushPage]
         - [BackBee\ClassContent\Listener\IndexationListener, onFlushPage]
-        - [BackBee\Event\Listener\RewritingListener, onFlushPage]
         - [@cache.listener, onFlushPage]
+        - [BackBee\Event\Listener\RewritingListener, onFlushPage]
+        - [BackBee\MetaData\Listener\MetaDataListener, onFlushPage, -100]
 
 site.layout.prepersist:
     listeners:

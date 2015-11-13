@@ -35,7 +35,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 use BackBee\AutoLoader\Exception\ClassNotFoundException;
 use BackBee\ClassContent\AbstractClassContent;
 use BackBee\Exception\InvalidArgumentException;
-use BackBee\MetaData\MetaDataBag;
 use BackBee\NestedNode\Page;
 use BackBee\Rest\Controller\Annotations as Rest;
 use BackBee\Rest\Exception\NotModifiedException;
@@ -79,12 +78,12 @@ class PageController extends AbstractRestController
     public function getMetadataAction(Page $page)
     {
         $metadata = null !== $page->getMetaData() ? $page->getMetaData()->jsonSerialize() : array();
-        $default_metadata = new MetaDataBag($this->getApplication()->getConfig()->getSection('metadata'));
-        $metadata = array_merge($default_metadata->jsonSerialize(), $metadata);
+        if (empty($metadata)) {
+            $metadata = $this->application->getContainer()->get('nestednode.metadata.resolver')->resolve($page);
+        }
 
         return $this->createJsonResponse($metadata);
     }
-
 
     /**
      * Get page ancestors
@@ -111,20 +110,23 @@ class PageController extends AbstractRestController
      */
     public function putMetadataAction(Page $page, Request $request)
     {
-        $metadatas = $page->getMetaData();
+        $metadatas = $this->application
+                ->getContainer()
+                ->get('nestednode.metadata.resolver')
+                ->resolve($page);
 
         foreach ($request->request->all() as $name => $attributes) {
             if ($metadatas->has($name)) {
                 foreach ($attributes as $attr_name => $attr_value) {
                     if ($attr_value !== $metadatas->get($name)->getAttribute($attr_name)) {
-                        $metadatas->get($name)->setAttribute($attr_name, $attr_value);
+                        $metadatas->get($name)->setAttribute($attr_name, $attr_value, null, false);
                     }
                 }
             }
         }
 
-        $page->setMetaData($metadatas->compute($page));
-        $this->getApplication()->getEntityManager()->flush($page);
+        $page->setMetaData($metadatas);
+        $this->getApplication()->getEntityManager()->flush();
 
         return $this->createJsonResponse(null, 204);
     }
