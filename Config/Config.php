@@ -31,6 +31,7 @@ use BackBee\Config\Exception\InvalidConfigException;
 use BackBee\DependencyInjection\Container;
 use BackBee\DependencyInjection\DispatchTagEventInterface;
 use BackBee\DependencyInjection\Dumper\DumpableServiceInterface;
+use BackBee\Utils\Collection\Collection;
 use BackBee\Utils\File\File;
 
 /**
@@ -377,7 +378,7 @@ class Config implements DispatchTagEventInterface, DumpableServiceInterface
     public function setSection($section, array $config, $overwrite = false)
     {
         if (false === $overwrite && array_key_exists($section, $this->raw_parameters)) {
-            $this->raw_parameters[$section] = array_replace_recursive($this->raw_parameters[$section], $config);
+            $this->raw_parameters[$section] = Collection::array_merge_assoc_recursive($this->raw_parameters[$section], $config);
         } else {
             $this->raw_parameters[$section] = $config;
         }
