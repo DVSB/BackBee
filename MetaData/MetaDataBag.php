@@ -23,10 +23,8 @@
 
 namespace BackBee\MetaData;
 
-use BackBee\NestedNode\Page;
-
 /**
- * A set of metadata.
+ * A set of metadata to be associated to a page.
  *
  * @category    BackBee
  *
@@ -40,105 +38,14 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
      *
      * @var array
      */
-    private $metadatas = array();
-
-    /**
-     * Class constructor.
-     *
-     * @param array                    $definitions
-     * @param \BackBee\NestedNode\Page $page
-     * @codeCoverageIgnore
-     */
-    public function __construct(array $definitions = null, Page $page = null)
-    {
-        $this->metadatas = array();
-        $this->update($definitions, $page);
-    }
-
-    /**
-     * Compute all metadata according to the provided page.
-     *
-     * @param \BackBee\NestedNode\Page $page
-     *
-     * @return \BackBee\MetaData\MetaDataBag
-     */
-    public function compute(Page $page = null)
-    {
-        if (null === $page) {
-            return $this;
-        }
-
-        foreach ($this->metadatas as $metadata) {
-            $metadata->computeAttributes($page->getContentSet(), $page);
-        }
-
-        return clone $this;
-    }
-
-    /**
-     * Updates the associated definition of the set of metadata.
-     *
-     * @param array                    $definitions
-     * @param \BackBee\NestedNode\Page $page
-     */
-    public function update(array $definitions = null, Page $page = null)
-    {
-        $content = (null === $page) ? null : $page->getContentSet();
-
-        if (null !== $definitions) {
-            foreach ($definitions as $name => $definition) {
-                if (false === is_array($definition)) {
-                    continue;
-                }
-
-                if (null === $metadata = $this->get($name)) {
-                    $metadata = new MetaData($name);
-                    $this->add($metadata);
-                }
-
-                foreach ($definition as $attrname => $attrvalue) {
-                    if (false === is_array($attrvalue)) {
-                        $attrvalue = ('' === $metadata->getAttribute($attrname)) ? $attrvalue : $metadata->getAttribute($attrname);
-                        $metadata->setAttribute($attrname, $attrvalue, $content);
-                        continue;
-                    }
-
-                    if (true === $metadata->hasAttribute($attrname)) {
-                        if (null !== $page && true === array_key_exists('layout', $attrvalue)) {
-                            $layout_uid = $page->getLayout()->getUid();
-                            if (true === array_key_exists($layout_uid, $attrvalue['layout'])) {
-                                $scheme = (is_array($attrvalue['layout'][$layout_uid])) ? reset($attrvalue['layout'][$layout_uid]) : $attrvalue['layout'][$layout_uid];
-                                $metadata->updateAttributeScheme($attrname, $scheme, $content);
-                            }
-                        }
-
-                        continue;
-                    }
-
-                    if (true === array_key_exists('default', $attrvalue)) {
-                        $value = (is_array($attrvalue['default'])) ? reset($attrvalue['default']) : $attrvalue['default'];
-                        $metadata->setAttribute($attrname, $value, $content);
-                    }
-
-                    if (null !== $page && true === array_key_exists('layout', $attrvalue)) {
-                        $layout_uid = $page->getLayout()->getUid();
-                        if (true === array_key_exists($layout_uid, $attrvalue['layout'])) {
-                            $value = (is_array($attrvalue['layout'][$layout_uid])) ? reset($attrvalue['layout'][$layout_uid]) : $attrvalue['layout'][$layout_uid];
-                            $metadata->setAttribute($attrname, $value, $content);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    private $metadatas = [];
 
     /**
      * Adds a new matadata to the bag.
      *
-     * @param \BackBee\MetaData\MetaData $metadata
+     * @param  MetaData $metadata
      *
-     * @return \BackBee\MetaData\MetaDataBag
-     * @codeCoverageIgnore
+     * @return MetaDataBag
      */
     public function add(MetaData $metadata)
     {
@@ -150,7 +57,7 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     /**
      * Checks if a metadata exists with the given name.
      *
-     * @param string $name
+     * @param  string $name
      *
      * @return Boolean
      */
@@ -162,19 +69,62 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
     /**
      * Returns the metadata associated to $name or NULL if it doesn't exist.
      *
-     * @param string $name
+     * @param  string $name
      *
-     * @return \BackBee\MetaData\MetaData|NULL
+     * @return MetaData|NULL
      */
     public function get($name)
     {
-        return (true === $this->has($name)) ? $this->metadatas[$name] : null;
+        return ($this->has($name)) ? $this->metadatas[$name] : null;
     }
 
     /**
-     * @param \stdClass $object
+     * Returns the number of attributes.
      *
-     * @return \BackBee\MetaData\MetaDataBag
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->metadatas);
+    }
+
+    /**
+     * Returns an iterator for attributes.
+     *
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->metadatas);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        $metadatas = array();
+        if (is_array($this->metadatas)) {
+            foreach ($this->metadatas as $meta) {
+                $attributes = [];
+
+                foreach ($meta->jsonSerialize() as $metadata) {
+                    if ('name' !== $metadata['attr']) {
+                        $attributes[$metadata['attr']] = $metadata['value'];
+                    }
+                }
+
+                $metadatas[$meta->getName()] = $attributes;
+            }
+        }
+
+        return $metadatas;
+    }
+
+    /**
+     * @param  \stdClass $object
+     *
+     * @return MetaDataBag
      *
      * @deprecated since version 1.0
      */
@@ -191,50 +141,5 @@ class MetaDataBag implements \IteratorAggregate, \Countable, \JsonSerializable
         }
 
         return clone $this;
-    }
-
-    /**
-     * Returns the number of attributes.
-     *
-     * @return int
-     * @codeCoverageIgnore
-     */
-    public function count()
-    {
-        return count($this->metadatas);
-    }
-
-    /**
-     * Returns an iterator for attributes.
-     *
-     * @return \ArrayIterator
-     * @codeCoverageIgnore
-     */
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->metadatas);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        $metadatas = array();
-        if (is_array($this->metadatas)) {
-            foreach ($this->metadatas as $meta) {
-                $attributes = array();
-
-                foreach ($meta->jsonSerialize() as $metadata) {
-                    if ('name' !== $metadata['attr']) {
-                        $attributes[$metadata['attr']] = $metadata['value'];
-                    }
-                }
-
-                $metadatas[$meta->getName()] = $attributes;
-            }
-        }
-
-        return $metadatas;
     }
 }

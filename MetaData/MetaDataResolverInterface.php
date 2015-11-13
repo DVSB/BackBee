@@ -21,40 +21,32 @@
  * @author Charles Rouillon <charles.rouillon@lp-digital.fr>
  */
 
-namespace BackBee\Event\Listener;
+namespace BackBee\MetaData;
 
-use BackBee\Event\Event;
+use BackBee\NestedNode\Page;
 
 /**
- * Listener to metadata events.
- *
  * @category    BackBee
  *
  * @copyright   Lp digital system
  * @author      c.rouillon <charles.rouillon@lp-digital.fr>
  */
-class MetaDataListener
+interface MetaDataResolverInterface
 {
 
     /**
-     * Occur on classcontent.onflush events.
+     * Sets Metadata definitions.
      *
-     * @param \BackBee\Event\Event $event
-     * @deprecated since version 1.1
+     * @param array $definitions
      */
-    public static function onFlushContent(Event $event)
-    {
-        \BackBee\MetaData\Listener\MetaDataListener::onFlushContent($event);
-    }
+    public function setDefinitions(array $definitions = null);
 
     /**
-     * Occur on nestednode.page.onflush events.
-     *
-     * @param \BackBee\Event\Event $event
-     * @deprecated since version 1.1
+     * Returns computed metadata from provided $page.
+     * 
+     * @param  Page|NULL $page
+     * 
+     * @return MetaDataBag
      */
-    public static function onFlushPage(Event $event)
-    {
-        \BackBee\MetaData\Listener\MetaDataListener::onFlushPage($event);
-    }
+    public function resolve(Page $page = null);
 }
