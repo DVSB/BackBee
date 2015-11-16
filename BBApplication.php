@@ -511,15 +511,17 @@ class BBApplication implements ApplicationInterface, DumpableServiceInterface, D
      */
     public function getEntityManager($name = 'default')
     {
-        try {
-            if (null === $this->getContainer()->get('doctrine')) {
+        if ($this->getContainer()->getDefinition('em')->isSynthetic()) {
+            try {
                 $this->initEntityManager();
-            }
+            } catch (\Exception $ex) {
+                $this->getLogging()->notice('BackBee starting without EntityManager');
 
-            return $this->getContainer()->get('doctrine')->getManager($name);
-        } catch (\Exception $e) {
-            $this->getLogging()->notice('BackBee starting without EntityManager');
+                return null;
+            }
         }
+
+        return $this->getContainer()->get('doctrine')->getManager($name);
     }
 
     /**

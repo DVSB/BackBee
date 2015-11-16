@@ -54,7 +54,10 @@ class ClassContentListener
     {
         $dispatcher = $event->getDispatcher();
         if (null !== $dispatcher->getApplication()) {
-            $em = $dispatcher->getApplication()->getEntityManager();
+            if (null === $em = $dispatcher->getApplication()->getEntityManager()) {
+                return;
+            }
+
             $shortClassname = AbstractClassContent::getShortClassname($event->getTarget());
             $fullClassname = AbstractClassContent::getFullClassname($event->getTarget());
             foreach (class_parents($fullClassname) as $classname) {
