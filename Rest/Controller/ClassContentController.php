@@ -454,19 +454,18 @@ class ClassContentController extends AbstractRestController
         $sortedDrafts = [];
         $filteredDrafts = [];
 
-        foreach ($drafts as $key => $draft) {
+        foreach ($drafts as $draft) {
             if (null === $draft->getContent()) {
                 continue;
             }
 
             $sortedDrafts[$draft->getContent()->getUid()] = [$draft->getContent()->getUid() => $draft];
-            $filteredDrafts[$key] = $draft;
         }
 
-        foreach ($filteredDrafts as $draft) {
+        foreach ($drafts as $draft) {
             foreach ($draft->getContent()->getData() as $key => $element) {
                 if (
-                    is_object($element)
+                    !is_int($key)
                     && $element instanceof AbstractClassContent
                     && in_array($element->getUid(), array_keys($sortedDrafts))
                 ) {
@@ -476,27 +475,20 @@ class ClassContentController extends AbstractRestController
             }
         }
 
-        $drafts = [];
         foreach ($sortedDrafts as $key => $data) {
-            if (!array_key_exists($key, $drafts)) {
-                $drafts[$key] = $data;
-            }
-
             foreach ($data as $elementName => $draft) {
                 if ($key === $elementName) {
                     continue;
                 }
 
-                if (false === $drafts[$key]) {
-                    $drafts[$draft->getContent()->getUid()] = false;
-                } elseif (isset($sortedDrafts[$draft->getContent()->getUid()])) {
-                    $drafts[$key][$elementName] = $sortedDrafts[$draft->getContent()->getUid()];
-                    $drafts[$draft->getContent()->getUid()] = false;
+                if (isset($sortedDrafts[$draft->getContent()->getUid()])) {
+                    $sortedDrafts[$key][$elementName] = &$sortedDrafts[$draft->getContent()->getUid()];
+                    $filteredDrafts[$draft->getContent()->getUid()] = false;
                 }
             }
         }
 
-        return array_filter($drafts);
+        return array_filter(array_merge($sortedDrafts, $filteredDrafts));
     }
 
     /**
